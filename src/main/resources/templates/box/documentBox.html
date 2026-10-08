@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+	 <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+	 <link rel="stylesheet" th:href="@{/dist/css/documentBox.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="home-layout">
+	<nav th:replace="~{layout/sidebar::homeSidebar('documentBox')}"></nav>
+			
+		<div class="section box-section">
+			<!-- 페이지 제목 영역 -->
+			<div class="box-heading">
+				<h1 class="box-title">문서함</h1>
+				<p class="box-description">내 문서함을 확인해보세요.</p>
+			</div>
+			
+			<div class="box-menu">
+				<button type="button" class="box-card box-card-view">
+					<span class="box-card-title">내 문서 목록</span>
+					<span class="box-card-description">
+						내 문서 리스트
+					</span>
+					<span class="box-card-project" aria-hidden="true">
+						📗1번 문서
+					</span>
+					<span class="box-card-project" aria-hidden="true">
+						📘2번 문서
+					</span>
+					<span class="box-card-project" aria-hidden="true">
+						📙3번 문서
+					</span>
+				</button>		
+			
+			</div>
+			
+		
+		</div>
+	</div>
+	
+</th:block>
+ 
+<th:block layout:fragment="script">
+</th:block> 
+
+</html>

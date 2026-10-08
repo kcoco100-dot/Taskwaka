@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.MemberMapper">
+
+	<insert id="insertMemberStatus" parameterType="MemberDto">
+		INSERT INTO memberStatus(num, member_id, status_code, memo, register_id, reg_date)
+		VALUES (memberStatus_seq.NEXTVAL, #{member_id}, #{status_code}, #{memo}, #{register_id}, SYSDATE)
+	</insert>
+
+    <update id="updateMemberEnabled" parameterType="map">
+		UPDATE members SET enabled = #{enabled}
+		<where>
+			<choose>
+				<when test="login_id != null">
+					login_id = #{login_id}
+				</when>
+				<otherwise>
+					member_id = #{member_id}
+				</otherwise>
+			</choose>
+		</where>
+    </update>
+
+	<!-- 로그인 시간 변경 -->
+	<update id="updateLastLogin" parameterType="Long">
+		UPDATE members SET last_login = SYSDATE, failure_cnt = 0
+		WHERE member_id = #{member_id}
+	</update>
+
+	<update id="updateLastLoginId" parameterType="String">
+		UPDATE members SET last_login = SYSDATE, failure_cnt = 0
+		WHERE login_id = #{login_id}
+	</update>
+
+	<!-- 회원 정보 -->
+	<select id="findById" parameterType="Long" resultType="MemberDto">
+		SELECT m1.member_id, m1.login_id, password, sns_provider, sns_id, email,
+			enabled, created_at, update_at, last_login,
+			name, TO_CHAR(birth, 'YYYY-MM-DD') birth, email, tel, 
+			profile_photo, zip, addr1, addr2, receive_email,
+			authority
+		FROM members m1
+		LEFT OUTER JOIN member_details m2 ON m1.member_id = m2.member_id
+		LEFT OUTER JOIN security m3 ON m1.login_id = m3.login_id
+		WHERE m1.member_id = #{member_id}
+	</select>
+
+	<select id="findByLoginId" parameterType="String" resultType="MemberDto">
+		SELECT m.member_id, m.login_id, m.password, m.status, m.fail_cnt, m.blocked_until,
+				m.last_login, d.name, d.email, d.birth, d.phone, s.role,
+			(
+				SELECT MAX(wm.role)
+				FROM workspace_members wm
+				WHERE wm.member_id = m.member_id
+				  AND wm.status = 0
+			) AS workspaceRole
+		FROM members m
+		LEFT OUTER JOIN member_details d ON m.member_id = d.member_id
+		LEFT OUTER JOIN security s ON m.member_id = s.member_id
+		WHERE m.login_id = #{login_id}
+	</select>
+
+	<select id="getMemberId" parameterType="String" resultType="Long">
+		SELECT member_id
+		FROM members
+		WHERE login_id = #{login_id}
+	</select>
+
+	<!-- 패스워드 실패 횟수 -->
+	<select id="checkFailureCount" parameterType="String" resultType="Integer">
+		SELECT NVL(failure_cnt, 0) failure_cnt
+		FROM members
+		WHERE login_id = #{login_id}
+	</select>
+	
+	<!-- 패스워드 실패 횟수 초기화 -->
+	<update id="updateFailureCountReset" parameterType="String">
+		UPDATE members SET failure_cnt = 0
+		WHERE login_id = #{login_id}
+	</update>
+	
+	<!-- 패스워드 실패 횟수 증가 -->
+	<update id="updateFailureCount" parameterType="String">
+		UPDATE members SET failure_cnt = failure_cnt + 1
+		WHERE login_id = #{login_id}
+	</update>
+
+
+	<select id="findByAuthority" parameterType="String" resultType="String">
+		SELECT authority
+		FROM security
+		WHERE login_id = #{login_id}
+	</select>
+	
+	
+	
+</mapper>

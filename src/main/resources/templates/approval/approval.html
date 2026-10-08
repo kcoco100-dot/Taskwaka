@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout">
+        <nav th:replace="~{layout/sidebar::manageSidebar('approval')}"></nav>
+
+        <div class="section shell-section">
+            <div class="page-heading">
+                <h1 class="page-title">전자결재</h1>
+                <p class="page-description">결재 문서와 진행 상태를 확인하세요.</p>
+            </div>
+
+            <div class="shell-content">
+                <!-- TODO: 담당자가 전자결재 목록과 상세 내용 UI를 추가할 영역 -->
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script"></th:block>
+</html>

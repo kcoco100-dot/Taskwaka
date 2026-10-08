@@ -1,0 +1,675 @@
+@charset "UTF-8";
+
+/* 기본 레이아웃과 제목 */
+.home-layout > .dashboard-page {
+	--overview-ink: #514536;
+	--overview-muted: #8D8275;
+	--overview-border: #EAE5DC;
+	--overview-green: #71865B;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding: 24px 32px 28px;
+	background: #FAF9F6;
+}
+
+.dashboard-page .overview-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.dashboard-page .overview-eyebrow {
+	margin: 0 0 8px;
+	color: #8B9A77;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 2px;
+}
+
+.dashboard-page .page-title {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--overview-ink);
+	font-size: 26px;
+	font-weight: 700;
+	line-height: 1.35;
+	text-align: left;
+	letter-spacing: -1px;
+}
+
+.dashboard-page .page-description {
+	margin: 8px 0 0;
+	color: var(--overview-muted);
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.dashboard-page .overview-date {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+	color: var(--overview-muted);
+	font-size: 12px;
+}
+
+.dashboard-page .overview-example {
+	padding: 5px 9px;
+	border: 1px solid var(--overview-border);
+	border-radius: 6px;
+	background: #FFFFFF;
+	color: #9A8C7A;
+	font-size: 10px;
+}
+
+.dashboard-page .overview-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+	font-size: 18px;
+	line-height: 1;
+}
+
+.dashboard-page a:focus-visible {
+	outline: 2px solid var(--overview-green);
+	outline-offset: 4px;
+	border-radius: 4px;
+}
+
+/* 상단 요약 카드 */
+.dashboard-page .overview-stats {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.dashboard-page .overview-stat {
+	min-width: 0;
+	padding: 14px 20px;
+	border: 1px solid var(--overview-border);
+	border-radius: 14px;
+	background: #FFFFFF;
+}
+
+.dashboard-page .overview-stat-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	color: #776B5E;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.dashboard-page .overview-stat-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 10px;
+}
+
+.dashboard-page .overview-tone-green {
+	background: #F0F4E9;
+	color: #7B9164;
+}
+
+.dashboard-page .overview-tone-sand {
+	background: #F7F1E7;
+	color: #AE9570;
+}
+
+.dashboard-page .overview-tone-lavender {
+	background: #F1F0F7;
+	color: #9791B4;
+}
+
+.dashboard-page .overview-stat-value {
+	display: flex;
+	align-items: baseline;
+	gap: 7px;
+	margin: 2px 0 5px;
+	color: var(--overview-ink);
+	font-size: 30px;
+	font-weight: 700;
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -1px;
+}
+
+.dashboard-page .overview-stat-value span {
+	color: #A19689;
+	font-size: 12px;
+	font-weight: 400;
+	letter-spacing: 0;
+}
+
+.dashboard-page .overview-stat-description {
+	margin: 0;
+	color: #9B9185;
+	font-size: 11px;
+	line-height: 1.5;
+}
+
+/* 본문 카드와 공통 상태 표시 */
+.dashboard-page .overview-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+	gap: 20px;
+	align-items: stretch;
+}
+
+.dashboard-page .overview-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	padding: 20px 24px;
+	border: 1px solid var(--overview-border);
+	border-radius: 16px;
+	background: #FFFFFF;
+	box-shadow: 0 3px 12px rgba(76, 63, 47, 0.025);
+}
+
+.dashboard-page .overview-card-heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 14px;
+}
+
+.dashboard-page .overview-card-heading h2 {
+	margin: 0 0 6px;
+	color: var(--overview-ink);
+	font-size: 17px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: -0.4px;
+}
+
+.dashboard-page .overview-card-heading p {
+	margin: 0;
+	color: var(--overview-muted);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.dashboard-page .overview-more {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	flex-shrink: 0;
+	padding-top: 3px;
+	color: #8C8173;
+	font-size: 11px;
+	text-decoration: none;
+	transition: color 0.2s;
+}
+
+.dashboard-page .overview-more .overview-icon {
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
+}
+
+.dashboard-page .overview-more:hover {
+	color: #536B42;
+}
+
+.dashboard-page .overview-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 56px;
+	padding: 4px 9px;
+	border-radius: 6px;
+	font-size: 10px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.dashboard-page .overview-badge-ongoing {
+	background: #EFF4E8;
+	color: #698052;
+}
+
+.dashboard-page .overview-badge-review {
+	background: #FBF1DF;
+	color: #AC8A4F;
+}
+
+.dashboard-page .overview-badge-planned {
+	background: #F1F0F7;
+	color: #8B83A4;
+}
+
+.dashboard-page .overview-task-list,
+.dashboard-page .overview-project-list,
+.dashboard-page .overview-schedule-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.dashboard-page .overview-card h3 {
+	margin: 0;
+	color: #5A4F40;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.5;
+}
+
+/* 내 업무 목록 */
+.dashboard-page .overview-task-summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 11px 13px;
+	border-radius: 8px;
+	background: #F7F8F3;
+	color: #859273;
+	font-size: 11px;
+}
+
+.dashboard-page .overview-task-summary strong {
+	color: #627650;
+	font-weight: 700;
+}
+
+.dashboard-page .overview-summary-dot {
+	flex-shrink: 0;
+	color: #A09A8F;
+	font-size: 10px;
+}
+
+.dashboard-page .overview-task-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 0;
+	border-bottom: 1px solid #F0EDE7;
+}
+
+.dashboard-page .overview-task-row:last-child {
+	border-bottom: 0;
+}
+
+.dashboard-page .overview-task-check {
+	width: 17px;
+	height: 17px;
+	flex-shrink: 0;
+	border: 1.5px solid #DDDCD3;
+	border-radius: 5px;
+	background: #FFFFFF;
+}
+
+.dashboard-page .overview-task-copy {
+	flex: 1;
+	min-width: 0;
+}
+
+.dashboard-page .overview-task-copy h3 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-page .overview-task-copy p {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 5px 0 0;
+	color: #A19689;
+	font-size: 10px;
+}
+
+.dashboard-page .overview-task-copy p span + span {
+	padding-left: 9px;
+	border-left: 1px solid #E6E1D8;
+}
+
+.dashboard-page .overview-task-copy .overview-due-today {
+	color: #B28E57;
+}
+
+/* 참여 프로젝트 */
+.dashboard-page .overview-project-list {
+	display: flex;
+	flex-direction: column;
+	gap: 17px;
+}
+
+.dashboard-page .overview-project-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 13px;
+}
+
+.dashboard-page .overview-project-avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 39px;
+	height: 39px;
+	flex-shrink: 0;
+	margin-top: 2px;
+	border-radius: 11px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+}
+
+.dashboard-page .overview-avatar-java {
+	background: #EFF4E7;
+	color: #7C9362;
+}
+
+.dashboard-page .overview-avatar-oracle {
+	background: #F7F0E6;
+	color: #B5986C;
+}
+
+.dashboard-page .overview-avatar-mongo {
+	background: #F0EFF5;
+	color: #9990B0;
+}
+
+.dashboard-page .overview-project-copy {
+	flex: 1;
+	min-width: 0;
+}
+
+.dashboard-page .overview-project-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.dashboard-page .overview-project-copy p {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin: 5px 0 9px;
+	color: #A19689;
+	font-size: 10px;
+	line-height: 1.6;
+}
+
+.dashboard-page .overview-project-copy p span {
+	flex-shrink: 0;
+}
+
+.dashboard-page .overview-project-progress {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.dashboard-page .overview-project-progress > span {
+	min-width: 30px;
+	color: #8B977B;
+	font-size: 10px;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-page .overview-progress-track {
+	display: block;
+	width: 100%;
+	height: 6px;
+	overflow: hidden;
+	border-radius: 10px;
+	background: #EFF1EA;
+}
+
+.dashboard-page .overview-progress-fill {
+	height: 100%;
+	background: #9AB580;
+	border-radius: 10px;
+}
+
+.dashboard-page .overview-progress-65 {
+	width: 65%;
+}
+
+.dashboard-page .overview-progress-40 {
+	width: 40%;
+}
+
+.dashboard-page .overview-progress-20 {
+	width: 20%;
+}
+
+.dashboard-page .overview-progress-62 {
+	width: 62%;
+}
+
+.dashboard-page .overview-avatar-oracle + .overview-project-copy .overview-progress-fill {
+	background: #C4AE85;
+}
+
+.dashboard-page .overview-avatar-mongo + .overview-project-copy .overview-progress-fill {
+	background: #ADA4C0;
+}
+
+/* 주간 날짜와 오늘의 일정 */
+.dashboard-page .overview-week {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 8px;
+	padding: 4px 0 12px;
+	border-bottom: 1px solid #F0EDE7;
+}
+
+.dashboard-page .overview-week > div {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 4px 12px;
+	border-radius: 10px;
+	color: #9A9084;
+	font-size: 10px;
+}
+
+.dashboard-page .overview-week strong {
+	color: #6B6053;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.dashboard-page .overview-week .overview-week-today {
+	background: #71865B;
+	color: #E8EFDF;
+}
+
+.dashboard-page .overview-week-today strong {
+	color: #FFFFFF;
+}
+
+.dashboard-page .overview-week-weekend strong,
+.dashboard-page .overview-week-weekend > span {
+	color: #B8AC9C;
+}
+
+.dashboard-page .overview-day-dot {
+	position: absolute;
+	bottom: 5px;
+	width: 3px;
+	height: 3px;
+	border-radius: 50%;
+	background: #A7B893;
+}
+
+.dashboard-page .overview-week-today .overview-day-dot {
+	background: #DAE6CC;
+}
+
+.dashboard-page .overview-schedule-list {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding-top: 17px;
+}
+
+.dashboard-page .overview-schedule-list li {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.dashboard-page .overview-schedule-time {
+	width: 40px;
+	flex-shrink: 0;
+	color: #8A8175;
+	font-size: 11px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-page .overview-schedule-line {
+	align-self: stretch;
+	width: 3px;
+	flex-shrink: 0;
+	border-radius: 4px;
+	background: #A8BC8F;
+}
+
+.dashboard-page .overview-schedule-line-deadline {
+	background: #D8BE89;
+}
+
+.dashboard-page .overview-schedule-list li > div {
+	flex: 1;
+	min-width: 0;
+}
+
+.dashboard-page .overview-schedule-list p {
+	margin: 4px 0 0;
+	color: #A19689;
+	font-size: 10px;
+}
+
+/* 팀 성장나무 */
+.dashboard-page .overview-growth-card {
+	border-color: #DFE6D5;
+	background: linear-gradient(125deg, #FFFFFF 10%, #F7FAF1 100%);
+}
+
+.dashboard-page .overview-growth-body {
+	display: grid;
+	grid-template-columns: minmax(120px, 0.9fr) minmax(0, 1.2fr);
+	align-items: center;
+	gap: 20px;
+	flex: 1;
+	padding: 4px 0 12px;
+}
+
+.dashboard-page .overview-tree-scene {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.dashboard-page .overview-tree {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 170px;
+	max-width: 100%;
+	height: 135px;
+	font-size: 90px;
+	line-height: 1;
+}
+
+.dashboard-page .overview-tree-level {
+	padding: 4px 11px;
+	border: 1px solid #DFE8D3;
+	border-radius: 20px;
+	background: #F1F6E9;
+	color: #8A9C70;
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: 1px;
+}
+
+.dashboard-page .overview-growth-label {
+	color: #94A47D;
+	font-size: 10px;
+}
+
+.dashboard-page .overview-growth-copy h3 {
+	margin: 8px 0;
+	color: #5B7048;
+	font-size: 19px;
+	font-weight: 700;
+	letter-spacing: -0.5px;
+}
+
+.dashboard-page .overview-growth-copy > p {
+	margin: 0 0 18px;
+	color: #9A9E8D;
+	font-size: 11px;
+	line-height: 1.8;
+}
+
+.dashboard-page .overview-growth-progress-heading {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 8px;
+	color: #929B84;
+	font-size: 10px;
+}
+
+.dashboard-page .overview-growth-progress-heading strong {
+	color: #7C9264;
+	font-weight: 600;
+}
+
+.dashboard-page .overview-growth-exp {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 8px;
+	color: #A6AC9D;
+	font-size: 9px;
+}
+
+.dashboard-page .overview-growth-exp strong {
+	color: #81946C;
+	font-weight: 600;
+}
+
+.dashboard-page .overview-growth-footer {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	margin-top: auto;
+	padding: 11px 8px 0;
+	border-top: 1px solid #E8EDDF;
+	color: #9AA789;
+	font-size: 10px;
+}
+
+.dashboard-page .overview-growth-footer .overview-icon {
+	width: 13px;
+	height: 13px;
+	font-size: 13px;
+}

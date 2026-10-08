@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <div class="panel-card">
+      <div class="panel-card-title">
+        <span>접속자 통계 조회 (중복 제거 회원 수 & 로그인 성공 건수)</span>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-subtle">일별</button>
+          <button class="btn-subtle" style="background:var(--primary-green-light); color:var(--primary-green); font-weight:700;">주별</button>
+          <button class="btn-subtle">월별</button>
+          <button class="btn-subtle">연간</button>
+        </div>
+      </div>
+      
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:18px;">
+        <div style="padding:16px; border:1px solid var(--border-main); border-radius:10px; background:var(--bg-card-sub);">
+          <div style="font-size:12px; color:var(--text-sub); font-weight:600;">조회 기간</div>
+          <div style="font-size:16px; font-weight:700; color:var(--text-main); margin-top:6px;">2026-09-25 ~ 2026-10-01 (주간)</div>
+        </div>
+        <div style="padding:16px; border:1px solid var(--border-main); border-radius:10px; background:var(--bg-card-sub);">
+          <div style="font-size:12px; color:var(--text-sub); font-weight:600;">접속 회원 수 (중복 제외)</div>
+          <div style="font-size:22px; font-weight:800; color:var(--primary-green); margin-top:4px;">1,428 명</div>
+        </div>
+        <div style="padding:16px; border:1px solid var(--border-main); border-radius:10px; background:var(--bg-card-sub);">
+          <div style="font-size:12px; color:var(--text-sub); font-weight:600;">로그인 성공 횟수 (총 건수)</div>
+          <div style="font-size:22px; font-weight:800; color:var(--text-main); margin-top:4px;">6,842 건</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card-title">
+        <span>전체 수익 통계 조회 (결제 및 환불 집계 현황)</span>
+        <span style="font-size:12px; color:var(--text-sub);">* 순결제 금액 = 결제 완료 금액 - 환불 완료 금액</span>
+      </div>
+
+      <table class="warm-table">
+        <thead>
+          <tr>
+            <th>조회 기간</th>
+            <th>결제 건수</th>
+            <th>결제 완료 금액</th>
+            <th>환불 완료 금액</th>
+            <th>순결제 금액</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2026년 10월 (당월 실적)</strong></td>
+            <td>124 건</td>
+            <td>₩ 14,880,000</td>
+            <td>₩ 480,000</td>
+            <td><strong style="color:var(--primary-green);">₩ 14,400,000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>2026년 3분기 (누적 실적)</strong></td>
+            <td>412 건</td>
+            <td>₩ 49,440,000</td>
+            <td>₩ 1,200,000</td>
+            <td><strong style="color:var(--primary-green);">₩ 48,240,000</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

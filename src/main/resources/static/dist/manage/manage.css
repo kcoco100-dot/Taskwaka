@@ -1,0 +1,142 @@
+﻿@charset "UTF-8";
+
+/* 왼쪽 메뉴 전체 스크롤 */
+.manage-layout .sidemenu {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
+.manage-layout .sidemenu .manage-menu {
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* 대분류별 박스 */
+.manage-layout .menu-group {
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid #E8E2D9;
+    border-radius: 12px;
+    background: #FCFAF6;
+}
+
+/* 대분류 버튼 */
+.manage-layout .menu-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 14px;
+    border: 0;
+    background: #EEF4E6;
+    color: #4F6242;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.manage-layout .menu-toggle:hover {
+    background: #E3EDD8;
+}
+
+.manage-layout .menu-toggle:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: -3px;
+}
+
+/* 세부 메뉴 목록 */
+.manage-layout .sidemenu .submenu {
+    gap: 4px;
+    padding: 8px;
+}
+
+.manage-layout .sidemenu .submenu a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #786B5E;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.6;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.manage-layout .sidemenu .submenu a:hover {
+    background: #F0E9DF;
+    color: #594331;
+}
+
+/* 현재 선택한 세부 메뉴 */
+.manage-layout .sidemenu .submenu a.active {
+    background: #EEF4E6;
+    color: #4F6242;
+    font-weight: 700;
+}
+
+.manage-layout .sidemenu .submenu a:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: -2px;
+}
+
+/* 오른쪽 본문 */
+.home-layout > .manage-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 24px;
+}
+
+.manage-content .page-heading {
+    flex-shrink: 0;
+}
+
+/* 제목 아래 남은 공간을 채우는 박스 */
+.manage-content .member-content {
+    flex: 1;
+    min-height: 200px;
+    padding: 24px;
+    border: 1px solid #E8E2D9;
+    border-radius: 14px;
+    background: #FFFFFF;
+}
+/* 팀원 정보 조회 버튼 */
+.manage-layout .sidemenu .submenu .manage-menu-button {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    appearance: none;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+    color: #786B5E;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.6;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.manage-layout .sidemenu .submenu .manage-menu-button:hover {
+    background: #F0E9DF;
+    color: #594331;
+}
+
+.manage-layout .sidemenu .submenu .manage-menu-button.active {
+    background: #EEF4E6;
+    color: #4F6242;
+    font-weight: 700;
+}
+
+.manage-layout .sidemenu .submenu .manage-menu-button:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: -2px;
+}

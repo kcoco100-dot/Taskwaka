@@ -1,0 +1,97 @@
+﻿@charset "UTF-8";
+
+/* 페이지 제목 */
+.box-section .box-heading {
+    margin-bottom: 24px;
+}
+
+.box-section .box-title {
+    margin: 0;
+    color: #594331;
+    font-family: inherit;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.box-section .box-description {
+    margin: 8px 0 0;
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* 문서 카드 배치 */
+.box-section .box-menu {
+    display: grid;
+    grid-template-columns: minmax(0, 360px);
+    gap: 24px;
+    align-items: start;
+}
+
+/* 문서 목록 카드 */
+.box-section .box-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    min-height: 320px;
+    padding: 24px;
+    border: 1px solid #E8E2D9;
+    border-radius: 18px;
+    background: #FFFFFF;
+    color: #594331;
+    box-shadow: 0 4px 14px rgba(89, 67, 49, 0.05);
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+/* 카드 제목 */
+.box-section .box-card-title {
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+/* 카드 설명 */
+.box-section .box-card-description {
+    margin-bottom: 24px;
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* 개별 문서 표시 */
+.box-section .box-card-project {
+    display: block;
+    padding: 13px 14px;
+    border: 1px solid #E1E8D9;
+    border-radius: 10px;
+    background: #EEF4E6;
+    color: #4F6242;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.box-section .box-card-project + .box-card-project {
+    margin-top: 10px;
+}
+
+/* 카드 전체 버튼에 적용 */
+.box-section button.box-card {
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.box-section button.box-card:hover {
+    border-color: #B6C6A6;
+    box-shadow: 0 6px 20px rgba(89, 67, 49, 0.08);
+}
+
+.box-section button.box-card:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 3px;
+}

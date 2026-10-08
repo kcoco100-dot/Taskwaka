@@ -1,0 +1,45 @@
+﻿@charset "UTF-8";
+
+.team-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    min-height: 64px;
+    padding: 16px 24px;
+    border-top: 1px solid #E8E2D9;
+    background: #F7F3EE;
+    color: #786B5E;
+}
+
+.footer-brand {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.footer-menu {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+}
+
+.footer-menu a {
+    color: #786B5E;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.footer-menu a:hover {
+    color: #594331;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.footer-menu a:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 4px;
+    border-radius: 2px;
+}

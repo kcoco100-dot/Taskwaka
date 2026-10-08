@@ -1,0 +1,104 @@
+﻿@charset "UTF-8";
+
+/* 오른쪽 본문: 제목 + 남은 공간을 채우는 메일함 */
+.home-layout > .mail-section {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding: 24px;
+    overflow: hidden;
+}
+
+/* 페이지 제목 */
+.mail-section .mail-heading {
+    flex-shrink: 0;
+    margin-bottom: 20px;
+}
+
+.mail-section .mail-title {
+    margin: 0;
+    color: #594331;
+    font-family: inherit;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.mail-section .mail-description {
+    margin: 8px 0 0;
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 제목 아래 남은 높이와 전체 너비 사용 */
+.mail-section .mail-menu {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* 메일 목록 박스 */
+.mail-section .mail-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 24px;
+    border: 1px solid #E8E2D9;
+    border-radius: 18px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+    text-align: left;
+    box-sizing: border-box;
+
+    /* 메일이 많아지면 박스 내부만 스크롤 */
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
+/* 내용이 많아도 각 항목의 높이 유지 */
+.mail-section .mail-card > span {
+    flex-shrink: 0;
+    overflow-wrap: anywhere;
+}
+
+.mail-section .mail-card-title {
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.mail-section .mail-card-description {
+    margin-bottom: 24px;
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 메일 한 줄 */
+.mail-section .mail-card-project {
+    display: block;
+    padding: 16px 18px;
+    border: 1px solid #E8E2D9;
+    border-radius: 10px;
+    background: #FCFBF8;
+    color: #594331;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.mail-section .mail-card-project + .mail-card-project {
+    margin-top: 12px;
+}
+
+.mail-section .mail-card:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: -3px;
+}

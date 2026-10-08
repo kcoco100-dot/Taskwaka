@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout">
+        <nav th:replace="~{layout/sidebar::manageSidebar('members')}"></nav>
+
+		<div class="section manage-content">
+		    <div class="page-heading">
+		        <h1 class="page-title">팀원 정보 조회</h1>
+		        <p class="page-description">사용하세요</p>
+		    </div>
+		
+		    <div class="member-content">
+		        <!-- 나중에 팀원 목록이 들어갈 자리 -->
+		    </div>
+		</div>
+	</div>
+	
+</th:block>
+
+<th:block layout:fragment="script">
+</th:block>
+
+</html>

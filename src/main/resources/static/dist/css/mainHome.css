@@ -1,0 +1,126 @@
+﻿@charset "UTF-8";
+
+/* 팀 선택 홈 전체 */
+.mainHome {
+    min-height: calc(100vh - 128px);
+    padding: 72px 24px;
+    background: #FCFBF8;
+    color: #594331;
+}
+
+/* 상단 안내 */
+.mainHome-heading {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.mainHome-label {
+    display: inline-block;
+    margin-bottom: 16px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #EEF4E6;
+    color: #4F6242;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.mainHome-heading h1 {
+    margin: 0;
+    color: #594331;
+    font-family: inherit;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+.mainHome-heading p {
+    margin: 14px 0 0;
+    color: #786B5E;
+    font-size: 15px;
+    line-height: 1.7;
+    word-break: keep-all;
+}
+
+/* 카드 두개 나란히 */
+.mainHome-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 카드 공통부분 */
+.mainHome .team-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    min-height: 280px;
+    padding: 32px;
+    border: 1px solid #E8E2D9;
+    border-radius: 20px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mainHome .team-card:hover {
+    border-color: #B6C6A6;
+    box-shadow: 0 8px 24px rgba(89, 67, 49, 0.07);
+}
+
+.mainHome .team-card:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 4px;
+}
+
+/* 카드 아이콘 디자인 */
+.mainHome .team-card-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    font-size: 28px;
+}
+
+.mainHome .team-card-create .team-card-icon {
+    background: #EEF4E6;
+    color: #4F6242;
+}
+
+.mainHome .team-card-list .team-card-icon {
+    background: #F3EBE2;
+    color: #795C43;
+}
+
+/* 카드 문구 부분 */
+.mainHome .team-card-title {
+    margin-bottom: 10px;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.mainHome .team-card-description {
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.7;
+    word-break: keep-all;
+}
+
+.mainHome .team-card-action {
+    margin-top: auto;
+    padding-top: 28px;
+    color: #4F6242;
+    font-size: 13px;
+    font-weight: 700;
+}

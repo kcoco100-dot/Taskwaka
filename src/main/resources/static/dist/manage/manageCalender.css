@@ -1,0 +1,14 @@
+﻿.calendar-content {
+    flex: 1;
+    min-height: 400px;
+    box-sizing: border-box;
+
+    margin-top: 24px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 12px;
+}
+
+#calendar {
+    width: 100%;
+}

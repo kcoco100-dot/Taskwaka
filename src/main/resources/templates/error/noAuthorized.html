@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+      
+<th:block layout:fragment="content">
+	<div class="section bg-light">
+		<div class="container">
+
+			<div class="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
+				<div class="col-md-5">
+					<div class="bg-white box-shadow mt-5 mb-5 p-5">
+						<h3 class="text-center pt-3 text-danger"><i class="bi bi-exclamation-triangle"></i> 경고 !</h3>
+
+						<div class="my-5">
+							<div class="text-center">
+								<p class="mb-1"><strong>해당 정보를 접근 할 수 있는 권한 이 없습니다.</strong></p>
+								<p>메인화면으로 이동하시기 바랍니다.</p>
+							</div>
+						</div>
+	                    
+						<div>
+							<button type="button" class="btn-accent btn-lg w-100" th:onclick="|location.href='@{/}'|">
+								메인화면으로 이동 <i class="bi bi-arrow-counterclockwise"></i>
+							</button>	                    
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</th:block>
+
+</html>

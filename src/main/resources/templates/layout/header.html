@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+
+<th:block th:fragment="header">
+	<div class="team-header">
+		<!-- 로고, 현재 팀 이름 line -->
+		<div class="team-header-left">
+			<a th:href="@{/main}" class="team-logo">
+				<img th:src="@{/dist/images/taskwaka-bear-icon.png}" 
+					class="team-logo-image" alt="">
+				<span>TASKWAKA</span>
+			</a>
+			<span class="team-name">개발팀</span>
+		</div>
+		
+		<div class="team-header-right">
+		<!-- 알림, 조직도, 채팅, 프로필 line -->
+			<button type="button">알림</button>
+			<button type="button">조직도</button>
+			<button type="button">채팅</button>
+			<button type="button" class="team-profile">프로필</button>
+		</div>
+	</div>
+
+
+</th:block>
+	
+</html>

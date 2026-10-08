@@ -1,0 +1,138 @@
+﻿@charset "UTF-8";
+
+body:has(.home-layout) {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+body:has(.home-layout) > header,
+body:has(.home-layout) > footer {
+    flex-shrink: 0;
+}
+
+body:has(.home-layout) > main {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.home-layout {
+    display: grid;
+    grid-template-columns: 224px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    background: #FCFBF8;
+    color: #594331;
+}
+
+.home-layout .sidemenu {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    padding: 24px 14px;
+    background: #F7F3EE;
+    border-right: 1px solid #E8E2D9;
+}
+
+.home-layout .sidemenu ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+}
+
+.home-layout .sidemenu a {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 10px;
+    color: #665747;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.home-layout .sidemenu a:hover {
+    background: #EFE8DE;
+    color: #594331;
+}
+
+.home-layout .sidemenu a.active {
+    background: #E8F0DE;
+    color: #465B38;
+    font-weight: 700;
+}
+
+.home-layout .sidemenu a:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+
+.home-layout > .section {
+    min-width: 0;
+    padding: 32px;
+    background: #FCFBF8;
+    color: #594331;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
+.home-layout .page-heading {
+    margin-bottom: 24px;
+}
+
+.home-layout .page-title {
+    margin: 0;
+    color: #594331;
+    font-family: inherit;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.home-layout .page-description {
+    margin: 8px 0 0;
+    color: #786B5E;
+    font-size: 14px;
+}
+
+.home-layout .page-content {
+    min-height: 480px;
+    padding: 24px;
+    border: 1px solid #E8E2D9;
+    border-radius: 14px;
+    background: #FFFFFF;
+}
+
+.home-layout .calendar-placeholder {
+    margin: 0;
+    color: #786B5E;
+    font-size: 14px;
+}
+
+.home-layout .sidemenu .project-menu-group {
+    flex: 0 1 auto;
+    min-height: 0;
+    margin: 0;
+    padding: 10px;
+    gap: 8px;
+    box-sizing: border-box;
+
+    border: 1px solid #DED5C9;
+    border-radius: 16px;
+    background: #FFFFFF;
+
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
+.home-layout .sidemenu .project-menu-group > li {
+    flex-shrink: 0;
+}

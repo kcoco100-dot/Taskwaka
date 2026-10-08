@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <div class="panel-card">
+      <div class="panel-card-title">
+        <span>전체 회원 목록 조회 및 상태 관리</span>
+        <div style="display:flex; gap:8px;">
+          <input type="text" class="warm-input" placeholder="이름 또는 이메일 검색..." style="width:240px;">
+          <select class="warm-select"><option>전체 상태</option><option>활성</option><option>비활성</option><option>탈퇴</option></select>
+          <button class="btn-sage">조회</button>
+        </div>
+      </div>
+
+      <table class="warm-table">
+        <thead>
+          <tr>
+            <th>이름</th>
+            <th>이메일</th>
+            <th>소속 팀</th>
+            <th>역할</th>
+            <th>회원 상태</th>
+            <th>가입일</th>
+            <th>최근 접속일</th>
+            <th>탈퇴일</th>
+            <th style="text-align:right;">관리 작업</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>김철수</strong></td>
+            <td>chulsoo@taskwaka.com</td>
+            <td>개발 1팀</td>
+            <td>AA (팀원)</td>
+            <td><span class="badge badge-active">활성</span></td>
+            <td>2026-08-12</td>
+            <td>2026-10-01</td>
+            <td>-</td>
+            <td style="text-align:right;">
+              <button class="btn-subtle" onclick="alert('비활성화 처리되었습니다. 기존 로그인 세션이 즉시 만료됩니다.');">비활성 전환</button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>이퇴사</strong></td>
+            <td>retired@taskwaka.com</td>
+            <td>-</td>
+            <td>-</td>
+            <td><span class="badge badge-inactive">탈퇴</span></td>
+            <td>2026-01-10</td>
+            <td>2026-08-30</td>
+            <td>2026-08-31</td>
+            <td style="text-align:right;">
+              <button class="btn-danger" onclick="if(confirm('탈퇴 보관 기간이 만료된 회원입니다. 개인정보를 영구 삭제하시겠습니까?\n(기존 업무 및 보고서 기록은 익명 처리되어 보존됩니다)')) alert('영구 삭제가 완료되었습니다.');">개인정보 영구 삭제</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

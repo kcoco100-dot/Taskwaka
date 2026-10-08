@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+	 <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+	 <link rel="stylesheet" th:href="@{/dist/css/mail.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="home-layout">
+		<nav id="sidemenu" class="sidemenu">
+			<ul class="project-menu-group">
+				<li><a th:href="@{/home}">캘린더</a></li>
+				<li><a th:href="@{/dashboard}">대시보드</a></li>
+				<li><a th:href="@{/gantt}">간트차트</a></li>
+			</ul>
+			<ul class="project-row-menu-group">
+				<li><a th:href="@{/documentBox}">문서함</a></li>
+				<li><a th:href="@{/mail}" class="active">메일</a></li>
+				<li><a th:href="@{/main}">팀 성장나무</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+			</ul>
+		</nav>
+			
+		<div class="section mail-section">
+			<!-- 페이지 제목 영역 -->
+			<div class="mail-heading">
+				<h1 class="mail-title">메일함</h1>
+				<p class="mail-description">내 메일함을 확인해보세요.</p>
+			</div>
+			
+			<div class="mail-menu">
+				<button type="button" class="mail-card mail-card-view">
+					<span class="mail-card-title">내 메일 목록</span>
+					<span class="mail-card-description">
+						메일 리스트
+					</span>
+					<span class="mail-card-project" aria-hidden="true">
+						📥구글에서 온 메일
+					</span>
+					<span class="mail-card-project" aria-hidden="true">
+						📥네이버에서 온 메일
+					</span>
+					<span class="mail-card-project" aria-hidden="true">
+						📥카카오에서 온 메일
+					</span>
+				</button>		
+			
+			</div>
+			
+		
+		</div>
+	</div>
+	
+</th:block>
+ 
+<th:block layout:fragment="script">
+</th:block> 
+
+</html>

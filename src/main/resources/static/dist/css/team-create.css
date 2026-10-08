@@ -1,0 +1,202 @@
+﻿@charset "UTF-8";
+
+/* 페이지 배경과 여백 */
+.team-create-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 128px);
+    padding: 56px 24px;
+    background: #FCFBF8;
+}
+
+/* 입력 카드 */
+.team-create-card {
+    width: 100%;
+    max-width: 560px;
+    padding: 36px;
+    border: 1px solid #E8E2D9;
+    border-radius: 20px;
+    background: #FFFFFF;
+    box-shadow: 0 6px 24px rgba(89, 67, 49, 0.05);
+    color: #594331;
+}
+
+/* 제목 */
+.team-create-heading {
+    margin-bottom: 32px;
+}
+
+.team-create-heading h1 {
+    margin: 0 0 12px;
+    color: #594331;
+    font-family: inherit;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.team-create-heading p {
+    margin: 0;
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* 입력 항목 */
+.team-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.team-create-form .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.team-create-form label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.team-create-form input,
+.team-create-form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #DED5C9;
+    border-radius: 10px;
+    background: #FFFEFC;
+    color: #594331;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.team-create-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.team-create-form input::placeholder,
+.team-create-form textarea::placeholder {
+    color: #8A8075;
+}
+
+.team-create-form input:focus,
+.team-create-form textarea:focus {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+    border-color: #71865B;
+}
+
+/* 하단 버튼 */
+.team-create-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 8px;
+}
+
+.team-create-actions .team-cancel,
+.team-create-actions .team-submit {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.team-create-actions .team-cancel {
+    border-color: #E8E2D9;
+    background: #F7F3EE;
+    color: #786B5E;
+}
+
+.team-create-actions .team-cancel:hover {
+    background: #EFE8DE;
+}
+
+.team-create-actions .team-submit {
+    border-color: #D4DFC8;
+    background: #E8F0DE;
+    color: #465B38;
+}
+
+.team-create-actions .team-submit:hover {
+    background: #DCE8CE;
+}
+
+.team-create-actions a:focus-visible,
+.team-create-actions button:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 3px;
+}
+
+/* 원형 배경 효과를 담는 영역 */
+.team-create-page {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+/* 흐릿한 원 두 개 */
+.team-create-page::before,
+.team-create-page::after {
+    content: "";
+    position: absolute;
+    width: clamp(190px, 30vw, 390px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 왼쪽 위 브라운 원 */
+.team-create-page::before {
+    top: -80px;
+    left: -70px;
+    background: rgba(166, 124, 91, 0.34);
+    animation: team-create-brown 8s ease-in-out -4s infinite alternate;
+}
+
+/* 오른쪽 아래 연두색 원 */
+.team-create-page::after {
+    right: -70px;
+    bottom: -100px;
+    background: rgba(172, 202, 137, 0.44);
+    animation: team-create-green 8s ease-in-out -5s infinite alternate;
+}
+
+/* 입력 카드는 배경 위에 표시 */
+.team-create-card {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes team-create-brown {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(160px, 130px) scale(1.15);
+    }
+}
+
+@keyframes team-create-green {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(-170px, -120px) scale(1.12);
+    }
+}

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+	<th:block layout:fragment="css">
+		<link rel="stylesheet" th:href="@{/dist/css/home.css}">
+		<link rel="stylesheet" th:href="@{/dist/css/dashboard.css}">
+	</th:block>
+
+	<th:block layout:fragment="content">
+		<div class="home-layout">
+			<nav th:replace="~{layout/sidebar::homeSidebar('dashboard')}"></nav>
+
+			<section class="section dashboard-page" aria-labelledby="overview-title">
+				<div class="overview-heading">
+					<div>
+						<p class="overview-eyebrow">MY WORKSPACE</p>
+						<h1 id="overview-title" class="page-title">한눈에 보는 나의 업무</h1>
+						<p class="page-description">오늘 해야 할 일부터 우리 팀의 성장까지, 함께 확인해보세요.</p>
+					</div>
+					<div class="overview-date">
+						<span class="overview-example">예시 현황</span>
+						<span>2026.10.07 · 수요일</span>
+					</div>
+				</div>
+
+				<!-- 디자인 확인용 예시 데이터입니다. -->
+				<div class="overview-stats" aria-label="업무 현황 요약">
+					<article class="overview-stat">
+						<div class="overview-stat-heading">
+							<span>남은 업무</span>
+							<span class="overview-stat-icon overview-tone-green">
+								<span class="overview-icon" aria-hidden="true">✓</span>
+							</span>
+						</div>
+						<p class="overview-stat-value">
+							03
+							<span>건</span>
+						</p>
+						<p class="overview-stat-description">진행 중 2 · 검토 중 1</p>
+					</article>
+
+					<article class="overview-stat">
+						<div class="overview-stat-heading">
+							<span>참여 프로젝트</span>
+							<span class="overview-stat-icon overview-tone-sand">
+								<span class="overview-icon" aria-hidden="true">📁</span>
+							</span>
+						</div>
+						<p class="overview-stat-value">
+							03
+							<span>건</span>
+						</p>
+						<p class="overview-stat-description">함께 진행하는 프로젝트</p>
+					</article>
+
+					<article class="overview-stat">
+						<div class="overview-stat-heading">
+							<span>오늘의 일정</span>
+							<span class="overview-stat-icon overview-tone-lavender">
+								<span class="overview-icon" aria-hidden="true">📅</span>
+							</span>
+						</div>
+						<p class="overview-stat-value">
+							02
+							<span>건</span>
+						</p>
+						<p class="overview-stat-description">회의 1 · 마감 1</p>
+					</article>
+
+					<article class="overview-stat">
+						<div class="overview-stat-heading">
+							<span>이번 달 완료</span>
+							<span class="overview-stat-icon overview-tone-green">
+								<span class="overview-icon" aria-hidden="true">✓</span>
+							</span>
+						</div>
+						<p class="overview-stat-value">
+							12
+							<span>건</span>
+						</p>
+						<p class="overview-stat-description">이번 달 목표 20건 중</p>
+					</article>
+				</div>
+				<div class="overview-grid">
+					<article class="overview-card overview-work-card">
+						<div class="overview-card-heading">
+							<div>
+								<h2>내 업무 목록</h2>
+								<p>지금 집중해야 할 업무를 확인하세요.</p>
+							</div>
+							<a th:href="@{/projects}" class="overview-more">
+								전체 보기
+								<span class="overview-icon" aria-hidden="true">→</span>
+							</a>
+						</div>
+						<div class="overview-task-summary">
+							<span><strong>3개</strong>의 업무가 기다리고 있어요.</span>
+							<span class="overview-summary-dot">마감일 순</span>
+						</div>
+						<ul class="overview-task-list">
+							<li class="overview-task-row">
+								<span class="overview-task-check" aria-hidden="true"></span>
+								<div class="overview-task-copy">
+									<h3>로그인 화면 UI 디자인</h3>
+									<p>
+										<span>자바 프로젝트</span>
+										<span class="overview-due-today">오늘 마감</span>
+									</p>
+								</div>
+								<span class="overview-badge overview-badge-review">검토 중</span>
+							</li>
+							<li class="overview-task-row">
+								<span class="overview-task-check" aria-hidden="true"></span>
+								<div class="overview-task-copy">
+									<h3>프로젝트 조회 페이지 작업</h3>
+									<p>
+										<span>오라클 프로젝트</span>
+										<span>10.09 마감</span>
+									</p>
+								</div>
+								<span class="overview-badge overview-badge-ongoing">진행 중</span>
+							</li>
+							<li class="overview-task-row">
+								<span class="overview-task-check" aria-hidden="true"></span>
+								<div class="overview-task-copy">
+									<h3>문서 저장 구조 설계</h3>
+									<p>
+										<span>몽고디비 프로젝트</span>
+										<span>10.12 마감</span>
+									</p>
+								</div>
+								<span class="overview-badge overview-badge-ongoing">진행 중</span>
+							</li>
+						</ul>
+					</article>
+
+					<article class="overview-card overview-project-card">
+						<div class="overview-card-heading">
+							<div>
+								<h2>참여 프로젝트</h2>
+								<p>우리 팀의 프로젝트는 어디까지 왔을까요?</p>
+							</div>
+							<a th:href="@{/projects}" class="overview-more">
+								전체 보기
+								<span class="overview-icon" aria-hidden="true">→</span>
+							</a>
+						</div>
+						<ul class="overview-project-list">
+							<li class="overview-project-row">
+								<span class="overview-project-avatar overview-avatar-java" aria-hidden="true">JV</span>
+								<div class="overview-project-copy">
+									<div class="overview-project-title">
+										<h3>자바 프로젝트</h3>
+										<span class="overview-badge overview-badge-ongoing">진행 중</span>
+									</div>
+									<p>
+										협업 서비스 개발
+										<span>참여 8명</span>
+									</p>
+									<div class="overview-project-progress">
+										<div class="overview-progress-track" role="progressbar" aria-label="자바 프로젝트 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="65">
+											<div class="overview-progress-fill overview-progress-65"></div>
+										</div>
+										<span>65%</span>
+									</div>
+								</div>
+							</li>
+							<li class="overview-project-row">
+								<span class="overview-project-avatar overview-avatar-oracle" aria-hidden="true">OR</span>
+								<div class="overview-project-copy">
+									<div class="overview-project-title">
+										<h3>오라클 프로젝트</h3>
+										<span class="overview-badge overview-badge-ongoing">진행 중</span>
+									</div>
+									<p>
+										데이터베이스 설계 및 구축
+										<span>참여 5명</span>
+									</p>
+									<div class="overview-project-progress">
+										<div class="overview-progress-track" role="progressbar" aria-label="오라클 프로젝트 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
+											<div class="overview-progress-fill overview-progress-40"></div>
+										</div>
+										<span>40%</span>
+									</div>
+								</div>
+							</li>
+							<li class="overview-project-row">
+								<span class="overview-project-avatar overview-avatar-mongo" aria-hidden="true">MG</span>
+								<div class="overview-project-copy">
+									<div class="overview-project-title">
+										<h3>몽고디비 프로젝트</h3>
+										<span class="overview-badge overview-badge-planned">예정</span>
+									</div>
+									<p>
+										문서 관리 시스템
+										<span>참여 4명</span>
+									</p>
+									<div class="overview-project-progress">
+										<div class="overview-progress-track" role="progressbar" aria-label="몽고디비 프로젝트 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20">
+											<div class="overview-progress-fill overview-progress-20"></div>
+										</div>
+										<span>20%</span>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</article>
+
+					<article class="overview-card overview-calendar-card">
+						<div class="overview-card-heading">
+							<div>
+								<h2>오늘의 일정</h2>
+								<p>놓치지 말아야 할 일정을 모았어요.</p>
+							</div>
+							<a th:href="@{/calendar}" class="overview-more">
+								캘린더 보기
+								<span class="overview-icon" aria-hidden="true">→</span>
+							</a>
+						</div>
+						<div class="overview-week" aria-label="2026년 10월 5일부터 11일까지">
+							<div>
+								<span>월</span>
+								<strong>5</strong>
+							</div>
+							<div>
+								<span>화</span>
+								<strong>6</strong>
+							</div>
+							<div class="overview-week-today" aria-current="date">
+								<span>수</span>
+								<strong>7</strong>
+								<span class="overview-day-dot" aria-hidden="true"></span>
+							</div>
+							<div>
+								<span>목</span>
+								<strong>8</strong>
+							</div>
+							<div>
+								<span>금</span>
+								<strong>9</strong>
+								<span class="overview-day-dot" aria-hidden="true"></span>
+							</div>
+							<div class="overview-week-weekend">
+								<span>토</span>
+								<strong>10</strong>
+							</div>
+							<div class="overview-week-weekend">
+								<span>일</span>
+								<strong>11</strong>
+							</div>
+						</div>
+						<ul class="overview-schedule-list">
+							<li>
+								<span class="overview-schedule-time">10:00</span>
+								<span class="overview-schedule-line" aria-hidden="true"></span>
+								<div>
+									<h3>개발팀 주간 회의</h3>
+									<p>자바 프로젝트 · 회의실 A</p>
+								</div>
+								<span class="overview-badge overview-badge-ongoing">회의</span>
+							</li>
+							<li>
+								<span class="overview-schedule-time">18:00</span>
+								<span class="overview-schedule-line overview-schedule-line-deadline" aria-hidden="true"></span>
+								<div>
+									<h3>로그인 화면 UI 디자인 마감</h3>
+									<p>자바 프로젝트 · 결과물 공유</p>
+								</div>
+								<span class="overview-badge overview-badge-review">마감</span>
+							</li>
+						</ul>
+					</article>
+
+					<article class="overview-card overview-growth-card">
+						<div class="overview-card-heading">
+							<div>
+								<h2>우리 팀 성장나무</h2>
+								<p>함께한 만큼, 조금씩 자라나는 우리 팀</p>
+							</div>
+							<a th:href="@{/growthTree}" class="overview-more">
+								나무 보러가기
+								<span class="overview-icon" aria-hidden="true">→</span>
+							</a>
+						</div>
+						<div class="overview-growth-body">
+							<div class="overview-tree-scene" aria-hidden="true">
+								<span class="overview-tree">🌳</span>
+								<span class="overview-tree-level">LEVEL 3</span>
+							</div>
+							<div class="overview-growth-copy">
+								<span class="overview-growth-label">함께 키우는 작은 나무</span>
+								<h3>오늘도 한 뼘 자랐어요.</h3>
+								<p>
+									업무를 완료하고 팀원과 함께
+									<br>
+									더 큰 나무로 키워보세요.
+								</p>
+								<div class="overview-growth-progress-heading">
+									<span>다음 단계까지</span>
+									<strong>62%</strong>
+								</div>
+								<div class="overview-progress-track" role="progressbar" aria-label="성장나무 경험치" aria-valuemin="0" aria-valuemax="2000" aria-valuenow="1240">
+									<div class="overview-progress-fill overview-progress-62"></div>
+								</div>
+								<div class="overview-growth-exp">
+									<strong>1,240 EXP</strong>
+									<span>2,000 EXP</span>
+								</div>
+							</div>
+						</div>
+						<div class="overview-growth-footer">
+							<span class="overview-icon" aria-hidden="true">🌱</span>
+							우리 팀의 꾸준한 노력이 쌓이고 있어요.
+						</div>
+					</article>
+				</div>
+			</section>
+		</div>
+	</th:block>
+</html>

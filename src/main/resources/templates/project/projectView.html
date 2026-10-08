@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/project-view.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="project-view-page">
+        <div class="project-view-card">
+            <div class="project-view-heading">
+                <h1>프로젝트 조회</h1>
+            </div>
+
+            <form class="project-view-form">
+                <div class="project-field">
+                    <label for="project-name">프로젝트명</label>
+                    <input type="text" id="project-name"
+                           placeholder="프로젝트명을 입력하세요">
+                </div>
+
+                <div class="project-field">
+					사용하세여
+                </div>
+
+                <div class="project-view-actions">
+                    <button type="button" class="project-update">수정하기</button>
+                    <a th:href="@{/manage}" class="project-delete">삭제하기</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script"></th:block>
+
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/growthTree.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout">
+        <nav th:replace="~{layout/sidebar::homeSidebar('growthTree')}"></nav>
+
+        <div class="section shell-section">
+            <div class="page-heading">
+                <h1 class="page-title">팀 성장나무</h1>
+                <p class="page-description">
+                    팀의 활동으로 나무를 키우고 함께 꾸며보세요.
+                </p>
+            </div>
+
+            <div class="shell-content growth-content">
+
+                <!-- 1. 현재 성장 상태 -->
+                <div class="growth-summary">
+                    <div>현재 단계 <strong>—</strong></div>
+                    <div>누적 경험치 <strong>— EXP</strong></div>
+                    <div>구매 가능 경험치 <strong>— EXP</strong></div>
+                </div>
+
+                <!-- 2. 나무 이미지와 커스텀 아이템 -->
+                <div class="tree-preview">
+                    <!-- 담당자: 현재 단계의 나무 이미지 표시 -->
+                    <!-- 담당자: 착용한 장식 이미지를 나무 위에 배치 -->
+                </div>
+
+                <!-- 3. 성장 단계와 진행률 -->
+                <div class="growth-stages">
+                    <h2>성장 단계</h2>
+                    <ol>
+                        <li>씨앗</li>
+                        <li>새싹</li>
+                        <li>작은 나무</li>
+                        <li>큰 나무</li>
+                        <li>왕 나무</li>
+                    </ol>
+                    <!-- 담당자: 현재 단계 강조, 다음 단계 진행률 표시 -->
+                    <!-- 5단계에서는 “최고 단계” 표시 -->
+                </div>
+
+                <!-- 4. 최근 경험치 획득 내역 -->
+                <div class="growth-history">
+                    <h2>최근 팀 활동</h2>
+                    <!-- 담당자: 회원 / 활동 / 경험치 / 날짜 목록 -->
+                </div>
+
+                <!-- 5. 추후 상점과 커스텀 기능 -->
+                <div class="tree-custom">
+                    <h2>나무 꾸미기</h2>
+                    <p>5단계부터 아이템을 구매할 수 있습니다.</p>
+                    <!-- 담당자: 상점, 보유 아이템, 적용·해제 기능 -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script"></th:block>
+</html>

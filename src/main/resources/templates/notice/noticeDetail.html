@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout">
+        <nav th:replace="~{layout/sidebar::manageSidebar('notice')}"></nav>
+
+        <div class="section shell-section">
+            <div class="page-heading">
+                <h1 class="page-title">공지사항 상세</h1>
+                <p class="page-description">공지사항의 내용을 확인하세요.</p>
+            </div>
+
+            <div class="shell-content">
+                <!-- TODO: 담당자가 공지사항 상세 내용 UI를 추가할 영역 -->
+            </div>
+
+            <div class="shell-actions">
+                <a th:href="@{/notice}" class="shell-action">목록으로</a>
+                <a th:href="@{/noticeEdit}" class="shell-action shell-action-primary">수정하기</a>
+                <!-- TODO: 삭제 확인과 실제 삭제 처리는 추후 연결 -->
+                <button type="button" class="shell-action">삭제하기</button>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script"></th:block>
+</html>

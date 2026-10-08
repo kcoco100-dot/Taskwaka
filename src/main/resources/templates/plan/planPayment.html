@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout">
+        <nav th:replace="~{layout/sidebar::manageSidebar('planPayment')}"></nav>
+
+        <div class="section shell-section">
+            <div class="page-heading">
+                <h1 class="page-title">요금제 결제</h1>
+                <p class="page-description">결제할 요금제와 결제 정보를 확인하세요.</p>
+            </div>
+
+            <div class="shell-content">
+                <!-- TODO: 담당자가 요금제 결제 정보 UI를 추가할 영역 -->
+            </div>
+
+            <div class="shell-actions">
+                <a th:href="@{/plan}" class="shell-action">요금제 조회로</a>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script"></th:block>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manageCalender.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout">
+        <nav th:replace="~{layout/sidebar::manageSidebar('manageCalender')}"></nav>
+
+        <div class="section manage-content">
+            <div class="page-heading">
+                <h1 class="page-title">PM 캘린더</h1>
+                <p class="page-description">
+                    팀과 프로젝트의 일정을 확인하고 관리하세요.
+                </p>
+            </div>
+
+            <div class="calendar-content">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+</th:block>
+
+</html>

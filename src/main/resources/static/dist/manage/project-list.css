@@ -1,0 +1,369 @@
+@charset "UTF-8";
+
+.home-layout > .project-list-page {
+	padding: 28px 32px;
+}
+
+.project-list-page .page-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin: 0 0 24px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	text-align: left;
+}
+
+.project-list-page .page-title {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	text-align: left;
+}
+
+.project-list-panel {
+	padding: 24px;
+	border: 1px solid #E8E2D9;
+	border-radius: 16px;
+	background: #fff;
+	box-shadow: 0 4px 16px rgba(89, 67, 49, .035);
+}
+
+.project-filters {
+	display: grid;
+	grid-template-columns: 170px minmax(180px, 1fr) auto;
+	align-items: end;
+	gap: 14px;
+	margin-bottom: 26px;
+	padding-bottom: 24px;
+	border-bottom: 1px solid #EEE8E0;
+}
+
+.project-field {
+	min-width: 0;
+}
+
+.project-field label {
+	display: block;
+	margin-bottom: 8px;
+	color: #665747;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.project-field input, .project-field select {
+	width: 100%;
+	height: 42px;
+	padding: 0 12px;
+	border: 1px solid #DDD5CA;
+	border-radius: 9px;
+	background: #fff;
+	color: #594331;
+	font: inherit;
+	font-size: 13px;
+}
+
+.project-field input::placeholder {
+	color: #9B9186;
+}
+
+.project-filter-actions, .project-row-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.project-list-page .project-button {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 42px;
+	padding: 0 17px;
+	border: 1px solid #DDD5CA;
+	border-radius: 9px;
+	background: #fff;
+	color: #665747;
+	font: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color .15s;
+}
+
+.project-list-page .project-button:hover {
+	background: #F7F3EE;
+}
+
+.project-list-page .project-button-primary {
+	border-color: #71865B;
+	background: #71865B;
+	color: #fff;
+}
+
+.project-list-page .project-button-primary:hover {
+	border-color: #5E724A;
+	background: #5E724A;
+}
+
+.project-list-page :is(input, select, button, a, .project-table-wrap):focus-visible {
+	outline: 2px solid #71865B;
+	outline-offset: 3px;
+}
+
+.project-list-heading {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 14px;
+}
+
+.project-list-heading h2 {
+	margin: 0;
+	color: #594331;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.project-list-heading p {
+	margin: 0;
+	color: #8B7D6E;
+	font-size: 13px;
+}
+
+.project-list-heading strong {
+	color: #4F6242;
+}
+
+.project-table-wrap {
+	overflow-x: auto;
+	border: 1px solid #E8E2D9;
+	border-radius: 10px;
+}
+
+.project-list-table {
+	width: 100%;
+	min-width: 1060px;
+	margin: 0;
+	border-collapse: collapse;
+	color: #665747;
+	font-size: 13px;
+}
+
+.project-list-table th, .project-list-table td {
+	padding: 19px 14px;
+	border-bottom: 1px solid #EEE8E0;
+	text-align: left;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
+.project-list-table th {
+	padding-block: 14px;
+	background: #F7F5F0;
+	color: #786B5E;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.project-list-table tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.project-list-row:hover {
+	background: #FCFBF8;
+}
+
+.project-list-table .project-number {
+	width: 58px;
+	color: #9B9186;
+	text-align: center;
+}
+
+.project-name-column {
+	width: 25%;
+}
+
+.project-name {
+	display: block;
+	color: #594331;
+	font-weight: 600;
+}
+
+.project-code {
+	display: block;
+	margin-top: 5px;
+	color: #9B9186;
+	font-size: 11px;
+	letter-spacing: .4px;
+}
+
+.project-period {
+	font-variant-numeric: tabular-nums;
+}
+
+.project-status {
+	display: inline-flex;
+	justify-content: center;
+	min-width: 70px;
+	padding: 5px 10px;
+	border-radius: 20px;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.project-status-progress {
+	background: #EEF4E6;
+	color: #567044;
+}
+
+.project-status-planned {
+	background: #FFF4DC;
+	color: #9B762C;
+}
+
+.project-status-completed {
+	background: #ECEFF7;
+	color: #596A91;
+}
+
+.project-status-paused {
+	background: #FCEDE8;
+	color: #AD6551;
+}
+
+.project-progress {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.project-progress progress {
+	width: 70px;
+	height: 6px;
+	overflow: hidden;
+	border: 0;
+	border-radius: 10px;
+	background: #F0EEE8;
+	accent-color: #8CA375;
+}
+
+.project-progress progress::-webkit-progress-bar {
+	background: #F0EEE8;
+	border-radius: 10px;
+}
+
+.project-progress progress::-webkit-progress-value {
+	background: #8CA375;
+	border-radius: 10px;
+}
+
+.project-progress progress::-moz-progress-bar {
+	background: #8CA375;
+	border-radius: 10px;
+}
+
+.project-list-table .project-actions-column {
+	text-align: center;
+}
+
+.project-row-actions {
+	justify-content: center;
+}
+
+.project-row-actions .project-button {
+	min-height: 32px;
+	padding: 0 12px;
+	font-size: 12px;
+	border-radius: 7px;
+}
+
+.project-list-page .project-edit {
+	background: #EEF4E6;
+	border-color: #DEE7D5;
+	color: #567044;
+}
+
+.project-list-page .project-edit:hover {
+	background: #E3EDD8;
+}
+
+.project-list-page .project-delete {
+	background: #FCEDE8;
+	border-color: #F1DBD3;
+	color: #AD6551;
+}
+
+.project-list-page .project-delete:hover {
+	background: #F7DFD7;
+}
+
+.project-list-table .project-empty {
+	padding: 64px 20px;
+	color: #9B9186;
+	text-align: center;
+}
+
+.project-list-page [hidden] {
+	display: none;
+}
+
+.project-list-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-top: 20px;
+}
+
+.project-list-footer p {
+	margin: 0;
+	color: #9B9186;
+	font-size: 12px;
+}
+
+.project-pagination {
+	display: flex;
+	gap: 6px;
+}
+
+.project-pagination .project-button, .project-current-page {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	min-width: 32px;
+	min-height: 32px;
+	padding: 0 10px;
+	border: 1px solid #E8E2D9;
+	border-radius: 7px;
+	font-size: 12px;
+}
+
+.project-pagination .project-button:disabled {
+	color: #B9B0A6;
+	cursor: default;
+	background: #fff;
+}
+
+.project-current-page {
+	background: #EEF4E6;
+	border-color: #E1E8D9;
+	color: #4F6242;
+	font-weight: 700;
+}
+
+.project-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

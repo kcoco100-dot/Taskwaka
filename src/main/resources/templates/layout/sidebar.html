@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="homeSidebar(activeMenu)" id="sidemenu" class="sidemenu" aria-label="HOME 메뉴">
+    <ul class="project-menu-group">
+        <li><a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}" th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'dashboard' ? 'page' : null}">📚대시보드</a></li>
+        <li><a th:href="@{/{domainKey}/home/calendar(domainKey=${domainKey})}" th:classappend="${activeMenu == 'calendar' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'calendar' ? 'page' : null}">🗓️캘린더</a></li>
+        <li><a th:href="@{/gantt}" th:classappend="${activeMenu == 'gantt' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">📉간트차트</a></li>
+        <li><a th:href="@{/documentBox}" th:classappend="${activeMenu == 'documentBox' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'documentBox' ? 'page' : null}">📭문서함</a></li>
+        <li><a th:href="@{/growthTree}" th:classappend="${activeMenu == 'growthTree' ? 'active' : ''}">🌳팀 성장나무</a></li>
+        <li><a th:href="@{/meetings}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}">📝회의록</a></li>
+        <li><a th:href="@{/projects}" th:classappend="${activeMenu == 'projects' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projects' ? 'page' : null}">📃참여 프로젝트</a></li>
+    </ul>
+</nav>
+
+<nav th:fragment="manageSidebar(activeMenu)" id="sidemenu" class="sidemenu" aria-label="PM 메뉴">
+    <ul class="manage-menu">
+        <li class="menu-group">
+            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="dashboard-submenu">
+                대시보드<span aria-hidden="true">⌄</span>
+            </button>
+            <ul id="dashboard-submenu" class="submenu">
+                <li><a th:href="@{/pmDashboard}" th:classappend="${activeMenu == 'pmDashboard' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'pmDashboard' ? 'page' : null}">PM 대시보드</a></li>
+                <li><a th:href="@{/gantt}" th:classappend="${activeMenu == 'gantt' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">간트차트</a></li>
+            </ul>
+        </li>
+        <li class="menu-group">
+            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="member-submenu">
+                팀원관리<span aria-hidden="true">⌄</span>
+            </button>
+            <ul id="member-submenu" class="submenu">
+                <li th:if="${activeMenu == 'members'}">
+                    <button type="button" id="member-info-btn" class="manage-menu-button active"
+                            aria-controls="member-info-panel" aria-expanded="false">팀원 정보 조회</button>
+                </li>
+                <li th:unless="${activeMenu == 'members'}"><a th:href="@{/manage}" th:classappend="${activeMenu == 'members' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'members' ? 'page' : null}">팀원 정보 조회</a></li>
+                <li><a th:href="@{/invitation}" th:classappend="${activeMenu == 'invitation' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'invitation' ? 'page' : null}">팀원 초대하기</a></li>
+            </ul>
+        </li>
+        <li class="menu-group">
+            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="project-submenu">
+                프로젝트 관리<span aria-hidden="true">⌄</span>
+            </button>
+            <ul id="project-submenu" class="submenu">
+                <li><a th:href="@{/projectCreate}" th:classappend="${activeMenu == 'projectCreate' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projectCreate' ? 'page' : null}">프로젝트 등록</a></li>
+                <li><a th:href="@{/manage/view}" th:classappend="${activeMenu == 'projectView' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projectView' ? 'page' : null}">프로젝트 조회</a></li>
+                <li><a th:href="@{/manage/approval}" th:classappend="${activeMenu == 'approval' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'approval' ? 'page' : null}">보고서 공지</a></li>
+                <li><a th:href="@{/manage/meetings}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'meetings' ? 'page' : null}">회의록</a></li>
+            </ul>
+        </li>
+
+		<li class="menu-group">
+		    <button type="button"
+		            class="menu-toggle"
+		            aria-expanded="true"
+		            aria-controls="calendar-submenu">
+		        캘린더<span aria-hidden="true">⌄</span>
+		    </button>
+		
+		    <ul id="calendar-submenu" class="submenu">
+		        <li>
+		            <a th:href="@{/manageCalender}"
+		               th:classappend="${activeMenu == 'manageCalender' ? 'active' : ''}"
+		               th:attr="aria-current=${activeMenu == 'manageCalender' ? 'page' : null}">
+		                PM 캘린더
+		            </a>
+		        </li>
+		    </ul>
+		</li>
+
+        <li class="menu-group">
+            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="notice-submenu">
+                공지사항<span aria-hidden="true">⌄</span>
+            </button>
+            <ul id="notice-submenu" class="submenu">
+                <li><a th:href="@{/notice}" th:classappend="${activeMenu == 'notice' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'notice' ? 'page' : null}">공지사항 조회</a></li>
+                <li><a th:href="@{/noticeCreate}" th:classappend="${activeMenu == 'noticeCreate' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeCreate' ? 'page' : null}">공지등록</a></li>
+                <li><a th:href="@{/noticeEdit}" th:classappend="${activeMenu == 'noticeEdit' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeEdit' ? 'page' : null}">공지수정</a></li>
+            </ul>
+        </li>
+        <li class="menu-group">
+            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="plan-submenu">
+                요금제 관리<span aria-hidden="true">⌄</span>
+            </button>
+            <ul id="plan-submenu" class="submenu">
+                <li><a th:href="@{/plan}" th:classappend="${activeMenu == 'plan' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'plan' ? 'page' : null}">요금제 조회</a></li>
+                <li><a th:href="@{/planPayment}" th:classappend="${activeMenu == 'planPayment' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'planPayment' ? 'page' : null}">요금제 결제</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>
+

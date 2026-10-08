@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <div class="panel-card">
+      <div class="panel-card-title">전체 공지사항 작성 및 공개 상태 설정</div>
+      <form onsubmit="event.preventDefault(); alert('전체 공지사항이 등록되었습니다.');">
+        <div style="display:grid; grid-template-columns: 3fr 1fr; gap:12px; margin-bottom:12px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">공지 제목 *</label>
+            <input type="text" class="warm-input" placeholder="전체 공지사항 제목을 입력하세요" style="width:100%;" required>
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">공개 여부 *</label>
+            <select class="warm-select" style="width:100%;">
+              <option value="PUBLIC">공개 (전체 노출)</option>
+              <option value="PRIVATE">비공개 (관리자만 조회)</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">공지 내용 *</label>
+          <textarea class="warm-textarea" rows="3" placeholder="공지 상세 내용을 입력하세요" style="width:100%;" required></textarea>
+        </div>
+        <div style="text-align:right;">
+          <button type="submit" class="btn-sage">공지사항 등록</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card-title">등록된 전체 공지사항 목록</div>
+      <table class="warm-table">
+        <thead>
+          <tr>
+            <th>공지 제목</th>
+            <th style="width:120px;">작성자</th>
+            <th style="width:120px;">작성일</th>
+            <th style="width:120px;">공개 상태</th>
+            <th style="width:140px; text-align:right;">상태 변경</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>[안내] 시스템 정기 보안 패치 및 데이터베이스 백업 작업</strong></td>
+            <td>ADMIN</td>
+            <td>2026-10-01</td>
+            <td><span class="badge badge-active">공개</span></td>
+            <td style="text-align:right;">
+              <button class="btn-subtle" onclick="alert('비공개로 변경되었습니다. 일반 사용자에게 노출되지 않습니다.');">비공개 전환</button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>[내부] 2026년 4분기 인프라 증설 내부 검토 계획</strong></td>
+            <td>ADMIN</td>
+            <td>2026-09-28</td>
+            <td><span class="badge badge-inactive">비공개</span></td>
+            <td style="text-align:right;">
+              <button class="btn-subtle" onclick="alert('공개 상태로 변경되었습니다.');">공개 전환</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

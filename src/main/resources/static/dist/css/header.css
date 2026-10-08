@@ -1,0 +1,112 @@
+﻿@charset "UTF-8";
+
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    height: 64px;
+    padding: 0 24px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E8E2D9;
+    color: #594331;
+}
+
+.team-header-left,
+.team-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.team-header-left {
+    min-width: 0;
+}
+
+.team-logo {
+    flex-shrink: 0;
+    color: #594331;
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.team-logo-image {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 0;
+    object-fit: contain;
+    border: 0;
+    background: transparent;
+}
+
+.team-logo:hover {
+    color: #72563E;
+}
+
+.team-name {
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #EEF4E6;
+    color: #4F6242;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.team-header-right {
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.team-header-right button {
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #594331;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.team-header-right button:hover {
+    background: #F7F3EE;
+}
+
+.team-header-right .team-profile {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    margin-left: 8px;
+    border: 1px solid #DCE5D2;
+    border-radius: 50%;
+    background: #EEF4E6;
+    color: #4F6242;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.team-header-right .team-profile:hover {
+    background: #E3EDD8;
+}
+
+.team-header a:focus-visible,
+.team-header button:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 3px;
+}
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #FFFFFF;
+}

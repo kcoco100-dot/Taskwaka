@@ -1,0 +1,181 @@
+﻿@charset "UTF-8";
+
+/* 페이지 배치 */
+.invitation-layout {
+    padding: 40px 24px;
+    background: #FCFBF8;
+}
+
+.invitation-layout .team-invitation {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 36px;
+    box-sizing: border-box;
+    border: 1px solid #E8E2D9;
+    border-radius: 20px;
+    background: #FFFFFF;
+}
+
+/* 제목 */
+.invitation-heading {
+    margin-bottom: 28px;
+}
+
+.invitation-heading h1 {
+    margin: 0;
+    color: #594331;
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.invitation-heading p {
+    margin: 10px 0 0;
+    color: #786B5E;
+    font-size: 14px;
+}
+
+/* 입력 영역 */
+.invitation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.invitation-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.invitation-field label {
+    color: #594331;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.invitation-field input {
+    width: 100%;
+    min-width: 0;
+    padding: 13px 16px;
+    box-sizing: border-box;
+    border: 1px solid #DED5C9;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+}
+
+.invitation-field input:focus {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+
+/* 버튼 배치 */
+.invitation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.invitation-actions .invitation-submit,
+.invitation-actions .invitation-cancel {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 24px;
+    border: 1px solid #E8E2D9;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.invitation-actions .invitation-submit {
+    border-color: #D5E2C7;
+    background: #E8F0DE;
+    color: #465B38;
+}
+
+.invitation-actions .invitation-cancel {
+    background: #F7F3EE;
+    color: #786B5E;
+}
+
+.invitation-actions .invitation-submit:hover {
+    background: #DDE9CF;
+}
+
+.invitation-actions .invitation-cancel:hover {
+    background: #EFE8DE;
+}
+
+.invitation-actions :focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+/* 배경 효과를 담는 영역 */
+.invitation-layout {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 75vh;
+}
+
+/* 두 개의 흐릿한 원 */
+.invitation-layout::before,
+.invitation-layout::after {
+    content: "";
+    position: absolute;
+    width: clamp(190px, 30vw, 390px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 왼쪽 위 브라운 원 */
+.invitation-layout::before {
+    top: -80px;
+    left: -70px;
+    background: rgba(166, 124, 91, 0.34);
+    animation: invitation-brown 8s ease-in-out -4s infinite alternate;
+}
+
+/* 오른쪽 아래 연두색 원 */
+.invitation-layout::after {
+    right: -70px;
+    bottom: -100px;
+    background: rgba(172, 202, 137, 0.44);
+    animation: invitation-green 8s ease-in-out -5s infinite alternate;
+}
+
+/* 입력 카드는 배경 위에 표시 */
+.invitation-layout .team-invitation {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes invitation-brown {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(160px, 130px) scale(1.15);
+    }
+}
+
+@keyframes invitation-green {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(-170px, -120px) scale(1.12);
+    }
+}
+
+

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Taskwaka Workspace</title>
+  
+  <!-- ==========================================================================
+       [CSS SECTION] Taskwaka 전역 테마 및 공통 레이아웃 스타일
+       - 웜 베이지 / 세이지 그린 / 올리브 브라운 톤앤매너
+       ========================================================================== -->
+  <style>
+    :root {
+      /* Base Natural Tone Palette */
+      --bg-body: #FCFBF8;
+      --bg-surface: #FFFFFF;
+      --bg-sidebar: #F7F3EE;
+      --bg-hover: #EFE8DE;
+      --bg-card-sub: #FCFAF6;
+      
+      /* Primary Sage Green Point Color */
+      --primary-green: #4F6242;
+      --primary-green-dark: #465B38;
+      --primary-green-light: #EEF4E6;
+      --primary-green-hover: #E3EDD8;
+      --primary-green-border: #DCE5D2;
+      --accent-green: #71865B;
+      
+      /* Neutral Brown / Text Colors */
+      --text-main: #594331;
+      --text-sub: #786B5E;
+      --text-muted: #A89B8C;
+      --border-main: #E8E2D9;
+      --border-sub: #DED5C9;
+      
+      /* Status Badge Colors */
+      --status-done-bg: #E8F0DE;
+      --status-done-text: #465B38;
+      --status-req-bg: #F3EBE2;
+      --status-req-text: #795C43;
+      --status-danger: #D9534F;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg-body);
+      color: var(--text-main);
+    }
+
+    /* 1. 상단 글로벌 헤더 (GNB) */
+    .site-header {
+      height: 64px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      color: var(--text-main);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary-green-light);
+      border: 1px solid var(--primary-green-border);
+      color: var(--primary-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .project-chip {
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--primary-green-light);
+      color: var(--primary-green);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .btn-nav-switch {
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-main);
+      background: var(--bg-sidebar);
+      color: var(--text-main);
+      font-size: 12.5px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-nav-switch:hover {
+      background: var(--bg-hover);
+    }
+
+    .profile-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--primary-green-border);
+      background: var(--primary-green-light);
+      color: var(--primary-green);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* 2. 메인 워크스페이스 프레임 */
+    .app-frame {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* 3. 좌측 사이드바 */
+    .sidebar {
+      width: 224px;
+      min-width: 224px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-main);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 14px;
+      overflow-y: auto;
+    }
+
+    .menu-group {
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      background: var(--bg-card-sub);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .menu-toggle {
+      width: 100%;
+      padding: 12px 14px;
+      border: none;
+      background: var(--primary-green-light);
+      color: var(--primary-green);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .submenu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      list-style: none;
+    }
+
+    .submenu a {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .submenu a:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .submenu a.active {
+      background: var(--primary-green-light);
+      color: var(--primary-green);
+      font-weight: 700;
+    }
+
+    /* 4. 우측 메인 영역 */
+    .main-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg-body);
+    }
+
+    .project-header {
+      padding: 20px 32px 0 32px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-main);
+      flex-shrink: 0;
+    }
+
+    .project-title-h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 5. 프로젝트 상단 탭 네비게이션 바 */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-sub);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--primary-green);
+      border-bottom-color: var(--primary-green);
+      font-weight: 700;
+    }
+
+    /* 6. 콘텐츠 영역 */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+      background: var(--bg-body);
+    }
+  </style>
+  <!-- ==========================================================================
+       [END OF CSS SECTION]
+       ========================================================================== -->
+</head>
+<body>
+
+  <!-- 상단 사이트 헤더 -->
+  <header class="site-header">
+    <div class="header-left">
+      <a href="/home" class="brand-logo">
+        <span class="brand-logo-badge">T</span>
+        <span>Taskwaka</span>
+      </a>
+      <span class="project-chip">Project Workspace</span>
+    </div>
+    <div class="header-right">
+      <a href="/admin" class="btn-nav-switch">⚙️ 어드민 콘솔</a>
+      <button class="profile-btn" title="내 프로필">혜림</button>
+    </div>
+  </header>
+
+  <div class="app-frame">
+    <!-- 좌측 사이드바 -->
+    <aside class="sidebar">
+      <div class="menu-group">
+        <div class="menu-toggle">
+          <span>참여 프로젝트</span>
+          <span style="font-size: 10px;">▲</span>
+        </div>
+        <ul class="submenu">
+          <li><a href="/project?tab=feed" class="active">🌿 Taskwaka 시작가이드</a></li>
+          <li><a href="#">📁 신규 프로젝트 TF</a></li>
+        </ul>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-toggle">
+          <span>모아보기</span>
+          <span style="font-size: 10px;">▼</span>
+        </div>
+        <ul class="submenu">
+          <li><a href="/project?tab=task">📋 전체 업무</a></li>
+          <li><a href="/project?tab=gantt">📉 간트차트</a></li>
+          <li><a href="/project?tab=calendar">📅 캘린더</a></li>
+          <li><a href="/project?tab=file">📁 파일함</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- 우측 메인 뷰포트 -->
+    <main class="main-viewport">
+      <div class="project-header">
+        <h2 class="project-title-h2">
+          <span>🌿</span>
+          <span th:text="${projectName}">Taskwaka 시작가이드</span>
+        </h2>
+        
+        <!-- 상단 탭 네비게이션 바 -->
+        <nav class="tab-bar">
+          <a th:href="@{/project(tab='feed')}" class="tab-btn" th:classappend="${activeTab == 'feed'} ? 'active'">피드</a>
+          <a th:href="@{/project(tab='task')}" class="tab-btn" th:classappend="${activeTab == 'task'} ? 'active'">업무</a>
+          <a th:href="@{/project(tab='gantt')}" class="tab-btn" th:classappend="${activeTab == 'gantt'} ? 'active'">간트차트</a>
+          <a th:href="@{/project(tab='calendar')}" class="tab-btn" th:classappend="${activeTab == 'calendar'} ? 'active'">캘린더</a>
+          <a th:href="@{/project(tab='file')}" class="tab-btn" th:classappend="${activeTab == 'file'} ? 'active'">파일</a>
+        </nav>
+      </div>
+
+      <!-- 동적 탭 본문 렌더링 영역 -->
+      <section class="content-area">
+        <div th:switch="${activeTab}">
+          <div th:case="'feed'"><div th:replace="~{project/fragments/feed :: content}"></div></div>
+          <div th:case="'task'"><div th:replace="~{project/fragments/task :: content}"></div></div>
+          <div th:case="'gantt'"><div th:replace="~{project/fragments/gantt :: content}"></div></div>
+          <div th:case="'calendar'"><div th:replace="~{project/fragments/calendar :: content}"></div></div>
+          <div th:case="'file'"><div th:replace="~{project/fragments/file :: content}"></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

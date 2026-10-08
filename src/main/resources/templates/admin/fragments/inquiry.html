@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <div class="panel-card">
+      <div class="panel-card-title">
+        <span>1:1 고객 문의 접수 및 답변 관리</span>
+        <select class="warm-select">
+          <option>전체 상태</option>
+          <option>답변 대기</option>
+          <option>답변 완료</option>
+        </select>
+      </div>
+
+      <table class="warm-table">
+        <thead>
+          <tr>
+            <th>문의 제목</th>
+            <th style="width:100px;">작성자</th>
+            <th style="width:110px;">등록일</th>
+            <th style="width:100px;">처리 상태</th>
+            <th style="width:110px;">답변일</th>
+            <th style="width:120px; text-align:right;">관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong>워크스페이스 대용량 첨부파일 업로드 용량 증설 요청</strong>
+              <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">팀 프로젝트 진행 중 파일 용량이 50MB로 제한되어 있어 증설을 요청드립니다.</div>
+            </td>
+            <td>박팀장</td>
+            <td>2026-10-01</td>
+            <td><span class="badge badge-inactive" style="background:#FEF3C7; color:#92400E;">답변 대기</span></td>
+            <td>-</td>
+            <td style="text-align:right;">
+              <button class="btn-sage" style="font-size:12px; padding:5px 10px;" onclick="prompt('답변 내용을 입력하세요:'); alert('답변이 등록되어 [답변 완료] 상태로 변경되었습니다.');">답변 등록</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>로그인 시 2단계 인증 이메일 지연 도착 이슈</strong>
+              <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">답변: SMTP 발송 릴레이 서버 튜닝 완료하여 정상 수신 확인되었습니다.</div>
+            </td>
+            <td>김철수</td>
+            <td>2026-09-29</td>
+            <td><span class="badge badge-active">답변 완료</span></td>
+            <td>2026-09-30</td>
+            <td style="text-align:right;">
+              <button class="btn-subtle" onclick="prompt('답변 내용을 수정하세요:', 'SMTP 발송 릴레이 서버 튜닝 완료하여 정상 수신 확인되었습니다.'); alert('수정되었습니다.');">답변 수정</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

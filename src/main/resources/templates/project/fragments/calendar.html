@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <style>
+      .cal-panel { background: #FFFFFF; border: 1px solid var(--border-main); border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03); }
+      .cal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+      .cal-title-h3 { font-size: 20px; font-weight: 700; color: var(--text-main); }
+      .cal-grid-box { border: 1px solid var(--border-main); border-radius: 10px; overflow: hidden; }
+      .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--bg-sidebar); border-bottom: 1px solid var(--border-main); text-align: center; padding: 10px 0; font-size: 13px; font-weight: 700; color: var(--text-sub); }
+      .cal-month-cells { display: grid; grid-template-columns: repeat(7, 1fr); min-height: 280px; }
+      .cal-cell-item { border-right: 1px solid var(--border-main); border-bottom: 1px solid var(--border-main); padding: 8px; min-height: 80px; font-size: 12px; }
+      .cal-cell-item:nth-child(7n) { border-right: none; }
+      .event-chip { margin-top: 4px; padding: 3px 6px; border-radius: 4px; background: var(--primary-green-light); color: var(--primary-green); font-size: 11px; font-weight: 700; }
+    </style>
+
+    <div class="cal-panel">
+      <div class="cal-top">
+        <h3 class="cal-title-h3">2026년 10월</h3>
+        <button class="btn-submit" style="padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer;">＋ 일정 추가</button>
+      </div>
+
+      <div class="cal-grid-box">
+        <div class="cal-weekdays">
+          <div style="color: var(--status-danger);">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div style="color: #6A8695;">토</div>
+        </div>
+        <div class="cal-month-cells">
+          <div class="cal-cell-item" style="color: var(--text-muted);">27</div>
+          <div class="cal-cell-item" style="color: var(--text-muted);">28</div>
+          <div class="cal-cell-item" style="color: var(--text-muted);">29</div>
+          <div class="cal-cell-item">30</div>
+          <div class="cal-cell-item" style="background: var(--bg-card-sub);">
+            <strong style="color: var(--primary-green);">1</strong>
+            <div class="event-chip">영상 시청 마감</div>
+          </div>
+          <div class="cal-cell-item">2</div>
+          <div class="cal-cell-item" style="color: #6A8695;">3</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

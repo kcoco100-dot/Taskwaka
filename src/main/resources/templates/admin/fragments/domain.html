@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <div class="panel-card">
+      <div class="panel-card-title">
+        <span>회사 이메일 도메인 접속 제한 관리</span>
+        <button class="btn-sage">＋ 새 도메인 등록</button>
+      </div>
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:16px; line-height:1.5;">
+        비활성 도메인의 이메일을 사용하는 회원은 신규 회원가입 및 로그인이 제한되며 기존 로그인 세션이 즉시 종료됩니다.
+      </p>
+
+      <table class="warm-table">
+        <thead>
+          <tr>
+            <th>도메인명</th>
+            <th>접속 제한 상태</th>
+            <th>등록일</th>
+            <th>상태 변경일</th>
+            <th>변경 사유</th>
+            <th style="text-align:right;">상태 제어</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>taskwaka.com</strong></td>
+            <td><span class="badge badge-active">활성 (접속 허용)</span></td>
+            <td>2026-01-01</td>
+            <td>2026-01-01</td>
+            <td>사내 기본 프로덕션 도메인</td>
+            <td style="text-align:right;">
+              <button class="btn-danger" onclick="if(confirm('도메인을 비활성화하시겠습니까? 해당 도메인 계정의 신규 가입/로그인이 즉시 제한되고 세션이 종료됩니다.')) alert('비활성화 처리되었습니다.');">비활성화</button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>temp-partner.org</strong></td>
+            <td><span class="badge badge-inactive">비활성 (접속 제한)</span></td>
+            <td>2026-04-15</td>
+            <td>2026-09-30</td>
+            <td>파트너십 제휴 기간 종료</td>
+            <td style="text-align:right;">
+              <button class="btn-subtle" onclick="alert('도메인이 다시 활성화되었습니다.');">활성화 전환</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

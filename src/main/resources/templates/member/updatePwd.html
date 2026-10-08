@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+  	  
+<th:block layout:fragment="content">
+	<div class="section bg-light">
+		<div class="container">
+
+			<div class="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
+				<div class="col-md-5">
+					<div class="bg-white box-shadow my-5 p-5">
+						<h3 class="text-center pt-3">패스워드 변경</h3>
+	                    
+						<form name="pwdForm" action="" method="post" class="row g-3 mb-2">
+							<div class="col-12">
+								<p class="form-control-plaintext text-center">
+									안전한 사용을 위하여 기존 패스워드를 변경하세요.
+								</p>
+							</div>
+							<div class="col-12">
+								<input type="text" name="login_id" class="form-control form-control-lg" placeholder="아이디" 
+									th:value="${#authentication.principal.username}" readonly>
+							</div>
+							<div class="col-12">
+								<input type="password" name="password" class="form-control form-control-lg" 
+									autocomplete="off" placeholder="패스워드">
+							</div>
+							<div class="col-12">
+								<input type="password" name="password2" class="form-control form-control-lg" 
+									autocomplete="off" placeholder="패스워드 확인">
+							</div>
+							<div class="col-12">
+								<small class="form-control-plaintext">※ 5~10자 이내의 하나 이상의 숫자나 특수문자가 포함되어야 합니다.</small>
+							</div>							
+							<div class="col-12 text-center">
+								<button type="button" class="btn-accent btn-lg" onclick="sendOk()">변경완료 <i class="bi bi-check2"></i></button>
+								<button type="button" class="btn-default btn-lg" th:onclick="|location.href='@{/}'|">다음에 변경 <i class="bi bi-x"></i></button>
+							</div>
+						</form>
+	                    
+						<div>
+							<p class="form-control-plaintext text-center text-danger" th:utext="${message}">메시지 입니다.</p>
+						</div>
+
+					</div>
+	
+				</div>
+			</div>
+
+		</div>
+	</div>
+</th:block>
+ 
+<th:block layout:fragment="script">
+	<script type="text/javascript">
+	function sendOk() {
+		const f = document.pwdForm;
+
+		if(! f.password.value.trim()) {
+			alert('패스워드를 입력하세요. ');
+			f.password.focus();
+			return;
+		}
+		
+		if(!/^(?=.*[a-z])(?=.*[!@#$%^*+=-]|.*[0-9]).{5,10}$/i.test(f.password.value)) { 
+			alert('패스워드는 5~10자이며 하나 이상의 숫자나 특수문자가 포함되어야 합니다.');
+			f.password.focus();
+			return;
+		}
+
+		if(f.password.value !== f.password2.value) {
+			alert('패스워드가 일치하지 않습니다.');
+			f.password.focus();
+			return;
+		}		
+
+		f.action = '[(@{/})]';
+		f.submit();
+	}
+	</script>
+</th:block>
+
+</html>

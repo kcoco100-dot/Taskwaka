@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "file.upload-root",
+      "type": "java.lang.String",
+      "description": "파일 업로드 디렉토리 경로"
+    }
+  ]
+}

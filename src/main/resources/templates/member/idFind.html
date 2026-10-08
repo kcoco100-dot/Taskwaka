@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Taskwaka - 아이디 / 비밀번호 찾기</title>
+
+  <!-- ==========================================================================
+       [CSS SECTION] 아이디 / 비밀번호 찾기 스타일
+       - 웜 베이지 / 세이지 그린 톤앤매너
+       ========================================================================== -->
+  <style>
+    :root {
+      --bg-body: #FCFBF8;
+      --bg-surface: #FFFFFF;
+      --primary-green: #4F6242;
+      --primary-green-dark: #465B38;
+      --primary-green-light: #EEF4E6;
+      --accent-green: #71865B;
+      --text-main: #594331;
+      --text-sub: #786B5E;
+      --border-main: #E8E2D9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: var(--bg-body);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .find-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: 0 8px 24px rgba(89, 67, 49, 0.05);
+    }
+
+    .tab-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-main);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-sub);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .tab-btn.active {
+      color: var(--primary-green);
+      border-bottom-color: var(--primary-green);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .warm-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border-main);
+      border-radius: 10px;
+      font-size: 13.5px;
+      outline: none;
+    }
+
+    .warm-input:focus {
+      border-color: var(--accent-green);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: var(--primary-green);
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+  </style>
+  <!-- ==========================================================================
+       [END OF CSS SECTION]
+       ========================================================================== -->
+</head>
+<body>
+
+  <div class="find-card">
+    <div class="tab-header">
+      <a th:href="@{/find-account(type='id')}" class="tab-btn" th:classappend="${findType == 'id'} ? 'active'">아이디 찾기</a>
+    </div>
+
+    <!-- 1. 아이디 찾기 (이름, 이메일 입력 -> 이메일 발송) -->
+    <div th:if="${findType == 'id'}">
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:18px;">
+        가입 시 등록한 이름과 이메일을 입력하시면 아이디 정보를 이메일로 전송해 드립니다.
+      </p>
+      <form onsubmit="event.preventDefault(); alert('계정 정보 일치 여부와 관계없이 입력된 이메일로 안내 메일이 발송되었습니다.'); location.href='/login';">
+        <div class="form-group">
+          <label class="form-label">이름</label>
+          <input type="text" class="warm-input" placeholder="이름을 입력하세요" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">가입 이메일</label>
+          <input type="email" class="warm-input" placeholder="name@company.com" required>
+        </div>
+        <button type="submit" class="btn-submit">아이디 찾기 요청</button>
+      </form>
+    </div>
+
+    <!-- 2. 비밀번호 재설정 (아이디, 이메일 입력 -> 랜덤 임시비밀번호 발송) -->
+    <div th:if="${findType == 'pw'}">
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:18px;">
+        등록된 아이디와 이메일을 입력하시면 랜덤한 새 비밀번호를 이메일로 전송해 드립니다.
+      </p>
+      <form onsubmit="event.preventDefault(); alert('계정 정보 일치 여부와 관계없이 등록된 이메일로 임시 비밀번호가 전송되었습니다.'); location.href='/login';">
+        <div class="form-group">
+          <label class="form-label">아이디</label>
+          <input type="text" class="warm-input" placeholder="아이디를 입력하세요" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">가입 이메일</label>
+          <input type="email" class="warm-input" placeholder="name@company.com" required>
+        </div>
+        <button type="submit" class="btn-submit">임시 비밀번호 발급</button>
+      </form>
+    </div>
+
+    <div style="text-align: center; margin-top: 18px; font-size: 13px;">
+      <a href="/login" style="color:var(--text-sub); text-decoration:none;">← 로그인으로 돌아가기</a>
+    </div>
+  </div>
+
+</body>
+</html>

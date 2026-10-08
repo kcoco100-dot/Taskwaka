@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.WorkspaceMapper">
+
+	<select id="findAccessibleWorkspace"
+        resultType="com.tk.app.admin.domain.dto.WorkspaceDto">
+
+        SELECT
+            w.workspace_id AS "workspaceId",
+            wm.member_id AS "memberId",
+            w.subject AS "subject",
+            w.status AS "status"
+
+        FROM workspace_domains wd
+
+        JOIN workspaces w
+            ON wd.workspace_id = w.workspace_id
+
+        JOIN workspace_members wm
+            ON w.workspace_id = wm.workspace_id
+
+        WHERE wd.domain_key = #{domain}
+          AND wd.active = 'Y'
+          AND wm.member_id = #{memberId}
+          AND wm.status = 0
+
+    </select>
+</mapper>

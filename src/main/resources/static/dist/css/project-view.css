@@ -1,0 +1,192 @@
+@charset "UTF-8";
+
+/* 페이지와 중앙 카드 */
+.project-view-page {
+    padding: 40px 24px;
+    background: #FCFBF8;
+}
+
+.project-view-card {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 36px;
+    box-sizing: border-box;
+    border: 1px solid #E8E2D9;
+    border-radius: 20px;
+    background: #FFFFFF;
+}
+
+/* 제목 */
+.project-view-heading {
+    margin-bottom: 28px;
+}
+
+.project-view-heading h1 {
+    margin: 0;
+    color: #594331;
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.project-view-heading p {
+    margin: 10px 0 0;
+    color: #786B5E;
+    font-size: 14px;
+}
+
+/* 입력 영역 */
+.project-view-form,
+.project-view-form .project-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-view-form {
+    gap: 20px;
+}
+
+.project-view-form .project-field {
+    min-width: 0;
+}
+
+.project-view-form label {
+    color: #594331;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.project-view-form input,
+.project-view-form textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 13px 16px;
+    box-sizing: border-box;
+    border: 1px solid #DED5C9;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+}
+
+.project-view-form textarea {
+    resize: vertical;
+}
+
+.project-view-form input:focus,
+.project-view-form textarea:focus {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+
+/* 시작일과 종료일 나란히 */
+.project-view-form .project-date-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+/* 하단 버튼 */
+.project-view-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.project-view-actions .project-update,
+.project-view-actions .project-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border: 1px solid #E8E2D9;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.project-view-actions .project-update {
+    border-color: #D5E2C7;
+    background: #E8F0DE;
+    color: #465B38;
+}
+
+.project-view-actions .project-delete {
+    background: #F7F3EE;
+    color: #786B5E;
+}
+
+.project-view-actions :focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+
+/* 배경 효과를 담는 영역 */
+.project-view-page {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 75vh;
+}
+
+/* 두 개의 흐릿한 원 */
+.project-view-page::before,
+.project-view-page::after {
+    content: "";
+    position: absolute;
+    width: clamp(190px, 30vw, 390px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 왼쪽 위 브라운 원 */
+.project-view-page::before {
+    top: -80px;
+    left: -70px;
+    background: rgba(166, 124, 91, 0.34);
+    animation: project-view-brown 8s ease-in-out -4s infinite alternate;
+}
+
+/* 오른쪽 아래 연두색 원 */
+.project-view-page::after {
+    right: -70px;
+    bottom: -100px;
+    background: rgba(172, 202, 137, 0.44);
+    animation: project-view-green 8s ease-in-out -5s infinite alternate;
+}
+
+/* 입력 카드는 배경 위에 표시 */
+.project-view-page .project-view-card {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes project-view-brown {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(160px, 130px) scale(1.15);
+    }
+}
+
+@keyframes project-view-green {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(-170px, -120px) scale(1.12);
+    }
+}
+
+
+
+

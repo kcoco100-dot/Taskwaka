@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="confirm">
+	<style type="text/css">
+	/* -- confirm -- */
+	
+	/* 전체 화면을 덮는 어두운 배경 */
+	.confirm-overlay {
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  height: 100%;
+	  background-color: rgba(0, 0, 0, 0.5); /* 반투명 검정 */
+	  display: flex;
+	  justify-content: center;
+	  align-items: center;
+	  z-index: 98880;
+	
+	  /* 애니메이션을 위한 기본 상태 */
+	  opacity: 1;
+	  visibility: visible;
+	  /* 부드러운 전환 효과 설정 */
+	  transition: opacity 0.3s ease, visibility 0.3s ease;
+	}
+	
+	/* 숨김 */
+	.confirm-overlay.hidden {
+	  visibility: hidden;
+	  opacity: 0;
+	  /* 숨겨진 상태에서 클릭 이벤트가 발생하지 않도록 막음 */
+	  pointer-events: none;
+	}
+	
+	/* 대화상자 박스 */
+	.confirm-box {
+	  background: white;
+	  padding: 25px 30px;
+	  border-radius: 12px;
+	  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* 그림자 더 부드럽게 */
+	  width: 350px;
+	  text-align: center;
+	
+	  /* 박스 애니메이션 */
+	  transform: scale(1);
+	  /* cubic-bezier를 사용하여 약간의 텐션(팅겨니는 느낌) 추가 */
+	  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+	
+	/* 부모가 hidden일 때 박스 상태(약간 작게 시작) */
+	.confirm-overlay.hidden .confirm-box {
+	  transform: scale(0.9);
+	}
+	
+	/* 제목 및 아이콘 영역 스타일링 */
+	.confirm-title-area {
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    gap: 10px;
+	    margin-bottom: 15px;
+	    color: #333;
+	}
+	
+	.confirm-title {
+	    margin: 0;
+	    font-size: 1.3rem;
+	    font-weight: bold;
+	}
+	
+	/* 아이콘 색상 및 크기 */
+	.confirm-icon {
+	    font-size: 1.5rem;
+	    color: #ffc107;
+	}
+	
+	.confirm-message {
+	    color: #555;
+	    line-height: 1.5;
+	    word-break: keep-all;
+	}
+	
+	/* 버튼 영역 */
+	.confirm-buttons {
+	  margin-top: 25px;
+	  display: flex;
+	  justify-content: center;
+	  gap: 12px;
+	}
+	
+	/* -- Toast Notification -- */
+	.toast {
+	  position: fixed;
+	  bottom: 30px;
+	  left: 50%;
+	  transform: translate(-50%, 20px) scale(0.9);
+	  background-color: rgba(51, 51, 51, 0.2); 
+	  color: rgba(255, 255, 255, 0.7);
+	  padding: 14px 30px;
+	  border-radius: 30px;
+	  font-size: 0.95rem;
+	  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+	  z-index: 99990;
+	  
+	/* 텍스트 중앙 정렬 설정 */
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  text-align: center;
+	  
+	  /* 긴 텍스트 대응 */
+	  max-width: 90vw; /* 화면 꽉 차지 않게 */
+	  white-space: pre-line; /* 줄바꿈 문자 인식 */
+	  word-break: keep-all; /* 단어 단위 줄바꿈 */
+	
+	  /* 숨김 상태 */
+	  opacity: 0;
+	  visibility: hidden;
+	  
+	  /* 애니메이션 설정 (나타날 때와 사라질 때 모두 적용) */
+	  transition: 
+	    opacity 0.4s ease, 
+	    transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+	    visibility 0.4s,
+	    background-color 0.4s ease, /* 배경색 전환 */
+	    color 0.4s ease, /* 글자색 전환 */
+	    box-shadow 0.4s ease; 
+	}
+	
+	/* 토스트 표시 상태 */
+	.toast.show {
+	  opacity: 1;
+	  visibility: visible;
+	  transform: translate(-50%, 0) scale(1);
+	  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+	}
+	
+	/* 상태별 색상 */
+	.toast.success {
+	  background-color: rgba(25, 135, 84, 0.25);
+	  color: rgba(255, 255, 255, 0.8);
+	}
+	
+	.toast.error {
+	  background-color: rgba(220, 53, 69, 0.25);
+	  color: rgba(255, 255, 255, 0.8);
+	}
+	
+	.toast.show.success {
+	  background-color: #198754;
+	  color: #fff;
+	}
+	.toast.show.error {
+	  background-color: #dc3545;
+	  color: #fff;
+	}
+	</style>
+	
+	<div id="custom-confirm" class="confirm-overlay hidden">
+		<div class="confirm-box">
+			<div class="confirm-title-area">
+				<i class="bi bi-exclamation-triangle-fill confirm-icon"></i>
+				<h3 class="confirm-title">알림</h3>
+			</div>
+		
+			<div class="confirm-message" id="confirm-msg-content">내용이 들어갑니다.</div>
+			
+			<div class="confirm-buttons">
+				<button id="btn-confirm-cancel" class="btn-light btn-md">취소</button>
+				<button id="btn-confirm-ok" class="btn-accent btn-md">확인</button>
+			</div>
+		</div>
+	</div>
+	<div id="toast" class="toast"></div>
+	
+	<script type="text/javascript">
+	function showConfirm(message) {
+		return new Promise((resolve) => {
+			const modalEl = document.getElementById('custom-confirm');
+			const msgElementEl = document.getElementById('confirm-msg-content');
+			const btnOk = document.getElementById('btn-confirm-ok');
+			const btnCancel = document.getElementById('btn-confirm-cancel');
+	
+			// 메시지 설정
+			// msgElementEl.textContent = message;
+			msgElementEl.innerHTML = message;
+			modalEl.classList.remove('hidden');
+	
+			// 확인 버튼에 포커스
+			btnOk.focus();
+			
+			const cleanup = () => {
+				modalEl.classList.add('hidden');
+				btnOk.removeEventListener('click', handleOk);
+				btnCancel.removeEventListener('click', handleCancel);
+				window.removeEventListener('keydown', handleKeydown);
+				modalEl.removeEventListener('click', handleBackdropClick);
+			};
+	        
+			// 확인 버튼 클릭 시
+			const handleOk = () => {
+				cleanup();
+				resolve(true); // Promise 해결: true 반환
+	        };
+	
+			// 취소 버튼 클릭 시
+			const handleCancel = () => {
+				cleanup();
+				resolve(false); // Promise 해결: false 반환
+			};
+	
+			// 키보드 지원(Enter, Esc)
+			const handleKeydown = (e) => {
+				if (e.key === 'Escape') handleCancel();
+				if (e.key === 'Enter') handleOk();
+			};
+	
+	        // 배경 클릭 시 취소 처리
+	        const handleBackdropClick = (e) => {
+	            // if (e.target === modalEl) handleCancel();
+	        };		
+			
+			// 이벤트 리스너 등록
+			btnOk.addEventListener('click', handleOk);
+			btnCancel.addEventListener('click', handleCancel);
+			window.addEventListener('keydown', handleKeydown);
+			modalEl.addEventListener('click', handleBackdropClick);
+		});
+	}
+	
+	var toastTimeout;
+	function showToast(message, type = "success", duration = 2500) {
+		const toast = document.getElementById("toast");
+	
+		if (toastTimeout) {
+			clearTimeout(toastTimeout);
+			toast.classList.remove("show");
+			setTimeout(() => {
+				triggerToast(toast, message, type, duration);
+			}, 50);
+		} else {
+			triggerToast(toast, message, type, duration);
+		}
+	}
+	
+	function triggerToast(el, message, type, duration) {
+		el.textContent = message;
+	    
+	    // 기본 toast 클래스와 타입 클래스만 적용
+		el.className = `toast ${type}`;
+	    
+	    // 브라우저가 스타일 변경을 인지하도록 강제 리플로우
+		void el.offsetWidth; 
+	    
+		// show 클래스 추가(진한 색상으로 트랜지션 시작)
+		el.classList.add("show");
+	
+		toastTimeout = setTimeout(() => {
+			// show 클래스 제거(연한 색상으로 트랜지션하며 사라짐)
+			el.classList.remove("show");
+			toastTimeout = null;
+		}, duration);
+	}
+	</script>
+</th:block>
+	
+</html>

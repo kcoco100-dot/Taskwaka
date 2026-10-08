@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <style>
+      .file-panel { background: #FFFFFF; border: 1px solid var(--border-main); border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03); }
+      .file-search-input { padding: 8px 14px; border: 1px solid var(--border-main); border-radius: 8px; font-size: 13px; width: 240px; outline: none; }
+      .btn-upload { padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer; }
+    </style>
+
+    <div class="file-panel">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+        <input type="text" class="file-search-input" placeholder="Drive에서 검색...">
+        <button class="btn-upload">📤 파일 업로드</button>
+      </div>
+
+      <table class="warm-table">
+        <thead>
+          <tr>
+            <th>파일명</th>
+            <th style="width: 140px;">소유자</th>
+            <th style="width: 160px;">등록일</th>
+            <th style="width: 100px;">크기</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>🖼️ taskwaka_guide.png</strong></td>
+            <td>Taskwaka 운영자</td>
+            <td>2026-09-30 17:30</td>
+            <td>699 KB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

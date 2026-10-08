@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/approval.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout approval-layout">
+        <nav th:replace="~{layout/sidebar::manageSidebar('approval')}"></nav>
+
+        <section class="section approval-page" aria-labelledby="approval-heading">
+            <div class="page-heading">
+                <h1 id="approval-heading" class="page-title">보고서 공지</h1>
+                <p class="page-description">프로젝트·업무·일일 보고서를 한곳에서 확인하세요.</p>
+            </div>
+
+            <div class="approval-panel">
+                <form id="approval-search-form" class="approval-filters"
+                      method="get" th:action="@{/manage/approval}">
+                    <div class="approval-field">
+                        <label for="approval-type">보고서 유형</label>
+                        <select id="approval-type" name="type">
+                            <option value="">전체 유형</option>
+                            <option value="project">프로젝트 보고서</option>
+                            <option value="team">업무 보고서</option>
+                            <option value="daily">일일 보고서</option>
+                        </select>
+                    </div>
+                    <div class="approval-field">
+                        <label for="approval-status">검토 상태</label>
+                        <select id="approval-status" name="status">
+                            <option value="">전체 상태</option>
+                            <option value="pending">검토 대기</option>
+                            <option value="reviewed">검토 완료</option>
+                            <option value="rejected">반려</option>
+                        </select>
+                    </div>
+                    <div class="approval-field approval-keyword-field">
+                        <label for="approval-keyword">검색어</label>
+                        <input id="approval-keyword" name="keyword" type="search"
+                               placeholder="제목, 프로젝트, 작성자 검색" maxlength="100">
+                    </div>
+                    <div class="approval-actions">
+                        <button type="submit" class="approval-button approval-button-primary">조회</button>
+                        <button type="button" id="approval-reset" class="approval-button">초기화</button>
+                    </div>
+                </form>
+
+                <div class="approval-list-heading">
+                    <h2>보고서 목록</h2>
+                    <p class="approval-count" role="status" aria-live="polite">
+                        총 <strong id="approval-count">6</strong>건
+                    </p>
+                </div>
+
+                <div class="approval-table-wrap" tabindex="0" role="region" aria-label="보고서 목록 표">
+                    <table class="approval-table">
+                        <caption class="approval-sr-only">보고서 유형, 제목, 프로젝트, 작성자, 보고일과 검토 상태</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="approval-number">번호</th>
+                                <th scope="col">유형</th>
+                                <th scope="col" class="approval-title-column">보고서 제목</th>
+                                <th scope="col">프로젝트</th>
+                                <th scope="col">작성자</th>
+                                <th scope="col">보고일</th>
+                                <th scope="col">검토 상태</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr class="approval-report-row" data-type="project" data-status="pending">
+                                <td class="approval-number">6</td>
+                                <td><span class="approval-kind">프로젝트</span></td>
+                                <td><span class="approval-title">프로젝트 킥오프 및 목표 정리</span></td>
+                                <td class="approval-project">TASKWAKA 프로젝트</td>
+                                <td class="approval-author">이팀장</td>
+                                <td><time datetime="2026-10-07">2026.10.07</time></td>
+                                <td><span class="approval-status approval-status-pending">검토 대기</span></td>
+                            </tr>
+                            <tr class="approval-report-row" data-type="team" data-status="reviewed">
+                                <td class="approval-number">5</td>
+                                <td><span class="approval-kind">업무</span></td>
+                                <td><span class="approval-title">로그인 기능 개발 진행 보고</span></td>
+                                <td class="approval-project">회원·인증</td>
+                                <td class="approval-author">김민수</td>
+                                <td><time datetime="2026-10-07">2026.10.07</time></td>
+                                <td><span class="approval-status approval-status-reviewed">검토 완료</span></td>
+                            </tr>
+                            <tr class="approval-report-row" data-type="daily" data-status="pending">
+                                <td class="approval-number">4</td>
+                                <td><span class="approval-kind">일일</span></td>
+                                <td><span class="approval-title">10월 7일 일일 업무 보고</span></td>
+                                <td class="approval-project">워크 관리</td>
+                                <td class="approval-author">박지은</td>
+                                <td><time datetime="2026-10-07">2026.10.07</time></td>
+                                <td><span class="approval-status approval-status-pending">검토 대기</span></td>
+                            </tr>
+                            <tr class="approval-report-row" data-type="project" data-status="rejected">
+                                <td class="approval-number">3</td>
+                                <td><span class="approval-kind">프로젝트</span></td>
+                                <td><span class="approval-title">프로젝트 일정 변경 검토 보고</span></td>
+                                <td class="approval-project">TASKWAKA 프로젝트</td>
+                                <td class="approval-author">이팀장</td>
+                                <td><time datetime="2026-10-06">2026.10.06</time></td>
+                                <td><span class="approval-status approval-status-rejected">반려</span></td>
+                            </tr>
+                            <tr class="approval-report-row" data-type="team" data-status="reviewed">
+                                <td class="approval-number">2</td>
+                                <td><span class="approval-kind">업무</span></td>
+                                <td><span class="approval-title">워크 생성 및 도메인 연결 보고</span></td>
+                                <td class="approval-project">워크 관리</td>
+                                <td class="approval-author">최서연</td>
+                                <td><time datetime="2026-10-06">2026.10.06</time></td>
+                                <td><span class="approval-status approval-status-reviewed">검토 완료</span></td>
+                            </tr>
+                            <tr class="approval-report-row" data-type="daily" data-status="pending">
+                                <td class="approval-number">1</td>
+                                <td><span class="approval-kind">일일</span></td>
+                                <td><span class="approval-title">보고서 목록 화면 작업 보고</span></td>
+                                <td class="approval-project">보고서 관리</td>
+                                <td class="approval-author">정유진</td>
+                                <td><time datetime="2026-10-06">2026.10.06</time></td>
+                                <td><span class="approval-status approval-status-pending">검토 대기</span></td>
+                            </tr>
+                            <tr id="approval-empty" hidden>
+                                <td colspan="7" class="approval-empty">검색 조건에 맞는 보고서가 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="approval-list-footer">
+                    <p><span id="approval-range">1–6</span> / <span id="approval-total">6</span>건</p>
+                    <nav class="approval-pagination" aria-label="보고서 목록 페이지">
+                        <button type="button" class="approval-page-button" disabled>이전</button>
+                        <span class="approval-current-page" aria-current="page">1</span>
+                        <button type="button" class="approval-page-button" disabled>다음</button>
+                    </nav>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+</html>

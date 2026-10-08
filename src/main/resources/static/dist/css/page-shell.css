@@ -1,0 +1,82 @@
+@charset "UTF-8";
+
+/* 사이드바 옆 제목과 본문 배치 */
+.home-layout > .shell-section {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.shell-section .page-heading {
+    flex-shrink: 0;
+    margin-bottom: 24px;
+}
+
+/* 공통 main.css의 중앙 제목 배너 스타일이 새 화면에 섞이지 않도록 조정 */
+.shell-section .page-title {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+}
+
+/* 남은 공간을 채우는 내용 자리 */
+.shell-section .shell-content {
+    flex: 1 0 200px;
+    min-width: 0;
+    padding: 24px;
+    box-sizing: border-box;
+    border: 1px solid #E8E2D9;
+    border-radius: 14px;
+    background: #FFFFFF;
+    color: #594331;
+    overflow-wrap: anywhere;
+}
+
+/* UI 확인용 화면 이동 링크와 버튼 */
+.shell-section .shell-actions {
+    display: flex;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.shell-section .shell-action {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 20px;
+    border: 1px solid #E8E2D9;
+    border-radius: 10px;
+    background: #F7F3EE;
+    color: #594331;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.shell-section .shell-action-primary {
+    border-color: #D5E2C7;
+    background: #EEF4E6;
+    color: #4F6242;
+}
+
+.shell-section .shell-action:hover {
+    background: #EFE8DE;
+}
+
+.shell-section .shell-action-primary:hover {
+    background: #E3EDD8;
+}
+
+.shell-section .shell-action:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}

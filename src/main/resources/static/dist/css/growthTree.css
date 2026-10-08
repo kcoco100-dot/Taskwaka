@@ -1,0 +1,10 @@
+﻿.growth-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.tree-preview {
+    min-height: 360px;
+    margin: 24px 0;
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+	 <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+	 <link rel="stylesheet" th:href="@{/dist/css/gantt.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="home-layout">
+		<nav id="sidemenu" class="sidemenu">
+			<ul class="project-menu-group">
+				<li><a th:href="@{/home}">캘린더</a></li>
+				<li><a th:href="@{/dashboard}">대시보드</a></li>
+				<li><a th:href="@{/gantt}" class="active">간트차트</a></li>
+			</ul>
+			<ul class="project-row-menu-group">
+				<li><a th:href="@{/documentBox}">문서함</a></li>
+				<li><a th:href="@{/mail}">메일</a></li>
+				<li><a th:href="@{/main}">팀 성장나무</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+				<li><a th:href="@{/main}">테스트</a></li>
+			</ul>
+		</nav>
+			
+		<div class="section">
+			<div class="page-heading">
+				<h1 class="page-title">간트차트</h1>
+				<p class="page-description">
+					사용하세여
+				</p>
+			</div>
+			
+			<div class="page-content gantt-content">
+				<div class="gantt-toolbar">
+					<h2 class="gantt-title">프로젝트 일정</h2>
+					<span class="gantt-view-label">주간 보기</span>
+				</div>
+				
+				<div class="gantt-placeholder">
+					차트 보이는곳
+				</div>
+			</div>
+		
+		</div>
+	</div>
+	
+</th:block>
+ 
+<th:block layout:fragment="script">
+</th:block> 
+
+</html>
