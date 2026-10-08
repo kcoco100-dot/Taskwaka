@@ -12,10 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping(value = "/member/*")
+@RequestMapping("/")
 public class MemberController {
 	
-	@GetMapping({"login"})
+
+   @GetMapping
+   public String index() {
+       return "redirect:/member/login";
+   }
+
+   @GetMapping({"member/login"})
 	public String handleHome(@RequestParam(name = "error", required = false) String error,
 			Model model) {
 		
@@ -29,19 +35,19 @@ public class MemberController {
 	  /**
 	  * 3. 회원가입 화면
 	   */
-	  @GetMapping("/register")
+	  @GetMapping("member/register")
 	  public String registerForm() {
 	      return "member/register";
 	  }
 
 	
 	
-	@GetMapping("updatePwd")
+	@GetMapping("member/updatePwd")
 	public String updatePwdForm() throws Exception{
 		return "member/updatePwd";
 	}
 
-	@GetMapping("expired")
+	@GetMapping("member/expired")
 	public String expired() throws Exception {
 		// 세션이 익스파이어드(만료) 된 경우
 		return "member/expired";
