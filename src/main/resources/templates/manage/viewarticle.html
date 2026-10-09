@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!-- xmlns 속성을 통해 Thymeleaf 및 Layout Dialect 네임스페이스를 선언합니다. -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<!-- CSS 영역: 기존 리스트 페이지와 동일한 베이스를 유지하여 전체적인 통일감을 줍니다. -->
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
+    <!-- 폼 전용 CSS가 없다면 아래의 인라인 스타일을 참고하여 css 파일에 추가해 주세요. -->
+</th:block>
+
+<!-- 본문 콘텐츠 영역 -->
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout project-create-layout">
+        
+        <!-- 좌측 사이드바: 'projectCreate' 상태를 전달하여 해당 메뉴에 하이라이트 처리를 합니다. -->
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('projectCreate')}"></nav>
+        
+        <section class="section project-create-page" aria-labelledby="project-create-heading">
+            
+            <!-- 1. 페이지 헤더 영역 (이미지의 상단 타이틀과 동일한 레이아웃) -->
+            <div class="page-heading">
+                <div>
+                    <h1 id="project-create-heading" class="page-title">프로젝트 등록</h1>
+                    <p class="page-description">새로운 프로젝트의 기본 정보 및 일정을 등록하세요.</p>
+                </div>
+                <!-- 기존 '+ 프로젝트 등록' 버튼 위치에 '목록으로' 버튼을 배치하여 UX를 개선합니다. -->
+                <a class="project-button" th:href="@{/manage/view}" style="background-color: #fff; border: 1px solid #ddd;">목록으로</a>
+            </div>
+
+            <!-- 2. 입력 폼 패널 영역 (이미지의 흰색 배경 카드 UI를 그대로 차용) -->
+            <!-- project-list-panel 클래스를 재사용하여 흰색 배경과 테두리, 그림자 효과를 동일하게 받습니다. -->
+            <div class="project-list-panel" style="padding: 40px; margin-top: 20px;">
+                
+                <div class="project-list-heading" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <h2>기본 정보 입력</h2>
+                </div>
+
+                <!-- 프로젝트 등록을 위한 form 태그 (POST 방식) -->
+                <form id="project-create-form" action="/manage/create" method="post" 
+                      style="display: flex; flex-direction: column; gap: 20px;">
+                    
+                    <!-- 폼 그룹 1: 프로젝트명 -->
+                    <div style="display: flex; align-items: center;">
+                        <label for="projectName" style="width: 150px; font-weight: bold;">프로젝트명 <span style="color: red;">*</span></label>
+                        <!-- input 디자인은 기존 검색창(project-keyword)에 적용된 스타일을 따라가도록 클래스 부여 -->
+                        <input id="projectName" name="projectName" type="text" required 
+                               style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+                               placeholder="예) TASKWAKA 협업 플랫폼">
+                    </div>
+
+                    <!-- 폼 그룹 2: 프로젝트 코드 -->
+                    <div style="display: flex; align-items: center;">
+                        <label for="projectCode" style="width: 150px; font-weight: bold;">프로젝트 코드 <span style="color: red;">*</span></label>
+                        <input id="projectCode" name="projectCode" type="text" required 
+                               style="width: 300px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+                               placeholder="예) PRJ-007">
+                    </div>
+
+                    <!-- 폼 그룹 3: 담당 PM & 참여 인원 (한 줄에 나란히 배치) -->
+                    <div style="display: flex; gap: 30px;">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <label for="pmName" style="width: 150px; font-weight: bold;">담당 PM</label>
+                            <input id="pmName" name="pmName" type="text" 
+                                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+                                   placeholder="PM 이름 입력">
+                        </div>
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <label for="headcount" style="width: 100px; font-weight: bold;">참여 인원</label>
+                            <input id="headcount" name="headcount" type="number" min="1" 
+                                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+                                   placeholder="숫자만 입력 (예: 8)">
+                        </div>
+                    </div>
+
+                    <!-- 폼 그룹 4: 프로젝트 기간 -->
+                    <div style="display: flex; align-items: center;">
+                        <label for="startDate" style="width: 150px; font-weight: bold;">프로젝트 기간</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input id="startDate" name="startDate" type="date" required 
+                                   style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                            <span>~</span>
+                            <input id="endDate" name="endDate" type="date" required 
+                                   style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        </div>
+                    </div>
+
+                    <!-- 폼 그룹 5: 진행 상태 -->
+                    <div style="display: flex; align-items: center;">
+                        <label for="status" style="width: 150px; font-weight: bold;">진행 상태</label>
+                        <!-- 기존 검색 조건의 select 디자인과 동일하게 적용 -->
+                        <select id="status" name="status" 
+                                style="width: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="planned" selected>예정</option>
+                            <option value="progress">진행 중</option>
+                            <option value="paused">보류</option>
+                            <option value="completed">완료</option>
+                        </select>
+                    </div>
+
+                    <!-- 하단 버튼 영역 (이미지의 우측 정렬된 초록/흰색 버튼 스타일 적용) -->
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                        <!-- project-button: 기본적인 회색/흰색 버튼 클래스 -->
+                        <button type="button" class="project-button" onclick="history.back()">취소</button>
+                        <!-- project-button-primary: 이미지의 '조회' 버튼과 같은 녹색 메인 버튼 클래스 -->
+                        <button type="submit" class="project-button project-button-primary">저장하기</button>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+    </div>
+</th:block>
+</html>

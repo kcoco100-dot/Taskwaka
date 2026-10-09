@@ -17,7 +17,7 @@
                     <h1 id="project-list-heading" class="page-title">프로젝트 조회</h1>
                     <p class="page-description">프로젝트 일정과 진행 현황을 확인하고 관리하세요.</p>
                 </div>
-                <a class="project-button project-button-primary" th:href="@{/projectCreate}">+ 프로젝트 등록</a>
+                <a class="project-button project-button-primary" th:href="@{/{domainKey}/manage/article(domainKey=${domainKey})}" th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}">+ 프로젝트 등록</a>
             </div>
             <div class="project-list-panel">
                 <form id="project-search-form" class="project-filters" method="get" th:action="@{/manage/view}">
