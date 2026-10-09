@@ -9,7 +9,7 @@
         <li><a th:href="@{/documentBox}" th:classappend="${activeMenu == 'documentBox' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'documentBox' ? 'page' : null}">📭문서함</a></li>
         <li><a th:href="@{/growthTree}" th:classappend="${activeMenu == 'growthTree' ? 'active' : ''}">🌳팀 성장나무</a></li>
         <li><a th:href="@{/meetings}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}">📝회의록</a></li>
-        <li><a th:href="@{/projects}" th:classappend="${activeMenu == 'projects' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projects' ? 'page' : null}">📃참여 프로젝트</a></li>
+        <li><a th:href="@{/{domainKey}/home/projects(domainKey=${domainKey})}" th:classappend="${activeMenu == 'projects' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projects' ? 'page' : null}">📃참여 프로젝트</a></li>
     </ul>
 </nav>
 </body>
