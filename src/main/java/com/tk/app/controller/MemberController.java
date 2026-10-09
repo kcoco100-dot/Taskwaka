@@ -15,6 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/")
 public class MemberController {
 	
+	// 로그인 후 mainHome 으로 이동
+	@GetMapping("main")
+	public String mainHome() {
+	    return "main/mainHome";
+	}
 
    @GetMapping
    public String index() {
