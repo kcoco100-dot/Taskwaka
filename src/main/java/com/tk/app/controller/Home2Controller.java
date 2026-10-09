@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
+import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
+import com.tk.app.service.NoticeService;
 import com.tk.app.service.ParticipatingProjectService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Home2Controller {
 	
 	private final ParticipatingProjectService participatingProjectService;
+	private final NoticeService noticeService;
 	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(
@@ -78,6 +81,7 @@ public class Home2Controller {
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			Model model) {
 		
+		// 프로젝트 목록 조회
 		List<ParticipatingProjectDto> participatingProjects = 
 				participatingProjectService.findParticipatingProjects(
 						workspace.getWorkspaceId(),
@@ -165,7 +169,14 @@ public class Home2Controller {
 	}
 
 	@GetMapping("/notice")
-	public String notice() {
+	public String notice(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			Model model) {
+		
+		List<NoticeDto> notices = noticeService.findWorkspaceNotice(workspace.getWorkspaceId());
+		
+		model.addAttribute("notices", notices);
+		
 		return "notice/notice";
 	}
 
