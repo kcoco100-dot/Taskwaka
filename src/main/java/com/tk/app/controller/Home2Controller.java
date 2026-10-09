@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
 import com.tk.app.domain.dto.NoticeDto;
@@ -181,7 +182,20 @@ public class Home2Controller {
 	}
 
 	@GetMapping("/noticeDetail")
-	public String noticeDetail() {
+	public String noticeDetail(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("noticeId") long noticeId,
+			Model model) throws Exception {
+		
+		NoticeDto notice = noticeService.findWorkspaceDetailNotice(
+				workspace.getWorkspaceId(), noticeId);
+		
+		if(notice == null) {
+			throw new Exception("공지를 찾을 수 없습니다.");
+		}
+		
+		model.addAttribute("notice", notice);
+		
 		return "notice/noticeDetail";
 	}
 

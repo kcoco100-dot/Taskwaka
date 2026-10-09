@@ -1,6 +1,5 @@
 @charset "UTF-8";
 
-/* 사이드바 옆 제목과 본문 배치 */
 .home-layout > .shell-section {
     display: flex;
     flex-direction: column;
@@ -15,7 +14,6 @@
     margin-bottom: 24px;
 }
 
-/* 공통 main.css의 중앙 제목 배너 스타일이 새 화면에 섞이지 않도록 조정 */
 .shell-section .page-title {
     padding: 0;
     border: 0;
@@ -23,7 +21,6 @@
     text-align: left;
 }
 
-/* 남은 공간을 채우는 내용 자리 */
 .shell-section .shell-content {
     flex: 1 0 200px;
     min-width: 0;
@@ -36,7 +33,6 @@
     overflow-wrap: anywhere;
 }
 
-/* UI 확인용 화면 이동 링크와 버튼 */
 .shell-section .shell-actions {
     display: flex;
     flex-wrap: wrap;

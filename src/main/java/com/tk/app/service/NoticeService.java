@@ -16,8 +16,15 @@ public class NoticeService {
 		this.noticeMapper = noticeMapper;
 	}
 	
+	// 워크 공지 목록 조회
 	public List<NoticeDto> findWorkspaceNotice(long workspaceId) {
 		
 		return noticeMapper.findWorkspaceNotice(workspaceId);
+	}
+	
+	// 워크에 공개된 공지 상세조회
+	public NoticeDto findWorkspaceDetailNotice(long workspaceId, long noticeId) {
+		
+		return noticeMapper.findWorkspaceDetailNotice(workspaceId, noticeId);
 	}
 }

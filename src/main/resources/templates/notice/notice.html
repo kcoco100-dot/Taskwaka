@@ -75,9 +75,11 @@
                                 <td>
                                     <div class="notice-title-cell">
                                         <span class="notice-type">워크</span>
-                                        <span class="notice-item-title" th:text="${notice.title}">
+                                        <a class="notice-item-title" 
+                                        		 th:href="@{/{domainKey}/home/noticeDetail(domainKey=${domainKey}, noticeId=${notice.noticeId})}"
+                                        	     th:text="${notice.title}">
                                             공지 제목
-                                        </span>
+                                        </a>
                                     </div>
                                 </td>
 

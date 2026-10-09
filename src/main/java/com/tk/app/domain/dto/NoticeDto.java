@@ -12,6 +12,7 @@ public class NoticeDto {
 	private String title;
 	
 	private String authorName; // 작성자 이름
+	private String content; // 공지 내용
 	
 	private String createdAt; // 등록일
 	private Long viewCount; // 조회수

@@ -7,11 +7,12 @@
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/noticeDetail.css}">
 </th:block>
 
 <th:block layout:fragment="content">
-    <div class="home-layout manage-layout">
-        <nav th:replace="~{layout/pmSidebar::manageSidebar('notice')}"></nav>
+    <div class="home-layout manage-layout notice-detail-layout">
+        <nav th:replace="~{layout/homeSidebar::homeSidebar('notice')}"></nav>
 
         <div class="section shell-section">
             <div class="page-heading">
@@ -20,14 +21,28 @@
             </div>
 
             <div class="shell-content">
-                <!-- TODO: 담당자가 공지사항 상세 내용 UI를 추가할 영역 -->
+                <h2 th:text="${notice.title}">공지 제목</h2>
+                <p>
+                    작성자:
+                    <span th:text="${notice.authorName}">작성자</span>
+                </p>
+                <p>
+                    등록일:
+                    <span th:text="${notice.createdAt}">등록일</span>
+                </p>
+                <p>
+                    조회수:
+                    <span th:text="${notice.viewCount}">0</span>
+                </p>
+                <hr>
+
+                <div th:text="${notice.content}" style="white-space: pre-wrap;">공지 본문</div>
             </div>
 
             <div class="shell-actions">
-                <a th:href="@{/notice}" class="shell-action">목록으로</a>
-                <a th:href="@{/noticeEdit}" class="shell-action shell-action-primary">수정하기</a>
-                <!-- TODO: 삭제 확인과 실제 삭제 처리는 추후 연결 -->
-                <button type="button" class="shell-action">삭제하기</button>
+                <a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}" class="shell-action">
+                    목록으로
+                </a>
             </div>
         </div>
     </div>

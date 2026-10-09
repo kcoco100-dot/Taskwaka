@@ -18,5 +18,21 @@
 		    AND n.deleted IS NULL
 		ORDER BY n.created DESC, n.notice_id DESC
 	</select>
+	
+	<!-- 워크 공지 상세 조회 -->
+	<select id="findWorkspaceDetailNotice" resultType="com.tk.app.domain.dto.NoticeDto">
+		SELECT n.notice_id AS "noticeId", n.title,
+		       n.content, md.name AS "authorName",
+		       TO_CHAR(n.created, 'YYYY-MM-DD') AS "createdAt",
+		       n.view_count AS "viewCount"
+		FROM notice n
+		LEFT OUTER JOIN member_details md
+		    ON n.member_id = md.member_id
+		WHERE n.workspace_id = #{workspaceId}
+		    AND n.notice_id = #{noticeId}
+		    AND n.notice_type = 'WORKSPACE'
+		    AND n.status = 1
+		    AND n.deleted IS NULL
+	</select>
 
 </mapper>
