@@ -7,25 +7,96 @@
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/notice.css}">
 </th:block>
 
 <th:block layout:fragment="content">
-    <div class="home-layout manage-layout">
-        <nav th:replace="~{layout/pmSidebar::manageSidebar('notice')}"></nav>
+    <div class="home-layout notice-layout">
+        <nav th:replace="~{layout/homeSidebar::homeSidebar('notice')}"></nav>
 
-        <div class="section shell-section">
-            <div class="page-heading">
-                <h1 class="page-title">공지사항</h1>
-                <p class="page-description">워크의 공지사항을 확인하세요.</p>
+        <div class="section notice-section">
+            <div class="notice-heading">
+                <span class="notice-label">WORKSPACE</span>
+                <h1 class="notice-page-title">공지사항</h1>
+                <p class="notice-description">
+                    함께하는 워크의 소식과 안내를 확인하세요.
+                </p>
             </div>
 
-            <div class="shell-content">
-                <!-- TODO: 담당자가 공지사항 목록 UI를 추가할 영역 -->
-            </div>
+            <section class="notice-panel" aria-labelledby="notice-list-title">
+                <div class="notice-panel-header">
+                    <div class="notice-panel-heading">
+                        <span class="notice-panel-icon" aria-hidden="true">
+                            <i class="bi bi-megaphone"></i>
+                        </span>
 
-            <div class="shell-actions">
-                <a th:href="@{/noticeDetail}" class="shell-action">상세 화면 보기</a>
-            </div>
+                        <div>
+                            <h2 id="notice-list-title">워크 공지</h2>
+                            <p>현재 워크에 공개된 공지사항입니다.</p>
+                        </div>
+                    </div>
+
+                    <span class="notice-count">
+                        <strong th:text="${notices == null ? 0 : #lists.size(notices)}">
+                            0
+                        </strong>건
+                    </span>
+                </div>
+
+                <!-- 공지가 없거나 아직 조회가 연결되지 않은 경우 -->
+                <div class="notice-empty"
+                     th:if="${notices == null or #lists.isEmpty(notices)}">
+
+                    <span class="notice-empty-icon" aria-hidden="true">
+                        <i class="bi bi-inbox"></i>
+                    </span>
+
+                    <h3>아직 공개된 공지가 없습니다</h3>
+                    <p>새로운 공지가 등록되면 이곳에서 확인할 수 있습니다.</p>
+                </div>
+
+                <div class="notice-table-wrap" th:unless="${notices == null or #lists.isEmpty(notices)}">
+                    <table class="notice-table">
+                        <caption class="visually-hidden">
+                            현재 워크의 공개 공지 목록
+                        </caption>
+
+                        <thead>
+                            <tr>
+                                <th scope="col">공지 제목</th>
+                                <th scope="col" class="notice-author-col">작성자</th>
+                                <th scope="col" class="notice-date-col">등록일</th>
+                                <th scope="col" class="notice-views-col">조회수</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr th:each="notice : ${notices}">
+                                <td>
+                                    <div class="notice-title-cell">
+                                        <span class="notice-type">워크</span>
+                                        <span class="notice-item-title" th:text="${notice.title}">
+                                            공지 제목
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td class="notice-author-col" th:text="${notice.authorName}">
+                                    작성자
+                                </td>
+
+                                <td class="notice-date-col" th:text="${notice.createdAt}">
+                                    등록일
+                                </td>
+
+                                <td class="notice-views-col" th:text="${notice.viewCount}">
+                                    0
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </div>
 </th:block>
