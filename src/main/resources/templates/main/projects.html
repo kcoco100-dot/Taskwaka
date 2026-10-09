@@ -38,9 +38,28 @@
 					        ⭐ <span th:text="${project.subject}"></span>
 					    </div>
 					
-					    <div>
-					        상태 코드:
-					        <span th:text="${project.projectStatus}"></span>
+					    <div th:switch="${project.projectStatus}">
+					        상태:
+					        <a th:case="0"
+					        	   class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   예정
+					        	</a>
+					        <a th:case="1"
+					           class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   진행중...
+					        	</a>
+					        <a th:case="2"
+					           class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   완료
+					        	</a>
+					        <a th:case="*"
+					           class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   확인필요
+					        	</a>
 					    </div>
 					
 					    <div>
