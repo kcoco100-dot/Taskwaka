@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.ParticipatingProjectMapper">
+
+	<!-- 참여중인 프로젝트 조회 -->
+	<select id="findParticipatingProjects" resultType="com.tk.app.domain.dto.ParticipatingProjectDto">
+		SELECT p.project_id AS "projectId", p.workspace_id AS "workspaceId",
+		       p.subject, p.status AS "projectStatus", 
+		       TO_CHAR(p.start_at, 'YYYY-MM-DD') AS "startAt",
+		       TO_CHAR(p.end, 'YYYY-MM-DD') AS "endAt", p.progress
+		FROM projects p
+		JOIN project_members pm ON p.project_id = pm.project_id
+		JOIN workspace_members wm 
+		    ON wm.workspace_member_id = pm.workspace_member_id
+		    AND wm.workspace_id = p.workspace_id
+		WHERE p.workspace_id = #{workspaceId}
+		    AND wm.member_id = #{memberId}
+		    AND wm.status = 0
+		    AND pm.left IS NULL
+		ORDER BY p.project_id
+	</select>
+
+</mapper>

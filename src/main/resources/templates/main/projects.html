@@ -21,22 +21,41 @@
 			</div>
 			
 			<div class="project-menu">
-				<button type="button" class="project-card project-card-view">
+				<div class="project-card project-card-view">
 					<span class="project-card-title">참여 프로젝트 조회</span>
 					<span class="project-card-description">
 						참여중인 프로젝트를 조회해보세요.
 					</span>
-					<span class="project-item">
-						⭐쌍용 프로젝트
-					</span>
-					<span class="project-item">
-						⭐쌍용 프로젝트
-					</span>
-					<span class="project-item">
-						⭐쌍용 프로젝트
-					</span>
-				</button>
-
+					
+					<p th:if="${#lists.isEmpty(participatingProjects)}">
+						⚠️현재 참여 중인 프로젝트가 없습니다.
+					</p>
+					
+					<div class="project-item"
+					     th:each="project : ${participatingProjects}">
+					
+					    <div>
+					        ⭐ <span th:text="${project.subject}"></span>
+					    </div>
+					
+					    <div>
+					        상태 코드:
+					        <span th:text="${project.projectStatus}"></span>
+					    </div>
+					
+					    <div>
+					        기간:
+					        <span th:text="${project.startAt}"></span>
+					        ~
+					        <span th:text="${project.endAt}"></span>
+					    </div>
+					
+					    <div>
+					        진행률:
+					        <span th:text="${project.progress}"></span>
+					    </div>
+					</div>
+				</div>
 
 			</div>
 		
