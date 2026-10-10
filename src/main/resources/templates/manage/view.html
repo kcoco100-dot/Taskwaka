@@ -59,67 +59,38 @@
                         </tr></thead>
                         <tbody id="project-list-body">
                         <!-- 화면 확인용 예시 데이터. DB 연동 시 th:each로 교체합니다. -->
-                        <tr class="project-list-row" data-status="progress">
-                            <td class="project-number">6</td>
-                            <td><span class="project-name">TASKWAKA 협업 플랫폼</span><span class="project-code">PRJ-006</span></td>
+                        <tr class="project-list-row" th:unless="${#lists.isEmpty(projectList)}" th:each="project : ${projectList}" data-status="progress">
+                            <td class="project-number" th:text="${project.project_id}">1</td>
+                            <td>
+	                            <span class="project-name" th:text="${project.subject}">TASKWAKA 협업 플랫폼</span>
+	                            <span class="project-code" th:text="'PRJ-' + ${#numbers.formatInteger(project.project_id, 3)}">PRJ-006</span></td>
                             <td class="project-manager">이팀장</td>
                             <td>8명</td>
-                            <td class="project-period"><time class="project-start" datetime="2026-09-01">2026.09.01</time><span> ~ </span><time class="project-end" datetime="2026-12-31">2026.12.31</time></td>
-                            <td><span class="project-status project-status-progress">진행 중</span></td>
-                            <td><div class="project-progress"><progress max="100" value="65" aria-label="TASKWAKA 협업 플랫폼 진행률"></progress><span>65%</span></div></td>
-                            <td><div class="project-row-actions"><button type="button" class="project-button project-edit" aria-label="TASKWAKA 협업 플랫폼 수정">수정</button><button type="button" class="project-button project-delete" aria-label="TASKWAKA 협업 플랫폼 삭제">삭제</button></div></td>
+                            <td class="project-period">
+                            	<time class="project-start" th:datetime="${project.start_date}" th:text="${project.start_date}">2026.09.01</time>
+                            	<span> ~ </span>
+                            	<time class="project-end" th:datetime="${project.end_date}" th:text="${project.end_date}">2026.12.31</time></td>
+							<td th:switch="${project.status}">
+								<span th:case="0" class="project-status project-status-planned">예정</span>
+								<span th:case="1" class="project-status project-status-progress">진행 중</span>
+								<span th:case="2" class="project-status project-status-completed">완료</span>
+								<span th:case="3" class="project-status project-status-paused">보류</span>
+								<span th:case="*" class="project-status">상태불명</span>
+							</td>
+                            <td>
+								<progress max="100" th:value="${project.progress}" th:aria-label="${project.subject + ' 진행률'}"></progress>
+								<span th:text="${project.progress + '%'}">0%</span>
+                            </td>
+                            <td>
+                            	<div class="project-row-actions">
+                            		<button type="button" class="project-button project-edit" aria-label="TASKWAKA 협업 플랫폼 수정">수정</button>
+                            		<button type="button" class="project-button project-delete" aria-label="TASKWAKA 협업 플랫폼 삭제">삭제</button>
+                            	</div>
+                            </td>
+                        </tr>  
+                        <tr id="project-empty" th:if="${#lists.isEmpty(projectList)}">
+                        	<td colspan="8" class="project-empty">조회된 프로젝트가 없습니다.</td>
                         </tr>
-                        <tr class="project-list-row" data-status="progress">
-                            <td class="project-number">5</td>
-                            <td><span class="project-name">회원·인증 기능 고도화</span><span class="project-code">PRJ-005</span></td>
-                            <td class="project-manager">김민수</td>
-                            <td>4명</td>
-                            <td class="project-period"><time class="project-start" datetime="2026-09-15">2026.09.15</time><span> ~ </span><time class="project-end" datetime="2026-10-30">2026.10.30</time></td>
-                            <td><span class="project-status project-status-progress">진행 중</span></td>
-                            <td><div class="project-progress"><progress max="100" value="80" aria-label="회원·인증 기능 고도화 진행률"></progress><span>80%</span></div></td>
-                            <td><div class="project-row-actions"><button type="button" class="project-button project-edit" aria-label="회원·인증 기능 고도화 수정">수정</button><button type="button" class="project-button project-delete" aria-label="회원·인증 기능 고도화 삭제">삭제</button></div></td>
-                        </tr>
-                        <tr class="project-list-row" data-status="progress">
-                            <td class="project-number">4</td>
-                            <td><span class="project-name">워크 관리 시스템</span><span class="project-code">PRJ-004</span></td>
-                            <td class="project-manager">박지은</td>
-                            <td>5명</td>
-                            <td class="project-period"><time class="project-start" datetime="2026-10-01">2026.10.01</time><span> ~ </span><time class="project-end" datetime="2026-11-30">2026.11.30</time></td>
-                            <td><span class="project-status project-status-progress">진행 중</span></td>
-                            <td><div class="project-progress"><progress max="100" value="35" aria-label="워크 관리 시스템 진행률"></progress><span>35%</span></div></td>
-                            <td><div class="project-row-actions"><button type="button" class="project-button project-edit" aria-label="워크 관리 시스템 수정">수정</button><button type="button" class="project-button project-delete" aria-label="워크 관리 시스템 삭제">삭제</button></div></td>
-                        </tr>
-                        <tr class="project-list-row" data-status="planned">
-                            <td class="project-number">3</td>
-                            <td><span class="project-name">모바일 서비스 리뉴얼</span><span class="project-code">PRJ-003</span></td>
-                            <td class="project-manager">최서연</td>
-                            <td>6명</td>
-                            <td class="project-period"><time class="project-start" datetime="2026-11-01">2026.11.01</time><span> ~ </span><time class="project-end" datetime="2027-01-31">2027.01.31</time></td>
-                            <td><span class="project-status project-status-planned">예정</span></td>
-                            <td><div class="project-progress"><progress max="100" value="0" aria-label="모바일 서비스 리뉴얼 진행률"></progress><span>0%</span></div></td>
-                            <td><div class="project-row-actions"><button type="button" class="project-button project-edit" aria-label="모바일 서비스 리뉴얼 수정">수정</button><button type="button" class="project-button project-delete" aria-label="모바일 서비스 리뉴얼 삭제">삭제</button></div></td>
-                        </tr>
-                        <tr class="project-list-row" data-status="completed">
-                            <td class="project-number">2</td>
-                            <td><span class="project-name">보고서 관리 기능</span><span class="project-code">PRJ-002</span></td>
-                            <td class="project-manager">정유진</td>
-                            <td>3명</td>
-                            <td class="project-period"><time class="project-start" datetime="2026-08-01">2026.08.01</time><span> ~ </span><time class="project-end" datetime="2026-09-30">2026.09.30</time></td>
-                            <td><span class="project-status project-status-completed">완료</span></td>
-                            <td><div class="project-progress"><progress max="100" value="100" aria-label="보고서 관리 기능 진행률"></progress><span>100%</span></div></td>
-                            <td><div class="project-row-actions"><button type="button" class="project-button project-edit" aria-label="보고서 관리 기능 수정">수정</button><button type="button" class="project-button project-delete" aria-label="보고서 관리 기능 삭제">삭제</button></div></td>
-                        </tr>
-                        <tr class="project-list-row" data-status="paused">
-                            <td class="project-number">1</td>
-                            <td><span class="project-name">사내 문서함 구축</span><span class="project-code">PRJ-001</span></td>
-                            <td class="project-manager">이팀장</td>
-                            <td>4명</td>
-                            <td class="project-period"><time class="project-start" datetime="2026-09-01">2026.09.01</time><span> ~ </span><time class="project-end" datetime="2026-11-15">2026.11.15</time></td>
-                            <td><span class="project-status project-status-paused">보류</span></td>
-                            <td><div class="project-progress"><progress max="100" value="45" aria-label="사내 문서함 구축 진행률"></progress><span>45%</span></div></td>
-                            <td><div class="project-row-actions"><button type="button" class="project-button project-edit" aria-label="사내 문서함 구축 수정">수정</button><button type="button" class="project-button project-delete" aria-label="사내 문서함 구축 삭제">삭제</button></div></td>
-                        </tr>
-                        <tr id="project-empty" hidden><td colspan="8" class="project-empty">조회된 프로젝트가 없습니다.</td></tr>
                         </tbody>
                     </table>
                 </div>

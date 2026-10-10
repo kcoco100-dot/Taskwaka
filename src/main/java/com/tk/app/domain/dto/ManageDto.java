@@ -14,8 +14,8 @@ public class ManageDto {
 	
 	private String subject;
 	private String content;
-	private String start;
-	private String end;
+	private String start_date;
+	private String end_date;
 	private String archive;
 	private String created;
 	private String updated;
