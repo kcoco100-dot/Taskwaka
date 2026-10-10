@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
+import com.tk.app.domain.dto.MeetingMinutesDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
+import com.tk.app.service.MeetingMinutesService;
 import com.tk.app.service.NoticeService;
 import com.tk.app.service.ParticipatingProjectService;
 
@@ -28,6 +30,7 @@ public class Home2Controller {
 	
 	private final ParticipatingProjectService participatingProjectService;
 	private final NoticeService noticeService;
+	private final MeetingMinutesService meetingMinutesService;
 	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(
@@ -102,7 +105,18 @@ public class Home2Controller {
 	
 	// home - meetings 페이지
 	@GetMapping("/meetings")
-	public String meetings() {
+	public String meetings(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			Model model) {
+		
+		// 회의록 목록 조회
+		List<MeetingMinutesDto> meetingMinutes = 
+				meetingMinutesService.findMeetingMinutes(
+						workspace.getWorkspaceId(),
+						workspace.getMemberId());
+		
+		model.addAttribute("meetingMinutes", meetingMinutes);
+		
 		return "home/meetings";
 	}
 	

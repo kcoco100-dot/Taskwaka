@@ -25,36 +25,21 @@
 					<table class="meetings-table">
 						<thead>
 							<tr>
-								<th scope="col">회의 제목</th>
+								<th scope="col" >회의 제목</th>
 								<th scope="col" class="meeting-date">회의일</th>
 								<th scope="col" class="meeting-writer">작성자</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
+							<tr th:each="meeting: ${meetingMinutes}">
 								<td>
-									<p class="meeting-title">프로젝트 시작 회의</p>
-									<p class="meeting-summary">프로젝트 목표와 팀원별 역할을 정리했어요.</p>
+									<p class="meeting-title" th:text="${meeting.title}"></p>
+									<p class="meeting-summary" th:text="${meeting.summary}"></p>
 								</td>
-								<td class="meeting-date">2026.10.07</td>
-								<td class="meeting-writer">김민수</td>
+								<td class="meeting-date" th:text="${meeting.meetingDate}"></td>
+								<td class="meeting-writer" th:text="${meeting.authorName}"></td>
 							</tr>
-							<tr>
-								<td>
-									<p class="meeting-title">화면 디자인 회의</p>
-									<p class="meeting-summary">주요 화면의 구성과 디자인 방향을 정했어요.</p>
-								</td>
-								<td class="meeting-date">2026.10.05</td>
-								<td class="meeting-writer">이서연</td>
-							</tr>
-							<tr>
-								<td>
-									<p class="meeting-title">주간 진행 상황 회의</p>
-									<p class="meeting-summary">완료한 작업을 공유하고 다음 일정을 확인했어요.</p>
-								</td>
-								<td class="meeting-date">2026.10.02</td>
-								<td class="meeting-writer">박지훈</td>
-							</tr>
+							
 						</tbody>
 					</table>
 				</div>
