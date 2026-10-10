@@ -16,10 +16,11 @@ public class MeetingMinutesService {
 		this.meetingMinutesMapper = meetingMinutesMapper;
 	}
 	
-	// 워크 회의록 목록 조회
-	public List<MeetingMinutesDto> findMeetingMinutes(long workspaceId, long memberID) {
+	// 워크 회의록 목록 조회 및 검색
+	public List<MeetingMinutesDto> findMeetingMinutes(
+			long workspaceId, long memberID, String kwd) {
 		
-		return meetingMinutesMapper.findMeetingMinutes(workspaceId, memberID);
+		return meetingMinutesMapper.findMeetingMinutes(workspaceId, memberID, kwd);
 	}
 	
 	// 워크 회의록 상세 조회

@@ -103,17 +103,18 @@ public class Home2Controller {
 		return "home/gantt";
 	}
 	
-	// home - meetings 페이지
+	// home - meetings 목록 페이지
 	@GetMapping("/meetings")
 	public String meetings(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam(value = "kwd", defaultValue = "") String kwd,
 			Model model) {
 		
 		// 회의록 목록 조회
 		List<MeetingMinutesDto> meetingMinutes = 
 				meetingMinutesService.findMeetingMinutes(
 						workspace.getWorkspaceId(),
-						workspace.getMemberId());
+						workspace.getMemberId(), kwd);
 		
 		model.addAttribute("meetingMinutes", meetingMinutes);
 		

@@ -13,7 +13,8 @@ public interface MeetingMinutesMapper {
 	// 업무 회의록 목록 조회
 	List<MeetingMinutesDto> findMeetingMinutes(
 			@Param("workspaceId") long workspaceId,
-			@Param("memberId") long memberId);
+			@Param("memberId") long memberId,
+			@Param("kwd") String kwd);
 	
 	// 회의록 상세 조회
 	public MeetingMinutesDto findMeetingDetailMinutes(

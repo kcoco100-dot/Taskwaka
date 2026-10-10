@@ -26,6 +26,9 @@
 		        AND wm.status = 0
 		        AND pm.left IS NULL
 		  )
+		<if test="kwd != null and kwd != ''">
+			AND m.title LIKE '%' || #{kwd} || '%'
+		</if>
 		ORDER BY m.meeting DESC NULLS LAST,
 		         m.created DESC,
 		         m.meeting_minute_id DESC
