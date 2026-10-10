@@ -1,0 +1,43 @@
+﻿@charset "UTF-8";
+
+.meeting-detail-page > .page-heading,
+.meeting-detail-page > .shell-content,
+.meeting-detail-page > .shell-actions {
+    width: 100%;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.meeting-detail-page .shell-content {
+    flex: 0 0 auto;
+}
+
+.meeting-detail-page .meeting-detail-title {
+    margin: 0 0 20px;
+    color: #594331;
+    font-family: inherit;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.meeting-detail-page .meeting-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #E8E2D9;
+    color: #786B5E;
+    font-size: 14px;
+}
+
+.meeting-detail-page .meeting-detail-body {
+    min-height: 240px;
+    padding-top: 24px;
+    font-size: 15px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/meetingsDetail.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout">
+        <nav th:replace="~{layout/homeSidebar::homeSidebar('meetings')}"></nav>
+
+        <div class="section shell-section meeting-detail-page">
+            <div class="page-heading">
+                <h1 class="page-title">회의록 상세</h1>
+                <p class="page-description">회의에서 나눈 내용을 확인하세요.</p>
+            </div>
+
+            <article class="shell-content">
+                <h2 class="meeting-detail-title" th:text="${meeting.title}"></h2>
+
+                <div class="meeting-detail-meta">
+                    <span>
+                        회의일
+                        <strong th:text="${meeting.meetingDate ?: '미입력'}"></strong>
+                    </span>
+                    <span>
+                        작성자
+                        <strong th:text="${meeting.authorName ?: '정보 없음'}"></strong>
+                    </span>
+                </div>
+
+                <div class="meeting-detail-body"
+                     th:text="${meeting.content}"></div>
+            </article>
+
+            <div class="shell-actions">
+                <a class="shell-action shell-action-primary"
+                   th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}">
+                    ← 목록으로
+                </a>
+            </div>
+        </div>
+    </div>
+</th:block>
+ 
+<th:block layout:fragment="script">
+</th:block> 
+
+</html>

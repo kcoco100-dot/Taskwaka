@@ -10,6 +10,7 @@ import lombok.Setter;
 public class MeetingMinutesDto {
 	private Long meetingMinuteId; // 회의록 번호
 	private String title; // 회의 제목
+	private String content; // 상세 본문
 	
 	private String summary; // 목록 표시
 	private String meetingDate; // 회의 일자

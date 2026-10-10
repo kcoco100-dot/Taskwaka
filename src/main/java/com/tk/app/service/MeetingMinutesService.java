@@ -21,4 +21,11 @@ public class MeetingMinutesService {
 		
 		return meetingMinutesMapper.findMeetingMinutes(workspaceId, memberID);
 	}
+	
+	// 워크 회의록 상세 조회
+	public MeetingMinutesDto findMeetingDetailMinutes(
+			long workspaceId, long memberId, long meetingMinuteId) {
+		
+		return meetingMinutesMapper.findMeetingDetailMinutes(workspaceId, memberId, meetingMinuteId);
+	}
 }

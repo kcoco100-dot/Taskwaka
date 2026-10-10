@@ -30,4 +30,30 @@
 		         m.created DESC,
 		         m.meeting_minute_id DESC
 	</select>
+	
+	<!-- 워크 회의록 상세 조회 -->
+	<select id="findMeetingDetailMinutes" resultType="com.tk.app.domain.dto.MeetingMinutesDto">
+		SELECT mm.meeting_minute_id AS "meetingMinuteId",
+		       mm.title, mm.content AS "content",
+		       TO_CHAR(mm.meeting, 'YYYY.MM.DD') AS "meetingDate",
+		       md.name AS "authorName"
+		FROM meeting_minutes mm
+		JOIN projects p ON p.project_id = mm.project_id
+		LEFT OUTER JOIN member_details md ON md.member_id = mm.member_id
+		WHERE p.workspace_id = #{workspaceId}
+		    AND mm.meeting_minute_id = #{meetingMinuteId}
+		    AND mm.deleted IS NULL
+		    AND EXISTS (
+		        SELECT 1
+		        FROM project_members pm
+		        JOIN workspace_members wm
+		            ON wm.workspace_member_id = pm.workspace_member_id
+		            AND wm.workspace_id = p.workspace_id
+		        WHERE pm.project_id = p.project_id
+		            AND wm.member_id = #{memberId}
+		            AND wm.status = 0
+		            AND pm.left IS NULL
+		)
+	</select>
+
 </mapper>

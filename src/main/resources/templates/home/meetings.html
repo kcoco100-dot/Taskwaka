@@ -25,7 +25,7 @@
 					<table class="meetings-table">
 						<thead>
 							<tr>
-								<th scope="col" >회의 제목</th>
+								<th scope="col">회의 제목</th>
 								<th scope="col" class="meeting-date">회의일</th>
 								<th scope="col" class="meeting-writer">작성자</th>
 							</tr>
@@ -33,9 +33,14 @@
 						<tbody>
 							<tr th:each="meeting: ${meetingMinutes}">
 								<td>
-									<p class="meeting-title" th:text="${meeting.title}"></p>
+									<p class="meeting-title">
+										<a th:href="@{/{domainKey}/home/meetingsDetail(domainKey=${domainKey},
+								            meetingMinuteId=${meeting.meetingMinuteId})}" th:text="${meeting.title}">
+								        </a>
+							        </p>
 									<p class="meeting-summary" th:text="${meeting.summary}"></p>
 								</td>
+								
 								<td class="meeting-date" th:text="${meeting.meetingDate}"></td>
 								<td class="meeting-writer" th:text="${meeting.authorName}"></td>
 							</tr>

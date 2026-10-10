@@ -120,6 +120,25 @@ public class Home2Controller {
 		return "home/meetings";
 	}
 	
+	// home - meetingsDetail 페이지
+	@GetMapping("/meetingsDetail")
+	public String meetingsDetail(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("meetingMinuteId") long meetingMinuteId,
+			Model model) throws Exception {
+		
+		MeetingMinutesDto meeting = meetingMinutesService.findMeetingDetailMinutes(
+				workspace.getWorkspaceId(), workspace.getMemberId(), meetingMinuteId);
+		
+		if(meeting == null) {
+			throw new Exception("회의록을 찾을 수 없습니다.");
+		}
+		
+		model.addAttribute("meeting", meeting);
+		
+		return "home/meetingsDetail";
+	}
+	
 	// manage - meetings 페이지
 	@GetMapping("/managemeetings")
 	public String managemeetings() {
