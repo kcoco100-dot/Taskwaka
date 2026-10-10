@@ -34,6 +34,29 @@
 		         m.meeting_minute_id DESC
 	</select>
 	
+	<!-- 워크 회의록 페이징 처리 -->
+	<select id="countMeetingMinutes" resultType="int">
+		SELECT COUNT(*)
+		FROM meeting_minutes m
+		JOIN projects p ON p.project_id = m.project_id
+		WHERE p.workspace_id = #{workspaceId}
+		  AND m.deleted IS NULL
+		  AND EXISTS (
+		      SELECT 1
+		      FROM project_members pm
+		      JOIN workspace_members wm
+		        ON wm.workspace_member_id = pm.workspace_member_id
+		       AND wm.workspace_id = p.workspace_id
+		      WHERE pm.project_id = p.project_id
+		        AND wm.member_id = #{memberId}
+		        AND wm.status = 0
+		        AND pm.left IS NULL
+		  )
+  		<if test="kwd != null and kwd != ''">
+			AND m.title LIKE '%' || #{kwd} || '%'
+		</if>
+	</select>
+	
 	<!-- 워크 회의록 상세 조회 -->
 	<select id="findMeetingDetailMinutes" resultType="com.tk.app.domain.dto.MeetingMinutesDto">
 		SELECT mm.meeting_minute_id AS "meetingMinuteId",

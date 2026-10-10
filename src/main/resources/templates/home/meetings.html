@@ -63,10 +63,22 @@
 								<td class="meeting-date" th:text="${meeting.meetingDate}"></td>
 								<td class="meeting-writer" th:text="${meeting.authorName}"></td>
 							</tr>
-							
 						</tbody>
+						
 					</table>
 				</div>
+				
+				<nav class="meetings-pagination" aria-label="회의록 페이지 이동">
+				    <div class="paginate">
+				        <span>‹</span>
+				        <span class="active" aria-current="page">1</span>
+				        <span>2</span>
+				        <span>3</span>
+				        <span>4</span>
+				        <span>5</span>
+				        <span>›</span>
+				    </div>
+				</nav>
 			</div>
 		
 		</div>

@@ -108,6 +108,8 @@ public class Home2Controller {
 	public String meetings(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam(value = "kwd", defaultValue = "") String kwd,
+			@RequestParam(value = "size", defaultValue = "1") int size,
+			@RequestParam(value = "schType", defaultValue = "") String schType,
 			Model model) {
 		
 		// 회의록 목록 조회

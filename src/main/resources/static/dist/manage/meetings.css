@@ -204,3 +204,52 @@
     border-radius: 10px;
     font-size: 14px;
 }
+
+.home-layout .meetings-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.home-layout .meetings-pagination .paginate {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.home-layout .meetings-pagination .paginate > a,
+.home-layout .meetings-pagination .paginate > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #E8E2D9;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #786B5E;
+    font-size: 14px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.home-layout .meetings-pagination .paginate > a:hover {
+    border-color: #CBD7BE;
+    background: #EDF2E7;
+    color: #465B38;
+}
+
+.home-layout .meetings-pagination .paginate > .active {
+    border-color: #71865B;
+    background: #71865B;
+    color: #FFFFFF;
+    font-weight: 700;
+}
+
+.home-layout .meetings-pagination .paginate > a:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 3px;
+}
+

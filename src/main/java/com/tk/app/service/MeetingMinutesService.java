@@ -23,6 +23,13 @@ public class MeetingMinutesService {
 		return meetingMinutesMapper.findMeetingMinutes(workspaceId, memberID, kwd);
 	}
 	
+	// 회의록 페이징 처리
+	public int countMeetingMinutes(
+			long workspaceId, long memberID, String kwd, String schType, int size) {
+		
+		return meetingMinutesMapper.countMeetingMinutes(workspaceId, memberID, kwd, schType, size);
+	}
+	
 	// 워크 회의록 상세 조회
 	public MeetingMinutesDto findMeetingDetailMinutes(
 			long workspaceId, long memberId, long meetingMinuteId) {
