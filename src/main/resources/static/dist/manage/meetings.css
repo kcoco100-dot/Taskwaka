@@ -109,3 +109,98 @@
     text-align: center;
     white-space: nowrap;
 }
+
+.meetings-toolbar {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(200px, 340px) auto;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.meetings-toolbar .meetings-title {
+    font-size: 20px;
+    letter-spacing: -0.5px;
+}
+
+.meetings-toolbar .meetings-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    height: 44px;
+    padding: 4px 5px 4px 14px;
+    border: 1px solid #E5E0D8;
+    border-radius: 10px;
+    background: #F8F7F4;
+}
+
+.meetings-toolbar .meetings-search > i {
+    flex-shrink: 0;
+    color: #8B8175;
+    font-size: 15px;
+}
+
+.meetings-toolbar .meetings-search input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #594331;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.meetings-toolbar .meetings-search input::placeholder {
+    color: #978E82;
+}
+
+.meetings-toolbar .meetings-search:focus-within {
+    border-color: #879A72;
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.12);
+}
+
+.meetings-toolbar .meetings-search input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.meetings-toolbar .meetings-search-button {
+    flex-shrink: 0;
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid #E5E0D8;
+    border-radius: 7px;
+    background: #FFFFFF;
+    color: #594331;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.meetings-toolbar .meetings-search-button:hover {
+    border-color: #CBD7BE;
+    background: #EDF2E7;
+    color: #465B38;
+}
+
+.meetings-toolbar .meetings-search-button:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+
+.meetings-toolbar .meetings-write-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 14px;
+}

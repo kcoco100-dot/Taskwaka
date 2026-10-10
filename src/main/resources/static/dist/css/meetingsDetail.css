@@ -41,3 +41,22 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
+
+.meeting-detail-page .meeting-detail-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.meeting-detail-page .meeting-delete-button {
+    border-color: #E8C9C5;
+    background: #FFF5F3;
+    color: #A3483E;
+}
+
+.meeting-detail-page .meeting-delete-button:hover {
+    border-color: #D8AAA4;
+    background: #FBE5E1;
+    color: #89382F;
+}

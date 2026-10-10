@@ -16,9 +16,28 @@
 			
 		<div class="section meetings-page">
 			<div class="page-content meetings-content">
-				<div class="meetings-heading">
-					<h2 class="meetings-title">회의록 목록</h2>
-					<button type="button" class="meetings-write-button">회의록 작성하기</button>
+
+				<div class="meetings-toolbar">
+				    <h2 class="meetings-title">회의록 목록</h2>
+				
+				    <div class="meetings-search" role="search" aria-label="회의록 검색">
+				        <i class="bi bi-search" aria-hidden="true"></i>
+				
+				        <label for="meetingSearchKeyword" class="visually-hidden">
+				            회의록 검색어
+				        </label>
+				
+				        <input type="search" id="meetingSearchKeyword" name="keyword" placeholder="회의록 검색">
+				
+				        <button type="button" class="meetings-search-button">
+				            검색
+				        </button>
+				    </div>
+				
+				    <button type="button" class="meetings-write-button">
+				        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+				        회의록 작성
+				    </button>
 				</div>
 
 				<div class="meetings-table-wrap">

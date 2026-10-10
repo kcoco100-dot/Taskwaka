@@ -38,12 +38,21 @@
                      th:text="${meeting.content}"></div>
             </article>
 
-            <div class="shell-actions">
-                <a class="shell-action shell-action-primary"
-                   th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}">
-                    ← 목록으로
-                </a>
-            </div>
+			<div class="shell-actions">
+			    <a class="shell-action"
+			       th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}">
+			        ← 목록으로
+			    </a>
+			
+			    <div class="meeting-detail-buttons">
+			        <button type="button" class="shell-action shell-action-primary">
+			            수정
+			        </button>
+			        <button type="button" class="shell-action meeting-delete-button">
+			            삭제
+			        </button>
+			    </div>
+			</div>
         </div>
     </div>
 </th:block>
