@@ -56,9 +56,17 @@ public class Home2Controller {
 		return workspace;
 	}
 
-    // calendar 페이지
+    // 담당 업무 기간 및 진행률 Home 캘린더에 표시
     @GetMapping("/calendar")
-    public String calendar() {
+    public String calendar(
+    		@RequestAttribute("workspace") WorkspaceDto workspace,
+    		Model model) {
+    	
+    		List<MyTaskDto> myTasks = myTaskService.findTasksList(
+    				workspace.getWorkspaceId(),
+    				workspace.getMemberId());
+    		
+    		model.addAttribute("myTasks", myTasks);
 
         return "main/home";
     }
