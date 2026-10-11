@@ -24,7 +24,6 @@
 					</div>
 				</div>
 
-				<!-- 디자인 확인용 예시 데이터입니다. -->
 				<div class="overview-stats" aria-label="업무 현황 요약">
 					<article class="overview-stat">
 						<div class="overview-stat-heading">
@@ -136,7 +135,7 @@
 								<h2>참여 프로젝트</h2>
 								<p>우리 팀의 프로젝트는 어디까지 왔을까요?</p>
 							</div>
-							<a th:href="@{/projects}" class="overview-more">
+							<a th:href="@{/{domainKey}/home/projects(domainKey=${domainKey})}" class="overview-more">
 								전체 보기
 								<span class="overview-icon" aria-hidden="true">→</span>
 							</a>
@@ -208,7 +207,7 @@
 								<h2>오늘의 일정</h2>
 								<p>놓치지 말아야 할 일정을 모았어요.</p>
 							</div>
-							<a th:href="@{/calendar}" class="overview-more">
+							<a th:href="@{/{domainKey}/home/calendar(domainKey=${domainKey})}" class="overview-more">
 								캘린더 보기
 								<span class="overview-icon" aria-hidden="true">→</span>
 							</a>
@@ -273,7 +272,7 @@
 								<h2>우리 팀 성장나무</h2>
 								<p>함께한 만큼, 조금씩 자라나는 우리 팀</p>
 							</div>
-							<a th:href="@{/growthTree}" class="overview-more">
+							<a th:href="@{/{domainKey}/home/growthTree(domainKey=${domainKey})}" class="overview-more">
 								나무 보러가기
 								<span class="overview-icon" aria-hidden="true">→</span>
 							</a>
