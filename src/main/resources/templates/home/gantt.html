@@ -14,25 +14,67 @@
 	
 	<nav th:replace="~{layout/homeSidebar::homeSidebar('gantt')}"></nav>
 			
-		<div class="section">
-			<div class="page-heading">
-				<h1 class="page-title">간트차트</h1>
-				<p class="page-description">
-					사용하세여
-				</p>
-			</div>
-			
-			<div class="page-content gantt-content">
-				<div class="gantt-toolbar">
-					<h2 class="gantt-title">프로젝트 일정</h2>
-					<span class="gantt-view-label">주간 보기</span>
-				</div>
-				
-				<div class="gantt-placeholder">
-					차트 보이는곳
-				</div>
-			</div>
+		<div class="section gantt-page">
+		    <div class="page-heading">
+		        <p class="gantt-eyebrow">MY WORKSPACE</p>
+		        <p class="page-description">
+		            업무 기간과 진행 상황을 한눈에 확인하세요.
+		        </p>
+		    </div>
 		
+		    <div class="page-content gantt-content">
+		        <div class="gantt-toolbar">
+		            <div>
+		                <h2 class="gantt-title">담당 업무 일정</h2>
+		                <p class="gantt-caption" th:text="|담당 업무 ${#lists.size(myTasks)}개|"></p>
+		            </div>
+		
+		            <div class="gantt-legend">
+		                <span><i class="gantt-dot gantt-dot-period"></i>업무 기간</span>
+		                <span><i class="gantt-dot gantt-dot-progress"></i>진행률</span>
+		            </div>
+		        </div>
+		
+		        <div class="gantt-scroll">
+		            <div class="gantt-board">
+		                <div class="gantt-header">
+		                    <div class="gantt-label-heading">업무 / 프로젝트</div>
+		                    <div class="gantt-days">
+		                        <span>12<small>월</small></span>
+		                        <span>13<small>화</small></span>
+		                        <span>14<small>수</small></span>
+		                        <span>15<small>목</small></span>
+		                        <span>16<small>금</small></span>
+		                        <span>17<small>토</small></span>
+		                        <span>18<small>일</small></span>
+		                    </div>
+		                </div>
+		
+						<div class="gantt-row" th:if="${#lists.isEmpty(myTasks)}">
+						    <div class="gantt-task">
+						        <strong>담당 업무가 없습니다.</strong>
+						    </div>
+						    <div class="gantt-track"></div>
+						</div>
+						
+						<div class="gantt-row" th:each="task : ${myTasks}">
+						    <div class="gantt-task">
+						        <strong th:text="${task.title}">업무명</strong>
+						        <span th:text="${task.subject}">프로젝트명</span>
+						        <span th:text="|${task.startAt} ~ ${task.endAt}|">업무 기간</span>
+						        <span th:text="|진행률 ${task.progress}%|">진행률</span>
+						    </div>
+						
+						    <div class="gantt-track"></div>
+						</div>
+		        		</div>
+		    		</div>
+		    		
+		        <p class="gantt-footnote">
+		            막대 길이는 업무 기간을, 안쪽 색상은 진행률을 나타냅니다.
+		        </p>
+		        
+			</div>
 		</div>
 	</div>
 	

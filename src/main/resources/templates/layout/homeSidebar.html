@@ -5,7 +5,7 @@
     <ul class="project-menu-group">
         <li><a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}" th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'dashboard' ? 'page' : null}">📚대시보드</a></li>
         <li><a th:href="@{/{domainKey}/home/calendar(domainKey=${domainKey})}" th:classappend="${activeMenu == 'calendar' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'calendar' ? 'page' : null}">🗓️캘린더</a></li>
-        <li><a th:href="@{/gantt}" th:classappend="${activeMenu == 'gantt' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">📉간트차트</a></li>
+        <li><a th:href="@{/{domainKey}/home/gantt(domainKey=${domainKey})}" th:classappend="${activeMenu == 'gantt' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">📉간트차트</a></li>
         <li><a th:href="@{/documentBox}" th:classappend="${activeMenu == 'documentBox' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'documentBox' ? 'page' : null}">📭문서함</a></li>
         <li><a th:href="@{/growthTree}" th:classappend="${activeMenu == 'growthTree' ? 'active' : ''}">🌳팀 성장나무</a></li>
         <li><a th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}">📝회의록</a></li>

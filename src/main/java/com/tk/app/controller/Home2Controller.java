@@ -111,9 +111,18 @@ public class Home2Controller {
 		return "main/projects";
 	}
 	
-	// gantt 페이지
+	// 담당 업무 기간 및 진행률 gantt 에 표시
 	@GetMapping("/gantt")
-	public String gantt() {
+	public String gantt(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			Model model) {
+		
+		List<MyTaskDto> myTasks = myTaskService.findTasksList(
+						workspace.getWorkspaceId(),
+						workspace.getMemberId());
+		
+		model.addAttribute("myTasks", myTasks);
+		
 		return "home/gantt";
 	}
 	
