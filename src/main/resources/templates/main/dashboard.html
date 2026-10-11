@@ -47,7 +47,7 @@
 							</span>
 						</div>
 						<p class="overview-stat-value">
-							03
+							<th:block th:text="${#lists.size(participatingProjects)}">0</th:block>
 							<span>건</span>
 						</p>
 						<p class="overview-stat-description">함께 진행하는 프로젝트</p>
@@ -88,7 +88,7 @@
 								<h2>내 업무 목록</h2>
 								<p>지금 집중해야 할 업무를 확인하세요.</p>
 							</div>
-							<a th:href="@{/projects}" class="overview-more">
+							<a th:href="@{/{domainKey}/home/gantt(domainKey=${domainKey})}" class="overview-more">
 								전체 보기
 								<span class="overview-icon" aria-hidden="true">→</span>
 							</a>
@@ -140,65 +140,35 @@
 								<span class="overview-icon" aria-hidden="true">→</span>
 							</a>
 						</div>
+
 						<ul class="overview-project-list">
-							<li class="overview-project-row">
-								<span class="overview-project-avatar overview-avatar-java" aria-hidden="true">JV</span>
-								<div class="overview-project-copy">
-									<div class="overview-project-title">
-										<h3>자바 프로젝트</h3>
-										<span class="overview-badge overview-badge-ongoing">진행 중</span>
-									</div>
-									<p>
-										협업 서비스 개발
-										<span>참여 8명</span>
-									</p>
-									<div class="overview-project-progress">
-										<div class="overview-progress-track" role="progressbar" aria-label="자바 프로젝트 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="65">
-											<div class="overview-progress-fill overview-progress-65"></div>
-										</div>
-										<span>65%</span>
-									</div>
-								</div>
-							</li>
-							<li class="overview-project-row">
-								<span class="overview-project-avatar overview-avatar-oracle" aria-hidden="true">OR</span>
-								<div class="overview-project-copy">
-									<div class="overview-project-title">
-										<h3>오라클 프로젝트</h3>
-										<span class="overview-badge overview-badge-ongoing">진행 중</span>
-									</div>
-									<p>
-										데이터베이스 설계 및 구축
-										<span>참여 5명</span>
-									</p>
-									<div class="overview-project-progress">
-										<div class="overview-progress-track" role="progressbar" aria-label="오라클 프로젝트 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
-											<div class="overview-progress-fill overview-progress-40"></div>
-										</div>
-										<span>40%</span>
-									</div>
-								</div>
-							</li>
-							<li class="overview-project-row">
-								<span class="overview-project-avatar overview-avatar-mongo" aria-hidden="true">MG</span>
-								<div class="overview-project-copy">
-									<div class="overview-project-title">
-										<h3>몽고디비 프로젝트</h3>
-										<span class="overview-badge overview-badge-planned">예정</span>
-									</div>
-									<p>
-										문서 관리 시스템
-										<span>참여 4명</span>
-									</p>
-									<div class="overview-project-progress">
-										<div class="overview-progress-track" role="progressbar" aria-label="몽고디비 프로젝트 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20">
-											<div class="overview-progress-fill overview-progress-20"></div>
-										</div>
-										<span>20%</span>
-									</div>
-								</div>
-							</li>
+						    <li class="overview-project-row"
+						        th:if="${#lists.isEmpty(participatingProjects)}">
+						        현재 참여 중인 프로젝트가 없습니다.
+						    </li>
+						
+						    <li class="overview-project-row" th:each="project : ${participatingProjects}">
+						        <span class="overview-project-avatar overview-avatar-java" aria-hidden="true">📁</span>
+						
+						        <div class="overview-project-copy">
+						            <div class="overview-project-title">
+						                <h3 th:text="${project.subject}">프로젝트명</h3>
+						            </div>
+						
+						            <p th:text="|${project.startAt} ~ ${project.endAt}|">프로젝트 기간</p>
+						
+						            <div class="overview-project-progress">
+						                <div class="overview-progress-track" role="progressbar"
+						                     aria-valuemin="0" aria-valuemax="100"
+						                     th:attr="aria-label=|${project.subject} 진행률|, aria-valuenow=${project.progress}">
+						                    <div class="overview-progress-fill" th:style="|width: ${project.progress}%;|"></div>
+						                </div>
+						                <span th:text="|${project.progress}%|">0%</span>
+						            </div>
+						        </div>
+						    </li>
 						</ul>
+
 					</article>
 
 					<article class="overview-card overview-calendar-card">

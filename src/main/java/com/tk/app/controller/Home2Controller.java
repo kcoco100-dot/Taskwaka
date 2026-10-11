@@ -91,6 +91,15 @@ public class Home2Controller {
 				worksapce.getMemberId());
 		
 		model.addAttribute("myTasks", myTasks);
+		
+		// 참여 프로젝트 화면에서 사용중인 service 재사용
+		// 회원이 참여하는 프로젝트 목록 가져오기
+		List<ParticipatingProjectDto> participatingProjects = 
+				participatingProjectService.findParticipatingProjects(
+						worksapce.getWorkspaceId(),
+						worksapce.getMemberId());
+		
+		model.addAttribute("participatingProjects", participatingProjects);
 
 	    return "main/dashboard";
 	}
