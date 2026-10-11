@@ -13,6 +13,11 @@
 						<h3 class="text-center pt-3">[[${title}]]</h3>
 						<hr class="mt-4">
 						
+						<div class="text-center mt-4">
+							<img alt="오류를 표시해주는 쿼카" th:src="@{/dist/images/{file}(file=${errorImage != null ? errorImage : 'error.png'})}"
+								 class="img-fluid" style="width: 200px;">
+						</div>
+						
 						<div class="my-5">
 							<div class="text-center">
 								<p class="text-center">
