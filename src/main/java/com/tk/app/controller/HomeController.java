@@ -49,6 +49,12 @@ public class HomeController {
         model.addAttribute("findType", type);
         return "auth/find_account";
     }
+    
+    // 새 워크 생성
+    @GetMapping("/create")
+    public String workCreate() {
+        return "work/create";
+    }
 
     /**
      * 5. 프로젝트 화면 라우팅 (피드, 업무, 간트, 캘린더, 파일)

@@ -36,6 +36,7 @@ public class GlobalExceptionHandler {
 		
 		mav.addObject("title", title);
 		mav.addObject("message", errorMessage);
+		mav.addObject("errorImage", "error-400.png");
 		
 		log.info("BAD_REQUEST - ", ex);
 		
@@ -54,6 +55,7 @@ public class GlobalExceptionHandler {
 		
 		mav.addObject("title", title);
 		mav.addObject("message", errorMessage);
+		mav.addObject("errorImage", "error-400.png");
 
 		log.info("BAD_REQUEST - ", ex);
 		

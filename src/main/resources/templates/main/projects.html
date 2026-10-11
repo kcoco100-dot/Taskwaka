@@ -11,7 +11,7 @@
   	  
 <th:block layout:fragment="content">
 	<div class="home-layout">
-		<nav th:replace="~{layout/sidebar::homeSidebar('projects')}"></nav>
+		<nav th:replace="~{layout/homeSidebar::homeSidebar('projects')}"></nav>
 			
 		<div class="section">
 			<!-- 페이지 제목 영역 -->
@@ -21,22 +21,60 @@
 			</div>
 			
 			<div class="project-menu">
-				<button type="button" class="project-card project-card-view">
+				<div class="project-card project-card-view">
 					<span class="project-card-title">참여 프로젝트 조회</span>
 					<span class="project-card-description">
 						참여중인 프로젝트를 조회해보세요.
 					</span>
-					<span class="project-item">
-						⭐쌍용 프로젝트
-					</span>
-					<span class="project-item">
-						⭐쌍용 프로젝트
-					</span>
-					<span class="project-item">
-						⭐쌍용 프로젝트
-					</span>
-				</button>
-
+					
+					<p th:if="${#lists.isEmpty(participatingProjects)}">
+						⚠️현재 참여 중인 프로젝트가 없습니다.
+					</p>
+					
+					<div class="project-item"
+					     th:each="project : ${participatingProjects}">
+					
+					    <div>
+					        ⭐ <span th:text="${project.subject}"></span>
+					    </div>
+					
+					    <div th:switch="${project.projectStatus}">
+					        상태:
+					        <a th:case="0"
+					        	   class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   예정
+					        	</a>
+					        <a th:case="1"
+					           class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   진행중...
+					        	</a>
+					        <a th:case="2"
+					           class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   완료
+					        	</a>
+					        <a th:case="*"
+					           class="btn btn-outline-success"
+					        	   th:href="@{/project(tab='feed')}">
+					        	   확인필요
+					        	</a>
+					    </div>
+					
+					    <div>
+					        기간:
+					        <span th:text="${project.startAt}"></span>
+					        ~
+					        <span th:text="${project.endAt}"></span>
+					    </div>
+					
+					    <div>
+					        진행률:
+					        <span th:text="${project.progress}"></span>
+					    </div>
+					</div>
+				</div>
 
 			</div>
 		

@@ -12,33 +12,132 @@
 <th:block layout:fragment="content">
 	<div class="home-layout">
 	
-	<nav th:replace="~{layout/sidebar::homeSidebar('gantt')}"></nav>
+	<nav th:replace="~{layout/homeSidebar::homeSidebar('gantt')}"></nav>
 			
-		<div class="section">
-			<div class="page-heading">
-				<h1 class="page-title">간트차트</h1>
-				<p class="page-description">
-					사용하세여
-				</p>
-			</div>
-			
-			<div class="page-content gantt-content">
-				<div class="gantt-toolbar">
-					<h2 class="gantt-title">프로젝트 일정</h2>
-					<span class="gantt-view-label">주간 보기</span>
-				</div>
-				
-				<div class="gantt-placeholder">
-					차트 보이는곳
-				</div>
-			</div>
+		<div class="section gantt-page">
+		    <div class="page-heading">
+		        <p class="gantt-eyebrow">MY WORKSPACE</p>
+		        <p class="page-description">
+		            업무 기간과 진행 상황을 한눈에 확인하세요.
+		        </p>
+		    </div>
 		
+		    <div class="page-content gantt-content">
+		        <div class="gantt-toolbar">
+		            <div>
+		                <h2 class="gantt-title">담당 업무 일정</h2>
+		                <p class="gantt-caption" th:text="|담당 업무 ${#lists.size(myTasks)}개|"></p>
+		            </div>
+		
+		            <div class="gantt-legend" th:if="${!#lists.isEmpty(myTasks)}">
+		                <span><i class="gantt-dot gantt-dot-period"></i>업무 기간</span>
+		                <span><i class="gantt-dot gantt-dot-progress"></i>진행률</span>
+		            </div>
+		        </div>
+		        
+		        <div class="gantt-empty" th:if="${#lists.isEmpty(myTasks)}">
+		        	 	현재 워크에서 담당하는 업무가 없습니다.
+		        </div>
+		
+		        <div class="gantt-scroll" th:if="${!#lists.isEmpty(myTasks)}">
+		        <!-- 날짜 목록의 갯수를 CSS 변수 gantt-day-count 에 전달 -->
+		        <!-- data-start: 자바스크립트가 읽을 수 있도록 HTML 에 시작일을 저장하는 속성 -->
+		            <div class="gantt-board" th:style="|--gantt-day-count: ${#lists.size(ganttDate)};|"
+		            		 th:attr="data-start=${ganttStart}">
+		                <div class="gantt-header">
+		                    <div class="gantt-label-heading">업무 / 프로젝트</div>
+		                    <div class="gantt-days">
+		                    		<!-- 날짜 목록에서 하나씩 꺼내 날짜 칸 만들기 -->
+		                        <span th:each="date : ${ganttDate}" th:classappend="${date.dayOfWeek.value >= 6} ? 'gantt-weekend' : ''">
+		                        
+		                        <th:block th:text="${date.monthValue + '/' + date.dayOfMonth}">
+		                        		10/12
+		                        </th:block>
+		                        <!-- 1은 월요일, 요일 목록의 인덱스는 0부터 시작하므로 -1 해줘야 함 -->
+		                        <small th:text="${{'월', '화', '수', '목', '금', '토', '일'}[date.dayOfWeek.value - 1]}">
+		                        		월
+		                        </small>
+		                        
+		                        </span>
+		                    </div>
+		                </div>
+						
+						<div class="gantt-row" th:each="task : ${myTasks}">
+						    <div class="gantt-task">
+						        <strong th:text="${task.title}">업무명</strong>
+						        <span th:text="${task.subject}">프로젝트명</span>
+						        <span th:text="|${task.startAt} ~ ${task.endAt}|">업무 기간</span>
+						        <span th:text="|진행률 ${task.progress}%|">진행률</span>
+						    </div>
+						
+							<!-- 간트차트에 표시할 막대 -->
+						    <div class="gantt-track" th:attr="data-start=${task.startAt}, data-end=${task.endAt}">
+						    		<!-- 업무 기간 전체를 표시하는 막대 -->
+						    		<div class="gantt-bar" hidden th:title="|${task.title}: ${task.startAt} ~ ${task.endAt}, 진행률 ${task.progress}%|">
+						    			<!-- 막대 내부를 저장된 진행률만큼 채움 -->
+						    			<div class="gantt-bar-fill" th:style="|width: ${task.progress}%;|"></div>
+						    		
+						    		<span class="gantt-bar-text" th:text="|${task.progress}%|">0%</span>
+						    		</div>
+						    
+						    </div>
+						</div>
+		        		</div>
+		    		</div>
+		    		
+		        <p class="gantt-footnote" th:if="${!#lists.isEmpty(myTasks)}">
+		            막대 길이는 업무 기간을, 안쪽 색상은 진행률을 나타냅니다.
+		        </p>
+		        
+			</div>
 		</div>
 	</div>
 	
 </th:block>
  
 <th:block layout:fragment="script">
+	<script>
+	document.addEventListener('DOMContentLoaded', function(){
+		const board = document.querySelector('.gantt-board');
+		
+		// 업무가 없으면 간트도 없음.
+		if(!board) {
+			return;
+		}
+		
+		// 하루를 밀리초로 계산
+		// 날짜끼리 빼기 위해서 밀리초로 계산한다
+		// 빼서 나온 값을 하루의 밀리초로 나누면 몇일 차이인지 알 수 있음
+		const dayMilliseconds = 24 * 60 * 60 * 1000;
+		
+		// UTC 자정 기준의 숫자로 변환
+		function toMilliseconds(dateString) {
+			return Date.parse(dateString + 'T00:00:00Z');
+		}
+		
+		// 간트 전체의 시작일
+		const chartStart = toMilliseconds(board.dataset.start);
+		
+		board.querySelectorAll('.gantt-track').forEach(function (track){
+			const taskStart = toMilliseconds(track.dataset.start);
+			const taskEnd = toMilliseconds(track.dataset.end);
+			const bar = track.querySelector('.gantt-bar');
+			
+			// 간트 시작일부터 몇일 뒤에 업무가 시작하는지 계산
+			// 날짜 차이를 계산해서 막대의 위치를 정하는 로직 
+			const startColumn = (taskStart - chartStart) / dayMilliseconds + 1;
+			
+			const endColumn = (taskEnd - chartStart) / dayMilliseconds + 2;
+			
+			// 계산한 시작 경계부터 끝 칸 사이의 경계까지 막대를 배치
+			bar.style.gridColumn = `${startColumn} / ${endColumn}`;
+			
+			// 막대 표시
+			bar.hidden = false;
+		});
+	});
+	</script>
+
 </th:block> 
 
 </html>

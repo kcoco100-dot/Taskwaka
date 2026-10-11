@@ -1,0 +1,138 @@
+﻿@charset "UTF-8";
+
+.home-layout.notice-detail-layout > .shell-section {
+    padding: 36px 40px;
+    gap: 0;
+}
+
+.notice-detail-layout .page-heading,
+.notice-detail-layout .shell-content,
+.notice-detail-layout .shell-actions {
+    width: 100%;
+    max-width: 960px;
+    align-self: center;
+    box-sizing: border-box;
+}
+
+.notice-detail-layout .page-heading {
+    margin-bottom: 24px;
+}
+
+.notice-detail-layout .page-title {
+    margin: 0;
+    color: #594331;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.6px;
+}
+
+.notice-detail-layout .page-description {
+    margin: 8px 0 0;
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.notice-detail-layout .shell-content {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    gap: 16px;
+    flex: 0 0 auto;
+    padding: 32px;
+    border: 1px solid #E8E2D9;
+    border-radius: 18px;
+    background: #FFFFFF;
+    box-shadow: 0 6px 24px rgba(89, 67, 49, 0.04);
+}
+
+.notice-detail-layout .shell-content > h2 {
+    grid-column: 1 / -1;
+    margin: 0 0 8px;
+    color: #493B2F;
+    font-family: inherit;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.55;
+    letter-spacing: -0.5px;
+    overflow-wrap: anywhere;
+}
+
+.notice-detail-layout .shell-content > p {
+    min-width: 0;
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid #F0EBE4;
+    border-radius: 10px;
+    background: #FBFAF7;
+    color: #786B5E;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.notice-detail-layout .shell-content > p > span {
+    display: block;
+    margin-top: 5px;
+    color: #594331;
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.notice-detail-layout .shell-content > hr {
+    grid-column: 1 / -1;
+    height: 1px;
+    margin: 8px 0;
+    border: 0;
+    background: #EEE8E0;
+    opacity: 1;
+}
+
+.notice-detail-layout .shell-content > div {
+    grid-column: 1 / -1;
+    min-width: 0;
+    min-height: 220px;
+    padding: 4px 0 16px;
+    color: #574C42;
+    font-size: 15px;
+    line-height: 1.95;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.notice-detail-layout .shell-actions {
+    justify-content: flex-start;
+    margin-top: 20px;
+}
+
+.notice-detail-layout .shell-action {
+    gap: 8px;
+    padding: 11px 20px;
+    border: 1px solid #D5E2C7;
+    border-radius: 10px;
+    background: #EEF4E6;
+    color: #465B38;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.notice-detail-layout .shell-action::before {
+    content: "←";
+    font-size: 17px;
+    line-height: 1;
+}
+
+.notice-detail-layout .shell-action:hover {
+    border-color: #C1D3AF;
+    background: #E3EDD8;
+    color: #3B502E;
+}
+
+.notice-detail-layout .shell-action:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 3px;
+}

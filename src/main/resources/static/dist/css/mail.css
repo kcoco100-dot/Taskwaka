@@ -1,6 +1,5 @@
 ﻿@charset "UTF-8";
 
-/* 오른쪽 본문: 제목 + 남은 공간을 채우는 메일함 */
 .home-layout > .mail-section {
     display: flex;
     flex-direction: column;
@@ -10,7 +9,6 @@
     overflow: hidden;
 }
 
-/* 페이지 제목 */
 .mail-section .mail-heading {
     flex-shrink: 0;
     margin-bottom: 20px;
@@ -31,7 +29,6 @@
     line-height: 1.6;
 }
 
-/* 제목 아래 남은 높이와 전체 너비 사용 */
 .mail-section .mail-menu {
     display: flex;
     flex: 1;
@@ -39,7 +36,6 @@
     min-height: 0;
 }
 
-/* 메일 목록 박스 */
 .mail-section .mail-card {
     display: flex;
     flex-direction: column;
@@ -56,13 +52,10 @@
     font: inherit;
     text-align: left;
     box-sizing: border-box;
-
-    /* 메일이 많아지면 박스 내부만 스크롤 */
     overflow-y: auto;
     overscroll-behavior-y: contain;
 }
 
-/* 내용이 많아도 각 항목의 높이 유지 */
 .mail-section .mail-card > span {
     flex-shrink: 0;
     overflow-wrap: anywhere;
@@ -82,7 +75,6 @@
     line-height: 1.6;
 }
 
-/* 메일 한 줄 */
 .mail-section .mail-card-project {
     display: block;
     padding: 16px 18px;

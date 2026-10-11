@@ -1,0 +1,218 @@
+﻿@charset "UTF-8";
+
+.notice-layout > .notice-section {
+    padding: 32px;
+}
+
+.notice-section .notice-heading {
+    margin-bottom: 24px;
+}
+
+.notice-section .notice-label {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #596D49;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.notice-section .notice-page-title {
+    margin: 0;
+    color: #594331;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.notice-section .notice-description {
+    margin: 10px 0 0;
+    color: #786B5E;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.notice-section .notice-panel {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #E8E2D9;
+    border-radius: 18px;
+    background: #FFFFFF;
+    box-shadow: 0 4px 18px rgba(89, 67, 49, 0.03);
+}
+
+.notice-section .notice-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 26px;
+    border-bottom: 1px solid #EEE8E0;
+}
+
+.notice-section .notice-panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.notice-section .notice-panel-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: #EEF4E6;
+    color: #596D49;
+    font-size: 20px;
+}
+
+.notice-section .notice-panel-heading h2 {
+    margin: 0;
+    color: #594331;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.notice-section .notice-panel-heading p {
+    margin: 5px 0 0;
+    color: #786B5E;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.notice-section .notice-count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 7px 13px;
+    border: 1px solid #E1E9D8;
+    border-radius: 20px;
+    background: #F3F7ED;
+    color: #596D49;
+    font-size: 12px;
+}
+
+.notice-section .notice-count strong {
+    font-size: 15px;
+}
+
+.notice-section .notice-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.notice-section .notice-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+    background: #F5F2EC;
+    color: #8A7B67;
+    font-size: 30px;
+}
+
+.notice-section .notice-empty h3 {
+    margin: 0;
+    color: #594331;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.notice-section .notice-empty p {
+    margin: 10px 0 0;
+    color: #786B5E;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.notice-section .notice-table-wrap {
+    overflow-x: auto;
+}
+
+.notice-section .notice-table {
+    width: 100%;
+    min-width: 620px;
+    margin: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    color: #665747;
+    font-size: 14px;
+}
+
+.notice-section .notice-table th {
+    padding: 14px 24px;
+    border-bottom: 1px solid #EEE8E0;
+    background: #FBFAF7;
+    color: #786B5E;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.notice-section .notice-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid #F0EBE4;
+    vertical-align: middle;
+}
+
+.notice-section .notice-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.notice-section .notice-table tbody tr:hover {
+    background: #FCFCF8;
+}
+
+.notice-section .notice-title-cell {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.notice-section .notice-type {
+    flex-shrink: 0;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #EEF4E6;
+    color: #596D49;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.notice-section .notice-item-title {
+    min-width: 0;
+    color: #594331;
+    font-weight: 600;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.notice-section .notice-author-col {
+    width: 130px;
+    overflow-wrap: anywhere;
+}
+
+.notice-section .notice-date-col {
+    width: 150px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.notice-section .notice-table .notice-views-col {
+    width: 100px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}

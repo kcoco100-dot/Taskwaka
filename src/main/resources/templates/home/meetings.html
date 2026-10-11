@@ -12,13 +12,32 @@
 <th:block layout:fragment="content">
 	<div class="home-layout">
 	
-		<nav th:replace="~{layout/sidebar::homeSidebar('meetings')}"></nav>
+		<nav th:replace="~{layout/homeSidebar::homeSidebar('meetings')}"></nav>
 			
 		<div class="section meetings-page">
 			<div class="page-content meetings-content">
-				<div class="meetings-heading">
-					<h2 class="meetings-title">회의록 목록</h2>
-					<button type="button" class="meetings-write-button">회의록 작성하기</button>
+
+				<div class="meetings-toolbar">
+				    <h2 class="meetings-title">회의록 목록</h2>
+				
+					<form class="meetings-search" role="search" aria-label="회의록 검색"
+					      method="get" th:action="@{/{domainKey}/home/meetings(domainKey=${domainKey})}">
+					    <i class="bi bi-search" aria-hidden="true"></i>
+					    		<label for="meetingSearchKeyword" class="visually-hidden">
+					       		회의록 검색어
+					    		</label>
+					    		
+					    		<input type="search" id="meetingSearchKeyword" name="kwd" placeholder="회의록 검색">
+					    		
+						    <button type="submit" class="meetings-search-button">
+						        검색
+						    </button>
+					</form>
+				
+				    <button type="button" class="meetings-write-button">
+				        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+				        회의록 작성
+				    </button>
 				</div>
 
 				<div class="meetings-table-wrap">
@@ -31,33 +50,27 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
+							<tr th:each="meeting: ${meetingMinutes}">
 								<td>
-									<p class="meeting-title">프로젝트 시작 회의</p>
-									<p class="meeting-summary">프로젝트 목표와 팀원별 역할을 정리했어요.</p>
+									<p class="meeting-title">
+										<a th:href="@{/{domainKey}/home/meetingsDetail(domainKey=${domainKey},
+								            meetingMinuteId=${meeting.meetingMinuteId})}" th:text="${meeting.title}">
+								        </a>
+							        </p>
+									<p class="meeting-summary" th:text="${meeting.summary}"></p>
 								</td>
-								<td class="meeting-date">2026.10.07</td>
-								<td class="meeting-writer">김민수</td>
-							</tr>
-							<tr>
-								<td>
-									<p class="meeting-title">화면 디자인 회의</p>
-									<p class="meeting-summary">주요 화면의 구성과 디자인 방향을 정했어요.</p>
-								</td>
-								<td class="meeting-date">2026.10.05</td>
-								<td class="meeting-writer">이서연</td>
-							</tr>
-							<tr>
-								<td>
-									<p class="meeting-title">주간 진행 상황 회의</p>
-									<p class="meeting-summary">완료한 작업을 공유하고 다음 일정을 확인했어요.</p>
-								</td>
-								<td class="meeting-date">2026.10.02</td>
-								<td class="meeting-writer">박지훈</td>
+								
+								<td class="meeting-date" th:text="${meeting.meetingDate}"></td>
+								<td class="meeting-writer" th:text="${meeting.authorName}"></td>
 							</tr>
 						</tbody>
+						
 					</table>
 				</div>
+				
+				<nav class="meetings-pagination" aria-label="회의록 페이지 이동" 
+					 th:if="${!#strings.isEmpty(paging)}" th:utext="${paging}">
+				</nav>
 			</div>
 		
 		</div>

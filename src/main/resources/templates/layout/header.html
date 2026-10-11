@@ -12,7 +12,10 @@
 					class="team-logo-image" alt="">
 				<span>TASKWAKA</span>
 			</a>
-			<span class="team-name">개발팀</span>
+			<span class="team-name"
+				  th:if="${workspace != null}"
+				  th:text="${workspace.subject}">
+			</span>
 		</div>
 		
 		<div class="team-header-right">

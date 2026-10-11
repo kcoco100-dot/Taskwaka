@@ -1,6 +1,5 @@
 ﻿@charset "UTF-8";
 
-/* 팀 선택 홈 전체 */
 .mainHome {
     min-height: calc(100vh - 128px);
     padding: 72px 24px;
@@ -8,7 +7,6 @@
     color: #594331;
 }
 
-/* 상단 안내 */
 .mainHome-heading {
     margin-bottom: 40px;
     text-align: center;
@@ -44,7 +42,6 @@
     word-break: keep-all;
 }
 
-/* 카드 두개 나란히 */
 .mainHome-menu {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -53,7 +50,6 @@
     margin: 0 auto;
 }
 
-/* 카드 공통부분 */
 .mainHome .team-card {
     display: flex;
     flex-direction: column;
@@ -81,7 +77,6 @@
     outline-offset: 4px;
 }
 
-/* 카드 아이콘 디자인 */
 .mainHome .team-card-icon {
     display: flex;
     justify-content: center;
@@ -103,7 +98,6 @@
     color: #795C43;
 }
 
-/* 카드 문구 부분 */
 .mainHome .team-card-title {
     margin-bottom: 10px;
     font-size: 21px;
@@ -123,4 +117,61 @@
     color: #4F6242;
     font-size: 13px;
     font-weight: 700;
+}
+
+
+.mainHome {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.mainHome::before,
+.mainHome::after {
+    content: "";
+    position: absolute;
+    width: clamp(190px, 30vw, 390px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.mainHome::before {
+    top: -80px;
+    left: -70px;
+    background: rgba(166, 124, 91, 0.34);
+    animation: mainHome-brown 8s ease-in-out -4s infinite alternate;
+}
+
+.mainHome::after {
+    right: -70px;
+    bottom: -100px;
+    background: rgba(172, 202, 137, 0.44);
+    animation: mainHome-green 8s ease-in-out -5s infinite alternate;
+}
+
+.mainHome-heading,
+.mainHome-menu {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes mainHome-brown {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(160px, 130px) scale(1.15);
+    }
+}
+
+@keyframes mainHome-green {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(-170px, -120px) scale(1.12);
+    }
 }

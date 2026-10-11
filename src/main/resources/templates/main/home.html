@@ -10,25 +10,71 @@
   	  
 <th:block layout:fragment="content">
 	<div class="home-layout">
-		<nav th:replace="~{layout/sidebar::homeSidebar('calendar')}"></nav>
+		<nav th:replace="~{layout/homeSidebar::homeSidebar('calendar')}"></nav>
 			
 		<div class="section">
 			<!-- 페이지 제목 영역 -->
 			<div class="page-heading">
-				<h1 class="page-title">2026년 10월</h1>
-				<p class="page-description">팀의 일정을 한눈으로 확인하세요.</p>
+				<p class="page-description">담당 업무의 일정을 확인해보세요.</p>
 			</div>
 			
 			<!-- 콘텐츠 영역 -->
 			<div class="page-content">
-				<p class="calendar-placeholder">캘린더가 표시될 부분</p>
+				<div id="myTaskCalendar"></div>
 			</div>
 		</div>
 		
 	</div>
 </th:block>
  
+ <!-- th:inline="javascript" : 컨트롤러가 전달한 데이터를 스크립트에서 사용할 수 있게 해줌 -->
 <th:block layout:fragment="script">
+	<script th:src="@{/dist/vendor/fullcalendar6/dist/index.global.min.js}"></script>
+	<script th:src="@{/dist/vendor/fullcalendar6/dist/locales/ko.global.min.js}"></script>
+
+	<script th:inline="javascript">
+		document.addEventListener('DOMContentLoaded', function(){
+			const calendarEl = document.getElementById('myTaskCalendar');
+			
+			// 컨트롤러가 전달한 담당 업무 목록
+			// /*[[${myTasks}]]*/ : 타임리프가 실제 조회 결과로 바꾸는 표현식
+			const tasks = /*[[${myTasks}]]*/[];
+			
+			// 업무 하나씩 FullCalendar 가 사용하는 일정 형태로 변환
+			function nextDate(dateString) {
+				const [year, month, day] = dateString.split('-').map(Number);
+				
+				return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+			}
+			
+			const taskEvents = tasks.map(function (task){
+				return {
+					id: String(task.taskId),
+					// 업무명 (진행률%) 로 표시
+					title: `${task.title} (${task.progress}%)`,
+					start: task.startAt,
+					end: nextDate(task.endAt),
+					allDay: true
+				};
+			});
+			
+			const calendar = new FullCalendar.Calendar(calendarEl, {
+				initialView: 'dayGridMonth',
+				locale: 'ko',
+				height: 'auto',
+				headerToolbar: {
+					left: 'prev,next today',
+					center: 'title',
+					right: ''
+				},
+				events: taskEvents
+			});
+			
+			calendar.render();
+		});
+	
+	</script>
+
 </th:block> 
 
 </html>
