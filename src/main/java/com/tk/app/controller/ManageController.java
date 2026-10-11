@@ -1,8 +1,10 @@
 package com.tk.app.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.tk.app.domain.dto.ManageDto;
 import com.tk.app.domain.dto.SessionInfo;
@@ -53,11 +57,37 @@ public class ManageController {
 		try {
 			Long workspaceId = servive.findByDomainKey(domainKey);
 			
-			System.out.println("조회된 워크스페이스 번호: " + workspaceId);
-			if(workspaceId != null) {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+            if (info == null) {
+                return "redirect:/login";
+            }
+			
+            if(workspaceId != null) {
+                Integer currentRole = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
+                if (currentRole == null) currentRole = 0;
+            
+                System.out.println("조회된 워크스페이스 번호: " + workspaceId);
 				List<ProjectTeamView> teamMembers = projectMemberRepository.findWorkspaceMembersWithProject(workspaceId);
 				System.out.println("조회된 팀원 수: " + teamMembers.size());
+				
+				Map<String, Object> map = new HashMap<>();
+                map.put("workspace_id", workspaceId);
+                List<ManageDto> allProjects = servive.listProject(map);
+                List<ManageDto> activeProjects = new ArrayList<>();
+                java.util.Set<Long> seenProjectIds = new java.util.HashSet<>();
+                
+                for (ManageDto p : allProjects) {
+                    if (p.getStatus() == 0 || p.getStatus() == 1) {
+                    	if (!seenProjectIds.contains(p.getProject_id())) {
+                            seenProjectIds.add(p.getProject_id());
+                            activeProjects.add(p);
+                    	}
+                    }
+                }
+                
 				model.addAttribute("teamMembers", teamMembers);
+				model.addAttribute("projectList", activeProjects);
+				model.addAttribute("currentRole", currentRole);
 			}
 			
 		} catch (Exception e) {
@@ -66,6 +96,62 @@ public class ManageController {
 		
 		return "manage/manage";
 	}
+	
+	// 인원 프로젝트 배정
+	@PostMapping("/assignProject")
+    @ResponseBody
+    public Map<String, Object> assignProject(
+            @PathVariable("domainKey") String domainKey,
+            @RequestParam("workspaceMemberId") Long workspaceMemberId,
+            @RequestParam("projectId") Long projectId,
+            @RequestParam("role") int role) {
+            
+        Map<String, Object> resultMap = new HashMap<>();
+        
+        try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			if (info == null) {
+			    resultMap.put("status", "fail");
+			resultMap.put("message", "로그인이 만료되었거나 정보가 없습니다.");
+			    return resultMap;
+			}
+			
+			Long workspaceId = servive.findByDomainKey(domainKey);
+			if (workspaceId == null) {
+			    resultMap.put("status", "fail");
+			resultMap.put("message", "유효하지 않은 워크스페이스입니다.");
+			    return resultMap;
+			}
+			
+			Integer currentRole = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
+			if (currentRole == null) {
+			    currentRole = 0; // 권한이 아예 없으면 0으로 처리
+			}
+			
+			if (currentRole < 50) {
+			    resultMap.put("status", "fail");
+			resultMap.put("message", "프로젝트 배정 권한이 없습니다.");
+			    return resultMap;
+			}
+			
+			if (currentRole == 50 && role == 70) {
+			    resultMap.put("status", "fail");
+			resultMap.put("message", "자신보다 높은 권한(PM)을 부여할 수 없습니다.");
+			    return resultMap;
+			}
+        	
+        	
+            servive.assignOrUpdateProjectMember(workspaceMemberId, projectId, role);
+        	
+            resultMap.put("status", "success");
+            
+        } catch (Exception e) {
+            log.info("assignProject: ", e);
+        }
+        
+        return resultMap;
+    }
+	
 	
 	// 프로젝트 페이지
 	@GetMapping("/view")
@@ -96,7 +182,7 @@ public class ManageController {
 		return "manage/viewWrite";
 	}
 	
-	// 프로젝트 등록
+	// 프로젝트 등록 처리
 	@PostMapping("/write")
 	public String writeSubmit(@PathVariable("domainKey") String domainKey,
 			ManageDto dto) throws Exception {

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.tk.app.domain.dto.ManageDto;
+import com.tk.app.repository.ProjectTeamView;
 
 public interface ManageService {
 	public Long findByDomainKey(String domainKey) throws Exception;
@@ -15,4 +16,7 @@ public interface ManageService {
 	
 	public List<ManageDto> listProject(Map<String, Object> map) throws SQLException;
 	public int dataCount(Map<String, Object> map) throws Exception;
+	
+	public List<ProjectTeamView> listWorkspaceMembers(Long workspaceId) throws Exception;
+	public void assignOrUpdateProjectMember(Long workspaceMemberId, Long projectId, int role) throws Exception;
 }

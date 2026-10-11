@@ -4,11 +4,15 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tk.app.common.MyUtil;
 import com.tk.app.domain.dto.ManageDto;
 import com.tk.app.mapper.ManageMapper;
+import com.tk.app.repository.ProjectMemberRepository;
+import com.tk.app.repository.ProjectTeamView;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ManageServiceImpl implements ManageService{
 	private final ManageMapper mapper;
 	private final MyUtil myUtil;
+	
+	@Autowired
+    private ProjectMemberRepository projectMemberRepository;
 	
 	@Override
 	public Long findByDomainKey(String domainKey) throws Exception {
@@ -80,4 +87,15 @@ public class ManageServiceImpl implements ManageService{
         }
 	}
 
+	@Override
+	public List<ProjectTeamView> listWorkspaceMembers(Long workspaceId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	@Transactional
+	public void assignOrUpdateProjectMember(Long workspaceMemberId, Long projectId, int role) throws Exception {
+		projectMemberRepository.upsertProjectMember(workspaceMemberId, projectId, role);
+	}
 }

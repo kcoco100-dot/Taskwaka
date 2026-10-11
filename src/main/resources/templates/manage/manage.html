@@ -28,23 +28,20 @@
                     <th>참여 프로젝트</th>
                     <th>프로젝트 직위</th>
                     <th>상태</th>
-                    <th>관리</th>
+                    <th>관리 (직위 변경 / 신규 배정)</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- 팀원 목록 반복 출력 구역 -->
                 <tr class="project-list-row" th:each="member : ${teamMembers}">
                     
-                    <!-- 이름 -->
                     <td>
                         <strong class="project-name" th:text="${member.name}">이팀장</strong>
                     </td>
                    
-					<td th:text="${member.projectName != null and member.projectName != '' ? member.projectName : '존재하지 않음'}">
+					<td th:text="${member.projectName != null and member.projectName != '' ? member.projectName : '미배정'}">
 		                프로젝트명
 		            </td>
                    
-                    <!-- 직위 표시 (70=PM, 50=DT, 30=TL, 10=AA) -->
                     <td th:switch="${member.role}">
                         <span th:case="70" class="project-status project-status-progress">PM</span>
                         <span th:case="50" class="project-status project-status-planned">DT</span>
@@ -53,26 +50,38 @@
                         <span th:case="*" class="project-status">미정</span>
                     </td>
                     
-                    <!-- 상태 표시 (0=참여중, 1=비활성) -->
-                    <td>
-                        <span class="project-status" 
-                              th:classappend="${member.status == 0 ? 'project-status-completed' : 'project-status-paused'}"
-                              th:text="${member.status == 0 ? '참여중' : '비활성'}">참여중</span>
-                    </td>
-                    
-                    <!-- 개별 관리 버튼 -->
-                    <td>
-					    <div class="project-row-actions">
-					        <button type="button" 
-					                class="project-button project-edit" 
-					                th:data-id="${member.projectMemberId}"
-					                th:aria-label="${member.name} + ' 직위 변경'">직위 변경</button>
-					        <button type="button" 
-					                class="project-button project-delete" 
-					                th:data-id="${member.projectMemberId}"
-					                th:aria-label="${member.name} + ' 프로젝트 제외'">제외</button>
-					    </div>
+					<td>
+					<span class="project-status" 
+						th:classappend="${member.status == 0 ? 'project-status-completed' : 'project-status-paused'}"
+						th:text="${member.status == 0 ? '참여중' : '비활성'}">참여중</span>
 					</td>
+                    
+					<td th:if="${currentRole >= 50}">
+						<div style="display: flex; gap: 5px; align-items: center;">
+	                        
+	                        <select class="project-select" th:id="'projectSelect_' + ${member.workspaceMemberId}" 
+	                                style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; min-width: 140px; cursor: pointer; position: relative; z-index: 10;">
+	                            <option value="" disabled selected>-- 프로젝트 --</option>
+	                            <option th:each="proj : ${projectList}" 
+	                                    th:value="${proj.project_id}" 
+	                                    th:text="${proj.status == 0 ? '[예정] ' + proj.subject : '[진행중] ' + proj.subject}"></option>
+	                        </select>
+	                        
+	                        <select class="role-select" th:id="'roleSelect_' + ${member.workspaceMemberId}" 
+	                                style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; position: relative; z-index: 10;">
+	                            <option value="" disabled selected>-- 직위 --</option>
+	                            <option th:if="${currentRole >= 70}" value="70">PM</option>
+	                            <option value="50">DT</option>
+	                            <option value="30">TL</option>
+	                            <option value="10">AA</option>
+	                        </select>
+	                        
+	                        <button type="button" 
+	                                class="project-button project-assign" 
+	                                th:data-workspace-member-id="${member.workspaceMemberId}"
+	                                style="background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; position: relative; z-index: 10;">배정</button>
+	                    </div>
+	                </td>
                 </tr>
 
                 <!-- 팀원이 0명일 때 출력되는 빈 화면 -->
@@ -90,7 +99,49 @@
 </th:block>
 
 <th:block layout:fragment="script">
-
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+		    const pathParts = window.location.pathname.split('/');
+			const domainKey = pathParts[1]; 
+		
+		    const assignButtons = document.querySelectorAll('.project-assign');
+		    assignButtons.forEach(button => {
+		    	button.addEventListener('click', function() {
+		    		const workspaceMemberId = this.getAttribute('data-workspace-member-id');     
+		            const projectId = document.getElementById('projectSelect_' + workspaceMemberId).value;
+		            const roleInput = document.getElementById('roleSelect_' + workspaceMemberId).value;
+		
+		            if(!projectId) {
+		                alert("프로젝트를 선택해주세요.");
+		                return;
+		            }
+		            if(!roleInput) {
+		                alert("직위를 선택해주세요.");
+		                return;
+		            }
+		
+		            fetch(`/${domainKey}/manage/assignProject`, {
+		                method: 'POST',
+		                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		                body: `workspaceMemberId=${workspaceMemberId}&projectId=${projectId}&role=${roleInput}`
+		            })
+		            .then(response => response.json())
+		            .then(data => {
+		                if(data.status === 'success') {
+		                    alert("배정이 완료되었습니다.");
+		                    window.location.reload(); 
+		                } else {
+		                    alert("배정에 실패했습니다: " + (data.message || "오류 발생"));
+		                }
+		            })
+		            .catch(error => {
+		                console.error('Error:', error);
+		                alert("서버와 통신 중 오류가 발생했습니다.");
+		            });
+		        });
+		    });
+		});
+    </script>
 </th:block>
 
 </html>
