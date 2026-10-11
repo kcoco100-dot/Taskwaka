@@ -17,9 +17,11 @@ import org.springframework.web.util.HtmlUtils;
 import com.tk.app.admin.domain.dto.WorkspaceDto;
 import com.tk.app.common.PaginateUtil;
 import com.tk.app.domain.dto.MeetingMinutesDto;
+import com.tk.app.domain.dto.MyTaskDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
 import com.tk.app.service.MeetingMinutesService;
+import com.tk.app.service.MyTaskService;
 import com.tk.app.service.NoticeService;
 import com.tk.app.service.ParticipatingProjectService;
 
@@ -37,6 +39,7 @@ public class Home2Controller {
 	private final NoticeService noticeService;
 	private final MeetingMinutesService meetingMinutesService;
 	private final PaginateUtil paginateUtil;
+	private final MyTaskService myTaskService;
 	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(
@@ -52,17 +55,6 @@ public class Home2Controller {
 		
 		return workspace;
 	}
-	
-
-    // 워크 HOME 화면
-    @GetMapping
-    public String home() {
-
-        // 기존 HOME 화면 사용
-        return "main/dashboard";
-    }
-
-
 
     // calendar 페이지
     @GetMapping("/calendar")
@@ -78,9 +70,17 @@ public class Home2Controller {
 		return "manage/manage";
 	}
 	
-	@GetMapping("/dashboard")
-	public String dashboard() {
+	// 기존 home 화면, 내 업무 목록 조회
+	@GetMapping({"", "/dashboard"})
+	public String dashboard(
+			@RequestAttribute("workspace") WorkspaceDto worksapce,
+			Model model) {
 
+		List<MyTaskDto> myTasks = myTaskService.findTasksList(
+				worksapce.getWorkspaceId(), 
+				worksapce.getMemberId());
+		
+		model.addAttribute("myTasks", myTasks);
 
 	    return "main/dashboard";
 	}

@@ -95,44 +95,39 @@
 							</a>
 						</div>
 						<div class="overview-task-summary">
-							<span><strong>3개</strong>의 업무가 기다리고 있어요.</span>
+							<span>
+								<strong th:text="|${#lists.size(myTasks)}개|">0개</strong>의 담당 업무가 있어요.
+							</span>
 							<span class="overview-summary-dot">마감일 순</span>
 						</div>
+
 						<ul class="overview-task-list">
-							<li class="overview-task-row">
-								<span class="overview-task-check" aria-hidden="true"></span>
-								<div class="overview-task-copy">
-									<h3>로그인 화면 UI 디자인</h3>
-									<p>
-										<span>자바 프로젝트</span>
-										<span class="overview-due-today">오늘 마감</span>
-									</p>
-								</div>
-								<span class="overview-badge overview-badge-review">검토 중</span>
-							</li>
-							<li class="overview-task-row">
-								<span class="overview-task-check" aria-hidden="true"></span>
-								<div class="overview-task-copy">
-									<h3>프로젝트 조회 페이지 작업</h3>
-									<p>
-										<span>오라클 프로젝트</span>
-										<span>10.09 마감</span>
-									</p>
-								</div>
-								<span class="overview-badge overview-badge-ongoing">진행 중</span>
-							</li>
-							<li class="overview-task-row">
-								<span class="overview-task-check" aria-hidden="true"></span>
-								<div class="overview-task-copy">
-									<h3>문서 저장 구조 설계</h3>
-									<p>
-										<span>몽고디비 프로젝트</span>
-										<span>10.12 마감</span>
-									</p>
-								</div>
-								<span class="overview-badge overview-badge-ongoing">진행 중</span>
-							</li>
+						    <li class="overview-task-row"
+						        th:if="${#lists.isEmpty(myTasks)}">
+						        담당 업무가 없습니다.
+						    </li>
+						
+						    <li class="overview-task-row" th:each="task : ${myTasks}">
+						        <span class="overview-task-check" aria-hidden="true"></span>
+						
+						        <div class="overview-task-copy">
+						            <h3 th:text="${task.title}">업무 제목</h3>
+						            <p>
+						                <span th:text="${task.subject}">프로젝트명</span>
+						                <span th:text="|${task.endAt} 마감|">마감일</span>
+						            </p>
+						        </div>
+						
+						        <th:block th:switch="${task.status}">
+						            <span th:case="0" class="overview-badge overview-badge-planned">할일</span>
+						            <span th:case="1" class="overview-badge overview-badge-ongoing">진행중</span>
+						            <span th:case="2" class="overview-badge overview-badge-review">검토중</span>
+						            <span th:case="3" class="overview-badge overview-badge-ongoing">완료</span>
+						        </th:block>
+						    </li>
 						</ul>
+
+
 					</article>
 
 					<article class="overview-card overview-project-card">
