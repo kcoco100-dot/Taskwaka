@@ -13,7 +13,7 @@
 
 	<select id="listProject" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
 		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date, 
-			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created 
+			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created
 		FROM projects p
 		LEFT OUTER JOIN project_members pm ON p.project_id = pm.project_id
 		ORDER BY project_id DESC

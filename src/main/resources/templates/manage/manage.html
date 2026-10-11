@@ -7,6 +7,7 @@
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
 </th:block>
 
 <th:block layout:fragment="content">
@@ -20,7 +21,68 @@
 		    </div>
 		
 		    <div class="member-content">
-		        <!-- 나중에 팀원 목록이 들어갈 자리 -->
+<table class="project-list-table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>참여 프로젝트</th>
+                    <th>프로젝트 직위</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 팀원 목록 반복 출력 구역 -->
+                <tr class="project-list-row" th:each="member : ${teamMembers}">
+                    
+                    <!-- 이름 -->
+                    <td>
+                        <strong class="project-name" th:text="${member.name}">이팀장</strong>
+                    </td>
+                   
+					<td th:text="${member.projectName != null and member.projectName != '' ? member.projectName : '존재하지 않음'}">
+		                프로젝트명
+		            </td>
+                   
+                    <!-- 직위 표시 (70=PM, 50=DT, 30=TL, 10=AA) -->
+                    <td th:switch="${member.role}">
+                        <span th:case="70" class="project-status project-status-progress">PM</span>
+                        <span th:case="50" class="project-status project-status-planned">DT</span>
+                        <span th:case="30" class="project-status project-status-completed">TL</span>
+                        <span th:case="10" class="project-status project-status-paused">AA</span>
+                        <span th:case="*" class="project-status">미정</span>
+                    </td>
+                    
+                    <!-- 상태 표시 (0=참여중, 1=비활성) -->
+                    <td>
+                        <span class="project-status" 
+                              th:classappend="${member.status == 0 ? 'project-status-completed' : 'project-status-paused'}"
+                              th:text="${member.status == 0 ? '참여중' : '비활성'}">참여중</span>
+                    </td>
+                    
+                    <!-- 개별 관리 버튼 -->
+                    <td>
+					    <div class="project-row-actions">
+					        <button type="button" 
+					                class="project-button project-edit" 
+					                th:data-id="${member.projectMemberId}"
+					                th:aria-label="${member.name} + ' 직위 변경'">직위 변경</button>
+					        <button type="button" 
+					                class="project-button project-delete" 
+					                th:data-id="${member.projectMemberId}"
+					                th:aria-label="${member.name} + ' 프로젝트 제외'">제외</button>
+					    </div>
+					</td>
+                </tr>
+
+                <!-- 팀원이 0명일 때 출력되는 빈 화면 -->
+                <tr th:if="${#lists.isEmpty(teamMembers)}">
+                    <td colspan="5" class="project-empty" style="text-align: center; padding: 40px 0;">
+                        조회된 프로젝트 팀원이 없습니다.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 		    </div>
 		</div>
 	</div>
@@ -28,6 +90,7 @@
 </th:block>
 
 <th:block layout:fragment="script">
+
 </th:block>
 
 </html>

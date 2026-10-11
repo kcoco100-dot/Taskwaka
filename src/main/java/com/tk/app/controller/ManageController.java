@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
 
 import com.tk.app.domain.dto.ManageDto;
 import com.tk.app.domain.dto.SessionInfo;
+import com.tk.app.repository.ProjectMemberRepository;
+import com.tk.app.repository.ProjectTeamView;
 import com.tk.app.security.LoginMemberUtil;
 import com.tk.app.service.ManageService;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/{domainKey}/manage")
 public class ManageController {
 
+	private final ProjectMemberRepository projectMemberRepository;
+	
 	@Autowired
 	private ManageService servive;
 	
@@ -47,7 +49,21 @@ public class ManageController {
 	
 	// 팀원관리 페이지
 	@GetMapping("manage")
-	public String manage() {
+	public String manage(@PathVariable("domainKey") String domainKey, Model model) {
+		try {
+			Long workspaceId = servive.findByDomainKey(domainKey);
+			
+			System.out.println("조회된 워크스페이스 번호: " + workspaceId);
+			if(workspaceId != null) {
+				List<ProjectTeamView> teamMembers = projectMemberRepository.findWorkspaceMembersWithProject(workspaceId);
+				System.out.println("조회된 팀원 수: " + teamMembers.size());
+				model.addAttribute("teamMembers", teamMembers);
+			}
+			
+		} catch (Exception e) {
+			log.info("manage : ", e);
+		}
+		
 		return "manage/manage";
 	}
 	
@@ -56,11 +72,8 @@ public class ManageController {
 	public String projectView(Model model) throws Exception {
 		
 		try {
-			// 검색 및 페이징 처리를 위해 사용될 Map 객체 (현재는 빈 상태로 전달)
 	        Map<String, Object> map = new HashMap<>();
-	        
 	        List<ManageDto> projectList =servive.listProject(map);
-	        
 	        model.addAttribute("projectList", projectList);
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -83,14 +96,13 @@ public class ManageController {
 		return "manage/viewWrite";
 	}
 	
+	// 프로젝트 등록
 	@PostMapping("/write")
 	public String writeSubmit(@PathVariable("domainKey") String domainKey,
 			ManageDto dto) throws Exception {
-
 		
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
-			// 2. 도메인 키를 통해 데이터베이스에서 실제 워크스페이스 고유 번호(sequence 값)를 가져옴
 			if (info == null) {
 				log.info("로그인 정보가 존재하지 않습니다.");
 				return "redirect:/login";
@@ -104,10 +116,8 @@ public class ManageController {
 			dto.setWorkspace_id(workspaceId);
 			dto.setMember_id(info.getMember_id());
 			
-			// 5. 등록 시 진행률은 무조건 0으로 강제 세팅
 			dto.setProgress(0);
 			
-			// 6. 서비스 호출하여 DB에 INSERT
 			servive.insertProject(dto);
 			
 		} catch (Exception e) {
@@ -116,7 +126,6 @@ public class ManageController {
 		
 		return "redirect:/" + domainKey + "/manage/view";
 	}
-	
 	
 	// 캘린더 페이지
 	@GetMapping("/calender")
