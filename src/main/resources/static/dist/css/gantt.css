@@ -124,7 +124,10 @@
 }
 
 .gantt-page .gantt-board {
-    min-width: 800px;
+      min-width: max(
+      800px,
+      calc(240px + var(--gantt-day-count) * 72px)
+  );
 }
 
 .gantt-page .gantt-header,
@@ -150,7 +153,12 @@
 
 .gantt-page .gantt-days {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(var(--gantt-day-count), minmax(72px, 1fr));
+}
+
+.gantt-page .gantt-days > span.gantt-weekend {
+    background: #F1EFEA;
 }
 
 .gantt-page .gantt-days > span {
@@ -172,10 +180,6 @@
     color: var(--gantt-muted);
     font-size: 10px;
     font-weight: 400;
-}
-
-.gantt-page .gantt-days > span:nth-last-child(-n + 2) {
-    background: #F1EFEA;
 }
 
 .gantt-page .gantt-row {
@@ -213,15 +217,16 @@
 
 .gantt-page .gantt-track {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: 
+    		repeat(var(--gantt-day-count), minmax(72px, 1fr));
     align-items: center;
     padding-block: 20px;
     background: repeating-linear-gradient(
         to right,
         transparent 0,
-        transparent calc(100% / 7 - 1px),
-        #F0EDE7 calc(100% / 7 - 1px),
-        #F0EDE7 calc(100% / 7)
+		transparent calc(100% / var(--gantt-day-count) - 1px),
+        #F0EDE7 calc(100% / var(--gantt-day-count) - 1px),
+        #F0EDE7 calc(100% / var(--gantt-day-count))
     );
 }
 
@@ -280,4 +285,14 @@
     color: var(--gantt-muted);
     font-size: 11px;
     line-height: 1.6;
+}
+
+.gantt-page .gantt-empty {
+    padding: 56px 24px;
+    border: 1px solid var(--gantt-border);
+    border-radius: 12px;
+    background: #FAF9F6;
+    color: var(--gantt-muted);
+    font-size: 14px;
+    text-align: center;
 }

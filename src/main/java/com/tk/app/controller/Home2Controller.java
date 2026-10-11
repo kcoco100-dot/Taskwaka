@@ -2,6 +2,8 @@ package com.tk.app.controller;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -121,7 +123,52 @@ public class Home2Controller {
 						workspace.getWorkspaceId(),
 						workspace.getMemberId());
 		
+		// 업무가 있을때만 날짜 범위 계산하기
+		List<LocalDate> ganttDate = new ArrayList<>();
+		
+		// 업무가 있을 때만 실행
+		if(!myTasks.isEmpty()) {
+			// 첫 업무 시작과 종료 가져오기
+			// LocalDate.parse : "2026-10-11" 처럼 변환해주기
+			LocalDate ganttStart = LocalDate.parse(myTasks.get(0).getStartAt());
+			LocalDate ganttEnd = LocalDate.parse(myTasks.get(0).getEndAt());
+			
+			// 업무를 하나씩 꺼내서 반복해주기
+			for(MyTaskDto task : myTasks) {
+				// 업무의 시작일과 종료일 변환 해주기
+				LocalDate start = LocalDate.parse(task.getStartAt());
+				LocalDate end = LocalDate.parse(task.getEndAt());
+				
+				// 기준이 되는 업무일보다 빠른지 늦은지를 비교해줘야 차트에 다 표시가 가능하다
+				// 업무의 시작일이 지금까지 찾은 시작일보다 빠른지 확인
+				if(start.isBefore(ganttStart)) {
+					// 더 빠르다면 간트의 시작일을 그 날짜로 바꿔주기
+					ganttStart = start;
+				}
+				
+				// 업무의 종료일이 지금까지 찾은 종료일보다 늦은지 확인
+				if(end.isAfter(ganttEnd)) {
+					// 더 늦다면 간트의 종료일을 그 날짜로 바꿔주기
+					ganttEnd = end;
+				}
+			}
+			
+			// 날짜 목록을 채울때 사용할 변수
+			LocalDate date = ganttStart;
+			
+			// 종료일을 표함하여 날짜 목록 생성하기
+			while(!date.isAfter(ganttEnd)) {
+				ganttDate.add(date);
+				
+				date = date.plusDays(1);
+			}
+			
+			model.addAttribute("ganttStart", ganttStart);
+			model.addAttribute("ganttEnd", ganttEnd);
+		}
+		
 		model.addAttribute("myTasks", myTasks);
+		model.addAttribute("ganttDate", ganttDate);
 		
 		return "home/gantt";
 	}
