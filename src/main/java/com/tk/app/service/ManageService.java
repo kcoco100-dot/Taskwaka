@@ -7,6 +7,8 @@ import java.util.Map;
 import com.tk.app.domain.dto.ManageDto;
 
 public interface ManageService {
+	public Long findByDomainKey(String domainKey) throws Exception;
+	
 	public void insertProject(ManageDto dto) throws SQLException;
 	public void updateProject(ManageDto dto) throws SQLException;
 	public void deleteProject(ManageDto dto) throws SQLException;

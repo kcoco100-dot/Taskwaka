@@ -58,7 +58,6 @@
                             <th scope="col" class="project-actions-column">관리</th>
                         </tr></thead>
                         <tbody id="project-list-body">
-                        <!-- 화면 확인용 예시 데이터. DB 연동 시 th:each로 교체합니다. -->
                         <tr class="project-list-row" th:unless="${#lists.isEmpty(projectList)}" th:each="project : ${projectList}" data-status="progress">
                             <td class="project-number" th:text="${project.project_id}">1</td>
                             <td>

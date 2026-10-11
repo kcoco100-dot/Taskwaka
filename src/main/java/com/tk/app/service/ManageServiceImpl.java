@@ -21,9 +21,24 @@ public class ManageServiceImpl implements ManageService{
 	private final MyUtil myUtil;
 	
 	@Override
+	public Long findByDomainKey(String domainKey) throws Exception {
+		try {
+            return mapper.findByDomainKey(domainKey);
+        } catch (Exception e) {
+            log.info("findByDomainKey : ", e);
+            throw e;
+        }
+	}
+	
+	@Override
 	public void insertProject(ManageDto dto) throws SQLException {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.insertProject(dto);
+		} catch (Exception e) {
+			log.info("insertProject : ", e);
+			
+			throw e;
+		}
 	}
 
 	@Override

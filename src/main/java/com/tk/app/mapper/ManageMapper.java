@@ -10,13 +10,14 @@ import com.tk.app.domain.dto.ManageDto;
 
 @Mapper
 public interface ManageMapper {
+	public Long findByDomainKey(String domainKey) throws Exception;
+	
 	public void insertProject(ManageDto dto) throws SQLException;
 	public void updateProject(ManageDto dto) throws SQLException;
 	public void deleteProject(ManageDto dto) throws SQLException;
 	
 	public List<ManageDto> listProject(Map<String, Object> map) throws SQLException;
 	public int dataCount(Map<String, Object> map);
-	
 	
 	
 }

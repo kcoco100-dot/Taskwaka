@@ -3,11 +3,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.ManageMapper">
 
+	<select id="findByDomainKey" parameterType="string" resultType="Long">
+        SELECT w.workspace_id 
+        FROM workspaces w
+        JOIN workspace_domains d ON w.workspace_id = d.workspace_id
+        WHERE d.domain_key = #{domainKey}
+          AND d.active = 'Y'
+    </select>
+
 	<select id="listProject" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-		SELECT p.project_id, p.workspace_id, p.subject, p.content, 
-        TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date,
-        TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date,
-		p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created 
+		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date, 
+			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created 
 		FROM projects p
 		LEFT OUTER JOIN project_members pm ON p.project_id = pm.project_id
 		ORDER BY project_id DESC
@@ -19,11 +25,11 @@
         WHERE deleted IS NULL
     </select>
 	
-	<insert id="insertProject" parameterType="ManageDto">
-		INSERT INTO projects(project_id, workspace_id, subject, content, start, end, status, progress,
+	<insert id="insertProject" parameterType="com.tk.app.domain.dto.ManageDto">
+		INSERT INTO projects(project_id, workspace_id, subject, content, start_at, "END", status, progress,
 			archive, created)
-			VALUES (seq_projects.NEXTVAL, #{workspace_id}, #{subject},
-				#{content}, #{start}, #{end}, #{status}, #{progress}, #{archive}, #{created})
+			VALUES (seq_projects.NEXTVAL, #{workspace_id}, #{subject}, #{content}, 
+			TO_DATE(#{start_date}, 'YYYY-MM-DD'), TO_DATE(#{end_date}, 'YYYY-MM-DD'), #{status}, #{progress}, 'N', SYSDATE)
 	</insert>
 	
 </mapper>
