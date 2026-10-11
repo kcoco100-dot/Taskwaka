@@ -7,6 +7,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.tk.app.service.MemberService;
+
+import jakarta.servlet.ServletException;
 import lombok.RequiredArgsConstructor;
 
 /*
@@ -65,6 +68,7 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SpringSecurityConfig {
+	private final MemberService memberService;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -72,8 +76,10 @@ public class SpringSecurityConfig {
 		http
 				// 1. 주소별 로그인 권한 설정
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/member/login", "/member/register", "/member/account", "/member/pwdFind",
-								"/member/expired", "/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
+						.requestMatchers("/", "/member/login", "/member/register", "/member/account", "/member/idFind", "/member/pwdFind", 
+								"/member/expired", "/member/check-id", "/member/email/send", "/member/email/verify",
+								"/member/registerComplete",
+								"/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
 								"/favicon.ico", "/error/**")
 						.permitAll()
 
@@ -85,13 +91,24 @@ public class SpringSecurityConfig {
 
 				// 2. 기존 로그인 화면 연결
 				.formLogin(form -> form.loginPage("/member/login").loginProcessingUrl("/member/login")
-						.usernameParameter("login_id").passwordParameter("password").defaultSuccessUrl("/main", true)
-						.failureUrl("/member/login?error").permitAll())
+						.usernameParameter("login_id").passwordParameter("password")
+						.successHandler((request, response, authentication) -> {
 
-				// 3. 로그아웃 설정
+						    try {
+						        String loginId = authentication.getName();
+
+						        memberService.updateLastLogin(loginId);
+
+						    } catch (Exception e) {
+						        throw new ServletException(
+						                "로그인 정보 저장 실패", e);
+						    }
+						    response.sendRedirect(
+						            request.getContextPath() + "/main");
+						})
+						.failureHandler(new LoginFailureHandler(memberService)))
+
 				.logout(logout -> logout.logoutUrl("/member/logout").logoutSuccessUrl("/member/login"))
-
-				// 기존 프로젝트 설정 유지
 				.csrf(AbstractHttpConfigurer::disable);
 
 		return http.build();

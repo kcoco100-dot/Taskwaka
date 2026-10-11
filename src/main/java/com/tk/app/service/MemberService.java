@@ -24,6 +24,7 @@ public interface MemberService {
 	public Long getMemberId(String login_id);
 	
 	public int checkFailureCount(String login_id);
+	public Integer countByLoginId(String login_id);
 	public void updateFailureCountReset(String login_id) throws Exception;
 	public void updateFailureCount(String login_id) throws Exception;
 	

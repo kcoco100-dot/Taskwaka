@@ -1,273 +1,589 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Taskwaka - 회원가입</title>
+<meta charset="UTF-8">
+<title>Taskwaka - 회원가입</title>
 
-  <!-- ==========================================================================
+<!-- ==========================================================================
        [CSS SECTION] 회원가입 페이지 스타일
        - 웜 베이지 / 세이지 그린 톤앤매너 & 폼 레이아웃
        ========================================================================== -->
-  <style>
-    :root {
-      --bg-body: #FCFBF8;
-      --bg-surface: #FFFFFF;
-      --bg-card-sub: #FCFAF6;
-      --primary-green: #4F6242;
-      --primary-green-dark: #465B38;
-      --primary-green-light: #EEF4E6;
-      --primary-green-border: #DCE5D2;
-      --accent-green: #71865B;
-      --text-main: #594331;
-      --text-sub: #786B5E;
-      --text-muted: #A89B8C;
-      --border-main: #E8E2D9;
-      --border-sub: #DED5C9;
-      --danger: #D9534F;
-    }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
+<style>
+:root {
+	--bg-body: #FCFBF8;
+	--bg-surface: #FFFFFF;
+	--primary-green: #4F6242;
+	--primary-green-dark: #465B38;
+	--primary-green-light: #EEF4E6;
+	--primary-green-border: #DCE5D2;
+	--accent-green: #71865B;
+	--text-main: #594331;
+	--text-sub: #786B5E;
+	--text-muted: #A89B8C;
+	--border-main: #E8E2D9;
+	--danger: #D9534F;
+}
 
-    body {
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      padding: 40px 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI",
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
 
-    .register-card {
-      width: 100%;
-      max-width: 540px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-main);
-      border-radius: 20px;
-      padding: 36px 40px;
-      box-shadow: 0 8px 24px rgba(89, 67, 49, 0.05);
-    }
+body {
+	background-color: var(--bg-body);
+	color: var(--text-main);
+	padding: 40px 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+}
 
-    .card-title {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text-main);
-      text-align: center;
-      margin-bottom: 6px;
-    }
+.register-card {
+	width: 100%;
+	max-width: 540px;
+	background: var(--bg-surface);
+	border: 1px solid var(--border-main);
+	border-radius: 20px;
+	padding: 36px 40px;
+	box-shadow: 0 8px 24px rgba(89, 67, 49, 0.05);
+}
 
-    .card-desc {
-      font-size: 13.5px;
-      color: var(--text-sub);
-      text-align: center;
-      margin-bottom: 28px;
-    }
+.card-title {
+	font-size: 24px;
+	font-weight: 800;
+	color: var(--text-main);
+	text-align: center;
+	margin-bottom: 6px;
+}
 
-    .form-group {
-      margin-bottom: 16px;
-    }
+.card-desc {
+	font-size: 13.5px;
+	color: var(--text-sub);
+	text-align: center;
+	margin-bottom: 28px;
+}
 
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 6px;
-    }
+.form-group {
+	margin-bottom: 16px;
+}
 
-    .form-label span.req {
-      color: var(--danger);
-      margin-left: 2px;
-    }
+.form-label {
+	display: block;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--text-main);
+	margin-bottom: 6px;
+}
 
-    .input-with-btn {
-      display: flex;
-      gap: 8px;
-    }
+.form-label span.req {
+	color: var(--danger);
+	margin-left: 2px;
+}
 
-    .warm-input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid var(--border-main);
-      border-radius: 10px;
-      background: #FFFFFF;
-      font-size: 13.5px;
-      color: var(--text-main);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
+/* 아이디 입력칸과 버튼 */
+.input-with-btn {
+	display: flex;
+	width: 100%;
+	gap: 8px;
+}
 
-    .warm-input:focus {
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 2px var(--primary-green-light);
-    }
+/* 모든 입력칸 */
+.warm-input {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	padding: 10px 14px;
+	border: 1px solid var(--border-main);
+	border-radius: 10px;
+	background: #FFFFFF;
+	font-size: 13.5px;
+	color: var(--text-main);
+	outline: none;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
 
-    .btn-action {
-      padding: 10px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border-main);
-      background: var(--primary-green-light);
-      color: var(--primary-green);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
+.warm-input:focus {
+	border-color: var(--accent-green);
+	box-shadow: 0 0 0 2px var(--primary-green-light);
+}
 
-    .btn-action:hover {
-      background: var(--primary-green-border);
-    }
+/* 버튼 옆에 있는 입력칸 */
+.input-with-btn .warm-input {
+	flex: 1;
+	width: 0;
+}
 
-    .btn-submit {
-      width: 100%;
-      padding: 13px;
-      border-radius: 10px;
-      border: none;
-      background: var(--primary-green);
-      color: #FFFFFF;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 14px;
-      transition: background 0.2s;
-    }
+.btn-action {
+	flex-shrink: 0;
+	padding: 10px 16px;
+	border-radius: 10px;
+	border: 1px solid var(--border-main);
+	background: var(--primary-green-light);
+	color: var(--primary-green);
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background 0.2s;
+}
 
-    .btn-submit:hover {
-      background: var(--primary-green-dark);
-    }
+.btn-action:hover {
+	background: var(--primary-green-border);
+}
 
-    .helper-text {
-      font-size: 11.5px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-  </style>
-  <!-- ==========================================================================
+.btn-submit {
+	width: 100%;
+	padding: 13px;
+	border-radius: 10px;
+	border: none;
+	background: var(--primary-green);
+	color: #FFFFFF;
+	font-size: 15px;
+	font-weight: 700;
+	cursor: pointer;
+	margin-top: 14px;
+	transition: background 0.2s;
+}
+
+.btn-submit:hover {
+	background: var(--primary-green-dark);
+}
+
+/* 중복 확인 및 비밀번호 일치 메시지 */
+.helper-text {
+	font-size: 11.5px;
+	color: var(--text-muted);
+	margin-top: 4px;
+}
+
+/* 제목과 검사 결과를 가로로 배치 */
+.label-line {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.label-line .form-label {
+	margin-bottom: 0;
+	white-space: nowrap;
+}
+
+.label-line .helper-text {
+	margin-top: 0;
+}
+
+/* 아이디, 비밀번호 입력 규칙 안내 */
+.guide-text {
+	display: block;
+	margin-top: 6px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--text-sub);
+	overflow-wrap: break-word;
+}
+
+/* 모바일 반응형 */
+@media ( max-width : 480px) {
+	body {
+		padding: 20px 12px;
+	}
+	.register-card {
+		padding: 24px 18px;
+	}
+	.btn-action {
+		padding: 10px 12px;
+	}
+}
+</style>
+
+<!-- ==========================================================================
        [END OF CSS SECTION]
        ========================================================================== -->
 </head>
 <body>
 
-  <div class="register-card">
-    <h1 class="card-title">Taskwaka 회원가입</h1>
-    <p class="card-desc">팀원들과 원활한 협업을 시작해 보세요</p>
+	<div class="register-card">
+		<h1 class="card-title">Taskwaka 회원가입</h1>
+		<p class="card-desc">팀원들과 원활한 협업을 시작해 보세요</p>
 
-    <form id="regForm" onsubmit="handleRegister(event)">
-      <!-- 아이디 및 중복 확인 -->
-      <div class="form-group">
-        <label class="form-label">아이디 <span class="req">*</span></label>
-        <div class="input-with-btn">
-          <input type="text" id="regId" class="warm-input" placeholder="영문, 숫자 4~16자" required>
-          <button type="button" class="btn-action" onclick="checkDuplicateId()">중복 확인</button>
-        </div>
-      </div>
+		<form id="regForm" onsubmit="handleRegister(event)">
 
-      <!-- 비밀번호 -->
-      <div class="form-group">
-        <label class="form-label">비밀번호 <span class="req">*</span></label>
-        <input type="password" id="regPw" class="warm-input" placeholder="비밀번호를 입력하세요" required>
-      </div>
 
-      <!-- 비밀번호 확인 -->
-      <div class="form-group">
-        <label class="form-label">비밀번호 확인 <span class="req">*</span></label>
-        <input type="password" id="regPwConfirm" class="warm-input" placeholder="비밀번호를 한 번 더 입력하세요" required>
-      </div>
+			<!-- 아이디 및 중복 확인 -->
+			<div class="form-group">
+				<div class="label-line">
+					<label class="form-label">아이디 <span class="req">*</span></label> <span
+						id="idCheckMessage" class="helper-text"></span>
+				</div>
+				<div class="input-with-btn">
+					<input type="text" id="regId" class="warm-input"
+						placeholder="아이디 입력" required>
+					<button type="button" class="btn-action"
+						onclick="checkDuplicateId()">중복 확인</button>
+				</div>
+				<p class="guide-text">아이디는 영문, 숫자 4~16자로 입력하세요.</p>
+			</div>
 
-      <!-- 이름 -->
-      <div class="form-group">
-        <label class="form-label">이름 <span class="req">*</span></label>
-        <input type="text" id="regName" class="warm-input" placeholder="실명을 입력하세요" required>
-      </div>
+			<!-- 비밀번호 -->
+			<div class="form-group">
+				<label class="form-label">비밀번호 <span class="req">*</span></label> <input
+					type="password" id="regPw" class="warm-input" placeholder="비밀번호 입력"
+					required>
+				<p class="guide-text">비밀번호는 8~20자이며 영문 대문자, 소문자, 숫자, 특수문자를 모두
+					포함해야 합니다.</p>
+			</div>
 
-      <!-- 생년월일 -->
-      <div class="form-group">
-        <label class="form-label">생년월일 <span class="req">*</span></label>
-        <input type="date" id="regBirth" class="warm-input" required>
-      </div>
+			<!-- 비밀번호 확인 -->
+			<div class="form-group">
+				<div class="label-line">
+					<label class="form-label">비밀번호 확인 <span class="req">*</span></label>
+					<span id="pwCheckMessage" class="helper-text"></span>
+				</div>
+				<input type="password" id="regPwConfirm" class="warm-input"
+					placeholder="비밀번호 확인" required>
+			</div>
 
-      <!-- 이메일 및 인증번호 발송 -->
-      <div class="form-group">
-        <label class="form-label">이메일 <span class="req">*</span></label>
-        <div class="input-with-btn">
-          <input type="email" id="regEmail" class="warm-input" placeholder="example@company.com" required>
-          <button type="button" class="btn-action" onclick="sendEmailCode()">인증번호 전송</button>
-        </div>
-      </div>
 
-      <!-- 이메일 인증번호 입력 (동적 표시) -->
-      <div class="form-group" id="verifyBox" style="display:none;">
-        <label class="form-label">이메일 인증번호 <span class="req">*</span></label>
-        <div class="input-with-btn">
-          <input type="text" id="verifyCode" class="warm-input" placeholder="인증번호 6자리">
-          <button type="button" class="btn-action" onclick="verifyEmailCode()">인증 확인</button>
-        </div>
-        <p class="helper-text" id="verifyStatus">이메일로 발송된 6자리 인증코드를 입력하세요.</p>
-      </div>
 
-      <!-- 전화번호 -->
-      <div class="form-group">
-        <label class="form-label">전화번호 <span class="req">*</span></label>
-        <input type="tel" id="regPhone" class="warm-input" placeholder="010-1234-5678" required>
-      </div>
+			<!-- 이름 -->
+			<div class="form-group">
+				<label class="form-label">이름 <span class="req">*</span></label> <input
+					type="text" id="regName" class="warm-input" placeholder="실명을 입력하세요"
+					required>
+			</div>
 
-      <!-- 주소 (요구사항 정의서: null 허용) -->
-      <div class="form-group">
-        <label class="form-label">주소 <span style="font-weight:normal; color:var(--text-muted); font-size:12px;">(선택)</span></label>
-        <input type="text" id="regAddress" class="warm-input" placeholder="주소를 입력하세요 (선택 사항)">
-      </div>
+			<!-- 생년월일 -->
+			<div class="form-group">
+				<label class="form-label">생년월일 <span class="req">*</span></label> <input
+					type="date" id="regBirth" class="warm-input" required>
+			</div>
 
-      <button type="submit" class="btn-submit">회원가입 완료</button>
-    </form>
+			<!-- 이메일 및 인증번호 발송 -->
+			<div class="form-group">
+				<label class="form-label">이메일 <span class="req">*</span></label>
+				<div class="input-with-btn">
+					<input type="email" id="regEmail" class="warm-input"
+						placeholder="example@company.com" required>
+					<button type="button" class="btn-action" onclick="sendEmailCode()">인증번호
+						전송</button>
+				</div>
+			</div>
 
-    <div style="text-align: center; margin-top: 18px; font-size: 13px;">
-      <span style="color:var(--text-sub);">이미 계정이 있으신가요?</span>
-      <a href="/login" style="color:var(--primary-green); font-weight:700; text-decoration:none; margin-left:6px;">로그인하기</a>
-    </div>
-  </div>
+			<!-- 이메일 인증번호 입력 (동적 표시) -->
+			<div class="form-group" id="verifyBox" style="display: none;">
+				<label class="form-label">이메일 인증번호 <span class="req">*</span></label>
+				<div class="input-with-btn">
+					<input type="text" id="verifyCode" class="warm-input"
+						placeholder="인증번호 6자리" maxlength="6" inputmode="numeric">
+					<button type="button" class="btn-action"
+						onclick="verifyEmailCode()">인증 확인</button>
+				</div>
+				<p class="helper-text" id="verifyStatus">이메일로 발송된 6자리 인증코드를
+					입력하세요.</p>
+			</div>
 
-  <script>
+			<!-- 전화번호 -->
+			<div class="form-group">
+				<label class="form-label">전화번호 <span class="req">*</span></label>
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<input type="text" id="phone1" class="warm-input"
+						style="flex: 1; min-width: 0;" maxlength="3" inputmode="numeric"
+						placeholder="010" required> <span>-</span> <input
+						type="text" id="phone2" class="warm-input"
+						style="flex: 1; min-width: 0;" maxlength="4" inputmode="numeric"
+						placeholder="1234" required> <span>-</span> <input
+						type="text" id="phone3" class="warm-input"
+						style="flex: 1; min-width: 0;" maxlength="4" inputmode="numeric"
+						placeholder="5678" required>
+				</div>
+				<input type="hidden" id="regPhone">
+			</div>
+
+
+			<div class="form-group">
+				<label class="form-label">주소 <span
+					style="font-weight: normal; color: var(--text-muted); font-size: 12px;">(선택)</span></label>
+
+				<div class="input-with-btn">
+					<input type="text" id="regPostcode" class="warm-input"
+						placeholder="우편번호" readonly>
+					<button type="button" class="btn-action" onclick="searchPostcode()">우편번호
+						검색</button>
+				</div>
+
+				<input type="text" id="regMainAddress" class="warm-input"
+					style="margin-top: 10px;" placeholder="기본주소" readonly> <input
+					type="text" id="regDetailAddress" class="warm-input"
+					style="margin-top: 10px;" placeholder="상세주소를 입력하세요"> <input
+					type="hidden" id="regAddress">
+			</div>
+
+
+			<button type="submit" class="btn-submit">회원가입 완료</button>
+		</form>
+
+		<div style="text-align: center; margin-top: 18px; font-size: 13px;">
+			<span style="color: var(--text-sub);">이미 계정이 있으신가요?</span> <a
+				href="/member/login"
+				style="color: var(--primary-green); font-weight: 700; text-decoration: none; margin-left: 6px;">로그인하기</a>
+		</div>
+	</div>
+
+
+	<script
+		src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+	<script>
+
+  function searchPostcode() {
+      new kakao.Postcode({
+          oncomplete: function(data) {
+              document.getElementById('regPostcode').value = data.zonecode;
+              document.getElementById('regMainAddress').value = data.address;
+              document.getElementById('regDetailAddress').value = '';
+              updateAddress();
+              document.getElementById('regDetailAddress').addEventListener('input', function () {
+                  updateAddress();
+              });
+              document.getElementById('regDetailAddress').focus();
+          }
+      }).open();
+  }
+  
+
+  function updateAddress() {
+      const postcode = document.getElementById('regPostcode').value;
+      const mainAddress = document.getElementById('regMainAddress').value;
+      const detailAddress = document.getElementById('regDetailAddress').value.trim();
+
+      if (mainAddress === '') {
+          document.getElementById('regAddress').value = '';
+          return;
+      }
+
+      document.getElementById('regAddress').value =
+          ('[' + postcode + '] ' + mainAddress + ' ' + detailAddress).trim();
+  }
+
+
+  
     let isIdChecked = false;
     let isEmailVerified = false;
 
+    document.getElementById('regEmail').addEventListener('input', function () {
+        isEmailVerified = false;
+        document.getElementById('verifyBox').style.display = 'none';
+        document.getElementById('verifyCode').value = '';
+    });
+    
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+
+    document.getElementById('regBirth').max = `${year}-${month}-${day}`;
+
     function checkDuplicateId() {
-      const id = document.getElementById('regId').value.trim();
-      if (!id) {
-        alert('아이디를 입력해 주세요.');
-        return;
+      const idInput = document.getElementById('regId');
+      const id = idInput.value.trim();
+      
+      isIdChecked = false;
+      
+      if(id === '') {
+    	  	alert('아이디를 입력해 주세요.');
+    	  	return;
       }
-      isIdChecked = true;
-      alert(`[${id}] 사용 가능한 아이디입니다.`);
+      
+      const idRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]{4,16}$/;
+
+      if (!idRegex.test(id)) {
+          alert('아이디는 영문, 숫자 4~16자로 입력해 주세요.');
+          return;
+      }
+      
+      fetch('/member/check-id?login_id=' + encodeURIComponent(id))
+      	.then(response => {
+      		if(! response.ok) {
+      			throw new Error('서버 요청 실패');
+      		}
+      		return response.text();
+      	})
+      	.then(data => {
+      		if(idInput.value.trim() != id) {
+      			return;
+      		}
+      		
+      		const message = document.getElementById('idCheckMessage');
+      		
+      		if(Number(data) === 0) {
+      			isIdChecked = true;
+      			
+      			message.textContent = '사용 가능한 아이디입니다.';
+      			message.style.color = 'green';
+      			
+      		} else {
+      			isIdChecked = false;
+      			
+      			message.textContent = '이미 사용 중인 아이디입니다.';
+      	        message.style.color = 'red';
+      		}
+      	})
+      	.catch(error => {
+      		console.log(error);
+      		alert('중복 확인 중 오류가 발생했습니다.');
+      	});
     }
+    
+    document.getElementById('regId')
+    		.addEventListener('input', function() {
+    			isIdChecked = false;
+    			document.getElementById('idCheckMessage').textContent = '';
+    		});
+    
+
+    function checkPasswordMatch() {
+        const pw = document.getElementById('regPw').value;
+        const pwConfirm = document.getElementById('regPwConfirm').value;
+        const message = document.getElementById('pwCheckMessage');
+
+        // 비밀번호 확인칸이 비어 있으면 문구를 표시하지 않음
+        if (pwConfirm === '') {
+            message.textContent = '';
+            return;
+        }
+
+        // 두 비밀번호가 같은지 비교
+        if (pw === pwConfirm) {
+            message.textContent = '비밀번호가 일치합니다.';
+            message.style.color = 'green';
+        } else {
+            message.textContent = '비밀번호가 일치하지 않습니다.';
+            message.style.color = 'red';
+        }
+    }
+
+    // 비밀번호를 입력하거나 수정할 때 검사
+    document.getElementById('regPw')
+        .addEventListener('input', checkPasswordMatch);
+
+    // 비밀번호 확인칸을 입력하거나 수정할 때 검사
+    document.getElementById('regPwConfirm')
+        .addEventListener('input', checkPasswordMatch);
+
 
     function sendEmailCode() {
-      const email = document.getElementById('regEmail').value.trim();
-      if (!email) {
-        alert('이메일을 입력해 주세요.');
-        return;
-      }
-      document.getElementById('verifyBox').style.display = 'block';
-      alert(`[${email}]으로 인증번호 6자리가 발송되었습니다. (테스트 코드: 123456)`);
+    		const emailInput = document.getElementById('regEmail');
+    		const email = emailInput.value.trim();
+    		
+    		if(email == '') {
+    			alert('이메일을 입력해 주세요.');
+    			return;
+    		}
+    		
+    		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    		
+    		if(!emailRegex.test(email)) {
+    			alert('올바른 이메일 형식으로 입력해 주세요.');
+    			return;
+    		}
+    		
+    		isEmailVerified = false;
+    		
+    		fetch('/member/email/send', {
+    			method: 'POST',
+    			headers: {
+    				'Content-Type': 'application/x-www-form-urlencoded'
+    			},
+    			body: 'email=' + encodeURIComponent(email)
+    		})
+    		.then(response => {
+    			if(!response.ok) {
+    				throw new Error('서버 요청 실패');
+    			}
+    			return response.text();
+    		})
+    		.then(data => {
+    			if (emailInput.value.trim() !== email) {
+    				return;
+    			}
+    			
+    			if (data === 'OK') {
+    				document.getElementById('verifyBox').style.display = 'block';
+    				document.getElementById('verifyCode').value = '';
+    				document.getElementById('verifyStatus').textContent = '인증번호를 발송했습니다. 5분 안에 입력해 주세요';
+    			} else if (data === 'WAIT') {
+    				alert('인증번호는 60초 후에 다시 발송할 수 있습니다.');
+    			} else if (data === 'INVALID_EMAIL') {
+    				alert('이메일 형식이 올바르지 않습니다.');
+    			} else {
+    				alert('이메일 발송에 실패했습니다.');
+    			}
+    		})
+    		.catch(error => {
+    			console.log(error);
+    			alert('서버 통신 중 오류가 발생했습니다.');
+    		});
     }
 
+
     function verifyEmailCode() {
-      const code = document.getElementById('verifyCode').value.trim();
-      if (code === '123456') {
-        isEmailVerified = true;
-        document.getElementById('verifyStatus').style.color = '#15803d';
-        document.getElementById('verifyStatus').innerText = '✓ 이메일 인증이 완료되었습니다.';
-        alert('이메일 인증이 완료되었습니다.');
-      } else {
-        alert('인증번호가 일치하지 않습니다. 다시 확인해 주세요.');
-      }
+        const email = document.getElementById('regEmail').value.trim();
+        const code = document.getElementById('verifyCode').value.trim();
+
+        fetch('/member/email/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'email=' + encodeURIComponent(email)
+                + '&code=' + encodeURIComponent(code)
+        })
+        .then(response => response.text())
+		.then(data => {
+		    console.log('인증 결과:', data);
+		
+		    if (data === 'OK') {
+		        isEmailVerified = true;
+		        document.getElementById('verifyStatus').style.color = '#15803d';
+		        document.getElementById('verifyStatus').textContent = '✓ 이메일 인증이 완료되었습니다.';
+		    } else if (data === 'WRONG') {
+		        isEmailVerified = false;
+		        document.getElementById('verifyStatus').style.color = '#dc2626';
+		        document.getElementById('verifyStatus').textContent = '인증번호가 일치하지 않습니다.';
+		    } else if (data === 'EXPIRED') {
+		        isEmailVerified = false;
+		        document.getElementById('verifyStatus').style.color = '#dc2626';
+		        document.getElementById('verifyStatus').textContent = '인증번호가 만료되었습니다. 다시 발송해 주세요.';
+		    } else if (data === 'TOO_MANY') {
+		        isEmailVerified = false;
+		        document.getElementById('verifyStatus').style.color = '#dc2626';
+		        document.getElementById('verifyStatus').textContent = '인증번호를 5번 틀렸습니다. 인증번호를 다시 발송해 주세요.';
+		    } else if (data === 'EMAIL_CHANGED') {
+		        isEmailVerified = false;
+		        document.getElementById('verifyStatus').style.color = '#dc2626';
+		        document.getElementById('verifyStatus').textContent = '이메일 주소가 변경되었습니다. 인증번호를 다시 발송해 주세요.';
+		    } else if (data === 'NOT_SENT') {
+		        isEmailVerified = false;
+		        document.getElementById('verifyStatus').style.color = '#dc2626';
+		        document.getElementById('verifyStatus').textContent = '인증번호 발송 기록이 없습니다. 인증번호를 먼저 발송해 주세요.';
+		    }
+
+
+		})
+        .catch(error => {
+            console.log(error);
+            alert('인증 확인 중 오류가 발생했습니다.');
+        });
     }
+
 
     function handleRegister(e) {
       e.preventDefault();
@@ -277,6 +593,16 @@
       }
       const pw = document.getElementById('regPw').value;
       const pwConfirm = document.getElementById('regPwConfirm').value;
+      
+      const pwRegex =
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/;
+
+      if (!pwRegex.test(pw)) {
+          alert('비밀번호는 8~20자이며 영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.');
+          return;
+      }
+
+      
       if (pw !== pwConfirm) {
         alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
         return;
@@ -285,9 +611,97 @@
         alert('이메일 인증을 완료해 주세요.');
         return;
       }
-      alert('회원가입이 정상적으로 완료되었습니다! 로그인 페이지로 이동합니다.');
-      location.href = '/login';
+
+      if (!checkPhoneLength()) {
+          alert('전화번호를 올바르게 입력해 주세요.');
+          return;
+      }
+      
+
+      const formData = new URLSearchParams();
+
+      formData.append('login_id', document.getElementById('regId').value.trim());
+      formData.append('password', pw);
+      formData.append('name', document.getElementById('regName').value.trim());
+      formData.append('birth', document.getElementById('regBirth').value);
+      formData.append('email', document.getElementById('regEmail').value.trim());
+      formData.append('phone', document.getElementById('regPhone').value);
+      formData.append('address', document.getElementById('regAddress').value);
+
+      fetch('/member/register', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: formData.toString()
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('서버 요청 실패');
+          }
+          return response.text();
+      })
+      .then(data => {
+          if (data === 'NOT_READY') {
+              alert('회원가입 요청이 서버에 전달되었습니다. DB 저장은 아직 연결 전입니다.');
+          } else if (data === 'EMAIL_NOT_VERIFIED') {
+              alert('이메일 인증을 완료해 주세요.');
+          } else if (data === 'EMAIL_MISMATCH') {
+              alert('인증한 이메일과 회원가입 이메일이 다릅니다.');
+          } else if (data === 'INVALID_ID') {
+        	    alert('아이디를 입력해 주세요.');
+          } else if (data === 'DUPLICATE_ID') {
+        	    alert('이미 사용 중인 아이디입니다. 다른 아이디를 입력해 주세요.');
+          } else if (data === 'INVALID_PASSWORD') {
+        	    alert('비밀번호는 8~20자이며 영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.');
+          } else if (data === 'INVALID_NAME') {
+        	    alert('이름을 입력해 주세요.');
+          } else if (data === 'INVALID_BIRTH') {
+        	    alert('생년월일을 올바르게 입력해 주세요. 미래 날짜는 사용할 수 없습니다.');
+          } else if (data === 'INVALID_PHONE') {
+        	    alert('전화번호를 올바르게 입력해 주세요.');
+          } else if (data === 'REGISTER_SUCCESS') {
+        	    location.href = '/member/registerComplete';
+       	  } else if (data === 'REGISTER_FAIL') {
+        	    alert('회원가입 처리 중 오류가 발생했습니다.');
+          } else {
+            alert('회원가입 요청 처리 결과를 확인해 주세요.');
+          } 
+      })
+      .catch(error => {
+          console.log(error);
+          alert('서버 통신 중 오류가 발생했습니다.');
+      });
+
     }
+    
+
+
+    ['phone1', 'phone2', 'phone3'].forEach(id => {
+        document.getElementById(id).addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+
+            const p1 = document.getElementById('phone1').value;
+            const p2 = document.getElementById('phone2').value;
+            const p3 = document.getElementById('phone3').value;
+
+            document.getElementById('regPhone').value = p1 + '-' + p2 + '-' + p3;
+        });
+    });
+    
+
+    function checkPhoneLength() {
+        const p1 = document.getElementById('phone1').value;
+        const p2 = document.getElementById('phone2').value;
+        const p3 = document.getElementById('phone3').value;
+
+        if (p1.length < 2 || p2.length < 3 || p3.length !== 4) {
+            return false;
+        }
+
+        return true;
+    }
+
   </script>
 </body>
 </html>

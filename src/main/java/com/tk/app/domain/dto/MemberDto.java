@@ -50,6 +50,7 @@ public class MemberDto {
 	private String blocked_until;
 	
 	private String phone;
+	private String address;
 	private String role;
 	
 	private Integer workspaceRole;

@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tk.app.domain.dto.MemberDto;
 import com.tk.app.mapper.MemberMapper;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MemberServiceImpl implements MemberService {
 	private final MemberMapper mapper;
+	private final PasswordEncoder passwordEncoder;
 	
 	@Value("${file.upload-root}/member")
 	private String uploadPath;
@@ -28,9 +31,20 @@ public class MemberServiceImpl implements MemberService {
 		return null;
 	}
 
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void insertMember(MemberDto dto) throws Exception {
-
+		String encodedPassword = passwordEncoder.encode(dto.getPassword());
+		
+		dto.setPassword(encodedPassword);
+		dto.setRole("USER");
+		
+		Long memberId = mapper.memberSeq();
+		dto.setMember_id(memberId);
+		
+		mapper.insertMember1(dto);
+		mapper.insertMember2(dto);
+		mapper.insertAuthority(dto);
 	}
 
 	@Override
@@ -185,8 +199,7 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public List<MemberDto> listFindMember(Map<String, Object> map) {
-		
-		return null;
+	    return mapper.listFindMember(map);
 	}
 
 	@Override
@@ -206,6 +219,11 @@ public class MemberServiceImpl implements MemberService {
 	public boolean isPasswordCheck(String login_id, String password) {
 		
 		return false;
+	}
+
+	@Override
+	public Integer countByLoginId(String login_id) {
+		return mapper.countByLoginId(login_id);
 	}
 
 }

@@ -9,7 +9,7 @@
 	</insert>
 
     <update id="updateMemberEnabled" parameterType="map">
-		UPDATE members SET enabled = #{enabled}
+		UPDATE members SET status = #{status}
 		<where>
 			<choose>
 				<when test="login_id != null">
@@ -24,12 +24,12 @@
 
 	<!-- 로그인 시간 변경 -->
 	<update id="updateLastLogin" parameterType="Long">
-		UPDATE members SET last_login = SYSDATE, failure_cnt = 0
+		UPDATE members SET last_login = SYSDATE, fail_cnt = 0
 		WHERE member_id = #{member_id}
 	</update>
 
 	<update id="updateLastLoginId" parameterType="String">
-		UPDATE members SET last_login = SYSDATE, failure_cnt = 0
+		UPDATE members SET last_login = SYSDATE, fail_cnt = 0
 		WHERE login_id = #{login_id}
 	</update>
 
@@ -69,20 +69,20 @@
 
 	<!-- 패스워드 실패 횟수 -->
 	<select id="checkFailureCount" parameterType="String" resultType="Integer">
-		SELECT NVL(failure_cnt, 0) failure_cnt
+		SELECT NVL(fail_cnt, 0) fail_cnt
 		FROM members
 		WHERE login_id = #{login_id}
 	</select>
 	
 	<!-- 패스워드 실패 횟수 초기화 -->
 	<update id="updateFailureCountReset" parameterType="String">
-		UPDATE members SET failure_cnt = 0
+		UPDATE members SET fail_cnt = 0
 		WHERE login_id = #{login_id}
 	</update>
 	
 	<!-- 패스워드 실패 횟수 증가 -->
 	<update id="updateFailureCount" parameterType="String">
-		UPDATE members SET failure_cnt = failure_cnt + 1
+		UPDATE members SET fail_cnt = fail_cnt + 1
 		WHERE login_id = #{login_id}
 	</update>
 
@@ -93,6 +93,46 @@
 		WHERE login_id = #{login_id}
 	</select>
 	
+	<select id="memberSeq" resultType="Long">
+		SELECT seq_members.NEXTVAL FROM dual
+	</select>
+	
+	<insert id="insertMember1" parameterType="MemberDto">
+		INSERT INTO members (
+			member_id, login_id, password, status, fail_cnt, joined
+		)
+		VALUES (
+			#{member_id}, #{login_id}, #{password}, 0, 0, SYSDATE
+		)
+	</insert>
+	
+	<insert id="insertMember2" parameterType="MemberDto">
+		INSERT INTO member_details (
+			member_id, name, email, birth, phone, address
+		)
+		VALUES (
+			#{member_id}, #{name}, #{email}, TO_DATE(#{birth}, 'YYYY-MM-DD'), #{phone}, #{address}
+		)
+	</insert>
+	
+	<insert id="insertAuthority" parameterType="MemberDto">
+	INSERT INTO security (member_id, role)
+	VALUES (#{member_id}, 'USER')
+	</insert>
+	
+	<select id="countByLoginId" parameterType="String" resultType="Integer">
+		SELECT COUNT(*)
+		FROM members
+		WHERE UPPER(login_id) = UPPER(#{login_id})
+	</select>
+	
+	<select id="listFindMember" parameterType="map" resultType="MemberDto">
+	    SELECT m.login_id
+	    FROM members m
+	    JOIN member_details d ON m.member_id = d.member_id
+	    WHERE d.name = #{name}
+	      AND LOWER(d.email) = LOWER(#{email})
+	</select>
 	
 	
 </mapper>

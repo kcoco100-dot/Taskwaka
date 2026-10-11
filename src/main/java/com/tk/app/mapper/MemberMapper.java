@@ -10,6 +10,9 @@ import com.tk.app.domain.dto.MemberDto;
 
 @Mapper
 public interface MemberMapper {
+	
+	public int countByLoginId(String loginId);
+	
 	public MemberDto loginSnsMember(Map<String, Object> map);
 
 	public Long memberSeq();	
@@ -33,7 +36,7 @@ public interface MemberMapper {
 	public MemberDto findByLoginId(String login_id);
 	public Long getMemberId(String login_id);
 	
-	public int checkFailureCount(String login_id);
+	public Integer checkFailureCount(String login_id);
 	public void updateFailureCountReset(String login_id) throws SQLException;
 	public void updateFailureCount(String login_id) throws SQLException;
 	

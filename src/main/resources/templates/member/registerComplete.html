@@ -1,0 +1,80 @@
+﻿
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+	<style>
+.register-done {
+	min-height: calc(100vh - 160px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 70px 20px;
+	background: #faf9f6;
+}
+
+.register-done-content {
+	width: 100%;
+	max-width: 580px;
+	text-align: center;
+}
+
+.register-done-label {
+	color: #78846c;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 2px;
+	margin-bottom: 20px;
+}
+
+.register-done h1 {
+	color: #33362f;
+	font-size: 32px;
+	font-weight: 700;
+	margin-bottom: 18px;
+}
+
+.register-done-desc {
+	color: #777970;
+	font-size: 15px;
+	line-height: 1.9;
+}
+
+.register-done-btn {
+	display: inline-block;
+	margin-top: 36px;
+	padding: 13px 40px;
+	background: #65745b;
+	color: white;
+	border-radius: 6px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.register-done-btn:hover {
+	background: #4f6046;
+	color: white;
+}
+
+.team-header-right, .team-name, .footer-menu {
+	display: none;
+}
+</style>
+</th:block>
+
+<th:block layout:fragment="content">
+	<main class="register-done">
+		<div class="register-done-content">
+			<div class="register-done-label" style="font-size: 30px;">TASKWAKA</div>
+			<h1>회원가입이 완료되었습니다.</h1>
+			<p class="register-done-desc">
+				이제 로그인하고<br> Taskwaka에서 팀 프로젝트를 시작해 보세요.
+			</p>
+			<a th:href="@{/member/login}" class="register-done-btn">로그인하기 →</a>
+		</div>
+	</main>
+</th:block>
+
+</html>

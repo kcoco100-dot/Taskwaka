@@ -1,11 +1,24 @@
 package com.tk.app.controller;
 
+import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.tk.app.domain.dto.MemberDto;
+import com.tk.app.mail.MailSender;
+import com.tk.app.service.MemberService;
+
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,42 +27,261 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequestMapping("/")
 public class MemberController {
-	
+	private final MemberService memberService;
+	private final MailSender mailSender;
 
-   @GetMapping
-   public String index() {
-       return "redirect:/member/login";
-   }
+	@GetMapping
+	public String index() {
+		return "redirect:/member/login";
+	}
 
-   @GetMapping({"member/login"})
-	public String handleHome(@RequestParam(name = "error", required = false) String error,
-			Model model) {
-		
-		if(error != null) {
-			model.addAttribute("message", "아이디 또는 패스워드가 일치하지 않습니다.");
+	@GetMapping({ "member/login" })
+	public String handleHome(@RequestParam(name = "error", required = false) String error, Model model) {
+
+		if ("locked".equals(error)) {
+		    model.addAttribute("message", "비밀번호를 5회 이상 잘못 입력하여 계정이 잠겼습니다.");
+		} else if (error != null) {
+		    model.addAttribute("message", "아이디 또는 패스워드가 일치하지 않습니다.");
 		}
-		
+
 		return "member/login-full";
 	}
-	
-	  /**
-	  * 3. 회원가입 화면
-	   */
-	  @GetMapping("member/register")
-	  public String registerForm() {
-	      return "member/register";
-	  }
 
-	
-	
+	@GetMapping("/main")
+	public String mainHome() {
+		return "main/mainHome";
+	}
+
+	/**
+	 * 3. 회원가입 화면
+	 */
+	@GetMapping("member/register")
+	public String registerForm() {
+		return "member/register";
+	}
+
+	@PostMapping("/member/register")
+	@ResponseBody
+	public String registerSubmit(MemberDto dto, HttpSession session) {
+
+		Boolean emailVerified = (Boolean) session.getAttribute("emailVerified");
+		if (!Boolean.TRUE.equals(emailVerified)) {
+			return "EMAIL_NOT_VERIFIED";
+		}
+		String verifiedEmail = (String) session.getAttribute("emailVerifyAddress");
+		if (dto.getEmail() == null || verifiedEmail == null || !verifiedEmail.equals(dto.getEmail().trim())) {
+			return "EMAIL_MISMATCH";
+		}
+		if (dto.getLogin_id() == null || dto.getLogin_id().isBlank()) {
+			return "INVALID_ID";
+		}
+		if (!dto.getLogin_id().matches("^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{4,16}$")) {
+			return "INVALID_ID";
+		}
+		int count = memberService.countByLoginId(dto.getLogin_id());
+		if (count > 0) {
+			return "DUPLICATE_ID";
+		}
+		if (dto.getPassword() == null || !dto.getPassword()
+				.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$")) {
+			return "INVALID_PASSWORD";
+		}
+		if (dto.getName() == null || dto.getName().isBlank()) {
+			return "INVALID_NAME";
+		}
+		if (dto.getBirth() == null || dto.getBirth().isBlank()) {
+			return "INVALID_BIRTH";
+		}
+		try {
+			LocalDate birthDate = LocalDate.parse(dto.getBirth());
+
+			if (birthDate.isAfter(LocalDate.now())) {
+				return "INVALID_BIRTH";
+			}
+		} catch (DateTimeParseException e) {
+			return "INVALID_BIRTH";
+		}
+		String phone = dto.getPhone();
+
+		if (phone == null || !phone.matches("^0[0-9]{1,2}-[0-9]{3,4}-[0-9]{4}$")) {
+			return "INVALID_PHONE";
+		}
+
+		try {
+			memberService.insertMember(dto);
+
+			session.removeAttribute("emailVerified");
+			session.removeAttribute("emailVerifyAddress");
+
+			return "REGISTER_SUCCESS";
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "REGISTER_FAIL";
+		}
+
+	}
+
+	// 이메일 인증번호 발송
+	@PostMapping("member/email/send")
+	@ResponseBody
+	public String sendEmailCode(@RequestParam("email") String email, HttpSession session) {
+
+		session.setAttribute("emailVerified", false);
+
+		// 이메일 형식 확인
+		if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+			return "INVALID_EMAIL";
+		}
+
+		long now = System.currentTimeMillis();
+
+		// 인증번호 재발송은 60초 후 가능
+		Long lastSent = (Long) session.getAttribute("emailSentAt");
+		if (lastSent != null && now - lastSent < 60000) {
+			return "WAIT";
+		}
+
+		// 6자리 인증번호 생성
+		SecureRandom random = new SecureRandom();
+		String code = String.valueOf(100000 + random.nextInt(900000));
+
+		// 실제 이메일 발송
+		boolean result = mailSender.sendVerificationMail(email, code);
+
+		if (!result) {
+			return "FAIL";
+		}
+
+		// 인증번호를 서버에 5분 동안 유효하도록 저장
+		session.setAttribute("emailVerifyCode", code);
+		session.setAttribute("emailVerifyAddress", email);
+		session.setAttribute("emailVerifyExpiresAt", now + 300000);
+		session.setAttribute("emailSentAt", now);
+		session.setAttribute("emailVerified", false);
+		session.setAttribute("emailVerifyFailCount", 0);
+
+		return "OK";
+	}
+
+	@GetMapping("member/check-id")
+	@ResponseBody
+	public Integer checkLoginId(@RequestParam("login_id") String login_id) {
+
+		return memberService.countByLoginId(login_id);
+	}
+
+	@GetMapping("/member/registerComplete")
+	public String registerComplete(Model model) {
+		model.addAttribute("title", "회원가입 완료");
+		model.addAttribute("message", "Taskwaka 회원가입이 완료되었습니다. 로그인하여 서비스를 이용해 주세요.");
+
+		return "member/registerComplete";
+	}
+
 	@GetMapping("member/updatePwd")
-	public String updatePwdForm() throws Exception{
+	public String updatePwdForm() throws Exception {
 		return "member/updatePwd";
+	}
+	
+	@GetMapping("member/idFind")
+	public String idFindForm() {
+	    return "member/idFind";
+	}
+	
+	@GetMapping("member/pwdFind")
+	public String pwdFindForm() {
+	    return "member/passwordFind";
+	}
+
+	@PostMapping("member/idFind")
+	@ResponseBody
+	public String findLoginId(@RequestParam("name") String name, @RequestParam("email") String email,
+			HttpSession session) {
+
+		if (name.isBlank() || email.isBlank()) {
+			return "INVALID_INPUT";
+		}
+
+		long now = System.currentTimeMillis();
+		Long startedAt = (Long) session.getAttribute("idFindStartedAt");
+		Integer count = (Integer) session.getAttribute("idFindCount");
+
+		if (startedAt == null || now - startedAt > 600000) {
+			session.setAttribute("idFindStartedAt", now);
+			count = 0;
+		}
+
+		if (count >= 5) {
+			return "TOO_MANY";
+		}
+
+		session.setAttribute("idFindCount", count + 1);
+
+		Map<String, Object> map = Map.of("name", name.trim(), "email", email.trim());
+
+		List<MemberDto> members = memberService.listFindMember(map);
+
+		if (members == null || members.isEmpty()) {
+			return "NOT_FOUND";
+		}
+
+		String loginId = members.get(0).getLogin_id();
+
+		if (loginId == null || loginId.length() < 4) {
+			return "NOT_FOUND";
+		}
+
+		int visible = loginId.length() >= 6 ? 2 : 1;
+
+		String maskedId = loginId.substring(0, visible) + "*".repeat(loginId.length() - visible * 2)
+				+ loginId.substring(loginId.length() - visible);
+
+		return "FOUND:" + maskedId;
 	}
 
 	@GetMapping("member/expired")
 	public String expired() throws Exception {
 		// 세션이 익스파이어드(만료) 된 경우
 		return "member/expired";
-	}	
+	}
+
+	@PostMapping("/member/email/verify")
+	@ResponseBody
+	public String verifyEmailCode(@RequestParam("email") String email, @RequestParam("code") String code,
+			HttpSession session) {
+
+		String savedCode = (String) session.getAttribute("emailVerifyCode");
+		String savedEmail = (String) session.getAttribute("emailVerifyAddress");
+		Long expiresAt = (Long) session.getAttribute("emailVerifyExpiresAt");
+		Integer failCount = (Integer) session.getAttribute("emailVerifyFailCount");
+
+		if (savedCode == null || savedEmail == null || expiresAt == null) {
+			return "NOT_SENT";
+		}
+
+		if (System.currentTimeMillis() > expiresAt) {
+			session.removeAttribute("emailVerifyCode");
+			session.setAttribute("emailVerified", false);
+			return "EXPIRED";
+		}
+
+		if (!savedEmail.equals(email.trim())) {
+			return "EMAIL_CHANGED";
+		}
+
+		if (failCount != null && failCount >= 5) {
+			return "TOO_MANY";
+		}
+
+		if (!code.matches("\\d{6}") || !savedCode.equals(code)) {
+			int nextCount = (failCount == null ? 0 : failCount) + 1;
+			session.setAttribute("emailVerifyFailCount", nextCount);
+			return "WRONG";
+		}
+
+		session.setAttribute("emailVerified", true);
+		session.removeAttribute("emailVerifyCode");
+		return "OK";
+	}
 }
