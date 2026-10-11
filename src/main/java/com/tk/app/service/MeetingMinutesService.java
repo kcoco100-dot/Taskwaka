@@ -18,16 +18,16 @@ public class MeetingMinutesService {
 	
 	// 워크 회의록 목록 조회 및 검색
 	public List<MeetingMinutesDto> findMeetingMinutes(
-			long workspaceId, long memberID, String kwd) {
+			long workspaceId, long memberID, String kwd, int offset, int size) {
 		
-		return meetingMinutesMapper.findMeetingMinutes(workspaceId, memberID, kwd);
+		return meetingMinutesMapper.findMeetingMinutes(workspaceId, memberID, kwd, offset, size);
 	}
 	
 	// 회의록 페이징 처리
 	public int countMeetingMinutes(
-			long workspaceId, long memberID, String kwd, String schType, int size) {
+			long workspaceId, long memberID, String kwd) {
 		
-		return meetingMinutesMapper.countMeetingMinutes(workspaceId, memberID, kwd, schType, size);
+		return meetingMinutesMapper.countMeetingMinutes(workspaceId, memberID, kwd);
 	}
 	
 	// 워크 회의록 상세 조회

@@ -14,15 +14,15 @@ public interface MeetingMinutesMapper {
 	public List<MeetingMinutesDto> findMeetingMinutes(
 			@Param("workspaceId") long workspaceId,
 			@Param("memberId") long memberId,
-			@Param("kwd") String kwd);
+			@Param("kwd") String kwd,
+			@Param("offset") int offset,
+			@Param("size") int size);
 	
 	// 회의록 목록 페이징처리
 	public int countMeetingMinutes(
 			@Param("workspaceId") long workspaceId,
 			@Param("memberId") long memberId,
-			@Param("kwd") String kwd,
-			@Param("schType") String schType,
-			@Param("size") int size);
+			@Param("kwd") String kwd);
 	
 	// 회의록 상세 조회
 	public MeetingMinutesDto findMeetingDetailMinutes(

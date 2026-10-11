@@ -1,5 +1,7 @@
 package com.tk.app.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -10,8 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.HtmlUtils;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
+import com.tk.app.common.PaginateUtil;
 import com.tk.app.domain.dto.MeetingMinutesDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
@@ -19,6 +23,7 @@ import com.tk.app.service.MeetingMinutesService;
 import com.tk.app.service.NoticeService;
 import com.tk.app.service.ParticipatingProjectService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +36,7 @@ public class Home2Controller {
 	private final ParticipatingProjectService participatingProjectService;
 	private final NoticeService noticeService;
 	private final MeetingMinutesService meetingMinutesService;
+	private final PaginateUtil paginateUtil;
 	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(
@@ -53,7 +59,7 @@ public class Home2Controller {
     public String home() {
 
         // 기존 HOME 화면 사용
-        return "main/home";
+        return "main/dashboard";
     }
 
 
@@ -108,16 +114,49 @@ public class Home2Controller {
 	public String meetings(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam(value = "kwd", defaultValue = "") String kwd,
-			@RequestParam(value = "size", defaultValue = "1") int size,
-			@RequestParam(value = "schType", defaultValue = "") String schType,
+			@RequestParam(value = "page", defaultValue = "1") int page,
+			HttpServletRequest request,
 			Model model) {
+		
+		int size = 10;
+		
+		// 검색 조건에 맞는 건수 & 페이지 수
+		int dataCount = meetingMinutesService.countMeetingMinutes(
+				workspace.getWorkspaceId(), workspace.getMemberId(),
+				kwd);
+		
+		int totalPage = paginateUtil.pageCount(dataCount, size);
+		
+		// 만약 페이지가 1보다 작거나 전체 페이지가 0이면 1로 맞춰주기
+		if(page < 1 || totalPage == 0) {
+			page = 1;
+		} else if(page > totalPage) {
+			page = totalPage;
+		}
+		
+		int offset = (page - 1) * size;
 		
 		// 회의록 목록 조회
 		List<MeetingMinutesDto> meetingMinutes = 
 				meetingMinutesService.findMeetingMinutes(
 						workspace.getWorkspaceId(),
-						workspace.getMemberId(), kwd);
+						workspace.getMemberId(), kwd, offset, size);
 		
+		// 현재 워크 목록 주소 유지
+		// getRequestURI : 현재 도메인이 포함된 목록 경로 가져오기
+		String listUrl = request.getRequestURI();
+		
+		// 페이지 이동 시 검색어 유지하기
+		if(!kwd.isEmpty()) {
+			listUrl += "?kwd=" + URLEncoder.encode(kwd,StandardCharsets.UTF_8);
+		}
+		
+		// 페이지 번호와 이동 링크가 들어있는 HTML을 만듦
+		// htmlEscape : 특수 문자 변환 (& -> &amp; 로 변경) 
+		String paging = paginateUtil.paging(page, totalPage, HtmlUtils.htmlEscape(listUrl));
+		
+		model.addAttribute("paging", paging);
+		model.addAttribute("kwd", kwd);
 		model.addAttribute("meetingMinutes", meetingMinutes);
 		
 		return "home/meetings";

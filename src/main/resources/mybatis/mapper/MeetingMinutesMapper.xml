@@ -32,6 +32,8 @@
 		ORDER BY m.meeting DESC NULLS LAST,
 		         m.created DESC,
 		         m.meeting_minute_id DESC
+		OFFSET #{offset} ROWS
+		FETCH FIRST #{size} ROWS ONLY
 	</select>
 	
 	<!-- 워크 회의록 페이징 처리 -->
