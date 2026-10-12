@@ -4,20 +4,15 @@
 	<div th:fragment="content">
 
 		<!-- ==========================================================================
-       [CSS SECTION] 풀 높이 오버레이 상세창 (상세내용 + 파일첨부 추가) 및 컬럼 비율 최적화
-       - 상세창: [추가 항목 보기] 아래에 [상세 내용 입력 영역] 및 [파일 첨부 영역] 추가
-       - 업무 목록 컬럼 비율 조정: 등록일/수정일(일시 포맷) 잘림 방지, 업무명 가독성 확보
-       - 웜 베이지 / 세이지 그린 톤앤매너 완벽 유지
+       [CSS SECTION] 풀 높이 오버레이 상세창 & 최적화된 10컬럼 그리드 스타일
        ========================================================================== -->
 		<style>
-/* 부모 컨테이너(.content-area) 패딩 제거 및 풀 높이 확보 */
 .content-area:has(.task-split-view-wrapper) {
 	padding: 0 !important;
 	overflow: hidden !important;
 	height: 100% !important;
 }
 
-/* 최상위 래퍼: 기준 좌표계(position: relative) */
 .task-split-view-wrapper {
 	display: flex;
 	width: 100%;
@@ -28,15 +23,6 @@
 	background: var(--bg-body, #FCFBF8);
 }
 
-.task-title-text {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	min-width: 0;
-	flex: 1; /* 남은 공간 안에서만 차지 */
-}
-
-/* 좌측 메인 업무 영역 */
 .task-tree-page {
 	width: 100%;
 	height: 100%;
@@ -47,39 +33,27 @@
 	padding: 24px 28px;
 }
 
-/* 스크롤 래퍼 */
 .task-scroll-wrapper {
 	width: 100%;
 	overflow-x: auto;
 	padding-bottom: 8px;
 }
 
-/* ==========================================================================
-   컬럼 비율 최적화 (총 10개 열)
-   - 업무명: minmax(260px, 3fr) - 트리 토글 및 아이콘 여유 공간 확보
-   - 상태: 80px
-   - 담당자: 90px
-   - 시작일 / 마감일: 각 100px (YYYY-MM-DD)
-   - 우선순위: 75px
-   - 진척도: 90px (바 + 텍스트)
-   - 작성자: 90px
-   - 등록일 / 수정일: 각 135px (YYYY-MM-DD HH:mm 일시 포맷 잘림 방지)
-   ========================================================================== */
+/* 10개 열 황금 비율 그리드 규격 */
 .task-grid-columns {
 	display: grid;
-	grid-template-columns: minmax(160px, 220px) 80px 90px 100px 100px 75px 90px 90px 135px 135px;
-	min-width: 1065px;
+	grid-template-columns: minmax(260px, 3fr) 80px 90px 100px 100px 75px 90px 90px 135px 135px;
+	min-width: 1155px;
 	align-items: center;
 }
 
-/* 최상단 공통 컬럼 헤더 */
 .task-grid-header {
 	background: var(--bg-sidebar, #F7F3EE);
 	border: 1px solid var(--border-main, #E8E2D9);
 	border-radius: 12px;
 	list-style: none;
 	margin: 0 0 16px 0;
-	padding: 0px;
+	padding: 0;
 	color: var(--text-sub, #786B5E);
 	font-size: 12.5px;
 	font-weight: 700;
@@ -91,16 +65,14 @@
 	align-items: center;
 }
 
-/* 그룹 컨테이너 */
 .group-container {
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
-	min-width: 1065px;
+	min-width: 1155px;
 	margin-bottom: 12px;
 }
 
-/* 그룹 메인 카드 */
 .group-card {
 	background: var(--bg-card-sub, #FCFAF6);
 	border: 1px solid var(--border-main, #E8E2D9);
@@ -113,7 +85,6 @@
 	position: relative;
 }
 
-/* 그룹 헤더 영역 */
 .group-header-row {
 	display: flex;
 	align-items: center;
@@ -124,7 +95,6 @@
 	padding: 2px 4px 6px 4px;
 }
 
-/* 토글 & 액션 버튼 규격 (20px x 20px) */
 .btn-toggle-box,
 .btn-action-tool {
 	width: 20px;
@@ -280,7 +250,7 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	min-width: 0 !important; /* Grid 자식 요소 수축 허용 (이게 없으면 안 줄어듭니다) */
+	min-width: 0 !important;
 	overflow: hidden;
 }
 
@@ -301,6 +271,14 @@
 .editable-cell:hover {
 	background: rgba(79, 98, 66, 0.08);
 	border-color: var(--primary-green-border, #DCE5D2);
+}
+
+.task-title-text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+	flex: 1;
 }
 
 .inline-edit-input {
@@ -357,30 +335,11 @@
 	opacity: 0.85;
 }
 
-.badge-req {
-	background: #E0F2FE;
-	color: #0284C7;
-}
-
-.badge-done {
-	background: var(--status-done-bg, #E8F0DE);
-	color: var(--status-done-text, #465B38);
-}
-
-.badge-hold {
-	background: #F1F3F7;
-	color: #64748B;
-}
-
-.badge-feedback {
-	background: #FEF3C7;
-	color: #92400E;
-}
-
-.text-danger {
-	color: var(--status-danger, #D9534F);
-	font-weight: 600;
-}
+.badge-req { background: #E0F2FE; color: #0284C7; }
+.badge-done { background: var(--status-done-bg, #E8F0DE); color: var(--status-done-text, #465B38); }
+.badge-hold { background: #F1F3F7; color: #64748B; }
+.badge-feedback { background: #FEF3C7; color: #92400E; }
+.text-danger { color: var(--status-danger, #D9534F); font-weight: 600; }
 
 .progress-cell {
 	display: flex;
@@ -453,9 +412,7 @@
 	background: var(--bg-hover, #EFE8DE);
 }
 
-/* ==========================================================================
-   [DETAIL SIDE PANEL (OVERLAY)] 
-   ========================================================================== */
+/* 오버레이 상세 패널 */
 .task-detail-panel {
 	position: absolute;
 	right: 0;
@@ -476,9 +433,7 @@
 	animation: slideInDrawer 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.task-detail-panel.active {
-	display: flex;
-}
+.task-detail-panel.active { display: flex; }
 
 @keyframes slideInDrawer {
 	from { transform: translateX(100%); }
@@ -534,7 +489,6 @@
 	color: var(--text-main, #594331);
 }
 
-/* 상세창 본문 스크롤 영역 */
 .detail-content-scroll {
 	flex: 1;
 	overflow-y: auto;
@@ -603,9 +557,7 @@
 	transition: color 0.15s;
 }
 
-.btn-link-action:hover {
-	color: var(--primary-green, #4F6242);
-}
+.btn-link-action:hover { color: var(--primary-green, #4F6242); }
 
 .detail-title-row {
 	display: flex;
@@ -660,9 +612,7 @@
 	transition: color 0.15s;
 }
 
-.btn-expand-more-props:hover {
-	color: var(--primary-green, #4F6242);
-}
+.btn-expand-more-props:hover { color: var(--primary-green, #4F6242); }
 
 .detail-extended-props {
 	display: none;
@@ -675,13 +625,8 @@
 	margin-top: 8px;
 }
 
-.detail-extended-props.show {
-	display: flex;
-}
+.detail-extended-props.show { display: flex; }
 
-/* ==========================================================================
-   [새로 추가] 상세 내용 영역 & 파일 첨부 영역 스타일
-   ========================================================================== */
 .detail-section-block {
 	display: flex;
 	flex-direction: column;
@@ -697,7 +642,6 @@
 	gap: 6px;
 }
 
-/* 상세 내용 텍스트에어리어 */
 .detail-desc-textarea {
 	width: 100%;
 	min-height: 110px;
@@ -719,7 +663,6 @@
 	box-shadow: 0 0 0 2px var(--primary-green-light, #EEF4E6);
 }
 
-/* 파일 첨부 영역 */
 .detail-file-dropzone {
 	border: 1px dashed var(--border-main, #E8E2D9);
 	border-radius: 10px;
@@ -728,12 +671,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-	transition: border-color 0.2s, background 0.2s;
-}
-
-.detail-file-dropzone:hover {
-	border-color: var(--primary-green, #4F6242);
-	background: #FFFFFF;
 }
 
 .file-upload-trigger-row {
@@ -754,13 +691,6 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	transition: all 0.15s;
-}
-
-.btn-upload-attach:hover {
-	background: var(--primary-green-light, #EEF4E6);
-	border-color: var(--primary-green-border, #DCE5D2);
-	color: var(--primary-green, #4F6242);
 }
 
 .file-list-box {
@@ -805,7 +735,6 @@
 	background: #FEE2E2;
 }
 
-/* 하위업무 섹션 */
 .detail-subtasks-section {
 	display: flex;
 	flex-direction: column;
@@ -853,15 +782,8 @@
 	color: var(--primary-green, #4F6242);
 	cursor: pointer;
 	align-self: flex-start;
-	transition: all 0.15s;
 }
 
-.btn-detail-add-subtask:hover {
-	background: var(--primary-green-light, #EEF4E6);
-	border-color: var(--primary-green, #4F6242);
-}
-
-/* 커스텀 삭제 모달 */
 .custom-modal-backdrop {
 	position: fixed;
 	top: 0;
@@ -878,10 +800,7 @@
 	transition: opacity 0.2s ease-in-out;
 }
 
-.custom-modal-backdrop.show {
-	display: flex;
-	opacity: 1;
-}
+.custom-modal-backdrop.show { display: flex; opacity: 1; }
 
 .custom-modal-card {
 	width: 400px;
@@ -938,12 +857,6 @@
 	font-size: 13px;
 	color: var(--text-sub, #786B5E);
 	line-height: 1.5;
-	word-break: break-all;
-}
-
-.modal-desc-text strong {
-	color: var(--text-main, #594331);
-	font-weight: 700;
 }
 
 .modal-actions-area {
@@ -962,12 +875,6 @@
 	font-size: 13px;
 	font-weight: 600;
 	cursor: pointer;
-	transition: all 0.15s;
-}
-
-.btn-modal-cancel:hover {
-	background: var(--bg-hover, #EFE8DE);
-	border-color: var(--border-sub, #DED5C9);
 }
 
 .btn-modal-confirm {
@@ -979,27 +886,20 @@
 	font-size: 13px;
 	font-weight: 700;
 	cursor: pointer;
-	box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
-	transition: all 0.15s;
-}
-
-.btn-modal-confirm:hover {
-	background: #B91C1C;
-	border-color: #B91C1C;
 }
 </style>
 		<!-- ==========================================================================
        [END OF CSS SECTION]
        ========================================================================== -->
 
-		<!-- 상위 래퍼: 기준 좌표계 -->
+		<!-- 상위 래퍼 -->
 		<div class="task-split-view-wrapper" id="taskSplitViewWrapper">
 
 			<!-- [좌측] 3단계 계층형 업무 트리 페이지 -->
 			<div class="task-tree-page" id="taskTreeMainPage">
 				<div class="task-scroll-wrapper">
 
-					<!-- 최상단 공통 컬럼 헤더 (10개 열: 균형잡힌 비율 적용) -->
+					<!-- 최상단 공통 컬럼 헤더 (10개 열) -->
 					<ul class="task-grid-header task-grid-columns">
 						<li>업무명</li>
 						<li>상태</li>
@@ -1013,207 +913,8 @@
 						<li>수정일</li>
 					</ul>
 
-					<!-- 그룹 카드 컨테이너 -->
-					<div class="group-container" id="groupContainer">
-
-						<!-- [그룹 1] 빈 그룹 카드 예시 -->
-						<div class="group-card" data-group-id="grp-1">
-							<div class="group-header-row">
-								<span class="btn-toggle-box group-toggle" onclick="toggleGroup(this)">－</span>
-								<span class="group-title editable-cell" onclick="event.stopPropagation(); editGroupName(this, 'grp-1')">그룹 1</span>
-								<span style="font-size: 13px; color: var(--text-muted);">(<span class="group-count">0</span>)</span>
-								<span class="inline-action-bundle">
-									<button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('group', 'grp-1', this)" title="그룹 삭제">
-										<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-									</button>
-								</span>
-							</div>
-
-							<div class="group-body">
-								<div class="task-box-inner" style="display: none;">
-									<ul class="task-tree-list"></ul>
-								</div>
-								<div class="btn-add-task-row" onclick="addNewMainTask('grp-1')">＋ 새 업무 추가</div>
-							</div>
-						</div>
-
-						<!-- [그룹 2] '그룹 미지정' -->
-						<div class="group-card" data-group-id="grp-2">
-							<div class="group-header-row">
-								<span class="btn-toggle-box group-toggle" onclick="toggleGroup(this)">－</span>
-								<span class="group-title editable-cell" onclick="event.stopPropagation(); editGroupName(this, 'grp-2')">그룹 미지정</span>
-								<span style="font-size: 13px; color: var(--text-muted);">(<span class="group-count">10</span>)</span>
-								<span class="inline-action-bundle">
-									<button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('group', 'grp-2', this)" title="그룹 삭제">
-										<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-									</button>
-								</span>
-							</div>
-
-							<div class="group-body">
-								<div class="task-box-inner">
-									<ul class="task-tree-list">
-
-										<!-- 업무 1 -->
-										<li class="task-branch" data-task-id="task-1">
-											<div class="task-item-row main-task task-grid-columns" onclick="openDetailPanel('task-1', this)">
-												<div class="col-task-name">
-													<span style="width: 20px;"></span>
-													<span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this)">업무 1</span>
-													<span class="inline-action-bundle">
-														<button type="button" class="btn-action-tool btn-action-add" onclick="event.stopPropagation(); addNewSubTask('task-1')" title="하위업무 추가">＋</button>
-														<button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('task', 'task-1', this)" title="업무 삭제">
-															<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-														</button>
-													</span>
-												</div>
-												<div><span class="badge-status badge-req" onclick="event.stopPropagation(); changeStatus(this)">● 요청</span></div>
-												<div><span class="editable-cell assignee-cell" onclick="event.stopPropagation(); editAssignee(this)">박혜림</span></div>
-												<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, false)">-</span></div>
-												<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, true)">-</span></div>
-												<div><span class="editable-cell priority-cell" onclick="event.stopPropagation(); editPriority(this)">-</span></div>
-												<div>
-													<div class="progress-cell" onclick="event.stopPropagation(); editProgress(this)">
-														<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 0%;"></div></div>
-														<span class="progress-text" style="font-size:12px;">0%</span>
-													</div>
-												</div>
-												<div>박혜림</div>
-												<div style="font-size: 12px; color: var(--text-muted);">2026-10-02 15:57</div>
-												<div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">2026-10-02 15:57</div>
-											</div>
-											<ul class="sub-task-list" style="list-style: none; padding: 0; margin: 0;"></ul>
-										</li>
-
-										<!-- 업무 3 -->
-										<li class="task-branch" data-task-id="task-3">
-											<div class="task-item-row main-task task-grid-columns" onclick="openDetailPanel('task-3', this)">
-												<div class="col-task-name">
-													<span class="btn-toggle-box task-toggle" onclick="event.stopPropagation(); toggleSubTasks(this)">－</span>
-													<span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this)">업무 3</span>
-													<span style="font-size:12px; color:var(--text-muted);">(<span class="sub-count">2</span>)</span>
-													<span class="inline-action-bundle">
-														<button type="button" class="btn-action-tool btn-action-add" onclick="event.stopPropagation(); addNewSubTask('task-3')" title="하위업무 추가">＋</button>
-														<button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('task', 'task-3', this)" title="업무 삭제">
-															<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-														</button>
-													</span>
-												</div>
-												<div><span class="badge-status badge-req" onclick="event.stopPropagation(); changeStatus(this)">● 요청</span></div>
-												<div><span class="editable-cell assignee-cell" onclick="event.stopPropagation(); editAssignee(this)">박혜림</span></div>
-												<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, false)">-</span></div>
-												<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, true)">-</span></div>
-												<div><span class="editable-cell priority-cell" onclick="event.stopPropagation(); editPriority(this)">-</span></div>
-												<div>
-													<div class="progress-cell" onclick="event.stopPropagation(); editProgress(this)">
-														<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 0%;"></div></div>
-														<span class="progress-text" style="font-size:12px;">0%</span>
-													</div>
-												</div>
-												<div>박혜림</div>
-												<div style="font-size: 12px; color: var(--text-muted);">2026-10-12 05:31</div>
-												<div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">2026-10-12 05:31</div>
-											</div>
-
-											<!-- 3단계 하위업무 목록 -->
-											<ul class="sub-task-list" style="list-style: none; padding: 0; margin: 0;">
-												<li class="task-item-row sub-task task-grid-columns" data-sub-id="sub-3-1" onclick="openDetailPanel('sub-3-1', this, true)">
-													<div class="col-task-name indent-sub">
-														<span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this)">하위업무 1</span>
-														<span class="inline-action-bundle">
-															<button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('subtask', 'sub-3-1', this)" title="하위업무 삭제">
-																<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-															</button>
-														</span>
-													</div>
-													<div><span class="badge-status badge-req" onclick="event.stopPropagation(); changeStatus(this)">● 요청</span></div>
-													<div><span class="editable-cell assignee-cell" onclick="event.stopPropagation(); editAssignee(this)">박혜림</span></div>
-													<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, false)">-</span></div>
-													<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, true)">-</span></div>
-													<div><span class="editable-cell priority-cell" onclick="event.stopPropagation(); editPriority(this)">-</span></div>
-													<div>
-														<div class="progress-cell" onclick="event.stopPropagation(); editProgress(this)">
-															<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 0%;"></div></div>
-															<span class="progress-text" style="font-size:12px;">0%</span>
-														</div>
-													</div>
-													<div>박혜림</div>
-													<div style="font-size: 12px; color: var(--text-muted);">2026-10-12 05:32</div>
-													<div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">2026-10-12 05:32</div>
-												</li>
-												<li class="task-item-row sub-task task-grid-columns" data-sub-id="sub-3-2" onclick="openDetailPanel('sub-3-2', this, true)">
-													<div class="col-task-name indent-sub">
-														<span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this)">하위업무 2</span>
-														<span class="inline-action-bundle">
-															<button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('subtask', 'sub-3-2', this)" title="하위업무 삭제">
-																<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-															</button>
-														</span>
-													</div>
-													<div><span class="badge-status badge-req" onclick="event.stopPropagation(); changeStatus(this)">● 요청</span></div>
-													<div><span class="editable-cell assignee-cell" onclick="event.stopPropagation(); editAssignee(this)">박혜림</span></div>
-													<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, false)">-</span></div>
-													<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, true)">-</span></div>
-													<div><span class="editable-cell priority-cell" onclick="event.stopPropagation(); editPriority(this)">-</span></div>
-													<div>
-														<div class="progress-cell" onclick="event.stopPropagation(); editProgress(this)">
-															<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 0%;"></div></div>
-															<span class="progress-text" style="font-size:12px;">0%</span>
-														</div>
-													</div>
-													<div>박혜림</div>
-													<div style="font-size: 12px; color: var(--text-muted);">2026-10-12 05:32</div>
-													<div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">2026-10-12 05:32</div>
-												</li>
-											</ul>
-										</li>
-
-										<!-- 업무 2 -->
-										<li class="task-branch" data-task-id="task-2">
-											<div class="task-item-row main-task task-grid-columns" onclick="openDetailPanel('task-2', this)">
-												<div class="col-task-name">
-													<span class="btn-toggle-box task-toggle" onclick="event.stopPropagation(); toggleSubTasks(this)">＋</span>
-													<span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this)">업무 2</span>
-													<span style="font-size:12px; color:var(--text-muted);">(<span class="sub-count">5</span>)</span>
-													<span class="inline-action-bundle">
-														<button type="button" class="btn-action-tool btn-action-add" onclick="event.stopPropagation(); addNewSubTask('task-2')" title="하위업무 추가">＋</button>
-														<button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('task', 'task-2', this)" title="업무 삭제">
-															<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-														</button>
-													</span>
-												</div>
-												<div><span class="badge-status badge-done" onclick="event.stopPropagation(); changeStatus(this)">● 진행</span></div>
-												<div><span class="editable-cell assignee-cell" onclick="event.stopPropagation(); editAssignee(this)">박혜림</span></div>
-												<div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, false)">2026-09-30</span></div>
-												<div><span class="editable-cell date-cell text-danger" onclick="event.stopPropagation(); editDate(this, true)">2026-10-12</span></div>
-												<div><span class="editable-cell priority-cell" onclick="event.stopPropagation(); editPriority(this)">보통</span></div>
-												<div>
-													<div class="progress-cell" onclick="event.stopPropagation(); editProgress(this)">
-														<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 30%;"></div></div>
-														<span class="progress-text" style="font-size:12px;">30%</span>
-													</div>
-												</div>
-												<div>플로우 운영자</div>
-												<div style="font-size: 12px; color: var(--text-muted);">2026-09-30 17:30</div>
-												<div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">2026-10-01 14:52</div>
-											</div>
-											<ul class="sub-task-list" style="list-style: none; padding: 0; margin: 0; display: none;"></ul>
-										</li>
-
-										<li class="task-branch">
-											<div class="task-item-row main-task task-grid-columns" onclick="addNewMainTask('grp-2')">
-												<div style="grid-column: 1/-1; padding: 12px 18px; color: var(--primary-green); font-weight: 700; cursor: pointer;">
-													＋ 새 업무 추가
-												</div>
-											</div>
-										</li>
-
-									</ul>
-								</div>
-							</div>
-						</div>
-
-					</div>
+					<!-- 그룹 카드 컨테이너 (API로부터 동적 렌더링) -->
+					<div class="group-container" id="groupContainer"></div>
 
 				</div>
 
@@ -1222,10 +923,8 @@
 
 			<!-- [우측] 오버레이 상세 패널 -->
 			<aside class="task-detail-panel" id="taskDetailSidePanel">
-				<!-- 너비 조절 리사이저 바 -->
 				<div class="pane-resizer-bar" id="paneResizerBar" title="좌우로 드래그하여 패널 너비 조절"></div>
 
-				<!-- 상단 바 -->
 				<div class="detail-top-nav">
 					<div style="display:flex; align-items:center; gap:6px;">
 						<span>🌿</span>
@@ -1234,31 +933,24 @@
 					<button type="button" class="detail-close-btn" onclick="closeDetailPanel()" title="닫기 (ESC)">✕</button>
 				</div>
 
-				<!-- 스크롤 상세 콘텐츠 -->
 				<div class="detail-content-scroll">
-
-					<!-- 작성자 프로필 및 헤더 -->
 					<div class="detail-meta-header">
 						<div class="detail-author-box">
 							<div class="detail-avatar-badge" id="detailAuthorAvatar">혜림</div>
 							<div>
 								<span class="detail-author-name" id="detailAuthorName">박혜림</span>
-								<span class="detail-created-date" id="detailCreatedDate">2026-10-12 05:31</span>
+								<span class="detail-created-date" id="detailCreatedDate">-</span>
 							</div>
 						</div>
 						<div class="detail-header-tools">
 							<button type="button" class="btn-link-action" onclick="alert('피드 게시물로 이동합니다.');">게시글 바로가기 ↗</button>
-							<span style="cursor:pointer;" title="고정">📌</span>
-							<span style="cursor:pointer;" title="더보기">⋮</span>
 						</div>
 					</div>
 
-					<!-- 업무 제목 행 -->
 					<div class="detail-title-row">
-						<input type="text" class="detail-task-title-input" id="detailTaskTitle" value="업무 3" onchange="syncDetailTitleToTree(this.value)">
+						<input type="text" class="detail-task-title-input" id="detailTaskTitle" value="" onchange="onDetailTitleChange(this.value)">
 					</div>
 
-					<!-- 상태 선택 행 -->
 					<div class="detail-prop-row">
 						<span class="prop-label">상태</span>
 						<div style="position:relative;">
@@ -1268,7 +960,6 @@
 						</div>
 					</div>
 
-					<!-- 추가 항목 보기 (접이식) -->
 					<div>
 						<button type="button" class="btn-expand-more-props" onclick="toggleExtendedProps(this)">
 							<span id="extendPropsIcon">＋</span> 추가 항목 보기
@@ -1276,7 +967,7 @@
 						<div class="detail-extended-props" id="extendedPropsContainer">
 							<div class="detail-prop-row">
 								<span class="prop-label">담당자</span>
-								<select class="inline-edit-select" id="detailAssigneeSelect" onchange="syncDetailAssignee(this.value)">
+								<select class="inline-edit-select" id="detailAssigneeSelect">
 									<option value="박혜림" selected>박혜림</option>
 									<option value="김철수">김철수</option>
 									<option value="이영희">이영희</option>
@@ -1285,15 +976,15 @@
 							</div>
 							<div class="detail-prop-row">
 								<span class="prop-label">시작일</span>
-								<input type="date" class="inline-edit-date" id="detailStartDate" onchange="syncDetailDate(false, this.value)">
+								<input type="date" class="inline-edit-date" id="detailStartDate" onchange="onDetailDateChange('startAt', this.value)">
 							</div>
 							<div class="detail-prop-row">
 								<span class="prop-label">마감일</span>
-								<input type="date" class="inline-edit-date" id="detailEndDate" onchange="syncDetailDate(true, this.value)">
+								<input type="date" class="inline-edit-date" id="detailEndDate" onchange="onDetailDateChange('endAt', this.value)">
 							</div>
 							<div class="detail-prop-row">
 								<span class="prop-label">우선순위</span>
-								<select class="inline-edit-select" id="detailPrioritySelect" onchange="syncDetailPriority(this.value)">
+								<select class="inline-edit-select" id="detailPrioritySelect">
 									<option value="-">-</option>
 									<option value="낮음">낮음</option>
 									<option value="보통">보통</option>
@@ -1304,19 +995,19 @@
 						</div>
 					</div>
 
-					<!-- [추가된 영역 1] 상세 내용 (Description / Content) -->
+					<!-- 상세 내용 -->
 					<div class="detail-section-block">
 						<label class="detail-block-title" for="detailContentText">
 							<span>📄 상세 내용</span>
 						</label>
-						<textarea class="detail-desc-textarea" id="detailContentText" placeholder="업무에 대한 상세한 설명과 가이드를 입력해 주세요..."></textarea>
+						<textarea class="detail-desc-textarea" id="detailContentText" placeholder="업무에 대한 상세한 설명과 가이드를 입력해 주세요..." onchange="onDetailContentChange(this.value)"></textarea>
 					</div>
 
-					<!-- [추가된 영역 2] 파일 첨부 (File Attachment) -->
+					<!-- 파일 첨부 -->
 					<div class="detail-section-block">
 						<div class="detail-block-title">
 							<span>📎 첨부파일</span>
-							<span style="font-size:11.5px; color:var(--text-muted);" id="attachedFileCount">(1)</span>
+							<span style="font-size:11.5px; color:var(--text-muted);" id="attachedFileCount">(0)</span>
 						</div>
 						<div class="detail-file-dropzone" id="fileDropzone">
 							<div class="file-upload-trigger-row">
@@ -1326,17 +1017,7 @@
 									<input type="file" style="display:none;" onchange="handleFileUpload(this)">
 								</label>
 							</div>
-							<!-- 첨부된 파일 리스트 목록 -->
-							<div class="file-list-box" id="attachedFileList">
-								<div class="attached-file-item">
-									<div class="attached-file-info">
-										<span>📁</span>
-										<span style="font-weight:600;">Taskwaka_Guide_v1.0.pdf</span>
-										<span style="color:var(--text-muted); font-size:11px;">(1.2 MB)</span>
-									</div>
-									<button type="button" class="btn-del-file" onclick="removeAttachedFile(this)" title="파일 삭제">✕</button>
-								</div>
-							</div>
+							<div class="file-list-box" id="attachedFileList"></div>
 						</div>
 					</div>
 
@@ -1344,31 +1025,16 @@
 					<div class="detail-subtasks-section">
 						<div class="detail-section-title">
 							<span>ㄴ 하위업무</span>
-							<span style="color:var(--text-muted); font-size:12px;" id="detailSubtaskCount">2</span>
+							<span style="color:var(--text-muted); font-size:12px;" id="detailSubtaskCount">0</span>
 						</div>
-
-						<div class="detail-subtask-box" id="detailSubtaskBox">
-							<div class="detail-subtask-row">
-								<span class="badge-status badge-req">● 요청</span>
-								<span>하위업무 1</span>
-							</div>
-							<div class="detail-subtask-row">
-								<span class="badge-status badge-req">● 요청</span>
-								<span>하위업무 2</span>
-							</div>
-						</div>
-
+						<div class="detail-subtask-box" id="detailSubtaskBox"></div>
 						<button type="button" class="btn-detail-add-subtask" onclick="detailAddSubtaskClick()">＋ 하위업무 추가</button>
 					</div>
-
 				</div>
 			</aside>
-
 		</div>
 
-		<!-- ==========================================================================
-       [CUSTOM MODAL COMPONENT] 삭제 확인 모달
-       ========================================================================== -->
+		<!-- 삭제 모달 -->
 		<div class="custom-modal-backdrop" id="deleteConfirmModal" onclick="handleBackdropClick(event)">
 			<div class="custom-modal-card">
 				<div class="modal-header-area">
@@ -1381,12 +1047,9 @@
 					</div>
 					<div class="modal-title-group">
 						<div class="modal-main-title" id="modalTargetTitle">항목 삭제 확인</div>
-						<div class="modal-desc-text" id="modalDescNotice">
-							선택한 항목을 영구 삭제하시겠습니까?
-						</div>
+						<div class="modal-desc-text" id="modalDescNotice">선택한 항목을 영구 삭제하시겠습니까?</div>
 					</div>
 				</div>
-
 				<div class="modal-actions-area">
 					<button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">취소</button>
 					<button type="button" class="btn-modal-confirm" id="btnModalConfirmDelete" onclick="executeConfirmedDelete()">삭제하기</button>
@@ -1395,364 +1058,204 @@
 		</div>
 
 		<!-- ==========================================================================
-       [JAVASCRIPT SECTION]
+       [JAVASCRIPT SECTION] 실제 REST API CRUD 비동기 연동
        ========================================================================== -->
 		<script>
-      let groupSeq = 3;
-      let taskSeq = 4;
+      const currentProjectId = 1; // 기본 프로젝트 ID
       const teamMemberList = ['박혜림', '김철수', '이영희', '홍길동', '-'];
       const priorityList = ['-', '낮음', '보통', '높음', '긴급'];
-      const statusCycle = [
-        { text: '● 요청', class: 'badge-req' },
-        { text: '● 진행', class: 'badge-done' },
-        { text: '● 피드백', class: 'badge-feedback' },
-        { text: '● 완료', class: 'badge-done' },
-        { text: '● 보류', class: 'badge-hold' }
+      const statusMap = [
+        { code: 0, text: '● 요청', class: 'badge-req' },
+        { code: 1, text: '● 진행', class: 'badge-done' },
+        { code: 2, text: '● 피드백', class: 'badge-feedback' },
+        { code: 3, text: '● 완료', class: 'badge-done' },
+        { code: 4, text: '● 보류', class: 'badge-hold' }
       ];
 
       const trashSvg = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
 
       let currentActiveRow = null;
       let currentActiveTaskId = null;
+      let pendingDeleteContext = null;
 
-      // ================= 1. 가변 너비 조절 =================
-      const resizerBar = document.getElementById('paneResizerBar');
-      const sidePanel = document.getElementById('taskDetailSidePanel');
-      const splitWrapper = document.getElementById('taskSplitViewWrapper');
-
-      let isDragging = false;
-
-      resizerBar.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        resizerBar.classList.add('dragging');
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
+      // ================= 1. 페이지 로드 시 DB에서 전체 업무 목록 조회 =================
+      document.addEventListener('DOMContentLoaded', function() {
+        loadTasksFromDatabase();
       });
 
-      document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        const wrapperRect = splitWrapper.getBoundingClientRect();
-        let newWidth = wrapperRect.right - e.clientX;
-        if (newWidth < 380) newWidth = 380;
-        if (newWidth > 860) newWidth = 860;
-        sidePanel.style.width = newWidth + 'px';
-      });
-
-      document.addEventListener('mouseup', function() {
-        if (isDragging) {
-          isDragging = false;
-          resizerBar.classList.remove('dragging');
-          document.body.style.cursor = '';
-          document.body.style.userSelect = '';
-        }
-      });
-
-      // ================= 2. 상세창 열기 & 데이터 로딩 =================
-      function openDetailPanel(taskId, rowElem, isSubTask = false) {
-        document.querySelectorAll('.task-item-row').forEach(r => r.classList.remove('selected-task-row'));
-        rowElem.classList.add('selected-task-row');
-
-        currentActiveRow = rowElem;
-        currentActiveTaskId = taskId;
-
-        sidePanel.classList.add('active');
-
-        const titleText = rowElem.querySelector('.task-title-text')?.textContent.trim() || '업무 상세';
-        const statusElem = rowElem.querySelector('.badge-status');
-        const statusText = statusElem ? statusElem.textContent.trim() : '● 요청';
-        const assignee = rowElem.querySelector('.assignee-cell')?.textContent.trim() || '박혜림';
-        const startDate = rowElem.querySelectorAll('.date-cell')[0]?.textContent.trim();
-        const endDate = rowElem.querySelectorAll('.date-cell')[1]?.textContent.trim();
-        const priority = rowElem.querySelector('.priority-cell')?.textContent.trim() || '-';
-
-        document.getElementById('detailTaskTitle').value = titleText;
-        document.getElementById('detailStatusText').textContent = statusText;
-        document.getElementById('detailStatusBadge').className = 'badge-status ' + (statusElem ? statusElem.className.replace('badge-status', '').trim() : 'badge-req');
-        
-        const assigneeSelect = document.getElementById('detailAssigneeSelect');
-        if (assigneeSelect) assigneeSelect.value = assignee;
-        const startDateInput = document.getElementById('detailStartDate');
-        if (startDateInput) startDateInput.value = startDate === '-' ? '' : startDate;
-        const endDateInput = document.getElementById('detailEndDate');
-        if (endDateInput) endDateInput.value = endDate === '-' ? '' : endDate;
-        const prioritySelect = document.getElementById('detailPrioritySelect');
-        if (prioritySelect) prioritySelect.value = priority;
-
-        // 하위업무 목록 렌더링
-        const subtaskBox = document.getElementById('detailSubtaskBox');
-        subtaskBox.innerHTML = '';
-        if (!isSubTask) {
-          const branch = rowElem.closest('.task-branch');
-          const subRows = branch ? branch.querySelectorAll('.sub-task-list .sub-task') : [];
-          document.getElementById('detailSubtaskCount').textContent = subRows.length;
-
-          if (subRows.length > 0) {
-            subRows.forEach(sub => {
-              const subTitle = sub.querySelector('.task-title-text')?.textContent.trim();
-              const subStat = sub.querySelector('.badge-status')?.textContent.trim() || '● 요청';
-              const div = document.createElement('div');
-              div.className = 'detail-subtask-row';
-              div.innerHTML = `<span class="badge-status badge-req">${subStat}</span><span>${subTitle}</span>`;
-              subtaskBox.appendChild(div);
-            });
-          } else {
-            subtaskBox.innerHTML = '<div style="padding:10px 14px; font-size:12.5px; color:var(--text-muted);">등록된 하위업무가 없습니다.</div>';
-          }
-        } else {
-          document.getElementById('detailSubtaskCount').textContent = '0 (하위업무 선택됨)';
-          subtaskBox.innerHTML = '<div style="padding:10px 14px; font-size:12.5px; color:var(--text-muted);">현재 선택된 항목은 하위업무입니다.</div>';
-        }
+      function loadTasksFromDatabase() {
+        fetch(`/api/projects/${currentProjectId}/tasks`)
+          .then(res => res.json())
+          .then(tasks => {
+            renderTaskTree(tasks);
+          })
+          .catch(err => console.error('업무 목록 로딩 실패:', err));
       }
 
-      function closeDetailPanel() {
-        sidePanel.classList.remove('active');
-        if (currentActiveRow) {
-          currentActiveRow.classList.remove('selected-task-row');
-          currentActiveRow = null;
-        }
+      function renderTaskTree(tasks) {
+        const container = document.getElementById('groupContainer');
+        container.innerHTML = '';
+
+        // 기본 2개 그룹 구성 (1: 그룹 1, 0: 그룹 미지정)
+        const groups = [
+          { level: 1, title: '그룹 1', tasks: [] },
+          { level: 0, title: '그룹 미지정', tasks: [] }
+        ];
+
+        tasks.forEach(t => {
+          if (t.taskLevel === 1) groups[0].tasks.push(t);
+          else groups[1].tasks.push(t);
+        });
+
+        groups.forEach(g => {
+          const card = document.createElement('div');
+          card.className = 'group-card';
+          card.setAttribute('data-group-level', g.level);
+          
+          let tasksHtml = '';
+          g.tasks.forEach(task => {
+            tasksHtml += renderMainTaskHtml(task);
+          });
+
+          card.innerHTML = `
+            <div class="group-header-row">
+              <span class="btn-toggle-box group-toggle" onclick="toggleGroup(this)">－</span>
+              <span class="group-title editable-cell">${g.title}</span>
+              <span style="font-size: 13px; color: var(--text-muted);">(<span class="group-count">${g.tasks.length}</span>)</span>
+            </div>
+            <div class="group-body">
+              <div class="task-box-inner" style="${g.tasks.length === 0 ? 'display:none;' : ''}">
+                <ul class="task-tree-list">
+                  ${tasksHtml}
+                </ul>
+              </div>
+              <div class="btn-add-task-row" onclick="requestCreateMainTask(${g.level})">＋ 새 업무 추가</div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
       }
 
-      // 파일 업로드 처리 시뮬레이션
-      function handleFileUpload(input) {
-        if (!input.files || input.files.length === 0) return;
-        const file = input.files[0];
-        const fileList = document.getElementById('attachedFileList');
-        const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      function renderMainTaskHtml(task) {
+        const statusObj = statusMap.find(s => s.code === task.status) || statusMap[0];
+        const subCount = task.subTasks ? task.subTasks.length : 0;
+        let subTasksHtml = '';
 
-        const div = document.createElement('div');
-        div.className = 'attached-file-item';
-        div.innerHTML = `
-          <div class="attached-file-info">
-            <span>📁</span>
-            <span style="font-weight:600;">${file.name}</span>
-            <span style="color:var(--text-muted); font-size:11px;">(${sizeMb} MB)</span>
-          </div>
-          <button type="button" class="btn-del-file" onclick="removeAttachedFile(this)" title="파일 삭제">✕</button>
+        if (task.subTasks && task.subTasks.length > 0) {
+          task.subTasks.forEach(st => {
+            subTasksHtml += renderSubTaskHtml(st);
+          });
+        }
+
+        return `
+          <li class="task-branch" data-task-id="${task.taskId}">
+            <div class="task-item-row main-task task-grid-columns" onclick="openDetailPanel(${task.taskId}, this)">
+              <div class="col-task-name">
+                ${subCount > 0 
+                  ? `<span class="btn-toggle-box task-toggle" onclick="event.stopPropagation(); toggleSubTasks(this)">－</span>` 
+                  : `<span style="width: 20px;"></span>`}
+                <span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this, ${task.taskId}, false)">${task.title}</span>
+                ${subCount > 0 ? `<span style="font-size:12px; color:var(--text-muted);">(<span class="sub-count">${subCount}</span>)</span>` : ''}
+                <span class="inline-action-bundle">
+                  <button type="button" class="btn-action-tool btn-action-add" onclick="event.stopPropagation(); requestCreateSubTask(${task.taskId})" title="하위업무 추가">＋</button>
+                  <button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('task', ${task.taskId}, this)" title="업무 삭제">${trashSvg}</button>
+                </span>
+              </div>
+              <div><span class="badge-status ${statusObj.class}" onclick="event.stopPropagation(); cycleStatus(this, ${task.taskId}, false)">${statusObj.text}</span></div>
+              <div><span class="editable-cell assignee-cell">${task.memberName || '미지정'}</span></div>
+              <div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, ${task.taskId}, 'startAt', false)">${task.startAt || '-'}</span></div>
+              <div><span class="editable-cell date-cell ${task.endAt ? 'text-danger' : ''}" onclick="event.stopPropagation(); editDate(this, ${task.taskId}, 'endAt', false)">${task.endAt || '-'}</span></div>
+              <div><span class="editable-cell priority-cell">-</span></div>
+              <div>
+                <div class="progress-cell">
+                  <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div>
+                  <span class="progress-text" style="font-size:12px;">${Math.round(task.progress || 0)}%</span>
+                </div>
+              </div>
+              <div>${task.memberName || '미지정'}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${task.created || '-'}</div>
+              <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">${task.updated || '-'}</div>
+            </div>
+            <ul class="sub-task-list" style="list-style: none; padding: 0; margin: 0;">
+              ${subTasksHtml}
+            </ul>
+          </li>
         `;
-        fileList.appendChild(div);
-
-        // 카운트 갱신
-        const countSpan = document.getElementById('attachedFileCount');
-        countSpan.textContent = `(${fileList.children.length})`;
       }
 
-      function removeAttachedFile(btn) {
-        const item = btn.closest('.attached-file-item');
-        if (item) {
-          item.remove();
-          const fileList = document.getElementById('attachedFileList');
-          document.getElementById('attachedFileCount').textContent = `(${fileList.children.length})`;
-        }
+      function renderSubTaskHtml(st) {
+        const statusObj = statusMap.find(s => s.code === st.status) || statusMap[0];
+        return `
+          <li class="task-item-row sub-task task-grid-columns" data-sub-id="${st.subTaskId}">
+            <div class="col-task-name indent-sub">
+              <span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this, ${st.subTaskId}, true)">${st.title}</span>
+              <span class="inline-action-bundle">
+                <button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('subtask', ${st.subTaskId}, this)" title="하위업무 삭제">${trashSvg}</button>
+              </span>
+            </div>
+            <div><span class="badge-status ${statusObj.class}" onclick="event.stopPropagation(); cycleStatus(this, ${st.subTaskId}, true)">${statusObj.text}</span></div>
+            <div><span class="editable-cell assignee-cell">${st.memberName || '미지정'}</span></div>
+            <div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, ${st.subTaskId}, 'startAt', true)">${st.startAt || '-'}</span></div>
+            <div><span class="editable-cell date-cell ${st.endAt ? 'text-danger' : ''}" onclick="event.stopPropagation(); editDate(this, ${st.subTaskId}, 'endAt', true)">${st.endAt || '-'}</span></div>
+            <div><span class="editable-cell priority-cell">-</span></div>
+            <div>
+              <div class="progress-cell">
+                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${st.progress || 0}%;"></div></div>
+                <span class="progress-text" style="font-size:12px;">${Math.round(st.progress || 0)}%</span>
+              </div>
+            </div>
+            <div>${st.memberName || '미지정'}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">${st.created || '-'}</div>
+            <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">${st.updated || '-'}</div>
+          </li>
+        `;
       }
 
-      function syncDetailTitleToTree(newTitle) {
-        if (!currentActiveRow) return;
-        const treeTitle = currentActiveRow.querySelector('.task-title-text');
-        if (treeTitle) {
-          treeTitle.textContent = newTitle;
-          updateModifiedTime(currentActiveRow);
-        }
+      // ================= 2. 등록 API 연동 =================
+      function requestCreateMainTask(level) {
+        const title = prompt('새 업무명을 입력하세요:', '새 업무');
+        if (!title) return;
+
+        fetch(`/api/projects/${currentProjectId}/tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: title,
+            taskLevel: level,
+            projectMemberId: 1
+          })
+        })
+        .then(res => res.json())
+        .then(() => loadTasksFromDatabase());
       }
 
-      function cycleDetailStatus(badgeElem) {
-        const currentText = document.getElementById('detailStatusText').textContent.trim();
-        let idx = statusCycle.findIndex(s => s.text === currentText);
-        if (idx === -1) idx = 0;
-        const next = statusCycle[(idx + 1) % statusCycle.length];
+      function requestCreateSubTask(taskId) {
+        const title = prompt('추가할 하위업무명을 입력하세요:', '새 하위업무');
+        if (!title) return;
 
-        badgeElem.className = 'badge-status ' + next.class;
-        document.getElementById('detailStatusText').textContent = next.text;
-
-        if (currentActiveRow) {
-          const rowBadge = currentActiveRow.querySelector('.badge-status');
-          if (rowBadge) {
-            rowBadge.className = 'badge-status ' + next.class;
-            rowBadge.textContent = next.text;
-            updateModifiedTime(currentActiveRow);
+        fetch(`/api/projects/${currentProjectId}/tasks/${taskId}/subtasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: title,
+            projectMemberId: 1
+          })
+        })
+        .then(res => res.json())
+        .then(() => {
+          loadTasksFromDatabase();
+          if (currentActiveTaskId === taskId) {
+            refreshDetailPanel(taskId);
           }
-        }
-      }
-
-      function toggleExtendedProps(btn) {
-        const container = document.getElementById('extendedPropsContainer');
-        const icon = document.getElementById('extendPropsIcon');
-        if (container.classList.contains('show')) {
-          container.classList.remove('show');
-          icon.textContent = '＋';
-        } else {
-          container.classList.add('show');
-          icon.textContent = '－';
-        }
-      }
-
-      function syncDetailAssignee(val) {
-        if (!currentActiveRow) return;
-        const cell = currentActiveRow.querySelector('.assignee-cell');
-        if (cell) {
-          cell.textContent = val;
-          updateModifiedTime(currentActiveRow);
-        }
-      }
-
-      function syncDetailDate(isEnd, val) {
-        if (!currentActiveRow) return;
-        const cell = currentActiveRow.querySelectorAll('.date-cell')[isEnd ? 1 : 0];
-        if (cell) {
-          cell.textContent = val || '-';
-          if (isEnd && val) cell.classList.add('text-danger');
-          else if (isEnd) cell.classList.remove('text-danger');
-          updateModifiedTime(currentActiveRow);
-        }
-      }
-
-      function syncDetailPriority(val) {
-        if (!currentActiveRow) return;
-        const cell = currentActiveRow.querySelector('.priority-cell');
-        if (cell) {
-          cell.textContent = val;
-          updateModifiedTime(currentActiveRow);
-        }
+        });
       }
 
       function detailAddSubtaskClick() {
-        if (currentActiveTaskId) {
-          addNewSubTask(currentActiveTaskId);
-          if (currentActiveRow) openDetailPanel(currentActiveTaskId, currentActiveRow);
-        }
+        if (currentActiveTaskId) requestCreateSubTask(currentActiveTaskId);
       }
 
-      // ================= 3. 삭제 모달 로직 =================
-      let pendingDeleteContext = null;
-
-      function openDeleteModal(type, targetId, btnElement) {
-        const modalBackdrop = document.getElementById('deleteConfirmModal');
-        const modalTitle = document.getElementById('modalTargetTitle');
-        const modalNotice = document.getElementById('modalDescNotice');
-
-        let itemName = '';
-        if (type === 'group') {
-          const groupCard = document.querySelector(`[data-group-id="${targetId}"]`);
-          itemName = groupCard.querySelector('.group-title')?.textContent.trim() || '해당 그룹';
-          modalTitle.textContent = '그룹 삭제';
-          modalNotice.innerHTML = `<strong>'${itemName}'</strong> 그룹을 삭제하시겠습니까?<br><span style="font-size:12px; color:var(--status-danger);">* 그룹 내에 등록된 모든 업무가 함께 삭제됩니다.</span>`;
-        } else if (type === 'task') {
-          const branch = document.querySelector(`[data-task-id="${targetId}"]`);
-          itemName = branch.querySelector('.task-title-text')?.textContent.trim() || '해당 업무';
-          modalTitle.textContent = '업무 삭제';
-          modalNotice.innerHTML = `<strong>'${itemName}'</strong> 업무를 삭제하시겠습니까?<br><span style="font-size:12px; color:var(--status-danger);">* 포함된 하위업무 목록도 함께 영구 삭제됩니다.</span>`;
-        } else if (type === 'subtask') {
-          const subRow = btnElement.closest('.task-item-row.sub-task');
-          itemName = subRow.querySelector('.task-title-text')?.textContent.trim() || '해당 하위업무';
-          modalTitle.textContent = '하위업무 삭제';
-          modalNotice.innerHTML = `<strong>'${itemName}'</strong> 하위업무를 삭제하시겠습니까?`;
-        }
-
-        pendingDeleteContext = { type, targetId, btnElement };
-        modalBackdrop.classList.add('show');
-      }
-
-      function closeDeleteModal() {
-        const modalBackdrop = document.getElementById('deleteConfirmModal');
-        modalBackdrop.classList.remove('show');
-        pendingDeleteContext = null;
-      }
-
-      function handleBackdropClick(event) {
-        if (event.target === document.getElementById('deleteConfirmModal')) {
-          closeDeleteModal();
-        }
-      }
-
-      function executeConfirmedDelete() {
-        if (!pendingDeleteContext) return;
-        const { type, targetId, btnElement } = pendingDeleteContext;
-
-        if (type === 'group') {
-          const groupCard = document.querySelector(`[data-group-id="${targetId}"]`);
-          if (groupCard) groupCard.remove();
-          closeDetailPanel();
-        } else if (type === 'task') {
-          const branch = document.querySelector(`[data-task-id="${targetId}"]`);
-          if (branch) {
-            const groupCard = branch.closest('.group-card');
-            branch.remove();
-            if (groupCard) {
-              const countSpan = groupCard.querySelector('.group-count');
-              const current = parseInt(countSpan.textContent || '0');
-              countSpan.textContent = Math.max(0, current - 1);
-            }
-            closeDetailPanel();
-          }
-        } else if (type === 'subtask') {
-          const subRow = btnElement.closest('.task-item-row.sub-task');
-          if (subRow) {
-            const branch = subRow.closest('.task-branch');
-            const mainRow = branch.querySelector('.main-task');
-            subRow.remove();
-
-            let subCountSpan = mainRow.querySelector('.sub-count');
-            if (subCountSpan) {
-              const count = parseInt(subCountSpan.textContent || '0') - 1;
-              if (count <= 0) {
-                const countWrapper = subCountSpan.closest('span');
-                if (countWrapper) countWrapper.remove();
-                const toggleBox = mainRow.querySelector('.task-toggle');
-                if (toggleBox) {
-                  const emptySpacer = document.createElement('span');
-                  emptySpacer.style.width = '20px';
-                  toggleBox.replaceWith(emptySpacer);
-                }
-              } else {
-                subCountSpan.textContent = count;
-              }
-            }
-            updateModifiedTime(mainRow);
-            if (currentActiveTaskId) openDetailPanel(currentActiveTaskId, mainRow);
-          }
-        }
-
-        closeDeleteModal();
-      }
-
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          if (document.getElementById('deleteConfirmModal').classList.contains('show')) {
-            closeDeleteModal();
-          } else if (sidePanel.classList.contains('active')) {
-            closeDetailPanel();
-          }
-        }
-      });
-
-      function updateModifiedTime(elem) {
-        const row = elem.closest('.task-item-row');
-        if (!row) return;
-        const updatedCol = row.querySelector('.col-updated-at');
-        if (updatedCol) {
-          const now = new Date();
-          const pad = n => String(n).padStart(2, '0');
-          updatedCol.textContent = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-        }
-      }
-
-      // ================= 4. 목록 인라인 수정 및 추가 로직 =================
-      function changeStatus(badgeElem) {
-        const currentText = badgeElem.textContent.trim();
-        let idx = statusCycle.findIndex(s => s.text === currentText);
-        if (idx === -1) idx = 0;
-        const next = statusCycle[(idx + 1) % statusCycle.length];
-
-        badgeElem.className = 'badge-status ' + next.class;
-        badgeElem.textContent = next.text;
-        updateModifiedTime(badgeElem);
-
-        if (currentActiveRow && currentActiveRow.contains(badgeElem)) {
-          document.getElementById('detailStatusBadge').className = 'badge-status ' + next.class;
-          document.getElementById('detailStatusText').textContent = next.text;
-        }
-      }
-
-      function editTitle(cell) {
+      // ================= 3. 인라인 수정 API 연동 =================
+      function editTitle(cell, id, isSub) {
         if (cell.querySelector('input')) return;
         const oldText = cell.textContent.trim();
         const input = document.createElement('input');
@@ -1769,58 +1272,48 @@
           const newText = input.value.trim() || oldText;
           cell.textContent = newText;
           if (newText !== oldText) {
-            updateModifiedTime(cell);
-            if (currentActiveRow && currentActiveRow.contains(cell)) {
-              document.getElementById('detailTaskTitle').value = newText;
-            }
+            const url = isSub 
+              ? `/api/projects/${currentProjectId}/tasks/subtasks/${id}/field`
+              : `/api/projects/${currentProjectId}/tasks/${id}/field`;
+            fetch(url, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fieldName: 'title', fieldValue: newText })
+            }).then(() => {
+              if (currentActiveTaskId === id) document.getElementById('detailTaskTitle').value = newText;
+            });
           }
         }
-
         input.onblur = finish;
-        input.onkeydown = function(e) {
-          if (e.key === 'Enter') { finish(); }
-          else if (e.key === 'Escape') { cell.textContent = oldText; }
-        };
+        input.onkeydown = e => { if (e.key === 'Enter') finish(); else if (e.key === 'Escape') cell.textContent = oldText; };
       }
 
-      function editAssignee(cell) {
-        if (cell.querySelector('select')) return;
-        const currentVal = cell.textContent.trim();
-        const select = document.createElement('select');
-        select.className = 'inline-edit-select';
+      function cycleStatus(badge, id, isSub) {
+        const text = badge.textContent.trim();
+        let idx = statusMap.findIndex(s => s.text === text);
+        const next = statusMap[(idx + 1) % statusMap.length];
 
-        teamMemberList.forEach(m => {
-          const opt = document.createElement('option');
-          opt.value = m;
-          opt.textContent = m;
-          if (m === currentVal) opt.selected = true;
-          select.appendChild(opt);
-        });
+        badge.className = 'badge-status ' + next.class;
+        badge.textContent = next.text;
 
-        cell.textContent = '';
-        cell.appendChild(select);
-        select.focus();
-
-        function finish() {
-          const chosen = select.value;
-          cell.textContent = chosen;
-          if (chosen !== currentVal) {
-            updateModifiedTime(cell);
-            if (currentActiveRow && currentActiveRow.contains(cell)) {
-              document.getElementById('detailAssigneeSelect').value = chosen;
-            }
+        const url = isSub 
+          ? `/api/projects/${currentProjectId}/tasks/subtasks/${id}/field`
+          : `/api/projects/${currentProjectId}/tasks/${id}/field`;
+        fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fieldName: 'status', fieldValue: next.code })
+        }).then(() => {
+          if (currentActiveTaskId === id) {
+            document.getElementById('detailStatusBadge').className = 'badge-status ' + next.class;
+            document.getElementById('detailStatusText').textContent = next.text;
           }
-        }
-
-        select.onblur = finish;
-        select.onchange = finish;
+        });
       }
 
-      function editDate(cell, isEndDate) {
+      function editDate(cell, id, fieldName, isSub) {
         if (cell.querySelector('input')) return;
-        const rawText = cell.textContent.trim();
-        const currentVal = rawText === '-' ? '' : rawText;
-
+        const currentVal = cell.textContent.trim() === '-' ? '' : cell.textContent.trim();
         const input = document.createElement('input');
         input.type = 'date';
         input.className = 'inline-edit-date';
@@ -1831,333 +1324,217 @@
         input.focus();
 
         function finish() {
-          const picked = input.value || '-';
-          cell.textContent = picked;
-          if (isEndDate && picked !== '-') {
-            cell.classList.add('text-danger');
-          } else {
-            cell.classList.remove('text-danger');
-          }
-          if (picked !== rawText) {
-            updateModifiedTime(cell);
-            if (currentActiveRow && currentActiveRow.contains(cell)) {
-              if (isEndDate) document.getElementById('detailEndDate').value = picked === '-' ? '' : picked;
-              else document.getElementById('detailStartDate').value = picked === '-' ? '' : picked;
-            }
-          }
+          const picked = input.value || '';
+          cell.textContent = picked || '-';
+          const url = isSub 
+            ? `/api/projects/${currentProjectId}/tasks/subtasks/${id}/field`
+            : `/api/projects/${currentProjectId}/tasks/${id}/field`;
+          fetch(url, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fieldName: fieldName, fieldValue: picked })
+          });
         }
-
         input.onblur = finish;
         input.onchange = finish;
-        input.onkeydown = function(e) {
-          if (e.key === 'Enter') finish();
-          else if (e.key === 'Escape') { cell.textContent = rawText; }
-        };
       }
 
-      function editPriority(cell) {
-        if (cell.querySelector('select')) return;
-        const currentVal = cell.textContent.trim();
-        const select = document.createElement('select');
-        select.className = 'inline-edit-select';
+      // ================= 4. 상세창 열기 & 동기화 =================
+      function openDetailPanel(taskId, rowElem) {
+        document.querySelectorAll('.task-item-row').forEach(r => r.classList.remove('selected-task-row'));
+        rowElem.classList.add('selected-task-row');
 
-        priorityList.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p;
-          opt.textContent = p;
-          if (p === currentVal) opt.selected = true;
-          select.appendChild(opt);
-        });
+        currentActiveRow = rowElem;
+        currentActiveTaskId = taskId;
 
-        cell.textContent = '';
-        cell.appendChild(select);
-        select.focus();
+        fetch(`/api/projects/${currentProjectId}/tasks/${taskId}`)
+          .then(res => res.json())
+          .then(task => {
+            document.getElementById('taskDetailSidePanel').classList.add('active');
+            document.getElementById('detailTaskTitle').value = task.title || '';
+            document.getElementById('detailCreatedDate').textContent = task.created || '';
+            document.getElementById('detailContentText').value = task.content || '';
+            document.getElementById('detailStartDate').value = task.startAt || '';
+            document.getElementById('detailEndDate').value = task.endAt || '';
 
-        function finish() {
-          const chosen = select.value;
-          cell.textContent = chosen;
-          if (chosen !== currentVal) {
-            updateModifiedTime(cell);
-            if (currentActiveRow && currentActiveRow.contains(cell)) {
-              document.getElementById('detailPrioritySelect').value = chosen;
+            const statusObj = statusMap.find(s => s.code === task.status) || statusMap[0];
+            document.getElementById('detailStatusBadge').className = 'badge-status ' + statusObj.class;
+            document.getElementById('detailStatusText').textContent = statusObj.text;
+
+            // 하위업무
+            const subBox = document.getElementById('detailSubtaskBox');
+            subBox.innerHTML = '';
+            const subCount = task.subTasks ? task.subTasks.length : 0;
+            document.getElementById('detailSubtaskCount').textContent = subCount;
+
+            if (task.subTasks && task.subTasks.length > 0) {
+              task.subTasks.forEach(st => {
+                const stStatus = statusMap.find(s => s.code === st.status) || statusMap[0];
+                const div = document.createElement('div');
+                div.className = 'detail-subtask-row';
+                div.innerHTML = `<span class="badge-status ${stStatus.class}">${stStatus.text}</span><span>${st.title}</span>`;
+                subBox.appendChild(div);
+              });
+            } else {
+              subBox.innerHTML = '<div style="padding:10px 14px; font-size:12.5px; color:var(--text-muted);">등록된 하위업무가 없습니다.</div>';
             }
-          }
-        }
-
-        select.onblur = finish;
-        select.onchange = finish;
+          });
       }
 
-      function editProgress(progressBox) {
-        if (progressBox.querySelector('input')) return;
-        const textSpan = progressBox.querySelector('.progress-text');
-        const fillBar = progressBox.querySelector('.progress-bar-fill');
-        const currentVal = parseInt(textSpan.textContent) || 0;
-
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.min = '0';
-        input.max = '100';
-        input.step = '10';
-        input.value = currentVal;
-        input.style.width = '48px';
-        input.className = 'inline-edit-input';
-
-        textSpan.style.display = 'none';
-        progressBox.appendChild(input);
-        input.focus();
-        input.select();
-
-        function finish() {
-          let num = parseInt(input.value);
-          if (isNaN(num)) num = currentVal;
-          if (num < 0) num = 0;
-          if (num > 100) num = 100;
-
-          fillBar.style.width = num + '%';
-          textSpan.textContent = num + '%';
-          textSpan.style.display = '';
-          input.remove();
-          if (num !== currentVal) updateModifiedTime(progressBox);
+      function closeDetailPanel() {
+        document.getElementById('taskDetailSidePanel').classList.remove('active');
+        if (currentActiveRow) {
+          currentActiveRow.classList.remove('selected-task-row');
+          currentActiveRow = null;
         }
-
-        input.onblur = finish;
-        input.onkeydown = function(e) {
-          if (e.key === 'Enter') finish();
-          else if (e.key === 'Escape') {
-            textSpan.style.display = '';
-            input.remove();
-          }
-        };
       }
 
-      function editGroupName(elem, grpId) {
-        if (elem.querySelector('input')) return;
-        const oldText = elem.textContent.trim();
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'inline-edit-input';
-        input.value = oldText;
-        input.style.width = '140px';
+      function onDetailTitleChange(val) {
+        if (!currentActiveTaskId) return;
+        fetch(`/api/projects/${currentProjectId}/tasks/${currentActiveTaskId}/field`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fieldName: 'title', fieldValue: val })
+        }).then(() => loadTasksFromDatabase());
+      }
 
-        elem.textContent = '';
-        elem.appendChild(input);
-        input.focus();
-        input.select();
+      function onDetailContentChange(val) {
+        if (!currentActiveTaskId) return;
+        fetch(`/api/projects/${currentProjectId}/tasks/${currentActiveTaskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: val })
+        });
+      }
 
-        function finish() {
-          const newText = input.value.trim() || oldText;
-          elem.textContent = newText;
+      function onDetailDateChange(fieldName, val) {
+        if (!currentActiveTaskId) return;
+        fetch(`/api/projects/${currentProjectId}/tasks/${currentActiveTaskId}/field`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fieldName: fieldName, fieldValue: val })
+        }).then(() => loadTasksFromDatabase());
+      }
+
+      function cycleDetailStatus(badge) {
+        if (!currentActiveTaskId) return;
+        const text = document.getElementById('detailStatusText').textContent.trim();
+        let idx = statusMap.findIndex(s => s.text === text);
+        const next = statusMap[(idx + 1) % statusMap.length];
+
+        badge.className = 'badge-status ' + next.class;
+        document.getElementById('detailStatusText').textContent = next.text;
+
+        fetch(`/api/projects/${currentProjectId}/tasks/${currentActiveTaskId}/field`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fieldName: 'status', fieldValue: next.code })
+        }).then(() => loadTasksFromDatabase());
+      }
+
+      function toggleExtendedProps(btn) {
+        const box = document.getElementById('extendedPropsContainer');
+        const icon = document.getElementById('extendPropsIcon');
+        if (box.classList.contains('show')) {
+          box.classList.remove('show');
+          icon.textContent = '＋';
+        } else {
+          box.classList.add('show');
+          icon.textContent = '－';
+        }
+      }
+
+      // ================= 5. 삭제 모달 & API 연동 =================
+      function openDeleteModal(type, targetId, btnElement) {
+        const modal = document.getElementById('deleteConfirmModal');
+        const title = document.getElementById('modalTargetTitle');
+        const notice = document.getElementById('modalDescNotice');
+
+        if (type === 'task') {
+          title.textContent = '업무 삭제';
+          notice.innerHTML = '선택한 업무와 포함된 하위업무가 모두 영구 삭제됩니다.';
+        } else if (type === 'subtask') {
+          title.textContent = '하위업무 삭제';
+          notice.innerHTML = '선택한 하위업무를 영구 삭제하시겠습니까?';
         }
 
-        input.onblur = finish;
-        input.onkeydown = function(e) {
-          if (e.key === 'Enter') finish();
-          else if (e.key === 'Escape') elem.textContent = oldText;
-        };
+        pendingDeleteContext = { type, targetId };
+        modal.classList.add('show');
       }
+
+      function closeDeleteModal() {
+        document.getElementById('deleteConfirmModal').classList.remove('show');
+        pendingDeleteContext = null;
+      }
+
+      function handleBackdropClick(e) {
+        if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
+      }
+
+      function executeConfirmedDelete() {
+        if (!pendingDeleteContext) return;
+        const { type, targetId } = pendingDeleteContext;
+
+        const url = type === 'task'
+          ? `/api/projects/${currentProjectId}/tasks/${targetId}`
+          : `/api/projects/${currentProjectId}/tasks/subtasks/${targetId}`;
+
+        fetch(url, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(() => {
+            closeDeleteModal();
+            closeDetailPanel();
+            loadTasksFromDatabase();
+          });
+      }
+
+      // ================= 6. 너비 조절 리사이저 바 =================
+      const resizerBar = document.getElementById('paneResizerBar');
+      const sidePanel = document.getElementById('taskDetailSidePanel');
+      const splitWrapper = document.getElementById('taskSplitViewWrapper');
+      let isDragging = false;
+
+      resizerBar.addEventListener('mousedown', () => { isDragging = true; document.body.style.cursor = 'col-resize'; });
+      document.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        let newWidth = splitWrapper.getBoundingClientRect().right - e.clientX;
+        if (newWidth < 380) newWidth = 380;
+        if (newWidth > 860) newWidth = 860;
+        sidePanel.style.width = newWidth + 'px';
+      });
+      document.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; document.body.style.cursor = ''; } });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDeleteModal(); closeDetailPanel(); } });
 
       function toggleGroup(btn) {
-        const card = btn.closest('.group-card');
-        const body = card.querySelector('.group-body');
-        if (body.style.display === 'none') {
-          body.style.display = 'flex';
-          btn.textContent = '－';
-        } else {
-          body.style.display = 'none';
-          btn.textContent = '＋';
-        }
+        const body = btn.closest('.group-card').querySelector('.group-body');
+        if (body.style.display === 'none') { body.style.display = 'flex'; btn.textContent = '－'; }
+        else { body.style.display = 'none'; btn.textContent = '＋'; }
       }
 
       function toggleSubTasks(btn) {
-        const branch = btn.closest('.task-branch');
-        const subList = branch.querySelector('.sub-task-list');
-        if (subList.style.display === 'none') {
-          subList.style.display = '';
-          btn.textContent = '－';
-        } else {
-          subList.style.display = 'none';
-          btn.textContent = '＋';
-        }
+        const subList = btn.closest('.task-branch').querySelector('.sub-task-list');
+        if (subList.style.display === 'none') { subList.style.display = ''; btn.textContent = '－'; }
+        else { subList.style.display = 'none'; btn.textContent = '＋'; }
       }
 
-      function addNewGroup() {
-        const groupName = `그룹 ${groupSeq}`;
-        const newGroupId = `grp-${groupSeq++}`;
-        const container = document.getElementById('groupContainer');
-
-        const card = document.createElement('div');
-        card.className = 'group-card';
-        card.setAttribute('data-group-id', newGroupId);
-        card.innerHTML = `
-          <div class="group-header-row">
-            <span class="btn-toggle-box group-toggle" onclick="toggleGroup(this)">－</span>
-            <span class="group-title editable-cell" onclick="event.stopPropagation(); editGroupName(this, '${newGroupId}')">${groupName}</span>
-            <span style="font-size: 13px; color: var(--text-muted);">(<span class="group-count">0</span>)</span>
-            <span class="inline-action-bundle">
-              <button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('group', '${newGroupId}', this)" title="그룹 삭제">
-                ${trashSvg}
-              </button>
-            </span>
+      function handleFileUpload(input) {
+        if (!input.files || input.files.length === 0) return;
+        const file = input.files[0];
+        const fileList = document.getElementById('attachedFileList');
+        const div = document.createElement('div');
+        div.className = 'attached-file-item';
+        div.innerHTML = `
+          <div class="attached-file-info">
+            <span>📁</span>
+            <span style="font-weight:600;">${file.name}</span>
+            <span style="color:var(--text-muted); font-size:11px;">(${(file.size / (1024 * 1024)).toFixed(1)} MB)</span>
           </div>
-          <div class="group-body">
-            <div class="task-box-inner" style="display:none;">
-              <ul class="task-tree-list"></ul>
-            </div>
-            <div class="btn-add-task-row" onclick="addNewMainTask('${newGroupId}')">＋ 새 업무 추가</div>
-          </div>
+          <button type="button" class="btn-del-file" onclick="this.closest('.attached-file-item').remove()" title="삭제">✕</button>
         `;
-        container.appendChild(card);
-      }
-
-      function addNewMainTask(groupId) {
-        const taskName = `업무 ${taskSeq}`;
-        const groupCard = document.querySelector(`[data-group-id="${groupId}"]`);
-        const taskBoxInner = groupCard.querySelector('.task-box-inner');
-        taskBoxInner.style.display = 'block';
-        const taskList = groupCard.querySelector('.task-tree-list');
-        const newTaskId = `task-${taskSeq++}`;
-        const now = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-        const timeStr = `${dateStr} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-        const branch = document.createElement('li');
-        branch.className = 'task-branch';
-        branch.setAttribute('data-task-id', newTaskId);
-        branch.innerHTML = `
-          <div class="task-item-row main-task task-grid-columns" onclick="openDetailPanel('${newTaskId}', this)">
-            <div class="col-task-name">
-              <span style="width: 20px;"></span>
-              <span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this)">${taskName}</span>
-              <span class="inline-action-bundle">
-                <button type="button" class="btn-action-tool btn-action-add" onclick="event.stopPropagation(); addNewSubTask('${newTaskId}')" title="하위업무 추가">＋</button>
-                <button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('task', '${newTaskId}', this)" title="업무 삭제">
-                  ${trashSvg}
-                </button>
-              </span>
-            </div>
-            <div>
-              <span class="badge-status badge-req" onclick="event.stopPropagation(); changeStatus(this)">● 요청</span>
-            </div>
-            <div>
-              <span class="editable-cell assignee-cell" onclick="event.stopPropagation(); editAssignee(this)">박혜림</span>
-            </div>
-            <div>
-              <span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, false)">${dateStr}</span>
-            </div>
-            <div>
-              <span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, true)">-</span>
-            </div>
-            <div>
-              <span class="editable-cell priority-cell" onclick="event.stopPropagation(); editPriority(this)">-</span>
-            </div>
-            <div>
-              <div class="progress-cell" onclick="event.stopPropagation(); editProgress(this)">
-                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%;"></div></div>
-                <span class="progress-text" style="font-size:12px;">0%</span>
-              </div>
-            </div>
-            <div>박혜림</div>
-            <div style="font-size: 12px; color: var(--text-muted);">${timeStr}</div>
-            <div class="col-updated-at" style="font-size:12px; color:var(--text-muted);">${timeStr}</div>
-          </div>
-          <ul class="sub-task-list" style="list-style:none; padding:0; margin:0;"></ul>
-        `;
-
-        const lastAddBtnLi = taskList.querySelector('.task-branch:last-child');
-        if (lastAddBtnLi) {
-          taskList.insertBefore(branch, lastAddBtnLi);
-        } else {
-          taskList.appendChild(branch);
-        }
-
-        const countSpan = groupCard.querySelector('.group-count');
-        countSpan.textContent = parseInt(countSpan.textContent || '0') + 1;
-      }
-
-      function addNewSubTask(taskId) {
-        const branch = document.querySelector(`[data-task-id="${taskId}"]`);
-        const subList = branch.querySelector('.sub-task-list');
-        const mainRow = branch.querySelector('.main-task');
-        const colName = mainRow.querySelector('.col-task-name');
-
-        let subCountSpan = mainRow.querySelector('.sub-count');
-        const nextSubNum = subCountSpan ? (parseInt(subCountSpan.textContent || '0') + 1) : 1;
-        const subTaskName = `하위업무 ${nextSubNum}`;
-
-        let toggleBox = colName.querySelector('.task-toggle');
-        if (!toggleBox) {
-          toggleBox = document.createElement('span');
-          toggleBox.className = 'btn-toggle-box task-toggle';
-          toggleBox.textContent = '－';
-          toggleBox.onclick = function(e) { e.stopPropagation(); toggleSubTasks(this); };
-          colName.replaceChild(toggleBox, colName.firstElementChild);
-        }
-
-        const now = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-        const timeStr = `${dateStr} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-        const subItem = document.createElement('li');
-        const newSubId = `sub-${Date.now()}`;
-        subItem.className = 'task-item-row sub-task task-grid-columns';
-        subItem.setAttribute('data-sub-id', newSubId);
-        subItem.onclick = function() { openDetailPanel(newSubId, this, true); };
-        subItem.innerHTML = `
-          <div class="col-task-name indent-sub">
-            <span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this)">${subTaskName}</span>
-            <span class="inline-action-bundle">
-              <button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('subtask', '${newSubId}', this)" title="하위업무 삭제">
-                ${trashSvg}
-              </button>
-            </span>
-          </div>
-          <div>
-            <span class="badge-status badge-req" onclick="event.stopPropagation(); changeStatus(this)">● 요청</span>
-          </div>
-          <div>
-            <span class="editable-cell assignee-cell" onclick="event.stopPropagation(); editAssignee(this)">박혜림</span>
-          </div>
-          <div>
-            <span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, false)">${dateStr}</span>
-          </div>
-          <div>
-            <span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, true)">-</span>
-          </div>
-          <div>
-            <span class="editable-cell priority-cell" onclick="event.stopPropagation(); editPriority(this)">-</span>
-          </div>
-          <div>
-            <div class="progress-cell" onclick="event.stopPropagation(); editProgress(this)">
-              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%;"></div></div>
-              <span class="progress-text" style="font-size:12px;">0%</span>
-            </div>
-          </div>
-          <div>박혜림</div>
-          <div style="font-size:12px; color:var(--text-muted);">${timeStr}</div>
-          <div class="col-updated-at" style="font-size:12px; color:var(--text-muted);">${timeStr}</div>
-        `;
-        subList.appendChild(subItem);
-
-        if (!subCountSpan) {
-          const titleSpan = mainRow.querySelector('.task-title-text');
-          const countWrapper = document.createElement('span');
-          countWrapper.style.fontSize = '12px';
-          countWrapper.style.color = 'var(--text-muted)';
-          countWrapper.innerHTML = `(<span class="sub-count">1</span>)`;
-          titleSpan.insertAdjacentElement('afterend', countWrapper);
-        } else {
-          subCountSpan.textContent = nextSubNum;
-        }
-
-        subList.style.display = '';
-        if (toggleBox) toggleBox.textContent = '－';
-        updateModifiedTime(mainRow);
+        fileList.appendChild(div);
+        document.getElementById('attachedFileCount').textContent = `(${fileList.children.length})`;
       }
     </script>
-
 	</div>
 </body>
 </html>
