@@ -98,4 +98,22 @@ public class ManageServiceImpl implements ManageService{
 	public void assignOrUpdateProjectMember(Long workspaceMemberId, Long projectId, int role) throws Exception {
 		projectMemberRepository.upsertProjectMember(workspaceMemberId, projectId, role);
 	}
+
+	@Override
+	public int getProjectCount(Long workspaceId) throws Exception {
+		
+		return mapper.getProjectCount(workspaceId);
+	}
+
+	@Override
+	public List<ManageDto> getProjectDetail(Map<String, Object> map) throws Exception {
+		List<ManageDto> list = null;
+		try {
+			list = mapper.getProjectDetail(map);
+		} catch (Exception e) {
+			log.info("getProjectDetail : ", e);
+		}
+		
+		return list;
+	}
 }

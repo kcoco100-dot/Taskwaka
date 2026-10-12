@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<!-- CSS 영역: 기존 프로젝트 리스트용 CSS 재활용 및 상세페이지 전용 스타일 추가 -->
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/projectDetail.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout project-list-layout">
+        <!-- 기존 사이드바 연결 -->
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
+        
+        <section class="section project-list-page">
+            <div class="page-heading">
+                <div>
+                    <h1 class="page-title">프로젝트 상세 정보</h1>
+                    <p class="page-description">프로젝트의 진행 상황과 상세 내용을 확인합니다.</p>
+                </div>
+                <!-- 목록으로 돌아가기 버튼 -->
+                <a class="project-button project-button-primary" th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">목록으로</a>
+            </div>
+
+            <!-- 상세 정보 패널 -->
+            <div class="project-detail-panel">
+                
+                <div class="detail-row">
+                    <div class="detail-label">프로젝트 명</div>
+                    <div class="detail-value">
+                        <strong style="font-size: 20px; color: var(--primary-green, #4F6242);" th:text="${project.subject}">프로젝트 명</strong>
+                    </div>
+                </div>
+
+                <!-- 2. 프로젝트 기간 -->
+                <div class="detail-row">
+                    <div class="detail-label">프로젝트 기간</div>
+                    <div class="detail-value">
+                        <span th:text="${project.start_date}">시작일</span> 
+                        <span style="color: #A89B8C; margin: 0 8px;">~</span> 
+                        <span th:text="${project.end_date}">종료일</span>
+                    </div>
+                </div>
+
+                <!-- 3. 담당자(PM 최우선, 없으면 DT) 및 참여인원 -->
+                <div class="detail-row">
+                    <div class="detail-label">책임자 / 참여인원</div>
+                    <div class="detail-value">
+                        <span class="project-name" style="font-weight: 700;" th:text="${project.pm_name != null ? project.pm_name : '담당자 미정'}">책임자 이름</span>
+                        <span style="margin-left: 12px; color: var(--accent-green, #71865B); font-size: 14px;" th:text="'(현재 참여 인원: ' + ${project.member_count} + '명)'"></span>
+                    </div>
+                </div>
+
+                <!-- 4. 상태 및 진행률 -->
+                <div class="detail-row">
+                    <div class="detail-label">진행 상태 / 진행률</div>
+                    <div class="detail-value" style="display: flex; align-items: center; gap: 20px;">
+                        <!-- 상태 뱃지 -->
+                        <span th:if="${project.status == 0}" class="project-status project-status-planned">예정</span>
+                        <span th:if="${project.status == 1}" class="project-status project-status-progress">진행 중</span>
+                        <span th:if="${project.status == 2}" class="project-status project-status-completed">완료</span>
+                        <span th:if="${project.status == 3}" class="project-status project-status-paused">보류</span>
+                        
+                        <!-- 진행률 Bar (시각적 피드백) -->
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <progress max="100" th:value="${project.progress}" style="width: 250px; height: 10px;"></progress>
+                            <strong style="color: var(--primary-green-dark, #465B38);" th:text="${project.progress} + '%'">0%</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. 프로젝트 상세 내용 -->
+                <div class="detail-row" style="border-bottom: none; display: block;">
+                    <div class="detail-label" style="margin-bottom: 16px;">프로젝트 상세 내용</div>
+                    <div class="content-box" th:text="${project.content != null and project.content != '' ? project.content : '등록된 상세 내용이 없습니다.'}">
+                        내용
+                    </div>
+                </div>
+                
+                <!-- 하단 액션 버튼 -->
+                <div class="bottom-actions">
+                    <!-- 버튼 컬러 커스텀은 기존 project-list.css 설정을 그대로 따릅니다 -->
+                    <button type="button" class="project-button project-edit" style="background-color: #EEF4E6; color: #465B38; border-color: #DCE5D2;">수정하기</button>
+                    <button type="button" class="project-button project-delete" style="background-color: #FDE8E8; color: #D9534F; border-color: #FAD1D1;">삭제하기</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+</html>

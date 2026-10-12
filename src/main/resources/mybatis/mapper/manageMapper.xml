@@ -26,10 +26,55 @@
     </select>
 	
 	<insert id="insertProject" parameterType="com.tk.app.domain.dto.ManageDto">
+		<selectKey keyProperty="project_id" resultType="Long" order="BEFORE">
+            SELECT seq_projects.NEXTVAL FROM dual
+        </selectKey>
+	
 		INSERT INTO projects(project_id, workspace_id, subject, content, start_at, "END", status, progress,
 			archive, created)
 			VALUES (seq_projects.NEXTVAL, #{workspace_id}, #{subject}, #{content}, 
 			TO_DATE(#{start_date}, 'YYYY-MM-DD'), TO_DATE(#{end_date}, 'YYYY-MM-DD'), #{status}, #{progress}, 'N', SYSDATE)
 	</insert>
+	
+	<!-- [신규 추가] 워크스페이스 내 프로젝트 총 개수 구하기 -->
+    <select id="getProjectCount" parameterType="Long" resultType="int">
+        SELECT COUNT(*)
+        FROM projects
+        WHERE workspace_id = #{workspaceId}
+          AND archive = 'N'
+    </select>
+
+    <!-- 프로젝트 상세 조회 -->
+	<select id="getProjectDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+        SELECT 
+            p.project_id, 
+            p.subject, 
+            p.content, 
+            p.start_at AS start_date, 
+            p.end AS end_date, 
+            p.status, 
+            p.progress,
+
+            (SELECT md.name 
+             FROM project_members pm
+             JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+             JOIN member_details md ON wm.member_id = md.member_id
+             WHERE pm.project_id = p.project_id 
+               AND pm.status = 0
+               AND pm.role = (
+                   SELECT MAX(role) 
+                   FROM project_members 
+                   WHERE project_id = p.project_id AND status = 0
+               )
+               AND ROWNUM = 1) AS pm_name,
+             
+            (SELECT COUNT(*) 
+             FROM project_members 
+             WHERE project_id = p.project_id AND status = 0) AS member_count
+             
+        FROM projects p
+        WHERE p.project_id = #{projectId}
+    </select>
+	
 	
 </mapper>

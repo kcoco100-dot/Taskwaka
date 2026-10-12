@@ -61,7 +61,9 @@
                         <tr class="project-list-row" th:unless="${#lists.isEmpty(projectList)}" th:each="project : ${projectList}" data-status="progress">
                             <td class="project-number" th:text="${project.project_id}">1</td>
                             <td>
-	                            <span class="project-name" th:text="${project.subject}">TASKWAKA 협업 플랫폼</span>
+	                            <a class="project-name" 
+	                            th:href="@{/{domainKey}/manage/detail/{projectId}(domainKey=${domainKey}, projectId=${project.project_id})}"
+	                            th:text="${project.subject}">TASKWAKA 협업 플랫폼</a>
 	                            <span class="project-code" th:text="'PRJ-' + ${#numbers.formatInteger(project.project_id, 3)}">PRJ-006</span></td>
                             <td class="project-manager">이팀장</td>
                             <td>8명</td>
