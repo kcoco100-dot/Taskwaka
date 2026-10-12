@@ -50,8 +50,13 @@ public class ManageServiceImpl implements ManageService{
 
 	@Override
 	public void updateProject(ManageDto dto) throws SQLException {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.updateProject(dto);
+		} catch (Exception e) {
+			log.info("updateProject : ", e);
+			
+			throw e;
+		}
 	}
 
 	@Override
