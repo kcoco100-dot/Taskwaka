@@ -162,7 +162,7 @@ public class ManageController {
 	        List<ManageDto> projectList =servive.listProject(map);
 	        model.addAttribute("projectList", projectList);
 		} catch (Exception e) {
-			// TODO: handle exception
+			log.info("projectView : ", e);
 		}
 
 		
