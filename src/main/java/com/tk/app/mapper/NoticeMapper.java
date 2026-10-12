@@ -18,4 +18,12 @@ public interface NoticeMapper {
 	public NoticeDto findWorkspaceDetailNotice(
 			@Param("workspaceId") long workspaceId,
 			@Param("noticeId") long noticeId);
+	
+	// 공지 수정
+	// 변경되는 값 : title, content
+	public int noticeEdit(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId,
+			@Param("title") String title, 
+			@Param("content") String content);
 }

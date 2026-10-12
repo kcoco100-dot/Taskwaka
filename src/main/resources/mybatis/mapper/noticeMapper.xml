@@ -35,8 +35,16 @@
 		    AND n.deleted IS NULL
 	</select>
 	
+	<!-- 공지 수정 : 수정될 항목 title, content -->
+	<!-- 공개 상태 : status = 1 공개 -->
 	<update id="noticeEdit">
-	
+		UPDATE notice 
+			SET title = #{title}, content = #{content}, updated = SYSDATE
+		WHERE notice_id = #{noticeId}
+		    AND workspace_id = #{workspaceId}
+		    AND notice_type = 'WORKSPACE'
+		    AND status = 1
+		    AND deleted IS NULL
 	</update>
 
 </mapper>

@@ -35,7 +35,7 @@
 			    </div>
 			
 			    <div class="shell-actions">
-			        <button type="submit" class="shell-action shell-action-primary" disabled title="저장 처리 연결 예정">
+			        <button type="submit" class="shell-action shell-action-primary">
 			            수정완료
 			        </button>
 			
@@ -48,6 +48,8 @@
 			        </a>
 			    </div>
 			</form>
+			
+			<div th:if="${errorMessage != null}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
         </div>
     </div>
 </th:block>
