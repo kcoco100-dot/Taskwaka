@@ -1,0 +1,53 @@
+﻿.growth-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.tree-preview {
+    min-height: 360px;
+    margin: 24px 0;
+}
+
+.growth-content .tree-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 28px 20px;
+    box-sizing: border-box;
+    border: 1px solid #D5E2C7;
+    border-radius: 16px;
+    background: #F4F8EE;
+}
+
+.tree-preview-label {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #E3EDD8;
+    color: #4F6242;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tree-image-area {
+    position: relative;
+    width: min(100%, 280px);
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tree-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.tree-preview-description {
+    margin: 0;
+    text-align: center;
+    line-height: 1.6;
+}

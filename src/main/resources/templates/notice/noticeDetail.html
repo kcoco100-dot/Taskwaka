@@ -39,11 +39,27 @@
                 <div th:text="${notice.content}" style="white-space: pre-wrap;">공지 본문</div>
             </div>
 
-            <div class="shell-actions">
-                <a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}" class="shell-action">
-                    목록으로
-                </a>
-            </div>
+			<div class="shell-actions">
+			    <a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}"
+			       class="shell-action notice-list-action">
+			        목록으로
+			    </a>
+			
+			    <a th:href="@{/{domainKey}/home/noticeEdit(domainKey=${domainKey}, noticeId=${notice.noticeId})}"
+			       class="shell-action shell-action-primary">
+			        수정
+			    </a>
+			
+				<form method="post" th:action="@{/{domainKey}/home/noticeDelete(domainKey=${domainKey})}"
+					  onsubmit="return confirm('공지를 삭제하시겠습니까 ?');">
+				
+				<input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+				
+				<button type="submit" class="shell-action">삭제</button>
+				</form>
+			</div>
+
+
         </div>
     </div>
 </th:block>

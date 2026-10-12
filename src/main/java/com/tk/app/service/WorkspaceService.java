@@ -1,6 +1,8 @@
 
 package com.tk.app.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
@@ -20,5 +22,12 @@ public class WorkspaceService {
 
         return workspaceMapper.findAccessibleWorkspace(
                 domainKey, memberId);
+    }
+    
+    // 워크 목록 조회
+    public List<WorkspaceDto> findWorkspaceList(
+    			long memberId) {
+    	
+    		return workspaceMapper.findWorkspaceList(memberId);
     }
 }

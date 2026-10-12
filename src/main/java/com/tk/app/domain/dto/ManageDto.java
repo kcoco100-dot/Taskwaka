@@ -34,4 +34,7 @@ public class ManageDto {
 	private String left;
 	private String update;
 	
+	private String pm_name;
+    private Integer member_count;
+	
 }

@@ -19,4 +19,7 @@ public interface ManageService {
 	
 	public List<ProjectTeamView> listWorkspaceMembers(Long workspaceId) throws Exception;
 	public void assignOrUpdateProjectMember(Long workspaceMemberId, Long projectId, int role) throws Exception;
+	
+	int getProjectCount(Long workspaceId) throws Exception;
+	public List<ManageDto> getProjectDetail(Map<String, Object> map) throws Exception;
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/mainHome.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/team-create.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+	<div class="mainHome myHome-page">
+        <div class="mainHome-heading">
+            <span class="mainHome-label">TASKWAKA</span>
+				<h1>참여 중인 워크</h1>
+				<p>업무를 확인할 워크를 선택하세요.</p>
+        </div>
+		
+		<div class="mainHome-menu">
+			<a th:each="work : ${workLists}" th:href="@{/{domainKey}/home/dashboard(domainKey=${work.domainKey})}" class="team-card team-card-list">
+				<span class="team-card-icon" aria-hidden="true">
+					<i class="bi bi-people"></i>
+				</span>
+				<span class="team-card-title" th:text="${work.subject}">워크 이름</span>
+				<span class="team-card-description">
+					참여 중인 팀과 팀의 일정을 확인해보세요.
+				</span>
+				<span class="team-card-action" aria-hidden="true">
+					내 팀 보기 ->
+				</span>
+			</a>
+		</div>
+	</div>
+</th:block>
+
+</html>

@@ -27,4 +27,16 @@ public class NoticeService {
 		
 		return noticeMapper.findWorkspaceDetailNotice(workspaceId, noticeId);
 	}
+	
+	// 공지사항 수정
+	public int noticeEdit(long workspaceId, long noticeId, String title, String content) {
+		
+		return noticeMapper.noticeEdit(workspaceId, noticeId, title, content);
+	}
+	
+	// 공지사항 삭제
+	public int deleteNotice(long workspaceId, long noticeId) {
+		
+		return noticeMapper.deleteNotice(workspaceId, noticeId);
+	}
 }

@@ -162,7 +162,7 @@ public class ManageController {
 	        List<ManageDto> projectList =servive.listProject(map);
 	        model.addAttribute("projectList", projectList);
 		} catch (Exception e) {
-			// TODO: handle exception
+			log.info("projectView : ", e);
 		}
 
 		
@@ -213,10 +213,38 @@ public class ManageController {
 		return "redirect:/" + domainKey + "/manage/view";
 	}
 	
+	// 프로젝트 상세조회
+	@GetMapping("/detail/{projectId}")
+    public String projectDetail(@PathVariable("domainKey") String domainKey, 
+                                @PathVariable("projectId") Long projectId, 
+                                Model model) {
+        try {
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("projectId", projectId);
+            List<ManageDto> projectList = servive.getProjectDetail(map);
+            
+            if(projectList == null) {
+                return "redirect:/" + domainKey + "/manage/view"; 
+            }
+            
+            ManageDto project = projectList.get(0);
+            
+            model.addAttribute("project", project);
+            
+        } catch (Exception e) {
+            log.error("projectDetail : ", e);
+        }
+        
+        return "manage/projectDetail";
+    }
+	
+	
 	// 캘린더 페이지
 	@GetMapping("/calender")
 	public String calender() {
 		return "manage/manageCalender";
 	}
+	
+	
 	
 }

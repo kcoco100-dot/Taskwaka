@@ -175,3 +175,23 @@
         transform: translate(-170px, -120px) scale(1.12);
     }
 }
+
+.mainHome.myHome-page {
+    padding: 40px 24px;
+}
+
+.myHome-page .mainHome-heading {
+    max-width: 800px;
+    margin: 0 auto 28px;
+    text-align: left;
+}
+
+.myHome-page .mainHome-menu {
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.mainHome.myHome-page .team-card {
+    min-height: 0;
+    padding: 24px;
+}

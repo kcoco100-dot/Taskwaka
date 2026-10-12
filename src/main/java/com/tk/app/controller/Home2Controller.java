@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +29,7 @@ import com.tk.app.service.NoticeService;
 import com.tk.app.service.ParticipatingProjectService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -352,9 +354,82 @@ public class Home2Controller {
 		return "notice/noticeCreate";
 	}
 
+	// 공지사항 수정
 	@GetMapping("/noticeEdit")
-	public String noticeEdit() {
+	public String noticeEdit(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("noticeId") long noticeId,
+			Model model) throws Exception {
+		
+		NoticeDto notice = noticeService.findWorkspaceDetailNotice(
+				workspace.getWorkspaceId(), noticeId);		
+		
+		if(notice == null) {
+			throw new Exception("공지를 찾을 수 없습니다.");
+		}
+		
+		model.addAttribute("notice", notice);
+		
 		return "notice/noticeEdit";
+	}
+	
+	// 공지사항 수정 저장
+	@PostMapping("/noticeEdit")
+	public String saveNotice(
+			@PathVariable("domainKey") String domainKey,
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("noticeId") long noticeId,
+			@RequestParam("title") String title,
+			@RequestParam("content") String content,
+			Model model,
+			HttpServletResponse response) throws Exception {
+		
+		// 제목 DB에 200자 이내로
+		if(title.isBlank() || title.length() > 200 || content.isBlank()) {
+			NoticeDto notice = new NoticeDto();
+			
+			notice.setNoticeId(noticeId);
+			notice.setTitle(title);
+			notice.setContent(content);
+			
+			model.addAttribute("notice", notice);
+			model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
+		
+			return "notice/noticeEdit";
+		}
+		
+		// updatedCount 에 수정된 행수를 담는다.
+		int updatedCount = noticeService.noticeEdit(
+				workspace.getWorkspaceId(), noticeId, title, content);
+		
+		// 수정할 공지가 없을 경우
+		if(updatedCount == 0) {
+			response.sendError(404, "수정할 공지가 없습니다.");
+			return null;
+		}
+		
+		return "redirect:/" + domainKey + "/home/noticeDetail?noticeId=" + noticeId;
+	}
+	
+	// 공지사항 삭제
+	@PostMapping("/noticeDelete")
+	public String deleteNotice(
+			@PathVariable("domainKey") String domainKey,
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("noticeId") long noticeId,
+			HttpServletResponse response) throws Exception {
+		
+		int deletedCount = noticeService.deleteNotice(
+				workspace.getWorkspaceId(), noticeId);
+		
+		// 삭제할 공지가 없을 경우
+		if(deletedCount == 0) {
+			response.sendError(404, "삭제할 공지가 없습니다.");
+			return null;
+		}
+		
+		// 삭제한 공지는 수정 화면에서 다시 조회할 수 없기 때문에 수정과 리다이렉트 주소가 다름
+		return "redirect:/" + domainKey + "/home/notice";
 	}
 
 	@GetMapping("/plan")

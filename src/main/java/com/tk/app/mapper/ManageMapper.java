@@ -19,5 +19,7 @@ public interface ManageMapper {
 	public List<ManageDto> listProject(Map<String, Object> map) throws SQLException;
 	public int dataCount(Map<String, Object> map);
 	
+	int getProjectCount(Long workspaceId) throws Exception;
+	public List<ManageDto> getProjectDetail(Map<String, Object> map) throws Exception;
 	
 }

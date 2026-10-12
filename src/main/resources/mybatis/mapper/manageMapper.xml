@@ -10,12 +10,36 @@
         WHERE d.domain_key = #{domainKey}
           AND d.active = 'Y'
     </select>
+    
+	<sql id="projectPmName">
+		(SELECT md.name 
+		FROM project_members pm
+		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+		JOIN member_details md ON wm.member_id = md.member_id
+		WHERE pm.project_id = p.project_id 
+			AND pm.status = 0
+			AND pm.role = (
+				SELECT MAX(role) 
+				FROM project_members 
+				WHERE project_id = p.project_id AND status = 0
+			)
+			AND ROWNUM = 1
+		) AS pm_name
+	</sql>
+
+	<sql id="projectMemberCount">
+		(SELECT COUNT(*) 
+		FROM project_members 
+		WHERE project_id = p.project_id AND status = 0
+		) AS member_count
+	</sql>
 
 	<select id="listProject" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
 		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date, 
-			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created
+			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
+			<include refid="projectPmName"></include>,
+			<include refid="projectMemberCount"></include>
 		FROM projects p
-		LEFT OUTER JOIN project_members pm ON p.project_id = pm.project_id
 		ORDER BY project_id DESC
 	</select>
 	
@@ -26,10 +50,30 @@
     </select>
 	
 	<insert id="insertProject" parameterType="com.tk.app.domain.dto.ManageDto">
+		<selectKey keyProperty="project_id" resultType="Long" order="BEFORE">
+            SELECT seq_projects.NEXTVAL FROM dual
+        </selectKey>
+	
 		INSERT INTO projects(project_id, workspace_id, subject, content, start_at, "END", status, progress,
 			archive, created)
 			VALUES (seq_projects.NEXTVAL, #{workspace_id}, #{subject}, #{content}, 
 			TO_DATE(#{start_date}, 'YYYY-MM-DD'), TO_DATE(#{end_date}, 'YYYY-MM-DD'), #{status}, #{progress}, 'N', SYSDATE)
 	</insert>
+	
+    <select id="getProjectCount" parameterType="Long" resultType="int">
+        SELECT COUNT(*)
+        FROM projects
+        WHERE workspace_id = #{workspaceId}
+          AND archive = 'N'
+    </select>
+
+	<select id="getProjectDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+        SELECT p.project_id, p.subject, p.content, p.start_at AS start_date, p.end AS end_date, p.status, p.progress,
+			<include refid="projectPmName"></include>,
+			<include refid="projectMemberCount"></include>
+        FROM projects p
+        WHERE p.project_id = #{projectId}
+    </select>
+	
 	
 </mapper>
