@@ -110,3 +110,54 @@
     z-index: 1000;
     background: #FFFFFF;
 }
+
+
+
+.profile-dropdown {
+    position: relative;
+}
+
+.team-profile {
+    cursor: pointer;
+}
+
+.profile-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 160px;
+    background: #fff;
+    border-radius: 8px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.profile-menu[hidden] {
+    display: none;
+}
+
+.profile-menu a,
+.profile-menu .logout-button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.profile-menu a:hover,
+.profile-menu .logout-button:hover {
+    background: #f3f4f6;
+}
+
+.profile-menu-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 4px 0;
+}
+
