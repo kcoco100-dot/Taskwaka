@@ -46,5 +46,17 @@
 		    AND status = 1
 		    AND deleted IS NULL
 	</update>
+	
+	<!-- 공지사항 삭제 : 삭제 일시는 기록함 -->
+	<update id="deleteNotice">
+		UPDATE notice 
+		SET deleted = SYSDATE,
+			updated = SYSDATE
+		WHERE notice_id = #{noticeId}
+		    AND workspace_id = #{workspaceId}
+		    AND notice_type = 'WORKSPACE'
+		    AND status = 1
+		    AND deleted IS NULL
+	</update>
 
 </mapper>

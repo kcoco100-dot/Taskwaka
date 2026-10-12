@@ -50,9 +50,13 @@
 			        수정
 			    </a>
 			
-			    <button type="button" class="shell-action" disabled title="삭제 처리 연결 예정">
-			        삭제
-			    </button>
+				<form method="post" th:action="@{/{domainKey}/home/noticeDelete(domainKey=${domainKey})}"
+					  onsubmit="return confirm('공지를 삭제하시겠습니까 ?');">
+				
+				<input type="hidden" name="noticeId" th:value="${notice.noticeId}">
+				
+				<button type="submit" class="shell-action">삭제</button>
+				</form>
 			</div>
 
 

@@ -410,6 +410,27 @@ public class Home2Controller {
 		
 		return "redirect:/" + domainKey + "/home/noticeDetail?noticeId=" + noticeId;
 	}
+	
+	// 공지사항 삭제
+	@PostMapping("/noticeDelete")
+	public String deleteNotice(
+			@PathVariable("domainKey") String domainKey,
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("noticeId") long noticeId,
+			HttpServletResponse response) throws Exception {
+		
+		int deletedCount = noticeService.deleteNotice(
+				workspace.getWorkspaceId(), noticeId);
+		
+		// 삭제할 공지가 없을 경우
+		if(deletedCount == 0) {
+			response.sendError(404, "삭제할 공지가 없습니다.");
+			return null;
+		}
+		
+		// 삭제한 공지는 수정 화면에서 다시 조회할 수 없기 때문에 수정과 리다이렉트 주소가 다름
+		return "redirect:/" + domainKey + "/home/notice";
+	}
 
 	@GetMapping("/plan")
 	public String plan() {
