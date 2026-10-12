@@ -19,12 +19,27 @@
 				<form class="work-create-form">
 					<div class="form-field">
 						<label for="work-name">워크 이름</label>
-						<input type="text"
-							   id="work-name"
-							   name="workName"
+						<input type="text" id="work-name" name="workName"
 							   placeholder="팀 이름을 입력하세요"
 							   required="required">
+
+						<label for="domain-name">도메인 주소</label>
+						<input type="text" id="domain-name" name="domainName"
+							   placeholder="도메인 주소를 입력하세요"
+							   required="required">
+						
+						<p>워크 공개 설정</p>   
+					    <label>
+					        <input type="radio" name="status" th:value="0" checked>
+					        공개
+					    </label>
 					
+					    <label>
+					        <input type="radio" name="status" th:value="1" >
+					        비공개
+					    </label>
+						
+							   					
 						<div class="work-create-actions">
 							<a th:href="@{/home}" class="work-submit">
 								워크 만들기

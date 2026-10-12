@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.WorkCreateMapper">
+
+	<insert id="insertWork" parameterType="WorkCreateDto">
+		<selectKey keyProperty="workId" resultType="long" order="BEFORE">
+            SELECT seq_workspaces.NEXTVAL
+            FROM dual
+        </selectKey>
+		INSERT INTO workspaces (workspace_id, member_id, subject, content, status, created)
+		VALUES (#{workId}, #{pmMemberId}, #{workSubject}, #{workContent, jdbcType=VARCHAR}, #{status}, SYSDATE)
+	</insert>
+	
+	<insert id="insertWorkPM" parameterType="WorkCreateDto">
+		INSERT INTO workspace_members(workspace_member_id, workspace_id, member_id, status, joined, role)
+		VALUES (seq_workspace_members.NEXTVAL, #{workId}, #{pmMemberId}, 0, SYSDATE, 70)
+	</insert>
+	
+	<insert id="insertDomainKey" parameterType="WorkCreateDto">
+		INSERT INTO workspace_domains (workspace_id, domain_key, active, created)
+		VALUES (#{workId}, #{domainKey}, 'Y', SYSDATE)
+	</insert>
+	
+	<!-- 중복 도메인 검사 -->
+	<select id="countByDomainKey" resultType="int">
+		SELECT NVL(COUNT(*), 0)
+		FROM workspace_domains
+		WHERE domain_key = #{domainKey}
+	</select>
+
+
+</mapper>
