@@ -39,11 +39,23 @@
                 <div th:text="${notice.content}" style="white-space: pre-wrap;">공지 본문</div>
             </div>
 
-            <div class="shell-actions">
-                <a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}" class="shell-action">
-                    목록으로
-                </a>
-            </div>
+			<div class="shell-actions">
+			    <a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}"
+			       class="shell-action notice-list-action">
+			        목록으로
+			    </a>
+			
+			    <a th:href="@{/{domainKey}/home/noticeEdit(domainKey=${domainKey}, noticeId=${notice.noticeId})}"
+			       class="shell-action shell-action-primary">
+			        수정
+			    </a>
+			
+			    <button type="button" class="shell-action" disabled title="삭제 처리 연결 예정">
+			        삭제
+			    </button>
+			</div>
+
+
         </div>
     </div>
 </th:block>

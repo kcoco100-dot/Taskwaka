@@ -352,8 +352,22 @@ public class Home2Controller {
 		return "notice/noticeCreate";
 	}
 
+	// 공지사항 수정
 	@GetMapping("/noticeEdit")
-	public String noticeEdit() {
+	public String noticeEdit(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("noticeId") long noticeId,
+			Model model) throws Exception {
+		
+		NoticeDto notice = noticeService.findWorkspaceDetailNotice(
+				workspace.getWorkspaceId(), noticeId);
+		
+		if(notice == null) {
+			throw new Exception("공지를 찾을 수 없습니다.");
+		}
+		
+		model.addAttribute("notice", notice);
+		
 		return "notice/noticeEdit";
 	}
 
