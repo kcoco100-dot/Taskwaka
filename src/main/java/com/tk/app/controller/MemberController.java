@@ -1,8 +1,12 @@
 package com.tk.app.controller;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Base64;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tk.app.domain.dto.MemberDto;
 import com.tk.app.mail.MailSender;
@@ -189,11 +194,6 @@ public class MemberController {
 	    return "member/idFind";
 	}
 	
-	@GetMapping("member/pwdFind")
-	public String pwdFindForm() {
-	    return "member/passwordFind";
-	}
-
 	@PostMapping("member/idFind")
 	@ResponseBody
 	public String findLoginId(@RequestParam("name") String name, @RequestParam("email") String email,
@@ -239,6 +239,177 @@ public class MemberController {
 
 		return "FOUND:" + maskedId;
 	}
+
+	
+
+	@GetMapping("member/reset-password")
+	public String resetPasswordForm(
+	        @RequestParam("token") String token,
+	        Model model) {
+	
+	    if (token.isBlank()) {
+	        return "redirect:/member/pwdFind";
+	    }
+	
+	    try {
+	        byte[] hashBytes = MessageDigest.getInstance("SHA-256")
+	                .digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+	
+	        String tokenHash = HexFormat.of().formatHex(hashBytes);
+	
+	        Long memberId = memberService.findResetMemberId(
+	                Map.of("token_hash", tokenHash));
+
+			if (memberId == null) {
+			    return "redirect:/member/pwdFind?expired=1";
+			}
+	
+	        model.addAttribute("token", token);
+	        return "member/resetPassword";
+	
+	    } catch (NoSuchAlgorithmException e) {
+	        throw new IllegalStateException(e);
+	    }
+	}
+	
+
+	@PostMapping("member/reset-password")
+	public String resetPasswordSubmit(
+	        @RequestParam("token") String token,
+	        @RequestParam("newPassword") String newPassword,
+	        @RequestParam("confirmPassword") String confirmPassword,
+	        Model model) {
+	
+	    if (token.isBlank()) {
+	        return "redirect:/member/pwdFind";
+	    }
+	
+		if (!newPassword.equals(confirmPassword)) {
+		    model.addAttribute("token", token);
+		    model.addAttribute("errorMessage", "비밀번호가 일치하지 않습니다.");
+		    return "member/resetPassword";
+		}
+	
+		if (!newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$")) {
+		    model.addAttribute("token", token);
+		    model.addAttribute("errorMessage", "영문 대소문자, 숫자, 특수문자를 포함해 8~20자로 입력해 주세요.");
+		    return "member/resetPassword";
+		}
+	
+	    try {
+	        byte[] hashBytes = MessageDigest.getInstance("SHA-256")
+	                .digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+	
+	        String tokenHash = HexFormat.of().formatHex(hashBytes);
+	
+	        boolean success = memberService.resetPassword(tokenHash, newPassword);
+	
+			if (!success) {
+			    return "redirect:/member/pwdFind?expired=1";
+			}
+	
+	        return "redirect:/member/login?reset=success";
+	
+	    } catch (NoSuchAlgorithmException e) {
+	        throw new IllegalStateException(e);
+	    }
+	}
+
+	
+	@GetMapping("member/pwdFind")
+	public String pwdFindForm() {
+	    return "member/passwordFind";
+	}
+
+	
+	@PostMapping("member/pwdFind")
+	@ResponseBody
+	public String pwdFindSubmit(
+	        @RequestParam("login_id") String loginId,
+	        @RequestParam("email") String email,
+	        HttpSession session) {
+	
+	    if (loginId.isBlank() || email.isBlank()) {
+	        return "INVALID_INPUT";
+	    }
+	    
+	    long now = System.currentTimeMillis();
+
+	    Long startedAt = (Long) session.getAttribute("pwdFindStartedAt");
+	    Integer count = (Integer) session.getAttribute("pwdFindCount");
+
+	    if (startedAt == null || count == null || now - startedAt >= 600000) {
+	        session.setAttribute("pwdFindStartedAt", now);
+	        count = 0;
+	    }
+
+	    if (count >= 5) {
+	        return "TOO_MANY";
+	    }
+
+	    session.setAttribute("pwdFindCount", count + 1);
+	    
+	    Map<String, Object> map = Map.of("login_id", loginId.trim(), "email", email.trim());
+	    
+	    MemberDto member = memberService.findByLoginIdAndEmail(map);
+	    
+	    if (member == null) {
+	        return "NOT_FOUND";
+	    }
+	    
+    	byte[] randomBytes = new byte[32];
+    	new SecureRandom().nextBytes(randomBytes);
+    	
+    	String token = Base64.getUrlEncoder()
+    			.withoutPadding()
+    			.encodeToString(randomBytes);
+    	
+    	String tokenHash;
+    	
+    	try {
+			byte[] hashBytes = MessageDigest.getInstance("SHA-256")
+					.digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+			
+			tokenHash = HexFormat.of().formatHex(hashBytes);
+		} catch (NoSuchAlgorithmException e) {
+			return "FAIL";
+		}
+    	
+    	Map<String, Object> tokenMap = Map.of(
+    			"token_hash", tokenHash,
+    			"member_id", member.getMember_id()
+    	);
+    		
+    	int result = memberService.insertPasswordResetToken(tokenMap);
+    	
+    	if(result != 1) {
+    		return "FAIL";
+    	}
+
+		String resetUrl = ServletUriComponentsBuilder
+		        .fromCurrentContextPath()
+		        .path("/member/reset-password")
+		        .queryParam("token", token)
+		        .toUriString();
+		
+		boolean sent;
+
+		try {
+		    sent = mailSender.sendPasswordResetMail(email.trim(), resetUrl);
+		} catch (Exception e) {
+		    log.error("비밀번호 재설정 이메일 발송 오류", e);
+		    sent = false;
+		}
+		
+		if (!sent) {
+		    memberService.useResetToken(Map.of("token_hash", tokenHash));
+		    return "FAIL";
+		}
+
+	
+	    return "OK";
+	}
+
 
 	@GetMapping("member/expired")
 	public String expired() throws Exception {

@@ -77,7 +77,7 @@ public class SpringSecurityConfig {
 				// 1. 주소별 로그인 권한 설정
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/", "/member/login", "/member/register", "/member/account", "/member/idFind", "/member/pwdFind", 
-								"/member/expired", "/member/check-id", "/member/email/send", "/member/email/verify",
+								"/member/expired", "/member/check-id", "/member/email/send", "/member/email/verify", "/member/reset-password",
 								"/member/registerComplete",
 								"/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
 								"/favicon.ico", "/error/**")

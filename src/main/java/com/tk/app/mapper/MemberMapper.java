@@ -24,6 +24,7 @@ public interface MemberMapper {
 	
 	public void updateMemberEnabled(Map<String, Object> map) throws SQLException;
 	public void updateMemberPassword(MemberDto dto) throws SQLException;
+	public int useResetToken(Map<String, Object> map);
 	
 	public void updateMember1(MemberDto dto) throws SQLException;
 	public void updateMember2(MemberDto dto) throws SQLException;
@@ -44,6 +45,9 @@ public interface MemberMapper {
 	public void deleteMember2(Map<String, Object> map) throws SQLException;
 	
 	public List<MemberDto> listFindMember(Map<String, Object> map);
+	public MemberDto findByLoginIdAndEmail(Map<String, Object> map);
+	public int insertPasswordResetToken(Map<String, Object> map);
+	public Long findResetMemberId(Map<String, Object> map);
 	
 	public void insertAuthority(MemberDto dto) throws SQLException;
 	public void deleteAuthority(Map<String, Object> map) throws SQLException;

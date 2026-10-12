@@ -33,7 +33,12 @@ public interface MemberService {
 	
 	public void generatePwd(MemberDto dto) throws Exception;
 	
-	public List<MemberDto> listFindMember(Map<String, Object> map);	
+	public List<MemberDto> listFindMember(Map<String, Object> map);
+	public MemberDto findByLoginIdAndEmail(Map<String, Object> map);
+	public int insertPasswordResetToken(Map<String, Object> map);
+	public Long findResetMemberId(Map<String, Object> map);
+	public int useResetToken(Map<String, Object> map);
+	public boolean resetPassword(String tokenHash, String newPassword);
 	
 	public String findByAuthority(String login_id);
 	

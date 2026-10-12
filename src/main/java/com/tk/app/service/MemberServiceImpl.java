@@ -1,5 +1,6 @@
 package com.tk.app.service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -225,5 +226,56 @@ public class MemberServiceImpl implements MemberService {
 	public Integer countByLoginId(String login_id) {
 		return mapper.countByLoginId(login_id);
 	}
+
+	@Override
+	public MemberDto findByLoginIdAndEmail(Map<String, Object> map) {
+		return mapper.findByLoginIdAndEmail(map);
+	}
+
+	@Override
+	public int insertPasswordResetToken(Map<String, Object> map) {
+		return mapper.insertPasswordResetToken(map);
+	}
+
+	@Override
+	public Long findResetMemberId(Map<String, Object> map) {
+		return mapper.findResetMemberId(map);
+	}
+
+	@Override
+	public int useResetToken(Map<String, Object> map) {
+		return mapper.useResetToken(map);
+	}
+
+
+	@Transactional
+	@Override
+	public boolean resetPassword(String tokenHash, String newPassword) {
+	
+	    Map<String, Object> map = Map.of("token_hash", tokenHash);
+	
+	    Long memberId = mapper.findResetMemberId(map);
+	
+	    if (memberId == null) {
+	        return false;
+	    }
+	
+	    if (mapper.useResetToken(map) != 1) {
+	        return false;
+	    }
+	
+	    MemberDto dto = new MemberDto();
+	    dto.setMember_id(memberId);
+	    dto.setPassword(passwordEncoder.encode(newPassword));
+	
+	    try {
+	        mapper.updateMemberPassword(dto);
+	    } catch (SQLException e) {
+	        throw new IllegalStateException("비밀번호 변경 실패", e);
+	    }
+	
+	    return true;
+	}
+
 
 }

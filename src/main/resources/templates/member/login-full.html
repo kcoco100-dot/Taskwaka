@@ -61,6 +61,11 @@
             <button type="submit" class="login-submit">로그인</button>
 
             <p class="login-error" th:if="${message != null and message != ''}" th:text="${message}"></p>
+
+			<p th:if="${param.reset != null and param.reset[0] == 'success'}"
+			   style="text-align:center; color:#60794b; font-size:14px; margin-top:12px;">
+			    비밀번호가 정상적으로 변경되었습니다. 새 비밀번호로 로그인해 주세요.
+			</p>
         </form>
 
         <div class="login-signup">
