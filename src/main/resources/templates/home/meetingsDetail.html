@@ -45,9 +45,12 @@
 			    </a>
 			
 			    <div class="meeting-detail-buttons">
-			        <button type="button" class="shell-action shell-action-primary">
+			        <a type="button" class="shell-action shell-action-primary"
+			        	   th:if="${meeting.canModify == 1}"
+			        	   th:href="@{/{domainKey}/home/meetingsEdit(domainKey=${domainKey}, 
+			        	   meetingMinuteId=${meeting.meetingMinuteId})}">
 			            수정
-			        </button>
+			        </a>
 			        <button type="button" class="shell-action meeting-delete-button">
 			            삭제
 			        </button>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/meetingsDetail.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout">
+        <nav th:replace="~{layout/homeSidebar::homeSidebar('meetings')}"></nav>
+
+        <div class="section shell-section meeting-detail-page">
+            <div class="page-heading">
+                <h1 class="page-title">회의록 수정</h1>
+                <p class="page-description">회의록의 제목과 내용을 수정하세요.</p>
+            </div>
+
+            <form class="shell-content" id="meetingsEditForm" method="post"
+            		  th:action="@{/{domainKey}/home/meetingsEdit(domainKey=${domainKey})}">
+         		  <input type="hidden" name="meetingMinuteId" th:value="${meeting.meetingMinuteId}">
+	                <div class="mb-3">
+	                		<label for="meetingTitle" class="form-label">제목</label>
+	                		<input type="text" id="meetingTitle" name="title" class="form-control"
+	                			   maxlength="200" required="required" th:value="${meeting.title}">
+	                </div>
+
+	                <div class="meeting-detail-meta">
+	                    <span>
+	                        회의일
+	                        <strong th:text="${meeting.meetingDate ?: '미입력'}"></strong>
+	                    </span>
+	                    <span>
+	                        작성자
+	                        <strong th:text="${meeting.authorName ?: '정보 없음'}"></strong>
+	                    </span>
+	                </div>
+	
+	                <div class="mt-4">
+	                		<label for="meetingContent" class="form-label">내용</label>
+	                		<textarea id="meetingContent" name="content" rows="12"
+	                				  class="form-control" required="required" th:text="${meeting.content}"></textarea>
+	                </div>
+            </form>
+            
+            <div th:if="${errorMessage != null}" class="alert alert-danger"
+            		 role="alert" th:text="${errorMessage}"></div>
+
+			<div class="shell-actions">
+			    <a class="shell-action"
+			       th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}">
+			        ← 목록으로
+			    </a>
+			
+			    <div class="meeting-detail-buttons">
+			        <button type="submit" form="meetingsEditForm" class="shell-action shell-action-primary">
+			            수정완료
+			        </button>
+			        <button type="reset" form="meetingsEditForm" class="shell-action">
+			            초기화
+			        </button>
+			    </div>
+			</div>
+        </div>
+    </div>
+</th:block>
+ 
+<th:block layout:fragment="script">
+</th:block> 
+
+</html>

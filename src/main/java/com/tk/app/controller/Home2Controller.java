@@ -256,6 +256,80 @@ public class Home2Controller {
 		return "home/meetingsDetail";
 	}
 	
+	// HOME 회의록 수정 화면 조회
+	@GetMapping("/meetingsEdit")
+	public String meetingsEdit(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("meetingMinuteId") long meetingMinuteId,
+			HttpServletResponse response,
+			Model model) throws Exception {
+		
+		MeetingMinutesDto meeting = meetingMinutesService.findMeetingDetailMinutes(
+				workspace.getWorkspaceId(), workspace.getMemberId(), meetingMinuteId);
+		
+		// 회의록이 없으면
+		if(meeting == null) {
+			response.sendError(404, "회의록을 찾을 수 없습니다.");
+			return null;
+		}
+		
+		// 회의록 수정 권한이 없으면
+		if(meeting.getCanModify() == 0) {
+			response.sendError(403, "회의록 수정 권한이 없습니다. 관리자에게 문의하세요.");
+			return null;
+		}
+		
+		model.addAttribute("meeting", meeting);
+		
+		return "home/meetingsEdit";
+	}
+	
+	// 회의록 수정 저장
+	@PostMapping("meetingsEdit")
+	public String meetingsEdit(
+			@PathVariable("domainKey") String domainKey,
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("meetingMinuteId") long meetingMinuteId,
+			@RequestParam("title") String title,
+			@RequestParam("content") String content,
+			HttpServletResponse response,
+			Model model) throws Exception {
+		
+		MeetingMinutesDto meeting = meetingMinutesService.findMeetingDetailMinutes(
+				workspace.getWorkspaceId(), workspace.getMemberId(), meetingMinuteId);
+		
+		if(meeting == null) {
+			response.sendError(404, "회의록을 찾을 수 없습니다.");
+			return null;
+		}
+		
+		if(meeting.getCanModify() == 0) {
+			response.sendError(403, "회의록 수정 권한이 없습니다. 관리자에게 문의하세요.");
+			return null;
+		}
+		
+		if(title.isBlank() || title.length() > 200 || content.isBlank()) {
+			meeting.setTitle(title);
+			meeting.setContent(content);
+			
+			model.addAttribute("meeting", meeting);
+			model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
+			
+			return "home/meetingsEdit";
+		}
+		
+		int updateCount = meetingMinutesService.meetingsEdit(
+				workspace.getWorkspaceId(), workspace.getMemberId(),
+				meetingMinuteId, title, content);
+		
+		if(updateCount == 0) {
+			response.sendError(404, "수정할 회의록이 없습니다.");
+			return null;
+		}
+		
+		return "redirect:/" + domainKey + "/home/meetingsDetail?meetingMinuteId=" + meetingMinuteId;
+	}
+	
 	// manage - meetings 페이지
 	@GetMapping("/managemeetings")
 	public String managemeetings() {

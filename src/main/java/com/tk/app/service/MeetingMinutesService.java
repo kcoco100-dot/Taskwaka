@@ -36,4 +36,12 @@ public class MeetingMinutesService {
 		
 		return meetingMinutesMapper.findMeetingDetailMinutes(workspaceId, memberId, meetingMinuteId);
 	}
+	
+	// 워크 회의록 수정
+	public int meetingsEdit(
+			long workspaceId, long memberId, long meetingMinuteId,
+			String title, String content) {
+		
+		return meetingMinutesMapper.meetingsEdit(workspaceId, memberId, meetingMinuteId, title, content);
+	}
 }
