@@ -210,20 +210,26 @@ public class MemberController {
 			return "INVALID_INPUT";
 		}
 
-		long now = System.currentTimeMillis();
-		Long startedAt = (Long) session.getAttribute("idFindStartedAt");
-		Integer count = (Integer) session.getAttribute("idFindCount");
+		 String searchKey = email.trim().toLowerCase();
 
-		if (startedAt == null || now - startedAt > 600000) {
-			session.setAttribute("idFindStartedAt", now);
-			count = 0;
-		}
+		 String countKey = "idFindCount_" + searchKey;
+		 String startedKey = "idFindStartedAt_" + searchKey;
 
-		if (count >= 5) {
-			return "TOO_MANY";
-		}
+		 long now = System.currentTimeMillis();
 
-		session.setAttribute("idFindCount", count + 1);
+		 Long startedAt = (Long) session.getAttribute(startedKey);
+		 Integer count = (Integer) session.getAttribute(countKey);
+
+		 if (startedAt == null || count == null || now - startedAt >= 600000) {
+		     session.setAttribute(startedKey, now);
+		     count = 0;
+		 }
+
+		 if (count >= 5) {
+		     return "TOO_MANY";
+		 }
+
+		 session.setAttribute(countKey, count + 1);
 
 		Map<String, Object> map = Map.of("name", name.trim(), "email", email.trim());
 
@@ -333,10 +339,11 @@ public class MemberController {
 	@ResponseBody
 	public String pwdFindSubmit(
 	        @RequestParam("login_id") String loginId,
+	        @RequestParam("name") String name,
 	        @RequestParam("email") String email,
 	        HttpSession session) {
 	
-	    if (loginId.isBlank() || email.isBlank()) {
+	    if (loginId.isBlank() || name.isBlank() || email.isBlank()) {
 	        return "INVALID_INPUT";
 	    }
 	    
@@ -356,7 +363,9 @@ public class MemberController {
 
 	    session.setAttribute("pwdFindCount", count + 1);
 	    
-	    Map<String, Object> map = Map.of("login_id", loginId.trim(), "email", email.trim());
+	    Map<String, Object> map = Map.of("login_id", loginId.trim(),
+	    									"name" , name.trim(),
+	    									"email", email.trim());
 	    
 	    MemberDto member = memberService.findByLoginIdAndEmail(map);
 	    

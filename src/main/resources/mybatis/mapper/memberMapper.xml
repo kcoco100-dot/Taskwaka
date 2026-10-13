@@ -135,11 +135,12 @@
 	</select>
 	
 	<select id="findByLoginIdAndEmail" parameterType="map" resultType="com.tk.app.domain.dto.MemberDto">
-	    SELECT m.member_id, m.login_id
+	    SELECT m.member_id, d.name, m.login_id
 	    FROM members m
 	    JOIN member_details d
 	        ON m.member_id = d.member_id
 	    WHERE m.login_id = #{login_id}
+	    	  AND d.name = #{name}
 	      AND LOWER(d.email) = LOWER(#{email})
 	</select>
 	

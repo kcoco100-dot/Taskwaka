@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import com.tk.app.service.MemberService;
 
@@ -108,10 +109,23 @@ public class SpringSecurityConfig {
 						})
 						.failureHandler(new LoginFailureHandler(memberService)))
 
-				.logout(logout -> logout.logoutUrl("/member/logout").logoutSuccessUrl("/member/login"))
+				.logout(logout -> logout
+				        .logoutUrl("/member/logout")
+				        .logoutSuccessUrl("/member/login"))
+
+				.sessionManagement(session -> session
+				        .maximumSessions(1)
+				        .maxSessionsPreventsLogin(false)
+				        .expiredUrl("/member/login"))
+
 				.csrf(AbstractHttpConfigurer::disable);
 
 		return http.build();
+	}
+	
+	@Bean
+	HttpSessionEventPublisher httpSessionEventPublisher() {
+	    return new HttpSessionEventPublisher();
 	}
 
 }
