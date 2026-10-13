@@ -6,16 +6,16 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.tk.app.domain.dto.NoticeDto;
+import com.tk.app.domain.dto.NoticeFileDto;
 
 @Mapper
 public interface NoticeMapper {
 	
 	// 공지 등록
-	public int createWorkspaceNotice(
-			@Param("workspaceId") long workspaceId,
-			@Param("memberId") long memberId,
-			@Param("title") String title, 
-			@Param("content") String content);
+	public int createWorkspaceNotice(NoticeDto notice);
+	
+	// 공지 파일처리
+	public int insertNoticeFile(NoticeFileDto noticeFile);
 	
 	// 공지 수정
 	// 변경되는 값 : title, content

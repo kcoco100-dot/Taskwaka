@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
@@ -458,7 +459,8 @@ public class Home2Controller {
 	public String noticeCreate(@PathVariable("domainKey") String domainKey,
 			@RequestAttribute("workspace") WorkspaceDto workspace, 
 			@RequestParam("title") String title,
-			@RequestParam("content") String content, 
+			@RequestParam("content") String content,
+			@RequestParam(value = "files", required = false) List<MultipartFile> files, // required = false 는 첨부파일이 선택사항이기 때문
 			HttpServletResponse response, Model model) throws Exception {
 
 		if (title.isBlank() || title.length() > 200 || content.isBlank()) {
@@ -471,10 +473,25 @@ public class Home2Controller {
 
 			return "notice/noticeCreate";
 		}
+		// 첨부파일 검증
+		String errorMessage = noticeService.validateNoticeFiles(files);
+		
+		// 첨부 검사에서 오류 메시지가 있다면
+		if(errorMessage != null) {
+			// 화면에 돌려줄 dto 객체 만들기
+			NoticeDto notice = new NoticeDto();
+			notice.setTitle(title);
+			notice.setContent(content);
+			
+			model.addAttribute("notice", notice);
+			model.addAttribute("errorMessage", errorMessage);
+			
+			return "notice/noticeCreate";
+		}
 
 		int insertNotice = noticeService.createWorkspaceNotice(
 				workspace.getWorkspaceId(), workspace.getMemberId(),
-				title, content);
+				title, content, files);
 
 		// 0 이랑 비교하는게 아니라 != 1 로 비교함
 		if (insertNotice != 1) {

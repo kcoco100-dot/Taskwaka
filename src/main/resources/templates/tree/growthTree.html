@@ -35,14 +35,14 @@
                 		<span class="tree-preview-label">나무 미리보기</span>
                     
                     <div class="tree-image-area">
-                    		<img class="tree-image" th:src="@{/dist/tree/Seed.png}"
-                    			alt="나무 미리보기 이미지">
+                        <img class="tree-image" src="/dist/tree/line/seed.png"
+                                th:src="@{/dist/tree/line/seed.png}" alt="씨앗 단계의 팀 성장나무">
                     
                     <!-- 추후 착용 아이템 이미지 여기에 추가 예정 -->
                     </div>
                     
                     <p class="tree-preview-description">
-                    		팀 활동으로 모은 경험치가 나무가 성장해요!
+                        팀 활동으로 모은 경험치로 나무가 성장해요!
                     </p>
                     
                 </div>
@@ -51,11 +51,36 @@
                 <div class="growth-stages">
                     <h2>성장 단계</h2>
                     <ol>
-                        <li>씨앗</li>
-                        <li>새싹</li>
-                        <li>작은 나무</li>
-                        <li>큰 나무</li>
-                        <li>왕 나무</li>
+                        <li>
+                            <div class="growth-stage-image">
+                                <img src="/dist/tree/line/seed.png" th:src="@{/dist/tree/line/seed.png}" alt="" loading="lazy">
+                            </div>
+                            <span>씨앗</span>
+                        </li>
+                        <li>
+                            <div class="growth-stage-image">
+                                <img src="/dist/tree/line/sprout.png" th:src="@{/dist/tree/line/sprout.png}" alt="" loading="lazy">
+                            </div>
+                            <span>새싹</span>
+                        </li>
+                        <li>
+                            <div class="growth-stage-image">
+                                <img src="/dist/tree/line/small-tree.png" th:src="@{/dist/tree/line/small-tree.png}" alt="" loading="lazy">
+                            </div>
+                            <span>작은 나무</span>
+                        </li>
+                        <li>
+                            <div class="growth-stage-image">
+                                <img src="/dist/tree/line/big-tree.png" th:src="@{/dist/tree/line/big-tree.png}" alt="" loading="lazy">
+                            </div>
+                            <span>큰 나무</span>
+                        </li>
+                        <li>
+                            <div class="growth-stage-image">
+                                <img src="/dist/tree/line/king-tree-crowned.png" th:src="@{/dist/tree/line/king-tree-crowned.png}" alt="" loading="lazy">
+                            </div>
+                            <span>왕 나무</span>
+                        </li>
                     </ol>
 
                 </div>

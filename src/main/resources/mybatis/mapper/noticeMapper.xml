@@ -4,12 +4,26 @@
 <mapper namespace="com.tk.app.mapper.NoticeMapper">
 
 	<!-- 공지사항 등록 -->
-	<insert id="createWorkspaceNotice">
+	<insert id="createWorkspaceNotice" parameterType="com.tk.app.domain.dto.NoticeDto">
+		<selectKey keyProperty="noticeId" resultType="long" order="BEFORE">
+			SELECT SEQ_NOTICE.NEXTVAL
+			FROM dual
+		</selectKey>
 		INSERT INTO notice
 		    (notice_id, notice_type, workspace_id, 
 		     member_id, title, content, status)
-		VALUES(SEQ_NOTICE.NEXTVAL, 'WORKSPACE', #{workspaceId}, 
+		VALUES(#{noticeId}, 'WORKSPACE', #{workspaceId}, 
 			#{memberId}, #{title}, #{content}, 1)
+	</insert>
+	
+	<!-- 공지사항 파일 첨부 -->
+	<insert id="insertNoticeFile" parameterType="com.tk.app.domain.dto.NoticeFileDto">
+		INSERT INTO notice_files (
+			notice_file_id, notice_id, original_name,
+			stored_name, file_path, file_size, uploaded
+		) VALUES (SEQ_NOTICE_FILES.NEXTVAL, #{noticeId},
+		  #{originalName}, #{storedName}, #{filePath}, 
+		  #{fileSize}, SYSDATE)
 	</insert>
 
 	<!-- 공개된 워크 공지 목록 조회 -->

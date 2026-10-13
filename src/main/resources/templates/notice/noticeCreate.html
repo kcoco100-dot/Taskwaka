@@ -19,7 +19,8 @@
                 <p class="page-description">새로운 공지사항을 작성하세요.</p>
             </div>
 
-			<form method="post" th:action="@{/{domainKey}/home/noticeCreate(domainKey=${domainKey})}">
+			<form method="post" th:action="@{/{domainKey}/home/noticeCreate(domainKey=${domainKey})}"
+				  enctype="multipart/form-data">
 
 	            <div class="shell-content">
 	            		<label for="noticeTitle" class="form-label">공지 제목</label>
@@ -29,6 +30,9 @@
                 		<label for="noticeContent" class="form-label">공지 내용</label>
 	            		<textarea id="noticeContent" name="content" rows="12" class="form-control"
 	            				  required th:text="${notice.content}"></textarea>
+	            		<label for="noticeFiles" class="form-label">첨부파일(선택)</label>
+	            		<input type="file" id="noticeFiles" name="files" class="form-control"
+	            			   multiple="multiple" accept=".gif, .png, .txt, .pdf, .doc, .docx, .ppt, .pptx, .xls, .xlsx">
 	            </div>
 
 			    <div class="shell-actions">
