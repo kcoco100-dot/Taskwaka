@@ -78,7 +78,7 @@ public class SpringSecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/", "/member/login", "/member/register", "/member/account", "/member/idFind", "/member/pwdFind", 
 								"/member/expired", "/member/check-id", "/member/email/send", "/member/email/verify", "/member/reset-password",
-								"/member/registerComplete",
+								"/member/registerComplete", "/oauth/kakao", "/oauth/kakao/callback",
 								"/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
 								"/favicon.ico", "/error/**")
 						.permitAll()

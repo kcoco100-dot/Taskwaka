@@ -48,7 +48,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 				.name(member.getName())
 				.email(member.getEmail())
 				.avatar(member.getProfile_photo())
-				.login_type("local")
+				.login_type(member.getLogin_id().startsWith("kakao_") ? "kakao" : "local")
 				.build();
 
 		return CustomUserDetails.builder()

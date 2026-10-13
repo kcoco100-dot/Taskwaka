@@ -111,7 +111,7 @@
 			member_id, name, email, birth, phone, address
 		)
 		VALUES (
-			#{member_id}, #{name}, #{email}, TO_DATE(#{birth}, 'YYYY-MM-DD'), #{phone}, #{address}
+			#{member_id}, #{name}, #{email}, TO_DATE(#{birth}, 'YYYY-MM-DD'), #{phone}, #{address, jdbcType=VARCHAR}
 		)
 	</insert>
 	
@@ -177,7 +177,24 @@
 	</update>
 	
 	
+	<select id="loginSnsMember" parameterType="map" resultType="MemberDto">
+	    SELECT m.member_id, m.login_id, m.password, m.status, m.fail_cnt, m.blocked_until, s.role
+	    FROM social_accounts a
+	    JOIN members m
+	      ON a.member_id = m.member_id
+	    JOIN security s
+	      ON s.member_id = m.member_id
+	    WHERE a.provider = #{provider}
+	      AND a.provider_user_id = #{provider_user_id}
+	</select>
 		
-	
+	<insert id="insertSnsMember" parameterType="MemberDto">
+    INSERT INTO social_accounts (
+        social_account_id, member_id, provider, provider_user_id, created
+    )
+    VALUES (
+        seq_social_accounts.NEXTVAL, #{member_id}, #{sns_provider}, #{sns_id}, SYSDATE
+    )
+	</insert>
 	
 </mapper>

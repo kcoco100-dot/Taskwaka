@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,8 +29,26 @@ public class MemberServiceImpl implements MemberService {
 	
 	@Override
 	public MemberDto loginSnsMember(Map<String, Object> map) {
-
-		return null;
+		return mapper.loginSnsMember(map);
+	}
+	
+	@Transactional(rollbackFor = Exception.class)
+	@Override
+	public void insertSnsMember(MemberDto dto) throws Exception {
+		Long memberId = mapper.memberSeq();
+		dto.setMember_id(memberId);
+		dto.setRole("USER");
+		
+		String snsLoginId = "kakao_" + UUID.randomUUID().toString().replace("-", "");
+		dto.setLogin_id(snsLoginId);
+		
+		String randomPassword = UUID.randomUUID().toString();
+		dto.setPassword(passwordEncoder.encode(randomPassword));
+		
+		mapper.insertMember1(dto);
+		mapper.insertMember2(dto);
+		mapper.insertAuthority(dto);
+		mapper.insertSnsMember(dto);
 	}
 
 	@Transactional(rollbackFor = Exception.class)
@@ -46,11 +65,6 @@ public class MemberServiceImpl implements MemberService {
 		mapper.insertMember1(dto);
 		mapper.insertMember2(dto);
 		mapper.insertAuthority(dto);
-	}
-
-	@Override
-	public void insertSnsMember(MemberDto dto) throws Exception {
-
 	}
 
 	@Override

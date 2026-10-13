@@ -44,9 +44,16 @@ public class MemberController {
 	public String handleHome(@RequestParam(name = "error", required = false) String error, Model model) {
 
 		if ("locked".equals(error)) {
-		    model.addAttribute("message", "비밀번호를 5회 이상 잘못 입력하여 계정이 잠겼습니다.");
+		    model.addAttribute("message",
+		            "비밀번호를 5회 이상 잘못 입력하여 계정이 잠겼습니다.");
+
+		} else if ("restricted".equals(error)) {
+		    model.addAttribute("message",
+		            "현재 이용이 제한된 계정입니다. 관리자에게 문의해 주세요.");
+
 		} else if (error != null) {
-		    model.addAttribute("message", "아이디 또는 패스워드가 일치하지 않습니다.");
+		    model.addAttribute("message",
+		            "아이디 또는 패스워드가 일치하지 않습니다.");
 		}
 
 		return "member/login-full";
