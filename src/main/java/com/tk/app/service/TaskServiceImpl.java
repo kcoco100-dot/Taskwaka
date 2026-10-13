@@ -1,8 +1,12 @@
 package com.tk.app.service;
 
+import com.tk.app.domain.dto.ProjectDto;
 import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
+import com.tk.app.mapper.ProjectMapper;
 import com.tk.app.mapper.TaskMapper;
+import com.tk.app.repository.ProjectTeamView;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +20,15 @@ import java.util.Map;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskMapper taskMapper;
+    private final ProjectMapper projectMapper;
+    
+    @Override
+    @Transactional(readOnly = true)
+    public String getProjectSubject(Long projectId) {
+    	ProjectDto project = projectMapper.selectProjectById(projectId);
+    	
+    	return project.getSubject();
+    }
 
     @Override
     @Transactional(readOnly = true)

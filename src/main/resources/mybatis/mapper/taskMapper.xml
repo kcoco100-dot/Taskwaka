@@ -135,8 +135,8 @@
             title, content, start_at, "END", status, progress, created, updated
         ) VALUES (
             #{subTaskId}, #{taskId}, #{projectMemberId}, #{projectId},
-            #{title}, #{content, jdbcType=CLOB}, NVL(TO_DATE(#{startAt}, 'YYYY-MM-DD'), SYSDATE),
-            NVL(TO_DATE(#{endAt}, 'YYYY-MM-DD'), SYSDATE + 7), #{status}, #{progress}, SYSDATE, SYSDATE
+            #{title}, NVL(#{content, jdbcType=CLOB}, '내용 없음'), NVL(TO_DATE(#{startAt, jdbcType=DATE}, 'YYYY-MM-DD'), SYSDATE),
+            NVL(TO_DATE(#{endAt, jdbcType=DATE}, 'YYYY-MM-DD'), SYSDATE + 7), NVL(#{status}, 0), NVL(#{progress}, 0), SYSDATE, SYSDATE
         )
     </insert>
 

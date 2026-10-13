@@ -71,9 +71,6 @@
               th:onclick="'event.stopPropagation(); editDate(this, ' + ${task.taskId} + ', \'endAt\', false)'">-</span>
       </div>
 
-      <!-- 우선순위 -->
-      <div><span class="editable-cell priority-cell">-</span></div>
-
       <!-- 진척도 -->
       <div>
         <div class="progress-cell">
@@ -86,7 +83,6 @@
       </div>
 
       <!-- 작성자 / 등록일 / 수정일 -->
-      <div th:text="${task.memberName != null ? task.memberName : '미지정'}">작성자</div>
       <div style="font-size: 12px; color: var(--text-muted);" th:text="${task.created != null ? task.created : '-'}">-</div>
       <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);" th:text="${task.updated != null ? task.updated : '-'}">-</div>
     </div>
@@ -138,14 +134,12 @@
     <div><span class="editable-cell assignee-cell" th:text="${subTask.memberName != null ? subTask.memberName : '미지정'}">-</span></div>
     <div><span class="editable-cell date-cell" th:text="${subTask.startAt != null ? subTask.startAt : '-'}" th:onclick="'event.stopPropagation(); editDate(this, ' + ${subTask.subTaskId} + ', \'startAt\', true)'">-</span></div>
     <div><span class="editable-cell date-cell" th:classappend="${subTask.endAt != null} ? 'text-danger'" th:text="${subTask.endAt != null ? subTask.endAt : '-'}" th:onclick="'event.stopPropagation(); editDate(this, ' + ${subTask.subTaskId} + ', \'endAt\', true)'">-</span></div>
-    <div><span class="editable-cell priority-cell">-</span></div>
     <div>
       <div class="progress-cell">
         <div class="progress-bar-bg"><div class="progress-bar-fill" th:style="'width:' + (${subTask.progress != null} ? ${subTask.progress} : 0) + '%;'"></div></div>
         <span class="progress-text" style="font-size:12px;" th:text="(${subTask.progress != null} ? ${T(java.lang.Math).round(subTask.progress)} : 0) + '%'">0%</span>
       </div>
     </div>
-    <div th:text="${subTask.memberName != null ? subTask.memberName : '미지정'}">-</div>
     <div style="font-size: 12px; color: var(--text-muted);" th:text="${subTask.created != null ? subTask.created : '-'}">-</div>
     <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);" th:text="${subTask.updated != null ? subTask.updated : '-'}">-</div>
   </li>

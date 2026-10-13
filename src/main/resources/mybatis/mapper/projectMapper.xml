@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tk.app.mapper.ProjectMapper">
+
+    <!-- ResultMap 정의 (날짜 포맷 및 필드 매핑) -->
+    <resultMap id="ProjectResultMap" type="com.tk.app.domain.dto.ProjectDto">
+        <id property="projectId" column="PROJECT_ID" />
+        <result property="workspaceId" column="WORKSPACE_ID" />
+        <result property="subject" column="SUBJECT" />
+        <result property="content" column="CONTENT" jdbcType="CLOB" javaType="java.lang.String" />
+        <result property="startAt" column="START_AT" />
+        <result property="endAt" column="END_AT" />
+        <result property="status" column="STATUS" />
+        <result property="progress" column="PROGRESS" />
+        <result property="archive" column="ARCHIVE" />
+        <result property="created" column="CREATED" />
+        <result property="updated" column="UPDATED" />
+        <result property="deleted" column="DELETED" />
+    </resultMap>
+
+    <!-- 프로젝트 ID 기준 전체 컬럼 조회 (종료일 컬럼 예약어 "END" 처리 완비) -->
+    <select id="selectProjectById" resultMap="ProjectResultMap">
+        SELECT 
+            project_id,
+            workspace_id,
+            subject,
+            content,
+            TO_CHAR(start_at, 'YYYY-MM-DD') AS start_at,
+            TO_CHAR("END", 'YYYY-MM-DD') AS end_at,
+            status,
+            progress,
+            archive,
+            TO_CHAR(created, 'YYYY-MM-DD HH24:MI:SS') AS created,
+            TO_CHAR(updated, 'YYYY-MM-DD HH24:MI:SS') AS updated,
+            TO_CHAR(deleted, 'YYYY-MM-DD HH24:MI:SS') AS deleted
+        FROM projects
+        WHERE project_id = #{projectId}
+          AND deleted IS NULL
+    </select>
+
+</mapper>

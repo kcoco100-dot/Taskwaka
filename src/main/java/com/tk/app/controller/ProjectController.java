@@ -21,17 +21,20 @@ public class ProjectController {
     public String projectDetail(
             @PathVariable("domainKey") String domainKey,
             @PathVariable("projectId") Long projectId,
-            @RequestParam(name = "tab", defaultValue = "feed") String tab,
+            @RequestParam(name = "tab", defaultValue = "dashboard") String tab,
             Model model) {
         
-        if (!tab.matches("feed|task|gantt|calendar|file")) {
-            tab = "feed";
+        if (!tab.matches("dashboard|task|gantt|calendar|file")) {
+            tab = "dashboard";
         }
+        
         
         model.addAttribute("domainKey", domainKey);
         model.addAttribute("projectId", projectId);
         model.addAttribute("activeTab", tab);
-        model.addAttribute("projectName", "Taskwaka 시작가이드");
+        
+        String projectName = taskService.getProjectSubject(projectId);
+        model.addAttribute("projectName", projectName);
 
         // 업무 탭인 경우 초기 화면 렌더링용 업무 목록 주입 (SSR)
         if ("task".equals(tab)) {

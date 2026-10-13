@@ -6,6 +6,8 @@ import com.tk.app.domain.dto.TaskDto;
 import java.util.List;
 
 public interface TaskService {
+	String getProjectSubject(Long projectId);
+	
     List<TaskDto> getTaskList(Long projectId);
     TaskDto getTaskDetail(Long taskId);
     
