@@ -41,7 +41,7 @@
     margin-top: 20px;
 }
 
-.shell-section .shell-action {
+:is(.shell-section, .notice-section) .shell-action {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -58,21 +58,115 @@
     cursor: pointer;
 }
 
-.shell-section .shell-action-primary {
+/* :is -> 괄호 안의 선택자 중 하나에 해당하면 선택 */
+:is(.shell-section, .notice-section) .shell-action-primary {
     border-color: #D5E2C7;
     background: #EEF4E6;
     color: #4F6242;
 }
 
-.shell-section .shell-action:hover {
+:is(.shell-section, .notice-section) .shell-action:hover {
     background: #EFE8DE;
 }
 
-.shell-section .shell-action-primary:hover {
+:is(.shell-section, .notice-section) .shell-action-primary:hover {
     background: #E3EDD8;
 }
 
-.shell-section .shell-action:focus-visible {
+:is(.shell-section, .notice-section) .shell-action:focus-visible {
     outline: 2px solid #71865B;
     outline-offset: 2px;
+}
+
+.shell-section form[action$="/home/noticeCreate"] .shell-actions {
+    align-items: center;
+    justify-content: center;
+}
+
+.shell-section form[action$="/home/noticeCreate"] .shell-actions .shell-actions {
+    margin-top: 0;
+}
+
+.shell-section form[action$="/home/noticeCreate"] .shell-action {
+    width: 120px;
+    height: 44px;
+    padding: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.home-layout > .notice-create-section {
+    font-family: var(--default-font);
+}
+
+.notice-create-section > .page-heading,
+.notice-create-section > form,
+.notice-create-section > .alert {
+    width: 100%;
+    max-width: 880px;
+    margin-inline: auto;
+}
+
+.notice-create-section .page-title {
+    font-size: 24px;
+    letter-spacing: -0.6px;
+}
+
+.notice-create-section .shell-content {
+    display: grid;
+    gap: 10px;
+    padding: 28px;
+    border-color: #E8E5DD;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(89, 67, 49, 0.04);
+}
+
+.notice-create-section .form-label {
+    margin: 0;
+    color: #594331;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notice-create-section .form-control + .form-label {
+    margin-top: 14px;
+}
+
+.notice-create-section .form-control {
+    padding: 12px 14px;
+    border: 1px solid #E4E1D9;
+    border-radius: 10px;
+    background: #FCFCFA;
+    color: #493B2F;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.notice-create-section input.form-control {
+    height: 46px;
+}
+
+.notice-create-section textarea.form-control {
+    height: 220px;
+    min-height: 160px;
+    resize: vertical;
+}
+
+.notice-create-section .form-control:focus {
+    outline: none;
+    border-color: #71865B;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.12);
+}
+
+.notice-create-section .shell-action-primary {
+    border-color: #596F45;
+    background: #596F45;
+    color: #FFFFFF;
+}
+
+.notice-create-section .shell-action-primary:hover {
+    border-color: #485D36;
+    background: #485D36;
 }

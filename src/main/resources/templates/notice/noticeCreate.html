@@ -11,23 +11,48 @@
 
 <th:block layout:fragment="content">
     <div class="home-layout manage-layout">
-        <nav th:replace="~{layout/pmSidebar::manageSidebar('noticeCreate')}"></nav>
+        <nav th:replace="~{layout/homeSidebar::homeSidebar('noticeCreate')}"></nav>
 
-        <div class="section shell-section">
+        <div class="section shell-section notice-create-section">
             <div class="page-heading">
                 <h1 class="page-title">공지사항 등록</h1>
                 <p class="page-description">새로운 공지사항을 작성하세요.</p>
             </div>
 
-            <div class="shell-content">
-                <!-- TODO: 담당자가 공지사항 등록 폼 UI를 추가할 영역 -->
-            </div>
+			<form method="post" th:action="@{/{domainKey}/home/noticeCreate(domainKey=${domainKey})}">
 
-            <div class="shell-actions">
-                <a th:href="@{/notice}" class="shell-action">목록으로</a>
-            </div>
-        </div>
-    </div>
+	            <div class="shell-content">
+	            		<label for="noticeTitle" class="form-label">공지 제목</label>
+                		<input th:value="${notice.title}" name="title" type="text"
+                			id="noticeTitle" class="form-control" maxlength="200" required>
+                			
+                		<label for="noticeContent" class="form-label">공지 내용</label>
+	            		<textarea id="noticeContent" name="content" rows="12" class="form-control"
+	            				  required th:text="${notice.content}"></textarea>
+	            </div>
+
+			    <div class="shell-actions">
+			        <button type="submit" class="shell-action shell-action-primary">
+			            등록하기
+			        </button>
+			
+			        <button type="reset" class="shell-action">
+			            초기화
+			        </button>
+				
+		            <div class="shell-actions">
+		                <a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}" class="shell-action">목록으로</a>
+		            </div>
+			    </div>
+			</form>
+			
+			<div th:if="${errorMessage != null}" class="alert alert-danger"
+				 role="alert" th:text="${errorMessage}"></div>
+			
+	    </div>
+        
+     </div>
+
 </th:block>
 
 <th:block layout:fragment="script"></th:block>

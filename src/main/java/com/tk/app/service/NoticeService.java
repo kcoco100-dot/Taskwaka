@@ -28,6 +28,12 @@ public class NoticeService {
 		return noticeMapper.findWorkspaceDetailNotice(workspaceId, noticeId);
 	}
 	
+	// 공지사항 등록
+	public int createWorkspaceNotice(long workspaceId, long memberId, String title, String content) {
+		
+		return noticeMapper.createWorkspaceNotice(workspaceId, memberId, title, content);
+	}
+	
 	// 공지사항 수정
 	public int noticeEdit(long workspaceId, long noticeId, String title, String content) {
 		

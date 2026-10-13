@@ -9,15 +9,13 @@ import com.tk.app.domain.dto.NoticeDto;
 
 @Mapper
 public interface NoticeMapper {
-
-	// 공개되있는 공지 목록 조회
-	List<NoticeDto> findWorkspaceNotice(
-			@Param("workspaceId") long workspaceId);
 	
-	// 워크에 공개된 공지 상세조회
-	public NoticeDto findWorkspaceDetailNotice(
+	// 공지 등록
+	public int createWorkspaceNotice(
 			@Param("workspaceId") long workspaceId,
-			@Param("noticeId") long noticeId);
+			@Param("memberId") long memberId,
+			@Param("title") String title, 
+			@Param("content") String content);
 	
 	// 공지 수정
 	// 변경되는 값 : title, content
@@ -31,4 +29,14 @@ public interface NoticeMapper {
 	public int deleteNotice(
 			@Param("workspaceId") long workspaceId,
 			@Param("noticeId") long noticeId);
+
+	// 공개되있는 공지 목록 조회
+	List<NoticeDto> findWorkspaceNotice(
+			@Param("workspaceId") long workspaceId);
+	
+	// 워크에 공개된 공지 상세조회
+	public NoticeDto findWorkspaceDetailNotice(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId);
+
 }
