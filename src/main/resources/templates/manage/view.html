@@ -42,15 +42,15 @@
                 </form>
                 <div class="project-list-heading">
                     <h2>프로젝트 목록</h2>
-                    <p role="status" aria-live="polite">총 <strong id="project-count">6</strong>건</p>
+                    <p role="status" aria-live="polite">총 <strong id="project-count" th:text=${dataCount}>6</strong>건</p>
                 </div>
                 <div class="project-table-wrap" tabindex="0" role="region" aria-label="프로젝트 목록 표">
                     <table class="project-list-table">
-                        <caption class="project-sr-only">프로젝트명, 담당 PM, 참여 인원, 기간, 상태, 진행률 및 수정·삭제</caption>
+                        <caption class="project-sr-only">프로젝트명, 담당자, 참여 인원, 기간, 상태, 진행률 및 수정·삭제</caption>
                         <thead><tr>
                             <th scope="col" class="project-number">번호</th>
                             <th scope="col" class="project-name-column">프로젝트명</th>
-                            <th scope="col">담당 PM</th>
+                            <th scope="col">담당자</th>
                             <th scope="col">참여 인원</th>
                             <th scope="col">프로젝트 기간</th>
                             <th scope="col">진행 상태</th>
@@ -95,13 +95,20 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="project-list-footer">
-                    <p><span id="project-range">1–6</span> / <span id="project-total">6</span>건</p>
-                    <nav class="project-pagination" aria-label="프로젝트 목록 페이지">
-                        <button type="button" class="project-button" disabled>이전</button>
-                        <span class="project-current-page" aria-current="page">1</span>
-                        <button type="button" class="project-button" disabled>다음</button>
-                    </nav>
+                <div class="project-list-footer" style="display: flex; justify-content: center; align-items: center; position: relative;">
+                    <p style="position: absolute; left: 0; margin: 0;">
+                    	<span id="project-range" th:text="${dataCount == 0 ? '0' : ((page - 1) * size + 1) + '–' + (page * size > dataCount ? dataCount : page * size)}">16–</span> / <span id="project-total" th:text="${dataCount}">6</span>건
+                    </p>
+                    <th:block th:if="${dataCount > 0}"  th:with="blockSize=5, startPage=${((page - 1) / blockSize) * blockSize + 1}, endPage=${(startPage + blockSize - 1) < totalPage ? (startPage + blockSize - 1) : totalPage}">
+	                    <nav class="project-pagination" aria-label="프로젝트 목록 페이지" th:if="${dataCount > 0}">
+	                        <button type="button" class="project-button" th:disabled="${page == 1}" th:onclick="|location.href='@{/{domainKey}/manage/view(domainKey=${domainKey}, page=${page-1})}'|">이전</button>
+	                        <th:block th:each="num : ${#numbers.sequence(startPage, endPage)}">
+		                		<span th:if="${num == page}" class="project-current-page" aria-current="page" th:text="${num}">1</span>
+		                		<button th:unless="${num == page}" type="button" class="project-button" th:onclick="|location.href='@{/{domainKey}/manage/view(domainKey=${domainKey}, page=${num})}'|" th:text="${num}">2</button>
+	            			</th:block>
+	                        <button type="button" class="project-button" th:disabled="${page == totalPage}" th:onclick="|location.href='@{/{domainKey}/manage/view(domainKey=${domainKey}, page=${page+1})}'|">다음</button>
+	                    </nav>
+                    </th:block>
                 </div>
             </div>
         </section>

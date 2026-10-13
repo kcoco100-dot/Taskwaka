@@ -80,6 +80,24 @@ public class ManageServiceImpl implements ManageService{
 		
 		return list;
 	}
+	
+
+	@Override
+	public List<ManageDto> listProjectManage(Map<String, Object> map) throws SQLException {
+		List<ManageDto> list = null;
+		
+		try {
+			list = mapper.listProjectManage(map);
+			
+		} catch (Exception e) {
+			log.info("listProject : ", e);
+			
+			throw e;
+		}
+		
+		return list;
+	}
+	
 
 	@Override
 	public int dataCount(Map<String, Object> map) throws Exception {
@@ -121,4 +139,40 @@ public class ManageServiceImpl implements ManageService{
 		
 		return list;
 	}
+
+	@Override
+	public List<ManageDto> findById(Map<String, Object> map) {
+		List<ManageDto> list = null;
+		try {
+			list = mapper.findById(map);
+		} catch (Exception e) {
+			log.info("findById : ", e);
+		}
+		
+		return list;
+	}
+
+	@Override
+	public List<ManageDto> findPrevPost(Map<String, Object> map) {
+		List<ManageDto> list = null;
+		try {
+			list = mapper.findPrevPost(map);
+		} catch (Exception e) {
+			log.info("findPrevPost : ", e);
+		}
+		return list;
+	}
+
+	@Override
+	public List<ManageDto> findNextPost(Map<String, Object> map) {
+		List<ManageDto> list = null;
+		try {
+			list = mapper.findNextPost(map);
+		} catch (Exception e) {
+			log.info("findNextPost : ", e);
+		}
+		return list;
+	}
+
+
 }

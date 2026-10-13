@@ -96,7 +96,7 @@ public class ManageController {
                 
                 Map<String, Object> map = new HashMap<>();
                 map.put("workspace_id", workspaceId);
-                List<ManageDto> allProjects = servive.listProject(map);
+                List<ManageDto> allProjects = servive.listProjectManage(map);
                 List<ManageDto> activeProjects = new ArrayList<>();
                 java.util.Set<Long> seenProjectIds = new java.util.HashSet<>();
                 
@@ -206,91 +206,11 @@ public class ManageController {
         return resultMap;
     }
 	
-	
-	// 프로젝트 페이지
-	@GetMapping("/view")
-	public String projectView(Model model) throws Exception {
-		
-		try {
-	        Map<String, Object> map = new HashMap<>();
-	        List<ManageDto> projectList =servive.listProject(map);
-	        model.addAttribute("projectList", projectList);
-		} catch (Exception e) {
-			log.info("projectView : ", e);
-		}
-
-		return "manage/view";
+	// 인원 초대 페이지
+	@GetMapping("/invitation")
+	public String invitationForm() {
+		return "manage/invitation";
 	}
-	
-	// 프로젝트 등록 페이지
-	@GetMapping("/write")
-	public String writeForm(Model model) {
-		try {
-			model.addAttribute("mode", "write");
-			model.addAttribute("dto", new ManageDto());
-		} catch (Exception e) {
-			log.info("writeForm : ", e);
-		}
-		
-		return "manage/viewWrite";
-	}
-	
-	// 프로젝트 등록 처리
-	@PostMapping("/write")
-	public String writeSubmit(@PathVariable("domainKey") String domainKey,
-			ManageDto dto) throws Exception {
-		
-		try {
-			SessionInfo info = LoginMemberUtil.getSessionInfo();
-			if (info == null) {
-				log.info("로그인 정보가 존재하지 않습니다.");
-				return "redirect:/login";
-			}
-			
-			Long workspaceId = servive.findByDomainKey(domainKey);
-			if (workspaceId == null) {
-				throw new IllegalArgumentException("유효하지 않은 워크스페이스 도메인입니다: " + domainKey);
-			}
-			
-			dto.setWorkspace_id(workspaceId);
-			dto.setMember_id(info.getMember_id());
-			
-			dto.setProgress(0);
-			
-			servive.insertProject(dto);
-			
-		} catch (Exception e) {
-			log.info("writeSubmit : ", e);
-		}
-		
-		return "redirect:/" + domainKey + "/manage/view";
-	}
-	
-	// 프로젝트 상세조회
-	@GetMapping("/detail/{projectId}")
-    public String projectDetail(@PathVariable("domainKey") String domainKey, 
-                                @PathVariable("projectId") Long projectId, 
-                                Model model) {
-        try {
-	        Map<String, Object> map = new HashMap<>();
-	        map.put("projectId", projectId);
-            List<ManageDto> projectList = servive.getProjectDetail(map);
-            
-            if(projectList == null) {
-                return "redirect:/" + domainKey + "/manage/view"; 
-            }
-            
-            ManageDto project = projectList.get(0);
-            
-            model.addAttribute("project", project);
-            
-        } catch (Exception e) {
-            log.error("projectDetail : ", e);
-        }
-        
-        return "manage/projectDetail";
-    }
-	
 	
 	// 캘린더 페이지
 	@GetMapping("/calender")
@@ -298,6 +218,22 @@ public class ManageController {
 		return "manage/manageCalender";
 	}
 	
+	// 보고서 페이지
+	@GetMapping("/approval")
+	public String approvalForm() {
+		return "manage/approval";
+	}
 	
+	// 회의록 페이지
+	@GetMapping("/meetings")
+	public String meetingsForm() {
+		return "manage/meetings";
+	}
+	
+	// 회의록 페이지
+	@GetMapping("/pmDashboard")
+	public String pmDashboardForm() {
+		return "manage/pmDashboard";
+	}
 	
 }

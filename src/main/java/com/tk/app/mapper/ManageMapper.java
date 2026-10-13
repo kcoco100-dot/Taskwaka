@@ -16,7 +16,12 @@ public interface ManageMapper {
 	public void updateProject(ManageDto dto) throws SQLException;
 	public void deleteProject(ManageDto dto) throws SQLException;
 	
+	public List<ManageDto> findById(Map<String, Object> map);
+    public List<ManageDto> findPrevPost(Map<String, Object> map);
+    public List<ManageDto> findNextPost(Map<String, Object> map);
+    
 	public List<ManageDto> listProject(Map<String, Object> map) throws SQLException;
+	public List<ManageDto> listProjectManage(Map<String, Object> map) throws SQLException;
 	public int dataCount(Map<String, Object> map);
 	
 	int getProjectCount(Long workspaceId) throws Exception;

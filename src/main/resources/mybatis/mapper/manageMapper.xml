@@ -34,7 +34,7 @@
 		) AS member_count
 	</sql>
 
-	<select id="listProject" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+	<select id="listProjectManage" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
 		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date, 
 			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
 			<include refid="projectPmName"></include>,
@@ -42,11 +42,25 @@
 		FROM projects p
 		ORDER BY project_id DESC
 	</select>
+
+
+	<select id="listProject" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date, 
+			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
+			<include refid="projectPmName"></include>,
+			<include refid="projectMemberCount"></include>
+		FROM projects p
+		JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+		WHERE wd.domain_key = #{domainKey} AND p.deleted IS NULL
+		ORDER BY p.project_id DESC
+		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
 	
 	<select id="dataCount" parameterType="map" resultType="int">
         SELECT NVL(COUNT(*), 0)
-        FROM projects
-        WHERE deleted IS NULL
+        FROM projects p
+		JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE wd.domain_key = #{domainKey} AND p.deleted IS NULL
     </select>
 	
 	<insert id="insertProject" parameterType="com.tk.app.domain.dto.ManageDto">
@@ -59,6 +73,12 @@
 			VALUES (seq_projects.NEXTVAL, #{workspace_id}, #{subject}, #{content}, 
 			TO_DATE(#{start_date}, 'YYYY-MM-DD'), TO_DATE(#{end_date}, 'YYYY-MM-DD'), #{status}, #{progress}, 'N', SYSDATE)
 	</insert>
+	
+	<update id="updateProject" parameterType="com.tk.app.domain.dto.ManageDto">
+		UPDATE projects SET subject = #{subject}, content = #{content}, start_at = TO_DATE(#{start_date}, 'YYYY-MM-DD'), 
+			"END" = TO_DATE(#{end_date}, 'YYYY-MM-DD'), status = #{status}, updated = SYSDATE
+		WHERE workspace_id = #{workspace_id}
+	</update>
 	
     <select id="getProjectCount" parameterType="Long" resultType="int">
         SELECT COUNT(*)
@@ -73,6 +93,34 @@
 			<include refid="projectMemberCount"></include>
         FROM projects p
         WHERE p.project_id = #{projectId}
+    </select>
+	
+	
+	<select id="findById" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+		SELECT p.project_id AS id, p.subject, p.content,  p.created
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE wd.domain_key = #{domainKey} 
+          AND p.project_id = #{id}
+          AND p.deleted IS NULL
+	</select>
+	
+	<select id="findByPrev" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+        SELECT p.project_id AS id, p.subject AS title
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE wd.domain_key = #{domainKey} AND (p.project_id &gt; #{id}) AND p.deleted IS NULL
+        ORDER BY p.project_id ASC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <select id="findByNext" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+        SELECT p.project_id , p.subject
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE wd.domain_key = #{domainKey} AND (p.project_id &lt; #{id}) AND p.deleted IS NULL
+        ORDER BY p.project_id DESC
+        FETCH FIRST 1 ROWS ONLY
     </select>
 	
 	
