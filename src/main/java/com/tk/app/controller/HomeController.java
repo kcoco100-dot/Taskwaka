@@ -50,11 +50,6 @@ public class HomeController {
         return "auth/find_account";
     }
     
-    // 새 워크 생성
-    @GetMapping("/create")
-    public String workCreate() {
-        return "work/create";
-    }
 
 
 }

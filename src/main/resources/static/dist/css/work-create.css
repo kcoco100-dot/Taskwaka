@@ -200,3 +200,23 @@
         transform: translate(-170px, -120px) scale(1.12);
     }
 }
+
+.field-error,
+.form-error {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.field-error:empty {
+    display: none;
+}
+
+.form-error {
+    margin-bottom: 15px;
+}
+
+.work-create-form input[aria-invalid="true"],
+.work-create-form textarea[aria-invalid="true"] {
+    border-color: #dc3545;
+}

@@ -1,62 +1,118 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/layout3}">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
 
 <th:block layout:fragment="css">
-	 <link rel="stylesheet" th:href="@{/dist/css/work-create.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/work-create.css}">
 </th:block>
-  	  
+
 <th:block layout:fragment="content">
-	<div class="work-create-page">
-			<div class="work-create-card">
-				<div class="work-create-heading">
-					<h1>새 워크 생성하기</h1>
-					<p>팀을 만들고 함께 협업을 시작해보세요.</p>	
-				</div>	
-				
-				<form class="work-create-form">
-					<div class="form-field">
-						<label for="work-name">워크 이름</label>
-						<input type="text" id="work-name" name="workName"
-							   placeholder="팀 이름을 입력하세요"
-							   required="required">
+    <div class="work-create-page">
+        <div class="work-create-card">
+            <div class="work-create-heading">
+                <h1>새 워크 생성하기</h1>
+                <p>팀을 만들고 함께 협업을 시작해보세요.</p>
+            </div>
 
-						<label for="domain-name">도메인 주소</label>
-						<input type="text" id="domain-name" name="domainName"
-							   placeholder="도메인 주소를 입력하세요"
-							   required="required">
-						
-						<p>워크 공개 설정</p>   
-					    <label>
-					        <input type="radio" name="status" th:value="0" checked>
-					        공개
-					    </label>
-					
-					    <label>
-					        <input type="radio" name="status" th:value="1" >
-					        비공개
-					    </label>
-						
-							   					
-						<div class="work-create-actions">
-							<a th:href="@{/home}" class="work-submit">
-								워크 만들기
-							</a>
-							<a th:href="@{/main}" class="work-cancel">취소</a>
-						</div>
-					</div>
-				</form>
-			</div>
+            <p class="form-error" id="serverError"
+               th:if="${errorMessage != null}"
+               th:text="${errorMessage}">
+            </p>
+            
+			<input type="hidden" id="serverErrorField"
+	       		th:if="${errorField != null}"
+	       		th:value="${errorField}">
 
-	</div>
+            <form class="work-create-form" th:action="@{/work}" method="post" novalidate>
+                <div class="form-field">
+                    <label for="work-subject">워크 이름</label>
+                    	<input type="text"
+                           id="work-subject"
+                           name="workSubject"
+                           th:value="${workCreateDto != null ? workCreateDto.workSubject : ''}"
+                           maxlength="150"
+                           pattern="\S+( \S+)*"
+                           placeholder="팀 이름을 입력하세요"
+                           required>
 
-	
+                    <p class="field-error" id="workSubjectError" 
+                    	th:text="${errorField == 'workSubject' ? errorMessage : ''}"></p>
+         
+                    <label for="domain-key">도메인 주소</label>
+                    	<input type="text"
+                           id="domain-key"
+                           name="domainKey"
+                           th:value="${workCreateDto != null ? workCreateDto.domainKey : ''}"
+                           maxlength="255"
+                           pattern="[a-z0-9]+"
+                           placeholder="도메인 주소를 입력하세요"
+                           required>
+
+                    <p class="field-error" id="domainError" 
+                    	th:text="${errorField == 'domainKey' ? errorMessage : ''}"></p>
+
+
+                    <label for="work-content">워크 소개</label>
+
+                    <textarea id="work-content" 
+                    	name="workContent"
+                        maxlength="1000"
+                        placeholder="워크를 소개해주세요"
+                        th:text="${workCreateDto != null ? workCreateDto.workContent : ''}">
+                      </textarea>
+
+                    <p class="field-error" id="workContentError" 
+                    	th:text="${errorField == 'workContent' ? errorMessage : ''}"></p>
+
+                    <label>워크 공개 설정</label>
+
+                    <label>
+                        <input type="radio" 
+                        	name="status"
+                            value="0"
+                            th:checked="${workCreateDto == null or workCreateDto.status == 0}"
+                            required>
+                        공개
+                    </label>
+
+                    <label>
+                        <input type="radio" 
+                        	name="status"
+                            value="1"
+                            th:checked="${workCreateDto != null and workCreateDto.status == 1}">
+                        비공개
+                    </label>
+
+					<p class="field-error" id="statusError"
+						th:text="${errorField == 'status' ? errorMessage : ''}"></p>
+                </div>
+
+                <div class="work-create-actions">
+
+                    <button type="submit" class="work-submit">
+                        워크 만들기
+                    </button>
+
+                    <a th:href="@{/main}" class="work-cancel">
+                        취소
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
 </th:block>
 
 <th:block layout:fragment="script">
 
-</th:block> 
+    <script th:src="@{/dist/js/work-create.js}"></script>
+
+</th:block>
 
 </html>

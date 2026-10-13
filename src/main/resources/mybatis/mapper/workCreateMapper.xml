@@ -8,8 +8,8 @@
             SELECT seq_workspaces.NEXTVAL
             FROM dual
         </selectKey>
-		INSERT INTO workspaces (workspace_id, member_id, subject, content, status, created)
-		VALUES (#{workId}, #{pmMemberId}, #{workSubject}, #{workContent, jdbcType=VARCHAR}, #{status}, SYSDATE)
+		INSERT INTO workspaces (workspace_id, member_id, subject, content, status, created, updated)
+		VALUES (#{workId}, #{pmMemberId}, #{workSubject}, #{workContent, jdbcType=VARCHAR}, #{status}, SYSDATE, SYSDATE)
 	</insert>
 	
 	<insert id="insertWorkPM" parameterType="WorkCreateDto">
@@ -28,6 +28,15 @@
 		FROM workspace_domains
 		WHERE domain_key = #{domainKey}
 	</select>
+	
+	
+	<!-- 회원번호 조회 -->
+	<select id="findMemberIdByLoginId" parameterType="string" resultType="long">
+	    SELECT member_id
+	    FROM members
+	    WHERE login_id = #{loginId}
+	</select>
+	
 
 
 </mapper>

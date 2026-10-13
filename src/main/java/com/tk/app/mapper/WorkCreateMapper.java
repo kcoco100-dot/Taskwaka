@@ -15,4 +15,6 @@ public interface WorkCreateMapper {
 	// 도메인 주소 중복 확인
 	public int countByDomainKey(String domainKey);
 	
+	public Long findMemberIdByLoginId(String loginId);
+	
 }
