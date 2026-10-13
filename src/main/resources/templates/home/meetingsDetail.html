@@ -51,9 +51,16 @@
 			        	   meetingMinuteId=${meeting.meetingMinuteId})}">
 			            수정
 			        </a>
-			        <button type="button" class="shell-action meeting-delete-button">
-			            삭제
-			        </button>
+			        <form method="post" th:if="${meeting.canModify == 1}"
+			        	      th:action="@{/{domainKey}/home/meetingsDelete(domainKey=${domainKey})}"
+			        	      onsubmit="return confirm('회의록을 삭제하시겠습니까 ?');">
+			        	   
+			        	   <input type="hidden" name="meetingMinuteId" th:value="${meeting.meetingMinuteId}">
+			        	   
+			        	   <button type="submit" class="shell-action meeting-delete-button">
+			        	   		삭제
+			        	   </button>
+			        </form>
 			    </div>
 			</div>
         </div>
@@ -61,6 +68,7 @@
 </th:block>
  
 <th:block layout:fragment="script">
+
 </th:block> 
 
 </html>

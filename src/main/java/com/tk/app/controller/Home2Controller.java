@@ -330,6 +330,42 @@ public class Home2Controller {
 		return "redirect:/" + domainKey + "/home/meetingsDetail?meetingMinuteId=" + meetingMinuteId;
 	}
 	
+	// 회의록 삭제
+	@PostMapping("/meetingsDelete")
+	public String meetingsDelete(
+			@PathVariable("domainKey") String domainKey,
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("meetingMinuteId") long meetingMinuteId,
+			HttpServletResponse response,
+			Model model) throws Exception {
+		
+		// meetingsDelete 는 int 를 반환하기 때문에 dto 에 담을 수 없음!!!
+		// 삭제가 아닌 삭제 조회로 해야 함
+		MeetingMinutesDto meeting = 
+				meetingMinutesService.findMeetingDetailMinutes(
+						workspace.getWorkspaceId(), workspace.getMemberId(), meetingMinuteId);
+		
+		if(meeting == null) {
+			response.sendError(404, "회의록을 찾을 수 없습니다.");
+			return null;
+		}
+		
+		if(meeting.getCanModify() == 0) {
+			response.sendError(403, "삭제할 권한이 없습니다. 관리자에게 문의하세요.");
+			return null;
+		}
+		
+		int deleteCount = meetingMinutesService.meetingsDelete(
+				workspace.getWorkspaceId(), workspace.getMemberId(), meetingMinuteId);
+		
+		if(deleteCount == 0) {
+			response.sendError(404, "삭제할 회의록이 없습니다.");
+			return null;
+		}
+		
+		return "redirect:/" + domainKey + "/home/meetings";
+	}
+	
 	// manage - meetings 페이지
 	@GetMapping("/managemeetings")
 	public String managemeetings() {

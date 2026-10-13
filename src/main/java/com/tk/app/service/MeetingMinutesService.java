@@ -44,4 +44,11 @@ public class MeetingMinutesService {
 		
 		return meetingMinutesMapper.meetingsEdit(workspaceId, memberId, meetingMinuteId, title, content);
 	}
+	
+	// 워크 회의록 삭제
+	public int meetingsDelete(
+			long workspaceId, long memberId, long meetingMinuteId) {
+		
+		return meetingMinutesMapper.meetingsDelete(workspaceId, memberId, meetingMinuteId);
+	}
 }
