@@ -4,7 +4,7 @@
 	<div th:fragment="content">
 
 		<!-- ==========================================================================
-       [CSS SECTION] 풀 높이 오버레이 상세창 & 최적화된 10컬럼 그리드 스타일
+       [CSS SECTION] 웜 베이지 & 세이지 그린 테마, 오버레이 상세창 및 리사이저 바
        ========================================================================== -->
 		<style>
 .content-area:has(.task-split-view-wrapper) {
@@ -39,7 +39,6 @@
 	padding-bottom: 8px;
 }
 
-/* 10개 열 황금 비율 그리드 규격 */
 .task-grid-columns {
 	display: grid;
 	grid-template-columns: minmax(260px, 3fr) 80px 90px 100px 100px 75px 90px 90px 135px 135px;
@@ -331,10 +330,7 @@
 	transition: opacity 0.15s;
 }
 
-.badge-status:hover {
-	opacity: 0.85;
-}
-
+.badge-status:hover { opacity: 0.85; }
 .badge-req { background: #E0F2FE; color: #0284C7; }
 .badge-done { background: var(--status-done-bg, #E8F0DE); color: var(--status-done-text, #465B38); }
 .badge-hold { background: #F1F3F7; color: #64748B; }
@@ -349,9 +345,7 @@
 	border-radius: 4px;
 }
 
-.progress-cell:hover {
-	background: rgba(79, 98, 66, 0.08);
-}
+.progress-cell:hover { background: rgba(79, 98, 66, 0.08); }
 
 .progress-bar-bg {
 	width: 40px;
@@ -412,7 +406,6 @@
 	background: var(--bg-hover, #EFE8DE);
 }
 
-/* 오버레이 상세 패널 */
 .task-detail-panel {
 	position: absolute;
 	right: 0;
@@ -913,12 +906,58 @@
 						<li>수정일</li>
 					</ul>
 
-					<!-- 그룹 카드 컨테이너 (API로부터 동적 렌더링) -->
-					<div class="group-container" id="groupContainer"></div>
+					<!-- 그룹 카드 컨테이너 (서버 사이드 Thymeleaf 렌더링 + 프래그먼트 연동) -->
+					<div class="group-container" id="groupContainer">
+
+						<!-- [그룹 1: taskLevel == 1] -->
+						<div class="group-card" data-group-level="1">
+							<div class="group-header-row">
+								<span class="btn-toggle-box group-toggle" onclick="toggleGroup(this)">－</span>
+								<span class="group-title editable-cell">그룹 1</span>
+								<span style="font-size: 13px; color: var(--text-muted);">(<span class="group-count" id="countGroup1">0</span>)</span>
+							</div>
+
+							<div class="group-body">
+								<div class="task-box-inner">
+									<ul class="task-tree-list">
+										<th:block th:if="${tasks != null}">
+											<th:block th:each="task : ${tasks}" th:if="${task.taskLevel == 1}">
+												<li th:replace="~{project/fragments/task_items :: mainTaskItem}"></li>
+											</th:block>
+										</th:block>
+									</ul>
+								</div>
+								<div class="btn-add-task-row" onclick="requestCreateMainTask(1, this)">＋ 새 업무 추가</div>
+							</div>
+						</div>
+
+						<!-- [그룹 2: 그룹 미지정 (taskLevel == 0)] -->
+						<div class="group-card" data-group-level="0">
+							<div class="group-header-row">
+								<span class="btn-toggle-box group-toggle" onclick="toggleGroup(this)">－</span>
+								<span class="group-title editable-cell">그룹 미지정</span>
+								<span style="font-size: 13px; color: var(--text-muted);">(<span class="group-count" id="countGroup0">0</span>)</span>
+							</div>
+
+							<div class="group-body">
+								<div class="task-box-inner">
+									<ul class="task-tree-list">
+										<th:block th:if="${tasks != null}">
+											<th:block th:each="task : ${tasks}" th:if="${task.taskLevel != 1}">
+												<li th:replace="~{project/fragments/task_items :: mainTaskItem}"></li>
+											</th:block>
+										</th:block>
+									</ul>
+								</div>
+								<div class="btn-add-task-row" onclick="requestCreateMainTask(0, this)">＋ 새 업무 추가</div>
+							</div>
+						</div>
+
+					</div>
 
 				</div>
 
-				<button type="button" class="btn-add-group" onclick="addNewGroup()">＋ 그룹 추가</button>
+				<button type="button" class="btn-add-group" onclick="alert('신규 그룹을 추가합니다.');">＋ 그룹 추가</button>
 			</div>
 
 			<!-- [우측] 오버레이 상세 패널 -->
@@ -1058,12 +1097,13 @@
 		</div>
 
 		<!-- ==========================================================================
-       [JAVASCRIPT SECTION] 실제 REST API CRUD 비동기 연동
+       [JAVASCRIPT SECTION] Thymeleaf Fragment HTML 조각 비동기 삽입 로직
        ========================================================================== -->
-		<script>
-      const currentProjectId = 1; // 기본 프로젝트 ID
-      const teamMemberList = ['박혜림', '김철수', '이영희', '홍길동', '-'];
-      const priorityList = ['-', '낮음', '보통', '높음', '긴급'];
+		<script th:inline="javascript">
+      /* Thymeleaf Model에서 domainKey와 projectId 추출 */
+      const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
+      const currentProjectId = /*[[${projectId}]]*/ 1;
+
       const statusMap = [
         { code: 0, text: '● 요청', class: 'badge-req' },
         { code: 1, text: '● 진행', class: 'badge-done' },
@@ -1072,189 +1112,95 @@
         { code: 4, text: '● 보류', class: 'badge-hold' }
       ];
 
-      const trashSvg = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
-
       let currentActiveRow = null;
       let currentActiveTaskId = null;
       let pendingDeleteContext = null;
 
-      // ================= 1. 페이지 로드 시 DB에서 전체 업무 목록 조회 =================
+      // 페이지 로딩 시 카운트 초기화
       document.addEventListener('DOMContentLoaded', function() {
-        loadTasksFromDatabase();
+        updateGroupCounts();
       });
 
-      function loadTasksFromDatabase() {
-        fetch(`/api/projects/${currentProjectId}/tasks`)
-          .then(res => res.json())
-          .then(tasks => {
-            renderTaskTree(tasks);
-          })
-          .catch(err => console.error('업무 목록 로딩 실패:', err));
-      }
-
-      function renderTaskTree(tasks) {
-        const container = document.getElementById('groupContainer');
-        container.innerHTML = '';
-
-        // 기본 2개 그룹 구성 (1: 그룹 1, 0: 그룹 미지정)
-        const groups = [
-          { level: 1, title: '그룹 1', tasks: [] },
-          { level: 0, title: '그룹 미지정', tasks: [] }
-        ];
-
-        tasks.forEach(t => {
-          if (t.taskLevel === 1) groups[0].tasks.push(t);
-          else groups[1].tasks.push(t);
-        });
-
-        groups.forEach(g => {
-          const card = document.createElement('div');
-          card.className = 'group-card';
-          card.setAttribute('data-group-level', g.level);
-          
-          let tasksHtml = '';
-          g.tasks.forEach(task => {
-            tasksHtml += renderMainTaskHtml(task);
-          });
-
-          card.innerHTML = `
-            <div class="group-header-row">
-              <span class="btn-toggle-box group-toggle" onclick="toggleGroup(this)">－</span>
-              <span class="group-title editable-cell">${g.title}</span>
-              <span style="font-size: 13px; color: var(--text-muted);">(<span class="group-count">${g.tasks.length}</span>)</span>
-            </div>
-            <div class="group-body">
-              <div class="task-box-inner" style="${g.tasks.length === 0 ? 'display:none;' : ''}">
-                <ul class="task-tree-list">
-                  ${tasksHtml}
-                </ul>
-              </div>
-              <div class="btn-add-task-row" onclick="requestCreateMainTask(${g.level})">＋ 새 업무 추가</div>
-            </div>
-          `;
-          container.appendChild(card);
+      function updateGroupCounts() {
+        document.querySelectorAll('.group-card').forEach(card => {
+          const count = card.querySelectorAll('.task-branch').length;
+          const countSpan = card.querySelector('.group-count');
+          if (countSpan) countSpan.textContent = count;
         });
       }
 
-      function renderMainTaskHtml(task) {
-        const statusObj = statusMap.find(s => s.code === task.status) || statusMap[0];
-        const subCount = task.subTasks ? task.subTasks.length : 0;
-        let subTasksHtml = '';
-
-        if (task.subTasks && task.subTasks.length > 0) {
-          task.subTasks.forEach(st => {
-            subTasksHtml += renderSubTaskHtml(st);
-          });
-        }
-
-        return `
-          <li class="task-branch" data-task-id="${task.taskId}">
-            <div class="task-item-row main-task task-grid-columns" onclick="openDetailPanel(${task.taskId}, this)">
-              <div class="col-task-name">
-                ${subCount > 0 
-                  ? `<span class="btn-toggle-box task-toggle" onclick="event.stopPropagation(); toggleSubTasks(this)">－</span>` 
-                  : `<span style="width: 20px;"></span>`}
-                <span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this, ${task.taskId}, false)">${task.title}</span>
-                ${subCount > 0 ? `<span style="font-size:12px; color:var(--text-muted);">(<span class="sub-count">${subCount}</span>)</span>` : ''}
-                <span class="inline-action-bundle">
-                  <button type="button" class="btn-action-tool btn-action-add" onclick="event.stopPropagation(); requestCreateSubTask(${task.taskId})" title="하위업무 추가">＋</button>
-                  <button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('task', ${task.taskId}, this)" title="업무 삭제">${trashSvg}</button>
-                </span>
-              </div>
-              <div><span class="badge-status ${statusObj.class}" onclick="event.stopPropagation(); cycleStatus(this, ${task.taskId}, false)">${statusObj.text}</span></div>
-              <div><span class="editable-cell assignee-cell">${task.memberName || '미지정'}</span></div>
-              <div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, ${task.taskId}, 'startAt', false)">${task.startAt || '-'}</span></div>
-              <div><span class="editable-cell date-cell ${task.endAt ? 'text-danger' : ''}" onclick="event.stopPropagation(); editDate(this, ${task.taskId}, 'endAt', false)">${task.endAt || '-'}</span></div>
-              <div><span class="editable-cell priority-cell">-</span></div>
-              <div>
-                <div class="progress-cell">
-                  <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div>
-                  <span class="progress-text" style="font-size:12px;">${Math.round(task.progress || 0)}%</span>
-                </div>
-              </div>
-              <div>${task.memberName || '미지정'}</div>
-              <div style="font-size: 12px; color: var(--text-muted);">${task.created || '-'}</div>
-              <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">${task.updated || '-'}</div>
-            </div>
-            <ul class="sub-task-list" style="list-style: none; padding: 0; margin: 0;">
-              ${subTasksHtml}
-            </ul>
-          </li>
-        `;
-      }
-
-      function renderSubTaskHtml(st) {
-        const statusObj = statusMap.find(s => s.code === st.status) || statusMap[0];
-        return `
-          <li class="task-item-row sub-task task-grid-columns" data-sub-id="${st.subTaskId}">
-            <div class="col-task-name indent-sub">
-              <span class="task-title-text editable-cell" onclick="event.stopPropagation(); editTitle(this, ${st.subTaskId}, true)">${st.title}</span>
-              <span class="inline-action-bundle">
-                <button type="button" class="btn-action-tool btn-action-del" onclick="event.stopPropagation(); openDeleteModal('subtask', ${st.subTaskId}, this)" title="하위업무 삭제">${trashSvg}</button>
-              </span>
-            </div>
-            <div><span class="badge-status ${statusObj.class}" onclick="event.stopPropagation(); cycleStatus(this, ${st.subTaskId}, true)">${statusObj.text}</span></div>
-            <div><span class="editable-cell assignee-cell">${st.memberName || '미지정'}</span></div>
-            <div><span class="editable-cell date-cell" onclick="event.stopPropagation(); editDate(this, ${st.subTaskId}, 'startAt', true)">${st.startAt || '-'}</span></div>
-            <div><span class="editable-cell date-cell ${st.endAt ? 'text-danger' : ''}" onclick="event.stopPropagation(); editDate(this, ${st.subTaskId}, 'endAt', true)">${st.endAt || '-'}</span></div>
-            <div><span class="editable-cell priority-cell">-</span></div>
-            <div>
-              <div class="progress-cell">
-                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${st.progress || 0}%;"></div></div>
-                <span class="progress-text" style="font-size:12px;">${Math.round(st.progress || 0)}%</span>
-              </div>
-            </div>
-            <div>${st.memberName || '미지정'}</div>
-            <div style="font-size: 12px; color: var(--text-muted);">${st.created || '-'}</div>
-            <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);">${st.updated || '-'}</div>
-          </li>
-        `;
-      }
-
-      // ================= 2. 등록 API 연동 =================
-      function requestCreateMainTask(level) {
+      // ================= 1. 메인 업무 생성 (ProjectController 프래그먼트 수신 후 삽입) =================
+      function requestCreateMainTask(level, btnElem) {
         const title = prompt('새 업무명을 입력하세요:', '새 업무');
         if (!title) return;
 
-        fetch(`/api/projects/${currentProjectId}/tasks`, {
+        const groupCard = btnElem.closest('.group-card');
+        const taskList = groupCard.querySelector('.task-tree-list');
+        const innerBox = groupCard.querySelector('.task-box-inner');
+
+        const formData = new URLSearchParams();
+        formData.append('title', title);
+        formData.append('taskLevel', level);
+
+        fetch(`/${currentDomainKey}/project/${currentProjectId}/tasks/fragment/create-main`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: title,
-            taskLevel: level,
-            projectMemberId: 1
-          })
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData
         })
-        .then(res => res.json())
-        .then(() => loadTasksFromDatabase());
+        .then(res => res.text()) // Thymeleaf 프래그먼트 HTML 조각 수신
+        .then(htmlFragment => {
+          if (innerBox) innerBox.style.display = 'block';
+          taskList.insertAdjacentHTML('beforeend', htmlFragment);
+          updateGroupCounts();
+        })
+        .catch(err => console.error('업무 생성 오류:', err));
       }
 
+      // ================= 2. 하위 업무 생성 (ProjectController 프래그먼트 수신 후 삽입) =================
       function requestCreateSubTask(taskId) {
         const title = prompt('추가할 하위업무명을 입력하세요:', '새 하위업무');
         if (!title) return;
 
-        fetch(`/api/projects/${currentProjectId}/tasks/${taskId}/subtasks`, {
+        const branchLi = document.querySelector(`[data-task-id="${taskId}"]`);
+        const subTaskList = branchLi.querySelector('.sub-task-list');
+
+        const formData = new URLSearchParams();
+        formData.append('title', title);
+
+        fetch(`/${currentDomainKey}/project/${currentProjectId}/tasks/${taskId}/fragment/create-sub`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: title,
-            projectMemberId: 1
-          })
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData
         })
-        .then(res => res.json())
-        .then(() => {
-          loadTasksFromDatabase();
-          if (currentActiveTaskId === taskId) {
-            refreshDetailPanel(taskId);
+        .then(res => res.text()) // Thymeleaf 프래그먼트 HTML 조각 수신
+        .then(htmlFragment => {
+          subTaskList.insertAdjacentHTML('beforeend', htmlFragment);
+
+          // 토글 버튼 및 하위 개수 카운트 갱신
+          let countSpan = branchLi.querySelector('.sub-count');
+          if (countSpan) {
+            countSpan.textContent = parseInt(countSpan.textContent || '0') + 1;
+          } else {
+            const titleSpan = branchLi.querySelector('.task-title-text');
+            titleSpan.insertAdjacentHTML('afterend', '<span style="font-size:12px; color:var(--text-muted);">(<span class="sub-count">1</span>)</span>');
+            const colName = branchLi.querySelector('.col-task-name');
+            if (!colName.querySelector('.task-toggle')) {
+              colName.firstElementChild.outerHTML = '<span class="btn-toggle-box task-toggle" onclick="event.stopPropagation(); toggleSubTasks(this)">－</span>';
+            }
           }
-        });
+
+          if (currentActiveTaskId === taskId) {
+            refreshSubTasksInDetailPanel(taskId);
+          }
+        })
+        .catch(err => console.error('하위업무 생성 오류:', err));
       }
 
       function detailAddSubtaskClick() {
         if (currentActiveTaskId) requestCreateSubTask(currentActiveTaskId);
       }
 
-      // ================= 3. 인라인 수정 API 연동 =================
+      // ================= 3. 인라인 즉시 수정 (TaskApiController PATCH 연동) =================
       function editTitle(cell, id, isSub) {
         if (cell.querySelector('input')) return;
         const oldText = cell.textContent.trim();
@@ -1326,6 +1272,9 @@
         function finish() {
           const picked = input.value || '';
           cell.textContent = picked || '-';
+          if (fieldName === 'endAt' && picked) cell.classList.add('text-danger');
+          else if (fieldName === 'endAt') cell.classList.remove('text-danger');
+
           const url = isSub 
             ? `/api/projects/${currentProjectId}/tasks/subtasks/${id}/field`
             : `/api/projects/${currentProjectId}/tasks/${id}/field`;
@@ -1339,7 +1288,7 @@
         input.onchange = finish;
       }
 
-      // ================= 4. 상세창 열기 & 동기화 =================
+      // ================= 4. 상세 패널 데이터 바인딩 (TaskApiController GET/PUT 연동) =================
       function openDetailPanel(taskId, rowElem) {
         document.querySelectorAll('.task-item-row').forEach(r => r.classList.remove('selected-task-row'));
         rowElem.classList.add('selected-task-row');
@@ -1361,7 +1310,14 @@
             document.getElementById('detailStatusBadge').className = 'badge-status ' + statusObj.class;
             document.getElementById('detailStatusText').textContent = statusObj.text;
 
-            // 하위업무
+            refreshSubTasksInDetailPanel(taskId);
+          });
+      }
+
+      function refreshSubTasksInDetailPanel(taskId) {
+        fetch(`/api/projects/${currentProjectId}/tasks/${taskId}`)
+          .then(res => res.json())
+          .then(task => {
             const subBox = document.getElementById('detailSubtaskBox');
             subBox.innerHTML = '';
             const subCount = task.subTasks ? task.subTasks.length : 0;
@@ -1395,7 +1351,11 @@
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fieldName: 'title', fieldValue: val })
-        }).then(() => loadTasksFromDatabase());
+        }).then(() => {
+          if (currentActiveRow) {
+            currentActiveRow.querySelector('.task-title-text').textContent = val;
+          }
+        });
       }
 
       function onDetailContentChange(val) {
@@ -1413,7 +1373,13 @@
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fieldName: fieldName, fieldValue: val })
-        }).then(() => loadTasksFromDatabase());
+        }).then(() => {
+          if (currentActiveRow) {
+            const idx = fieldName === 'startAt' ? 0 : 1;
+            const cell = currentActiveRow.querySelectorAll('.date-cell')[idx];
+            cell.textContent = val || '-';
+          }
+        });
       }
 
       function cycleDetailStatus(badge) {
@@ -1429,7 +1395,13 @@
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fieldName: 'status', fieldValue: next.code })
-        }).then(() => loadTasksFromDatabase());
+        }).then(() => {
+          if (currentActiveRow) {
+            const rowBadge = currentActiveRow.querySelector('.badge-status');
+            rowBadge.className = 'badge-status ' + next.class;
+            rowBadge.textContent = next.text;
+          }
+        });
       }
 
       function toggleExtendedProps(btn) {
@@ -1444,7 +1416,7 @@
         }
       }
 
-      // ================= 5. 삭제 모달 & API 연동 =================
+      // ================= 5. 삭제 모달 & API 연동 (TaskApiController DELETE) =================
       function openDeleteModal(type, targetId, btnElement) {
         const modal = document.getElementById('deleteConfirmModal');
         const title = document.getElementById('modalTargetTitle');
@@ -1458,7 +1430,7 @@
           notice.innerHTML = '선택한 하위업무를 영구 삭제하시겠습니까?';
         }
 
-        pendingDeleteContext = { type, targetId };
+        pendingDeleteContext = { type, targetId, btnElement };
         modal.classList.add('show');
       }
 
@@ -1473,7 +1445,7 @@
 
       function executeConfirmedDelete() {
         if (!pendingDeleteContext) return;
-        const { type, targetId } = pendingDeleteContext;
+        const { type, targetId, btnElement } = pendingDeleteContext;
 
         const url = type === 'task'
           ? `/api/projects/${currentProjectId}/tasks/${targetId}`
@@ -1482,13 +1454,29 @@
         fetch(url, { method: 'DELETE' })
           .then(res => res.json())
           .then(() => {
+            if (type === 'task') {
+              const li = document.querySelector(`[data-task-id="${targetId}"]`);
+              if (li) li.remove();
+              if (currentActiveTaskId === targetId) closeDetailPanel();
+            } else if (type === 'subtask') {
+              const subLi = btnElement.closest('.task-item-row.sub-task');
+              const mainBranch = subLi.closest('.task-branch');
+              if (subLi) subLi.remove();
+              if (mainBranch) {
+                const countSpan = mainBranch.querySelector('.sub-count');
+                if (countSpan) {
+                  const cnt = Math.max(0, parseInt(countSpan.textContent || '0') - 1);
+                  countSpan.textContent = cnt;
+                }
+              }
+              if (currentActiveTaskId) refreshSubTasksInDetailPanel(currentActiveTaskId);
+            }
+            updateGroupCounts();
             closeDeleteModal();
-            closeDetailPanel();
-            loadTasksFromDatabase();
           });
       }
 
-      // ================= 6. 너비 조절 리사이저 바 =================
+      // ================= 6. 너비 조절 리사이저 바 & 부가 기능 =================
       const resizerBar = document.getElementById('paneResizerBar');
       const sidePanel = document.getElementById('taskDetailSidePanel');
       const splitWrapper = document.getElementById('taskSplitViewWrapper');

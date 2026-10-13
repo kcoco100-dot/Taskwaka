@@ -30,19 +30,7 @@ public class TaskApiController {
         return ResponseEntity.ok(taskService.getTaskDetail(taskId));
     }
 
-    // 3. 메인 업무 생성
-    @PostMapping
-    public ResponseEntity<TaskDto> createTask(
-            @PathVariable("projectId") Long projectId,
-            @RequestBody TaskDto dto) {
-        dto.setProjectId(projectId);
-        if (dto.getProjectMemberId() == null) {
-            dto.setProjectMemberId(1L); // 기본값 매핑
-        }
-        return ResponseEntity.ok(taskService.createMainTask(dto));
-    }
-
-    // 4. 메인 업무 인라인 필드 수정
+    // 3. 메인 업무 인라인 필드 수정
     @PatchMapping("/{taskId}/field")
     public ResponseEntity<Map<String, Object>> updateTaskField(
             @PathVariable("taskId") Long taskId,
@@ -56,7 +44,7 @@ public class TaskApiController {
         return ResponseEntity.ok(res);
     }
 
-    // 5. 상세창 전체 저장
+    // 4. 상세창 전체 저장
     @PutMapping("/{taskId}")
     public ResponseEntity<Map<String, Object>> updateTaskDetail(
             @PathVariable("taskId") Long taskId,
@@ -69,7 +57,7 @@ public class TaskApiController {
         return ResponseEntity.ok(res);
     }
 
-    // 6. 메인 업무 삭제
+    // 5. 메인 업무 삭제
     @DeleteMapping("/{taskId}")
     public ResponseEntity<Map<String, Object>> deleteTask(@PathVariable("taskId") Long taskId) {
         taskService.deleteTask(taskId);
@@ -78,21 +66,7 @@ public class TaskApiController {
         return ResponseEntity.ok(res);
     }
 
-    // 7. 하위 업무 생성
-    @PostMapping("/{taskId}/subtasks")
-    public ResponseEntity<SubTaskDto> createSubTask(
-            @PathVariable("projectId") Long projectId,
-            @PathVariable("taskId") Long taskId,
-            @RequestBody SubTaskDto dto) {
-        dto.setProjectId(projectId);
-        dto.setTaskId(taskId);
-        if (dto.getProjectMemberId() == null) {
-            dto.setProjectMemberId(1L);
-        }
-        return ResponseEntity.ok(taskService.createSubTask(dto));
-    }
-
-    // 8. 하위 업무 필드 수정
+    // 6. 하위 업무 필드 수정
     @PatchMapping("/subtasks/{subTaskId}/field")
     public ResponseEntity<Map<String, Object>> updateSubTaskField(
             @PathVariable("subTaskId") Long subTaskId,
@@ -106,7 +80,7 @@ public class TaskApiController {
         return ResponseEntity.ok(res);
     }
 
-    // 9. 하위 업무 삭제
+    // 7. 하위 업무 삭제
     @DeleteMapping("/subtasks/{subTaskId}")
     public ResponseEntity<Map<String, Object>> deleteSubTask(@PathVariable("subTaskId") Long subTaskId) {
         taskService.deleteSubTask(subTaskId);

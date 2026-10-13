@@ -56,21 +56,5 @@ public class HomeController {
         return "work/create";
     }
 
-    /**
-     * 5. 프로젝트 화면 라우팅 (피드, 업무, 간트, 캘린더, 파일)
-     */
-    @GetMapping("/project")
-    public String projectDetail(
-            @RequestParam(name = "tab", defaultValue = "feed") String tab,
-            Model model) {
-        
-        if (!tab.matches("feed|task|gantt|calendar|file")) {
-            tab = "feed";
-        }
-        
-        model.addAttribute("activeTab", tab);
-        model.addAttribute("projectName", "Taskwaka 시작가이드");
-        
-        return "project/project_layout";
-    }
+
 }

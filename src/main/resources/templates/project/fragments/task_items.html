@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <!-- =========================================================================
+       [조각 1] 메인 업무 단일 행 프래그먼트
+       ========================================================================= -->
+  <li th:fragment="mainTaskItem" class="task-branch" th:attr="data-task-id=${task.taskId}">
+    <div class="task-item-row main-task task-grid-columns" 
+         th:onclick="'openDetailPanel(' + ${task.taskId} + ', this)'">
+      
+      <!-- 업무명 컬럼 (토글, 제목, 액션 버튼) -->
+      <div class="col-task-name">
+        <span th:if="${task.subTasks != null and #lists.size(task.subTasks) > 0}"
+              class="btn-toggle-box task-toggle" 
+              onclick="event.stopPropagation(); toggleSubTasks(this)">－</span>
+        <span th:unless="${task.subTasks != null and #lists.size(task.subTasks) > 0}" 
+              style="width: 20px;"></span>
+
+        <span class="task-title-text editable-cell" 
+              th:text="${task.title}"
+              th:onclick="'event.stopPropagation(); editTitle(this, ' + ${task.taskId} + ', false)'">업무명</span>
+
+        <span th:if="${task.subTasks != null and #lists.size(task.subTasks) > 0}"
+              style="font-size:12px; color:var(--text-muted);">
+          (<span class="sub-count" th:text="${#lists.size(task.subTasks)}">0</span>)
+        </span>
+
+        <span class="inline-action-bundle">
+          <button type="button" class="btn-action-tool btn-action-add" 
+                  th:onclick="'event.stopPropagation(); requestCreateSubTask(' + ${task.taskId} + ')'" 
+                  title="하위업무 추가">＋</button>
+          <button type="button" class="btn-action-tool btn-action-del" 
+                  th:onclick="'event.stopPropagation(); openDeleteModal(\'task\', ' + ${task.taskId} + ', this)'" 
+                  title="업무 삭제">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </span>
+      </div>
+
+      <!-- 상태 뱃지 (0: 요청, 1: 진행, 2: 피드백, 3: 완료, 4: 보류) -->
+      <div>
+        <span th:switch="${task.status}" class="badge-status"
+              th:classappend="${task.status == 0 ? 'badge-req' : (task.status == 1 ? 'badge-done' : (task.status == 2 ? 'badge-feedback' : (task.status == 3 ? 'badge-done' : 'badge-hold')))}"
+              th:onclick="'event.stopPropagation(); cycleStatus(this, ' + ${task.taskId} + ', false)'">
+          <span th:case="0">● 요청</span>
+          <span th:case="1">● 진행</span>
+          <span th:case="2">● 피드백</span>
+          <span th:case="3">● 완료</span>
+          <span th:case="4">● 보류</span>
+          <span th:case="*">● 요청</span>
+        </span>
+      </div>
+
+      <!-- 담당자 -->
+      <div>
+        <span class="editable-cell assignee-cell" 
+              th:text="${task.memberName != null ? task.memberName : '미지정'}">담당자</span>
+      </div>
+
+      <!-- 시작일 / 마감일 -->
+      <div>
+        <span class="editable-cell date-cell" 
+              th:text="${task.startAt != null ? task.startAt : '-'}"
+              th:onclick="'event.stopPropagation(); editDate(this, ' + ${task.taskId} + ', \'startAt\', false)'">-</span>
+      </div>
+      <div>
+        <span class="editable-cell date-cell" 
+              th:classappend="${task.endAt != null} ? 'text-danger'"
+              th:text="${task.endAt != null ? task.endAt : '-'}"
+              th:onclick="'event.stopPropagation(); editDate(this, ' + ${task.taskId} + ', \'endAt\', false)'">-</span>
+      </div>
+
+      <!-- 우선순위 -->
+      <div><span class="editable-cell priority-cell">-</span></div>
+
+      <!-- 진척도 -->
+      <div>
+        <div class="progress-cell">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" th:style="'width:' + (${task.progress != null} ? ${task.progress} : 0) + '%;'"></div>
+          </div>
+          <span class="progress-text" style="font-size:12px;" 
+                th:text="(${task.progress != null} ? ${T(java.lang.Math).round(task.progress)} : 0) + '%'">0%</span>
+        </div>
+      </div>
+
+      <!-- 작성자 / 등록일 / 수정일 -->
+      <div th:text="${task.memberName != null ? task.memberName : '미지정'}">작성자</div>
+      <div style="font-size: 12px; color: var(--text-muted);" th:text="${task.created != null ? task.created : '-'}">-</div>
+      <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);" th:text="${task.updated != null ? task.updated : '-'}">-</div>
+    </div>
+
+    <!-- 하위업무 목록 -->
+    <ul class="sub-task-list" style="list-style: none; padding: 0; margin: 0;">
+      <th:block th:if="${task.subTasks != null}">
+        <th:block th:each="subTask : ${task.subTasks}">
+          <li th:replace="~{project/fragments/task_items :: subTaskItem}"></li>
+        </th:block>
+      </th:block>
+    </ul>
+  </li>
+
+
+  <!-- =========================================================================
+       [조각 2] 하위업무 단일 행 프래그먼트
+       ========================================================================= -->
+  <li th:fragment="subTaskItem" class="task-item-row sub-task task-grid-columns" 
+      th:attr="data-sub-id=${subTask.subTaskId}"
+      th:onclick="'openDetailPanel(' + ${subTask.subTaskId} + ', this, true)'">
+    
+    <div class="col-task-name indent-sub">
+      <span class="task-title-text editable-cell" 
+            th:text="${subTask.title}"
+            th:onclick="'event.stopPropagation(); editTitle(this, ' + ${subTask.subTaskId} + ', true)'">하위업무</span>
+      <span class="inline-action-bundle">
+        <button type="button" class="btn-action-tool btn-action-del" 
+                th:onclick="'event.stopPropagation(); openDeleteModal(\'subtask\', ' + ${subTask.subTaskId} + ', this)'" 
+                title="하위업무 삭제">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        </button>
+      </span>
+    </div>
+
+    <div>
+      <span th:switch="${subTask.status}" class="badge-status"
+            th:classappend="${subTask.status == 0 ? 'badge-req' : (subTask.status == 1 ? 'badge-done' : (subTask.status == 2 ? 'badge-feedback' : (subTask.status == 3 ? 'badge-done' : 'badge-hold')))}"
+            th:onclick="'event.stopPropagation(); cycleStatus(this, ' + ${subTask.subTaskId} + ', true)'">
+        <span th:case="0">● 요청</span>
+        <span th:case="1">● 진행</span>
+        <span th:case="2">● 피드백</span>
+        <span th:case="3">● 완료</span>
+        <span th:case="4">● 보류</span>
+        <span th:case="*">● 요청</span>
+      </span>
+    </div>
+
+    <div><span class="editable-cell assignee-cell" th:text="${subTask.memberName != null ? subTask.memberName : '미지정'}">-</span></div>
+    <div><span class="editable-cell date-cell" th:text="${subTask.startAt != null ? subTask.startAt : '-'}" th:onclick="'event.stopPropagation(); editDate(this, ' + ${subTask.subTaskId} + ', \'startAt\', true)'">-</span></div>
+    <div><span class="editable-cell date-cell" th:classappend="${subTask.endAt != null} ? 'text-danger'" th:text="${subTask.endAt != null ? subTask.endAt : '-'}" th:onclick="'event.stopPropagation(); editDate(this, ' + ${subTask.subTaskId} + ', \'endAt\', true)'">-</span></div>
+    <div><span class="editable-cell priority-cell">-</span></div>
+    <div>
+      <div class="progress-cell">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" th:style="'width:' + (${subTask.progress != null} ? ${subTask.progress} : 0) + '%;'"></div></div>
+        <span class="progress-text" style="font-size:12px;" th:text="(${subTask.progress != null} ? ${T(java.lang.Math).round(subTask.progress)} : 0) + '%'">0%</span>
+      </div>
+    </div>
+    <div th:text="${subTask.memberName != null ? subTask.memberName : '미지정'}">-</div>
+    <div style="font-size: 12px; color: var(--text-muted);" th:text="${subTask.created != null ? subTask.created : '-'}">-</div>
+    <div class="col-updated-at" style="font-size: 12px; color: var(--text-muted);" th:text="${subTask.updated != null ? subTask.updated : '-'}">-</div>
+  </li>
+
+</body>
+</html>
