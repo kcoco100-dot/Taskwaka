@@ -1,5 +1,6 @@
 package com.tk.app.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,11 @@ public class NoticeService {
 				
 				if(originalName == null || originalName.isBlank()) {
 					return "첨부파일 이름을 확인해 주세요.";
+				}
+				
+				// 원본 파일명 255 바이트 제한 검사
+				if(originalName.getBytes(StandardCharsets.UTF_8).length > 255) {
+					return "첨부 파일명이 너무 깁니다. 파일명을 줄여 주세요.";
 				}
 				
 				// 파일 명에서 마지막 점의 위치 찾기
