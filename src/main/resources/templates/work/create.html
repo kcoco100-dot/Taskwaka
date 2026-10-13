@@ -25,7 +25,11 @@
 	       		th:if="${errorField != null}"
 	       		th:value="${errorField}">
 
-            <form class="work-create-form" th:action="@{/work}" method="post" novalidate>
+            <form class="work-create-form" 
+            	th:action="@{/work}"
+            	th:attr= "checkDomainUrl = @{/work/check}"
+            	method="post" 
+            	novalidate>
                 <div class="form-field">
                     <label for="work-subject">워크 이름</label>
                     	<input type="text"
@@ -68,7 +72,7 @@
 
                     <label>워크 공개 설정</label>
 
-                    <label>
+                    <label class="radio-option">
                         <input type="radio" 
                         	name="status"
                             value="0"
@@ -77,7 +81,7 @@
                         공개
                     </label>
 
-                    <label>
+                    <label class="radio-option">
                         <input type="radio" 
                         	name="status"
                             value="1"
@@ -111,7 +115,7 @@
 
 <th:block layout:fragment="script">
 
-    <script th:src="@{/dist/js/work-create.js}"></script>
+    <script th:src="@{/dist/js/workCreate.js}"></script>
 
 </th:block>
 

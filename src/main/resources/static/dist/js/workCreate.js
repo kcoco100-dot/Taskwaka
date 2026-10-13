@@ -10,6 +10,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const domainError = document.getElementById("domainError");
     const workContentError = document.getElementById("workContentError");
     const statusError = document.getElementById("statusError");
+	
+	let domainCheckTimer;
+	let domainCheckVersion = 0;
+	
+
 
     // 오류 메시지 표시
     function showError(input, errorElement, message) {
@@ -70,42 +75,79 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 입력할 때 바로 검사
     workSubject.addEventListener("input", checkWorkSubject);
-    domainKey.addEventListener("input", checkDomainKey);
     workContent.addEventListener("input", checkWorkContent);
+	domainKey.addEventListener("input", () => {
+		clearTimeout(domainCheckTimer);
 
-    // 워크 만들기 버튼 클릭 시 검사
-    form.addEventListener("submit", function (e) {
+		   // 이전 요청 결과를 무효화
+		   domainCheckVersion++;
 
-        const validSubject = checkWorkSubject();
-        const validDomain = checkDomainKey();
-        const validContent = checkWorkContent();
+		   // 도메인 형식 검사
+		   if (!checkDomainKey()) {
+		       return;
+		   }
 
-        const selectedStatus = form.querySelector(
-            'input[name="status"]:checked'
-        );
+		   // 입력을 멈춘 뒤 400ms 후 중복 조회
+		   domainCheckTimer = setTimeout(function () {
+		       checkDomainDuplicate();
+		   }, 400);
 
-        if (!selectedStatus) {
-            statusError.textContent = "워크 공개 여부를 선택해주세요.";
-        } else {
-            statusError.textContent = "";
-        }
+	});
 
-        if (!validSubject || !validDomain || !validContent || !selectedStatus) {
-            e.preventDefault();
 
-            if (!validSubject) {
-                workSubject.focus();
-            } else if (!validDomain) {
-                domainKey.focus();
-            } else if (!validContent) {
-                workContent.focus();
-            } else {
-                form.querySelector(
-                    'input[name="status"]'
-                ).focus();
-            }
-        }
-    });
+	form.addEventListener("submit", async function (e) {
+
+	    e.preventDefault();
+
+	    // 진행 중인 실시간 검사 무효화
+	    clearTimeout(domainCheckTimer);
+	    domainCheckVersion++;
+
+	    const validSubject = checkWorkSubject();
+	    const validDomain = checkDomainKey();
+	    const validContent = checkWorkContent();
+
+	    const selectedStatus = form.querySelector(
+	        'input[name="status"]:checked'
+	    );
+
+	    if (!selectedStatus) {
+	        statusError.textContent =
+	            "워크 공개 여부를 선택해주세요.";
+	    } else {
+	        statusError.textContent = "";
+	    }
+
+	    // 기본 입력 검사
+	    if (!validSubject || !validDomain || !validContent || !selectedStatus) {
+
+	        if (!validSubject) {
+	            workSubject.focus();
+	        } else if (!validDomain) {
+	            domainKey.focus();
+	        } else if (!validContent) {
+	            workContent.focus();
+	        } else {
+	            form.querySelector(
+	                'input[name="status"]'
+	            ).focus();
+	        }
+
+	        return;
+	    }
+
+	    // 도메인 DB 중복 확인
+	    const available = await checkDomainDuplicate();
+
+	    if (!available) {
+	        domainKey.focus();
+	        return;
+	    }
+
+	    form.submit();
+
+	});
+
 
     // 서버 오류가 있다면 해당 입력칸으로 focus
     const serverErrorField = document.getElementById("serverErrorField");
@@ -127,5 +169,56 @@ document.addEventListener("DOMContentLoaded", function () {
             input.focus();
         }
     }
+	
+
+
+	async function checkDomainDuplicate() {
+	    const value = domainKey.value;
+		
+	    if (! checkDomainKey()) {
+	        return false;
+	    }
+
+	    const version = ++domainCheckVersion;
+
+	    try {
+	        const url = form.dataset.checkDomainUrl
+	            + "?domainKey=" + encodeURIComponent(value);
+
+	        const response = await fetch(url);
+
+	        if (! response.ok) {
+	            throw new Error("중복 확인 요청 실패");
+	        }
+
+	        const data = await response.json();
+
+	        // 입력값이 바뀌었거나 이전 요청이면 무시
+	        if (version !== domainCheckVersion ||
+	                domainKey.value !== value) {
+	            return false;
+	        }
+
+	        // 이미 사용 중인 도메인
+	        if (data.duplicate) {
+	            showError(domainKey, domainError, "이미 사용 중인 도메인 주소입니다.");
+	            return false;
+	        }
+
+	        // 사용 가능한 도메인
+	        clearError(domainKey, domainError);
+	        return true;
+
+	    } catch (error) {
+
+	        if (version !== domainCheckVersion || domainKey.value !== value) {
+	            return false;
+	        }
+
+	        showError(domainKey, domainError, "도메인 중복 확인에 실패했습니다. 다시 시도해주세요.");
+			return false;
+	    }
+	}
+
 
 });

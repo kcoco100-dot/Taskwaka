@@ -52,7 +52,7 @@
 .work-create-form .form-field {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 }
 
 .work-create-form label {
@@ -201,16 +201,29 @@
     }
 }
 
-.field-error,
+
+/* 입력칸 아래 오류 메시지 */
+.field-error {
+    color: #dc3545;
+    font-size: 12px;
+    line-height: 18px;
+
+    min-height: 20px;
+    margin: 0;
+}
+
+/* 오류가 없어도 공간은 유지 */
+.field-error:empty {
+    visibility: hidden;
+}
+
+/* 서버 전체 오류 메시지 */
 .form-error {
     color: #dc3545;
     font-size: 13px;
-    margin-top: 5px;
+    margin-bottom: 15px;
 }
 
-.field-error:empty {
-    display: none;
-}
 
 .form-error {
     margin-bottom: 15px;
@@ -219,4 +232,22 @@
 .work-create-form input[aria-invalid="true"],
 .work-create-form textarea[aria-invalid="true"] {
     border-color: #dc3545;
+}
+
+/* 공개 / 비공개 라디오 버튼 */
+.work-create-form input[type="radio"] {
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    accent-color: #71865B;
+}
+
+/* 라디오 버튼과 글자를 나란히 배치 */
+.work-create-form .radio-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    cursor: pointer;
 }

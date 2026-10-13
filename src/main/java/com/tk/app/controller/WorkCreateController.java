@@ -1,5 +1,7 @@
 package com.tk.app.controller;
 
+import java.util.Map;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tk.app.domain.dto.WorkCreateDto;
@@ -83,6 +86,21 @@ public class WorkCreateController {
 		}
 		
 		return "work/create";
+	}
+	
+	@GetMapping("/check")
+	@ResponseBody
+	public Map<String, Boolean> checkDomainKey(@RequestParam("domainKey") String domainKey){
+		
+	    if (domainKey.length() > 255 ||
+	            !domainKey.matches("[a-z0-9]+")) {
+	        throw new IllegalArgumentException(
+	            "도메인 주소 형식이 올바르지 않습니다.");
+	    }
+		
+	    boolean duplicate = service.isDomainKeyDuplicate(domainKey);
+		
+		return Map.of("duplicate" , duplicate);
 	}
 	
 	

@@ -87,4 +87,9 @@ public class WorkCreateServiceImpl implements WorkCreateService {
 		
 	}
 
+	@Override
+	public boolean isDomainKeyDuplicate(String domainKey) {
+		return mapper.countByDomainKey(domainKey) > 0;
+	}
+
 }
