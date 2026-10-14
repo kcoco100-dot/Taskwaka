@@ -21,20 +21,17 @@ public class ProjectController {
     public String projectDetail(
             @PathVariable("domainKey") String domainKey,
             @PathVariable("projectId") Long projectId,
-            @RequestParam(name = "tab", defaultValue = "dashboard") String tab,
+            @RequestParam(name = "tab", defaultValue = "feed") String tab,
             Model model) {
         
-        if (!tab.matches("dashboard|task|gantt|calendar|file")) {
-            tab = "dashboard";
+        if (!tab.matches("feed|dashboard|task|gantt|calendar|file")) {
+            tab = "feed";
         }
-        
         
         model.addAttribute("domainKey", domainKey);
         model.addAttribute("projectId", projectId);
         model.addAttribute("activeTab", tab);
-        
-        String projectName = taskService.getProjectSubject(projectId);
-        model.addAttribute("projectName", projectName);
+        model.addAttribute("projectName", "Taskwaka 시작가이드");
 
         // 업무 탭인 경우 초기 화면 렌더링용 업무 목록 주입 (SSR)
         if ("task".equals(tab)) {
@@ -52,14 +49,23 @@ public class ProjectController {
             @PathVariable("domainKey") String domainKey,
             @PathVariable("projectId") Long projectId,
             @RequestParam("title") String title,
-            @RequestParam("taskLevel") Integer taskLevel,
+            @RequestParam("content") String content,
+            @RequestParam("projectMemberId") Long projectMemberId,
+            @RequestParam(value = "status", defaultValue = "0") Integer status,
+            @RequestParam(value = "startAt", required = false) String startAt,
+            @RequestParam(value = "endAt", required = false) String endAt,
+            @RequestParam(value = "taskLevel", defaultValue = "1") Integer taskLevel,
             Model model) {
 
         TaskDto dto = new TaskDto();
         dto.setProjectId(projectId);
         dto.setTitle(title);
+        dto.setContent(content);
+        dto.setProjectMemberId(projectMemberId);
+        dto.setStatus(status);
+        dto.setStartAt((startAt != null && !startAt.isBlank()) ? startAt : null);
+        dto.setEndAt((endAt != null && !endAt.isBlank()) ? endAt : null);
         dto.setTaskLevel(taskLevel);
-        dto.setProjectMemberId(1L);
 
         TaskDto created = taskService.createMainTask(dto);
         model.addAttribute("task", created);
@@ -76,13 +82,22 @@ public class ProjectController {
             @PathVariable("projectId") Long projectId,
             @PathVariable("taskId") Long taskId,
             @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam("projectMemberId") Long projectMemberId,
+            @RequestParam(value = "status", defaultValue = "0") Integer status,
+            @RequestParam(value = "startAt", required = false) String startAt,
+            @RequestParam(value = "endAt", required = false) String endAt,
             Model model) {
 
         SubTaskDto dto = new SubTaskDto();
         dto.setProjectId(projectId);
         dto.setTaskId(taskId);
         dto.setTitle(title);
-        dto.setProjectMemberId(1L);
+        dto.setContent(content);
+        dto.setProjectMemberId(projectMemberId);
+        dto.setStatus(status);
+        dto.setStartAt((startAt != null && !startAt.isBlank()) ? startAt : null);
+        dto.setEndAt((endAt != null && !endAt.isBlank()) ? endAt : null);
 
         SubTaskDto created = taskService.createSubTask(dto);
         model.addAttribute("subTask", created);

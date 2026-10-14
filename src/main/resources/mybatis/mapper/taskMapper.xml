@@ -88,8 +88,8 @@
             task_level, start_at, "END", status, progress, created, updated
         ) VALUES (
             #{taskId}, #{projectId}, #{projectMemberId}, #{title}, #{content, jdbcType=CLOB},
-            #{taskLevel}, NVL(TO_DATE(#{startAt}, 'YYYY-MM-DD'), SYSDATE),
-            NVL(TO_DATE(#{endAt}, 'YYYY-MM-DD'), SYSDATE + 7), #{status}, #{progress}, SYSDATE, SYSDATE
+            #{taskLevel}, NVL(TO_DATE(#{startAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'), SYSDATE),
+            NVL(TO_DATE(#{endAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'), SYSDATE + 7), #{status}, #{progress}, SYSDATE, SYSDATE
         )
     </insert>
 

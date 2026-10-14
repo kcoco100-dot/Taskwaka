@@ -21,6 +21,7 @@
 						<li>시작일</li>
 						<li>마감일</li>
 						<li>진척도</li>
+						<li>작성자</li>
 						<li>등록일</li>
 						<li>수정일</li>
 					</ul>
@@ -49,7 +50,7 @@
 				<div class="detail-top-nav">
 					<div style="display:flex; align-items:center; gap:6px;">
 						<span>🌿</span>
-						<span id="detailProjectTitle">Taskwaka 시작가이드</span>
+						<span id="detailProjectTitle" th:text="${projectName != null ? projectName : 'Taskwaka 시작가이드'}">Taskwaka 시작가이드</span>
 					</div>
 					<button type="button" class="detail-close-btn" onclick="closeDetailPanel()" title="닫기 (ESC)">✕</button>
 				</div>
@@ -103,16 +104,6 @@
 								<span class="prop-label">마감일</span>
 								<input type="date" class="inline-edit-date" id="detailEndDate" onchange="onDetailDateChange('endAt', this.value)">
 							</div>
-							<div class="detail-prop-row">
-								<span class="prop-label">우선순위</span>
-								<select class="inline-edit-select" id="detailPrioritySelect">
-									<option value="-">-</option>
-									<option value="낮음">낮음</option>
-									<option value="보통">보통</option>
-									<option value="높음">높음</option>
-									<option value="긴급">긴급</option>
-								</select>
-							</div>
 						</div>
 					</div>
 
@@ -155,7 +146,96 @@
 			</aside>
 		</div>
 
-		<!-- 삭제 모달 -->
+		<!-- ==========================================================================
+       [모달 1] 오버레이 상세 패널 디자인을 계승한 업무 / 하위업무 등록 모달
+       ========================================================================== -->
+		<div class="custom-modal-backdrop" id="taskCreateModal" onclick="handleCreateBackdropClick(event)">
+			<div class="task-create-modal-card">
+				<!-- 상단 헤더 바 (상세 패널과 동일한 웜 베이지 헤더) -->
+				<div class="detail-top-nav">
+					<div style="display:flex; align-items:center; gap:6px;">
+						<span>🌿</span>
+						<span id="createModalHeaderTitle">새 업무 등록</span>
+					</div>
+					<button type="button" class="detail-close-btn" onclick="closeCreateTaskModal()" title="닫기 (ESC)">✕</button>
+				</div>
+
+				<!-- 모달 본문 -->
+				<div class="create-modal-body">
+					<!-- 제목 입력 (필수) -->
+					<div class="detail-title-row">
+						<input type="text" class="create-title-input" id="createTaskTitleInput" placeholder="업무 제목을 입력하세요 *">
+					</div>
+
+					<!-- 주요 속성 박스 (상태, 담당자 필수, 시작일/마감일) -->
+					<div class="create-props-card">
+						<div class="detail-prop-row">
+							<span class="prop-label">상태</span>
+							<div>
+								<span class="badge-status badge-req" id="createStatusBadge" onclick="cycleCreateModalStatus()" title="클릭하여 상태 변경">
+									<span id="createStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
+								</span>
+							</div>
+						</div>
+
+						<div class="detail-prop-row">
+							<span class="prop-label">담당자<span class="req-star">*</span></span>
+							<select class="inline-edit-select" id="createAssigneeSelect" style="width: 150px; padding: 4px 8px;">
+								<option value="1" selected>박혜림</option>
+								<option value="2">김철수</option>
+								<option value="3">이영희</option>
+							</select>
+						</div>
+
+						<div class="detail-prop-row">
+							<span class="prop-label">시작일</span>
+							<input type="date" class="inline-edit-date" id="createStartDateInput" style="width: 150px; padding: 4px 8px;">
+						</div>
+
+						<div class="detail-prop-row">
+							<span class="prop-label">마감일</span>
+							<input type="date" class="inline-edit-date" id="createEndDateInput" style="width: 150px; padding: 4px 8px;">
+						</div>
+					</div>
+
+					<!-- 상세 내용 입력 (필수 - NOT NULL 대응) -->
+					<div class="detail-section-block">
+						<label class="detail-block-title" for="createTaskContentInput">
+							<span>📄 상세 내용<span class="req-star">*</span></span>
+						</label>
+						<textarea class="detail-desc-textarea" id="createTaskContentInput" style="min-height: 130px;" placeholder="업무에 대한 상세한 설명과 가이드를 입력해 주세요 (필수 입력)..."></textarea>
+					</div>
+
+					<!-- 파일 첨부 (상세 패널과 동일한 디자인) -->
+					<div class="detail-section-block">
+						<div class="detail-block-title">
+							<span>📎 첨부파일</span>
+							<span style="font-size:11.5px; color:var(--text-muted);" id="createAttachedFileCount">(0)</span>
+						</div>
+						<div class="detail-file-dropzone" id="createFileDropzone">
+							<div class="file-upload-trigger-row">
+								<span style="font-size:12px; color:var(--text-sub);">파일을 끌어다 놓거나 선택하세요</span>
+								<label class="btn-upload-attach">
+									<span>＋ 파일 첨부</span>
+									<input type="file" id="createTaskFileInput" multiple style="display:none;">
+								</label>
+							</div>
+							<div class="file-list-box" id="createAttachedFileList"></div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 하단 액션 푸터 -->
+				<div class="create-modal-footer">
+					<button type="button" class="btn-modal-cancel" onclick="closeCreateTaskModal()">취소</button>
+					<button type="button" class="btn-modal-submit" onclick="submitCreateTaskModal()">등록하기</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ==========================================================================
+       [모달 2] 삭제 확인 모달
+       ========================================================================== -->
 		<div class="custom-modal-backdrop" id="deleteConfirmModal" onclick="handleBackdropClick(event)">
 			<div class="custom-modal-card">
 				<div class="modal-header-area">
