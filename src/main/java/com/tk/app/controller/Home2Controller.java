@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.HtmlUtils;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
@@ -25,10 +29,12 @@ import com.tk.app.domain.dto.MyTaskDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.NoticeFileDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
+import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.service.MeetingMinutesService;
 import com.tk.app.service.MyTaskService;
 import com.tk.app.service.NoticeService;
 import com.tk.app.service.ParticipatingProjectService;
+import com.tk.app.service.TaskService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,6 +52,7 @@ public class Home2Controller {
 	private final MeetingMinutesService meetingMinutesService;
 	private final PaginateUtil paginateUtil;
 	private final MyTaskService myTaskService;
+	private final TaskService taskService;
 
 	@ModelAttribute("domainKey")
 	public String setDomainKey(@PathVariable("domainKey") String domainKey) {
@@ -247,6 +254,49 @@ public class Home2Controller {
 	}
 	
 	// 회의록 등록
+	@GetMapping("/meetingsCreate")
+	public String meetingCreate(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			Model model) {
+		
+		model.addAttribute("participatingProjects", 
+				participatingProjectService.findParticipatingProjects(
+						workspace.getWorkspaceId(), workspace.getMemberId()));
+		
+		return "home/meetingsCreate";
+	}
+	
+	// 회의록에서 하위 업무 조회
+	// @ResponseBody : 조회 결과를 JSON 으로 반환
+	@GetMapping("/meetingTasks")
+	@ResponseBody
+	public List<TaskDto> meetingTasks(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("projectId") long projectId) {
+		
+		List<ParticipatingProjectDto> projects =
+				participatingProjectService.findParticipatingProjects(
+						workspace.getWorkspaceId(), workspace.getMemberId());
+		
+		boolean participating = false;
+		
+		for(ParticipatingProjectDto project : projects) {
+			if(project.getProjectId() == projectId) {
+				participating = true;
+				break;
+			}
+		}
+		
+		if(!participating) {
+			// HTTP 응답 상태 코드 
+			// FORBIDDEN : 403 에러 
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "참여중인 프로젝트가 아닙니다.");
+		}
+		
+		return taskService.getTaskList(projectId);
+	}
+	
+	// 회의록 등록저장
 	@PostMapping("meetingsIn")
 	public String insertMeetingMinutes(
 			@PathVariable("domainKey") String domainKey,

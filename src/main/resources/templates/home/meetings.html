@@ -34,10 +34,10 @@
 						    </button>
 					</form>
 				
-				    <button type="button" class="meetings-write-button">
+				    <a th:href="@{/{domainKey}/home/meetingsCreate(domainKey=${domainKey})}" class="meetings-write-button">
 				        <i class="bi bi-plus-lg" aria-hidden="true"></i>
 				        회의록 작성
-				    </button>
+				    </a>
 				</div>
 
 				<div class="meetings-table-wrap">

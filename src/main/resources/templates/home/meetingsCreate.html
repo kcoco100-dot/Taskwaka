@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/meetingsDetail.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout">
+        <nav th:replace="~{layout/homeSidebar::homeSidebar('meetings')}"></nav>
+
+        <div class="section shell-section meeting-detail-page">
+            <div class="page-heading">
+                <h1 class="page-title">회의록 등록</h1>
+                <p class="page-description">회의록의 제목과 내용을 입력하세요.</p>
+            </div>
+
+            <form class="shell-content" id="meetingsCreateForm" method="post"
+            		  th:action="@{/{domainKey}/home/meetingsIn(domainKey=${domainKey})}">
+	                <div class="mb-3">
+	                		
+	                		<div class="mb-3">
+						    <label for="meetingTitle" class="form-label">제목</label>
+						    <input type="text" id="meetingTitle" name="title"
+						           class="form-control" maxlength="200" required>
+						</div>
+	                		
+	                		<div class="mb-3">
+	                			<label for="meetingProject" class="form-label">프로젝트</label>
+	                			<select id="meetingProject" name="projectId" class="form-select" required="required">
+	                				<option value="">프로젝트를 선택하세요</option>
+								<option th:each="project : ${participatingProjects}"
+									    th:value="${project.projectId}"
+									    th:text="${project.subject}">
+								</option>
+	                			</select>
+	                		</div>
+	                		
+	                		<div class="mb-3">
+	                			<label for="meetingSubTask" class="form-label">하위업무</label>
+	                			<select id="meetingSubTask" name="subTaskId"
+	                				    class="form-select" required="required">
+	                				<option value="">프로젝트를 선택하세요.</option>
+	                			</select>
+	                		</div>
+	                </div>
+	
+	                <div class="mt-4">
+	                		<label for="meetingContent" class="form-label">내용</label>
+	                		<textarea id="meetingContent" name="content" rows="12"
+	                				  class="form-control" required="required"></textarea>
+	                </div>
+            </form>
+            
+            <div th:if="${errorMessage != null}" class="alert alert-danger"
+            		 role="alert" th:text="${errorMessage}"></div>
+
+			<div class="shell-actions">
+			    <a class="shell-action"
+			       th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}">
+			        ← 목록으로
+			    </a>
+			
+			    <div class="meeting-detail-buttons">
+			        <button type="submit" form="meetingsCreateForm" class="shell-action shell-action-primary">
+			            등록하기
+			        </button>
+			        <button type="reset" form="meetingsCreateForm" class="shell-action">
+			            초기화
+			        </button>
+			    </div>
+			</div>
+        </div>
+    </div>
+</th:block>
+ 
+<th:block layout:fragment="script">
+	<script th:inline="javascript">
+		const projectSelect = document.getElementById('meetingProject');
+		const subTaskSelect = document.getElementById('meetingSubTask');
+		const apiUrl = /*[[@{/{domainKey}/home/meetingTasks(domainKey=${domainKey})}]]*/ '';
+		
+		// 하위 업무 목록을 비우고 안내 문구를 표시하는 함수 정의 
+		function resetSubTasks(message) {
+			// 기존 옵션을 지우고 안내 옵션 하나로 교체
+			subTaskSelect.replaceChildren(new Option(message, ''));
+		}
+		
+		// 프로젝트 선택이 바뀌면 실행할 함수를 등록함
+		projectSelect.addEventListener('change', async ()=> {
+			resetSubTasks('프로젝트를 먼저 선택하세요.');
+			
+			// 선택한 프로젝트가 없으면 return 
+			if(!projectSelect.value) return;
+			
+			try {
+				// 선택한 프로젝트 목록을 서버에 GET 요청한다.
+				const response = await fetch(
+						apiUrl + '?projectId=' + projectSelect.value);
+				
+				if(!response.ok) {
+					throw new Error('조회 실패');
+				}
+				
+				// 응답 본문의 JSON 을 자바스크립트로 변환해서 tasks에 담는다.
+				const tasks = await response.json();
+				resetSubTasks('하위업무를 선택하세요.');
+				
+				for(const task of tasks) {
+					for(const subTask of task.subTasks ?? []) {
+						// 하위업무 선택 목록에 옵션 추가
+						subTaskSelect.add(new Option(
+								task.title + ' / ' + subTask.title,
+								// 화면의 이름 대신 실제 하위업무 ID가 subTaskId로 전송
+								subTask.subTaskId));
+					}
+				}
+				
+				// 옵션이 안내 문구 하나인지 확인
+				if(subTaskSelect.options.length === 1) {
+					resetSubTasks('등록할 하위업무가 없습니다.');
+				}
+			} catch(err) {
+				resetSubTasks('하위업무를 불러오지 못했습니다.');
+			}
+		});
+		
+		// 등록 폼 찾기
+		document.getElementById('meetingsCreateForm')
+			.addEventListener('reset', () => {
+				resetSubTasks('프로젝트를 먼저 선택하세요.');
+			});
+		
+	</script>
+</th:block> 
+
+</html>
