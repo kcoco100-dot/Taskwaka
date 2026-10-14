@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout project-list-layout">
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('notice')}"></nav>
+        
+        <section class="section project-list-page" aria-labelledby="notice-heading">
+            <div class="page-heading">
+                <div>
+                    <h1 id="notice-heading" class="page-title">공지사항 조회</h1>
+                    <p class="page-description">워크스페이스 및 프로젝트 공지사항을 확인하세요.</p>
+                </div>
+                <!-- 권한(50 이상: DL, PM)인 경우에만 등록 버튼 노출 -->
+                <a th:if="${userRole >= 50}" class="project-button project-button-primary" th:href="@{/manage/notice/write}">+ 공지사항 등록</a>
+            </div>
+
+            <div class="project-list-panel">
+                <form class="project-filters" method="get" th:action="@{/manage/notice}">
+                    <div class="project-field">
+                        <label for="notice-type">공지 유형</label>
+                        <select id="notice-type" name="type">
+                            <option value="">전체 유형</option>
+                            <option value="WORKSPACE">전체 공지</option>
+                            <option value="PROJECT">프로젝트 공지</option>
+                        </select>
+                    </div>
+                    <div class="project-field project-keyword-field">
+                        <label for="notice-keyword">검색어</label>
+                        <input id="notice-keyword" name="keyword" type="search" placeholder="제목 검색" maxlength="100">
+                    </div>
+                    <div class="project-filter-actions">
+                        <button type="submit" class="project-button project-button-primary">조회</button>
+                        <button type="reset" class="project-button">초기화</button>
+                    </div>
+                </form>
+
+                <div class="project-list-heading">
+                    <h2>공지사항 목록</h2>
+                    <p role="status">총 <strong th:text="${noticeList.size()}">0</strong>건</p>
+                </div>
+
+                <div class="project-table-wrap">
+                    <table class="project-table">
+                        <thead>
+                            <tr>
+                                <th class="project-number">번호</th>
+                                <th>유형</th>
+                                <th class="project-title-column">제목</th>
+                                <th>작성자</th>
+                                <th>등록일</th>
+                                <th>조회수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${noticeList.isEmpty()}">
+                                <td colspan="6" class="project-empty" style="text-align: center; padding: 20px;">등록된 공지사항이 없습니다.</td>
+                            </tr>
+                            <tr th:each="notice : ${noticeList}" th:onclick="'location.href=\'/manage/notice/' + ${notice.notice_id} + '\''" style="cursor: pointer;">
+                                <td class="project-number" th:text="${notice.notice_id}">1</td>
+                                <td>
+                                    <span th:text="${notice.notice_type == 'WORKSPACE' ? '전체 공지' : '프로젝트 공지'}"
+                                          th:style="${notice.notice_type == 'WORKSPACE' ? 'background: #ffebee; color: #c62828; padding: 4px 8px; border-radius: 4px; font-size: 12px;' : 'background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px; font-size: 12px;'}"></span>
+                                </td>
+                                <td class="project-title-column" style="font-weight: bold; text-align: left;" th:text="${notice.title}">제목</td>
+                                <td th:text="${notice.writer_name}">작성자</td>
+                                <td th:text="${#dates.format(notice.created, 'yyyy.MM.dd')}">2026.10.13</td>
+                                <td th:text="${notice.view_count}">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+</html>
