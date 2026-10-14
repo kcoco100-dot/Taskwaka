@@ -23,6 +23,7 @@ import com.tk.app.common.PaginateUtil;
 import com.tk.app.domain.dto.MeetingMinutesDto;
 import com.tk.app.domain.dto.MyTaskDto;
 import com.tk.app.domain.dto.NoticeDto;
+import com.tk.app.domain.dto.NoticeFileDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
 import com.tk.app.service.MeetingMinutesService;
 import com.tk.app.service.MyTaskService;
@@ -437,8 +438,13 @@ public class Home2Controller {
 		if (notice == null) {
 			throw new Exception("공지를 찾을 수 없습니다.");
 		}
+		
+		// 등록된 공지사항의 첨부파일 조회
+		List<NoticeFileDto> noticeFile = 
+				noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
 
 		model.addAttribute("notice", notice);
+		model.addAttribute("noticeFile", noticeFile);
 
 		return "notice/noticeDetail";
 	}
@@ -454,7 +460,7 @@ public class Home2Controller {
 		return "notice/noticeCreate";
 	}
 
-	// 공지사항 등록 저장
+	// 공지사항 등록 저장 및 파일첨부
 	@PostMapping("/noticeCreate")
 	public String noticeCreate(@PathVariable("domainKey") String domainKey,
 			@RequestAttribute("workspace") WorkspaceDto workspace, 

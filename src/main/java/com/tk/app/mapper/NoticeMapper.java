@@ -14,6 +14,11 @@ public interface NoticeMapper {
 	// 공지 등록
 	public int createWorkspaceNotice(NoticeDto notice);
 	
+	// 공지 등록 시 파일 업로드 조회
+	public List<NoticeFileDto> findWorkspaceFiles(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId);
+	
 	// 공지 파일처리
 	public int insertNoticeFile(NoticeFileDto noticeFile);
 	
@@ -31,7 +36,7 @@ public interface NoticeMapper {
 			@Param("noticeId") long noticeId);
 
 	// 공개되있는 공지 목록 조회
-	List<NoticeDto> findWorkspaceNotice(
+	public List<NoticeDto> findWorkspaceNotice(
 			@Param("workspaceId") long workspaceId);
 	
 	// 워크에 공개된 공지 상세조회

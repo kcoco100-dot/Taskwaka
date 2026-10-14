@@ -35,8 +35,16 @@
                     <span th:text="${notice.viewCount}">0</span>
                 </p>
                 <hr>
+                
+               <div th:text="${notice.content}" style="white-space: pre-wrap;">공지 본문</div>
 
-                <div th:text="${notice.content}" style="white-space: pre-wrap;">공지 본문</div>
+				<p class="notice-attachments">
+				    첨부파일
+				    <span th:if="${#lists.isEmpty(noticeFile)}">첨부파일이 없습니다.</span>
+				    <span th:each="file : ${noticeFile}"
+				          th:text="${file.originalName}">파일이름</span>
+				</p>
+				
             </div>
 
 			<div class="shell-actions">

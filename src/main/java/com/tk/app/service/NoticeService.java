@@ -28,7 +28,7 @@ public class NoticeService {
 	@Value("${file.upload-root}")
 	private String uploadPath;
 	
-	// 공지사항 파일처리
+	// 공지사항 글 등록 시 파일처리
 	public String validateNoticeFiles(List<MultipartFile> files) {
 		// MultipartFile : 업로드한 파일 한개
 		if(files == null) {
@@ -105,6 +105,13 @@ public class NoticeService {
 	public NoticeDto findWorkspaceDetailNotice(long workspaceId, long noticeId) {
 		
 		return noticeMapper.findWorkspaceDetailNotice(workspaceId, noticeId);
+	}
+	
+	// 공지 상세조회에서 첨부된 파일 조회
+	public List<NoticeFileDto> findWorkspaceFiles(
+			long workspaceId, long noticeId) {
+		
+		return noticeMapper.findWorkspaceFiles(workspaceId, noticeId);
 	}
 	
 	// 공지사항 등록 및 파일처리

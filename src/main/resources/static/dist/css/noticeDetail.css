@@ -136,3 +136,7 @@
     outline: 2px solid #71865B;
     outline-offset: 3px;
 }
+
+.notice-detail-layout .shell-content > .notice-attachments {
+    grid-column: 1 / -1;
+}

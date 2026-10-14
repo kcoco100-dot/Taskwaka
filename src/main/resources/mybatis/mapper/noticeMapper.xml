@@ -25,6 +25,21 @@
 		  #{originalName}, #{storedName}, #{filePath}, 
 		  #{fileSize}, SYSDATE)
 	</insert>
+	
+	<!-- 공지사항 파일 첨부 등록 보기 -->
+	<!-- 공지사항 첨부파일 이름만 보여주는거라서 noticeId, originalName -->
+	<select id="findWorkspaceFiles" resultType="com.tk.app.domain.dto.NoticeFileDto">
+		SELECT nf.notice_id AS "noticeId", 
+		       nf.original_name AS "originalName"
+		FROM notice_files nf
+		JOIN notice n ON n.notice_id = nf.notice_id
+		WHERE n.workspace_id = #{workspaceId}
+			  AND n.notice_id = #{noticeId}
+		      AND n.notice_type = 'WORKSPACE'
+		      AND n.status = 1
+		      AND n.deleted IS NULL
+		ORDER BY nf.notice_file_id
+	</select>
 
 	<!-- 공개된 워크 공지 목록 조회 -->
 	<select id="findWorkspaceNotice" resultType="com.tk.app.domain.dto.NoticeDto">
