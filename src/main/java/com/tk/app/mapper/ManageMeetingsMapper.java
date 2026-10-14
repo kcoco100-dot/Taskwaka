@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.tk.app.domain.dto.ManageMeetingsDto;
-import com.tk.app.domain.dto.MeetingMinutesDto;
 
 @Mapper
 public interface ManageMeetingsMapper {

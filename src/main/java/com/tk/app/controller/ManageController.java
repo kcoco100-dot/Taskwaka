@@ -200,7 +200,7 @@ public class ManageController {
             projectMemberRepository.excludeFromWorkspace(workspaceMemberId);
             resultMap.put("status", "success");
         } catch (Exception e) {
-            log.error("워크스페이스 제외 에러:", e);
+            log.error("excludeWorkspace : ", e);
             resultMap.put("status", "error");
         }
         return resultMap;

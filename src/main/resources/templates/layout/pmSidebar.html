@@ -29,7 +29,7 @@
             <ul id="project-submenu" class="submenu">
                 <li><a th:href="@{/{domainKey}/manage/write(domainKey=${domainKey})}" th:classappend="${activeMenu == 'write' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'write' ? 'page' : null}">프로젝트 등록</a></li>
                 <li><a th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}" th:classappend="${activeMenu == 'view' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'view' ? 'page' : null}">프로젝트 조회</a></li>
-                <li><a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}" th:classappend="${activeMenu == 'approval' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'approval' ? 'page' : null}">보고서 공지</a></li>
+                <li><a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}" th:classappend="${activeMenu == 'approval' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'approval' ? 'page' : null}">보고서 결재</a></li>
                 <li><a th:href="@{/{domainKey}/manage/meetings(domainKey=${domainKey})}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'meetings' ? 'page' : null}">회의록</a></li>
             </ul>
         </li>
