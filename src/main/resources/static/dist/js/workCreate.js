@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (workSubject.validity.patternMismatch) {
-            showError(workSubject, workNameError, "워크명은 앞뒤 공백을 사용할 수 없으며, 단어 사이에는 공백 한 칸만 허용됩니다.");
+            showError(workSubject, workNameError, "워크명에는 단독 한글 자음·모음, 앞뒤 공백, 연속 공백을 사용할 수 없습니다.");
             return false;
         }
 
@@ -73,17 +73,36 @@ document.addEventListener("DOMContentLoaded", function () {
         return true;
     }
 
-    // 입력할 때 바로 검사
-    workSubject.addEventListener("input", checkWorkSubject);
+	
     workContent.addEventListener("input", checkWorkContent);
-	domainKey.addEventListener("input", () => {
-		clearTimeout(domainCheckTimer);
 
-		   // 이전 요청 결과를 무효화
+	let isComposing = false;
+
+	workSubject.addEventListener("compositionstart", function () {
+	    isComposing = true;
+	});
+
+	workSubject.addEventListener("compositionend", function () {
+	    isComposing = false;
+	    checkWorkSubject();
+	});
+
+	workSubject.addEventListener("input", function () {
+	    if (! isComposing) {
+	        checkWorkSubject();
+	    }
+	});
+
+	
+	domainKey.addEventListener("input", () => {
+		
+		   clearTimeout(domainCheckTimer);
+
+		   // 이전 요청 결과를 무효화, 버전체크
 		   domainCheckVersion++;
 
 		   // 도메인 형식 검사
-		   if (!checkDomainKey()) {
+		   if (! checkDomainKey()) {
 		       return;
 		   }
 
@@ -111,21 +130,21 @@ document.addEventListener("DOMContentLoaded", function () {
 	        'input[name="status"]:checked'
 	    );
 
-	    if (!selectedStatus) {
+	    if (! selectedStatus) {
 	        statusError.textContent =
 	            "워크 공개 여부를 선택해주세요.";
 	    } else {
 	        statusError.textContent = "";
 	    }
 
-	    // 기본 입력 검사
-	    if (!validSubject || !validDomain || !validContent || !selectedStatus) {
+		
+	    if (! validSubject || ! validDomain || ! validContent || ! selectedStatus) {
 
-	        if (!validSubject) {
+	        if (! validSubject) {
 	            workSubject.focus();
-	        } else if (!validDomain) {
+	        } else if (! validDomain) {
 	            domainKey.focus();
-	        } else if (!validContent) {
+	        } else if (! validContent) {
 	            workContent.focus();
 	        } else {
 	            form.querySelector(
@@ -137,9 +156,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	    }
 
 	    // 도메인 DB 중복 확인
-	    const available = await checkDomainDuplicate();
+	    const checkOk = await checkDomainDuplicate();
 
-	    if (!available) {
+	    if (! checkOk) {
 	        domainKey.focus();
 	        return;
 	    }
@@ -193,19 +212,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	        const data = await response.json();
 
-	        // 입력값이 바뀌었거나 이전 요청이면 무시
 	        if (version !== domainCheckVersion ||
 	                domainKey.value !== value) {
 	            return false;
 	        }
 
-	        // 이미 사용 중인 도메인
 	        if (data.duplicate) {
 	            showError(domainKey, domainError, "이미 사용 중인 도메인 주소입니다.");
 	            return false;
 	        }
 
-	        // 사용 가능한 도메인
 	        clearError(domainKey, domainError);
 	        return true;
 

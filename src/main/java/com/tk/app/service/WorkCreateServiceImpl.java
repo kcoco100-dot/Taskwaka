@@ -31,9 +31,15 @@ public class WorkCreateServiceImpl implements WorkCreateService {
 			throw new IllegalArgumentException ("워크명을 입력해주세요.");
 		}
 
-        if (! workSubject.matches("(?U)\\S+( \\S+)*")) {
-            throw new IllegalArgumentException("워크명은 앞뒤 공백을 사용할 수 없으며, 단어 사이에는 공백 한 칸만 허용됩니다.");
-        }
+
+		if (!workSubject.matches(
+		        "(?U)(?!.*[ㄱ-ㅎㅏ-ㅣᄀ-ᇿ])\\S+( \\S+)*")) {
+		
+		    throw new IllegalArgumentException(
+		        "워크명에는 완성되지 않은 한글 자음·모음을 사용할 수 없으며, 앞뒤 공백과 연속 공백도 허용되지 않습니다."
+		    );
+		}
+
         
         if(workSubject.length() > 150) {
         	throw new IllegalArgumentException("워크명은 150자를 넘길 수 없습니다.");

@@ -27,7 +27,7 @@
 
             <form class="work-create-form" 
             	th:action="@{/work}"
-            	th:attr= "checkDomainUrl = @{/work/check}"
+            	th:attr= "data-check-domain-url = @{/work/check}"
             	method="post" 
             	novalidate>
                 <div class="form-field">
@@ -37,7 +37,7 @@
                            name="workSubject"
                            th:value="${workCreateDto != null ? workCreateDto.workSubject : ''}"
                            maxlength="150"
-                           pattern="\S+( \S+)*"
+                           pattern="(?!.*[ㄱ-ㅎㅏ-ㅣᄀ-ᇿ])\S+( \S+)*"
                            placeholder="팀 이름을 입력하세요"
                            required>
 
