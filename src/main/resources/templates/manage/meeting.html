@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/meetings.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/meetingsDetail.css}">
+    <style>
+        [v-cloak] { display: none; }
+        .meetings-detail-container { background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #E8E2D9; }
+        .meeting-detail-title { margin-top: 0; margin-bottom: 16px; font-size: 24px; color: #594331; }
+        .meeting-detail-meta { display: flex; gap: 20px; padding-bottom: 20px; border-bottom: 1px solid #E8E2D9; color: #786B5E; font-size: 14px; }
+        .meeting-detail-body { padding-top: 24px; min-height: 200px; white-space: pre-wrap; line-height: 1.6; }
+    </style>
+</th:block>
+
+<th:block layout:fragment="content">
+    <div id="manageMeetingsApp" class="home-layout manage-layout" v-cloak>
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('meetings')}"></nav>
+
+        <div v-if="viewMode === 'LIST'" class="section meetings-page">
+            <div class="page-content meetings-content">
+                <div class="meetings-toolbar">
+                    <h2 class="meetings-title">회의록 목록</h2>
+                    <form class="meetings-search" @submit.prevent="fetchMeetingList(1)">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                        <input type="search" v-model="searchParams.kwd" placeholder="회의록 제목 검색">
+                        <button type="submit" class="meetings-search-button">검색</button>
+                    </form>
+                </div>
+
+                <div class="meetings-table-wrap">
+                    <table class="meetings-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">회의 제목</th>
+                                <th scope="col" class="meeting-date">회의일</th>
+                                <th scope="col" class="meeting-writer">작성자</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="meeting in meetingList" :key="meeting.meetingMinuteId">
+                                <td>
+                                    <p class="meeting-title">
+                                        <a href="#" @click.prevent="openMeetingDetail(meeting)">{{ meeting.title }}</a>
+                                    </p>
+                                    <p class="meeting-summary">{{ meeting.summary || truncateContent(meeting.content) }}</p>
+                                </td>
+                                <td class="meeting-date">{{ meeting.meetingDate }}</td>
+                                <td class="meeting-writer">{{ meeting.authorName }}</td>
+                            </tr>
+                            <tr v-if="meetingList.length === 0">
+                                <td colspan="3" style="text-align:center; padding: 40px;">등록된 회의록이 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="meetings-pagination" aria-label="회의록 페이지 이동" style="display:flex; justify-content:center; gap:8px; margin-top:20px;">
+                    <button type="button" class="project-button" :disabled="searchParams.page <= 1" @click="fetchMeetingList(searchParams.page - 1)">이전</button>
+                    
+                    <template v-for="num in pageNumbers" :key="num">
+                        <span v-if="num === searchParams.page" class="project-current-page" aria-current="page">{{ num }}</span>
+                        <button v-else type="button" class="project-button" @click="fetchMeetingList(num)">{{ num }}</button>
+                    </template>
+                    
+                    <button type="button" class="project-button" :disabled="searchParams.page >= pageInfo.totalPage || pageInfo.totalPage === 0" @click="fetchMeetingList(searchParams.page + 1)">다음</button>
+                </nav>
+            </div>
+        </div>
+
+
+        <div v-if="viewMode === 'DETAIL'" class="section shell-section meeting-detail-page">
+            <div class="meetings-detail-container">
+                <div class="page-heading">
+                    <h1 class="page-title">회의록 상세</h1>
+                </div>
+                <article class="shell-content">
+                    <h2 class="meeting-detail-title">{{ currentMeeting.title }}</h2>
+                    <div class="meeting-detail-meta">
+                        <span>회의일 <strong>{{ currentMeeting.meetingDate }}</strong></span>
+                        <span>작성자 <strong>{{ currentMeeting.authorName }}</strong></span>
+                    </div>
+                    <div class="meeting-detail-body">{{ currentMeeting.content }}</div>
+                </article>
+                <div class="shell-actions" style="margin-top:30px;">
+                    <a href="#" class="shell-action" @click.prevent="viewMode = 'LIST'">← 목록으로</a>
+                    <div class="meeting-detail-buttons" v-if="currentMeeting.memberId === currentUser.id">
+                        <button type="button" class="shell-action shell-action-primary" @click="openMeetingEdit">수정</button>
+                        <button type="button" class="shell-action meeting-delete-button" @click="deleteMeetingAction">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div v-if="viewMode === 'EDIT'" class="section shell-section meeting-detail-page">
+            <div class="meetings-detail-container">
+                <div class="page-heading">
+                    <h1 class="page-title">회의록 수정</h1>
+                </div>
+                <form class="shell-content" @submit.prevent="saveMeetingAction">
+                    <div class="mb-3" style="margin-bottom:15px;">
+                        <label class="form-label" style="display:block; margin-bottom:8px; font-weight:600;">제목</label>
+                        <input type="text" v-model="editMeetingData.title" class="form-control" style="width:100%; padding:10px; border:1px solid #E8E2D9; border-radius:8px;" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="display:block; margin-bottom:8px; font-weight:600;">내용</label>
+                        <textarea v-model="editMeetingData.content" rows="12" class="form-control" style="width:100%; padding:10px; border:1px solid #E8E2D9; border-radius:8px; resize:vertical;" required></textarea>
+                    </div>
+                    <div class="shell-actions" style="margin-top:30px;">
+                        <a href="#" class="shell-action" @click.prevent="viewMode = 'DETAIL'">← 취소</a>
+                        <div class="meeting-detail-buttons">
+                            <button type="submit" class="shell-action shell-action-primary">수정완료</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+        const domainKey = '[[${domainKey}]]';
+        const baseUrl = `/${domainKey}/manage/api/meetings`;
+
+        const { createApp, ref, reactive, onMounted, computed } = Vue;
+
+        createApp({
+            setup() {
+                const currentUser = reactive({ id: null });
+                const viewMode = ref('LIST');
+
+                const searchParams = reactive({
+                    kwd: '',
+                    page: 1,
+                    size: 10
+                });
+                
+                const pageInfo = reactive({
+                    totalCount: 0,
+                    totalPage: 0
+                });
+
+                const blockSize = 5;
+                const pageNumbers = computed(() => {
+                    if (pageInfo.totalPage === 0) return [];
+                    const startPage = Math.floor((searchParams.page - 1) / blockSize) * blockSize + 1;
+                    const endPage = Math.min(startPage + blockSize - 1, pageInfo.totalPage);
+                    const pages = [];
+                    for (let i = startPage; i <= endPage; i++) {
+                        pages.push(i);
+                    }
+                    return pages;
+                });
+
+                const meetingList = ref([]);
+                const currentMeeting = ref(null);
+                const editMeetingData = reactive({ title: '', content: '' });
+
+                const truncateContent = (text) => {
+                    if(!text) return '';
+                    return text.length > 50 ? text.substring(0, 50) + '...' : text;
+                };
+
+                const fetchMeetingList = async (page = 1) => {
+                    searchParams.page = page;
+                    try {
+                        const response = await axios.get(`${baseUrl}/list`, { params: searchParams });
+                        meetingList.value = response.data.meetingList;
+                        pageInfo.totalCount = response.data.pageInfo.totalCount;
+                        pageInfo.totalPage = response.data.pageInfo.totalPage;
+                        currentUser.id = response.data.currentMemberId;
+                    } catch (error) {
+                        console.error(error);
+                        if (error.response && error.response.status === 401) {
+                            alert('세션이 만료되었습니다.');
+                            location.href = '/login';
+                        } else {
+                            alert('목록 조회 실패');
+                        }
+                    }
+                };
+
+                const openMeetingDetail = async (meeting) => {
+                    try {
+                        const response = await axios.get(`${baseUrl}/${meeting.meetingMinuteId}`);
+                        currentMeeting.value = response.data;
+                        viewMode.value = 'DETAIL';
+                    } catch (error) {
+                        console.error(error);
+                        alert('상세 조회 실패');
+                    }
+                };
+
+                const openMeetingEdit = () => {
+                    editMeetingData.title = currentMeeting.value.title;
+                    editMeetingData.content = currentMeeting.value.content;
+                    viewMode.value = 'EDIT';
+                };
+
+                const saveMeetingAction = async () => {
+                    try {
+                        await axios.put(`${baseUrl}/${currentMeeting.value.meetingMinuteId}`, {
+                            title: editMeetingData.title,
+                            content: editMeetingData.content
+                        });
+                        alert('수정되었습니다.');
+                        viewMode.value = 'DETAIL';
+                        await fetchMeetingList(searchParams.page);
+                        currentMeeting.value.title = editMeetingData.title;
+                        currentMeeting.value.content = editMeetingData.content;
+                    } catch (error) {
+                        console.error(error);
+                        alert('수정 실패');
+                    }
+                };
+
+                const deleteMeetingAction = async () => {
+                    if(confirm('삭제하시겠습니까?')) {
+                        try {
+                            await axios.delete(`${baseUrl}/${currentMeeting.value.meetingMinuteId}`);
+                            alert('삭제되었습니다.');
+                            viewMode.value = 'LIST';
+                            fetchMeetingList(1);
+                        } catch (error) {
+                            console.error(error);
+                            alert('삭제 실패');
+                        }
+                    }
+                };
+
+                onMounted(() => fetchMeetingList(1));
+
+                return {
+                    currentUser, viewMode, searchParams, pageInfo, pageNumbers,
+                    meetingList, currentMeeting, editMeetingData,
+                    truncateContent, fetchMeetingList, openMeetingDetail,
+                    openMeetingEdit, saveMeetingAction, deleteMeetingAction
+                };
+            }
+        }).mount('#manageMeetingsApp');
+    </script>
+</th:block>
+</html>

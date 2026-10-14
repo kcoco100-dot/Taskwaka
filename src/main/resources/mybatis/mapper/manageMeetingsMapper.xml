@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.ManageMeetingsMapper">
+
+	<select id="findMeetingList" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
+		SELECT 
+            m.meeting_minute_id AS meetingMinuteId,
+            m.title,
+            m.content,
+            TO_CHAR(m.meeting, 'YYYY.MM.DD') AS meetingDate,
+            md.name AS authorName,
+            m.member_id AS memberId
+        FROM meeting_minutes m
+        JOIN projects p ON p.project_id = m.project_id
+        LEFT JOIN member_details md ON m.member_id = md.member_id
+        WHERE p.workspace_id = #{workspaceId}
+          AND m.deleted IS NULL
+        <if test="kwd != null and kwd != ''">
+            AND m.title LIKE '%' || #{kwd} || '%'
+        </if>
+        ORDER BY m.meeting DESC NULLS LAST, m.created DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <select id="countMeetings" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM meeting_minutes m
+        JOIN projects p ON p.project_id = m.project_id
+        WHERE p.workspace_id = #{workspaceId}
+          AND m.deleted IS NULL
+        <if test="kwd != null and kwd != ''">
+            AND m.title LIKE '%' || #{kwd} || '%'
+        </if>
+    </select>
+
+    <select id="findMeetingsById" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
+       SELECT 
+            m.meeting_minute_id AS meetingMinuteId,
+            m.title,
+            m.content,
+            TO_CHAR(m.meeting, 'YYYY.MM.DD') AS meetingDate,
+            md.name AS authorName,
+            m.member_id AS memberId
+        FROM meeting_minutes m
+        JOIN projects p ON p.project_id = m.project_id
+        LEFT JOIN member_details md ON m.member_id = md.member_id
+        WHERE p.workspace_id = #{workspaceId}
+          AND m.meeting_minute_id = #{meetingMinuteId} 
+          AND m.deleted IS NULL
+    </select>
+
+    <update id="updateMeetings" parameterType="map">
+        UPDATE meeting_minutes
+        SET title = #{title},
+            content = #{content},
+            updated = SYSDATE
+        WHERE meeting_minute_id = #{meetingMinuteId}
+          AND deleted IS NULL
+          AND project_id IN (SELECT project_id FROM projects WHERE workspace_id = #{workspaceId})
+    </update>
+
+    <update id="deleteMeetings" parameterType="map">
+        UPDATE meeting_minutes
+        SET deleted = SYSDATE
+        WHERE meeting_minute_id = #{meetingMinuteId}
+          AND project_id IN (SELECT project_id FROM projects WHERE workspace_id = #{workspaceId})
+    </update>
+
+</mapper>

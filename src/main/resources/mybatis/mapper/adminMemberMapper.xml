@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.admin.mapper.AdminMemberMapper">
+
+	<select id="findAllMembers" resultType="com.tk.app.admin.domain.dto.AdminMemberDto">	
+		SELECT m.member_id, m.login_id, m.status, m.joined, d.name, d.email
+		FROM MEMBERS m
+		LEFT JOIN MEMBER_DETAILS d 
+		ON m.MEMBER_ID = d.MEMBER_ID
+		ORDER BY m.joined DESC;
+	</select>
+
+</mapper>

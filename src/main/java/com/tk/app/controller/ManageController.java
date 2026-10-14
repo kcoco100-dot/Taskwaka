@@ -227,13 +227,18 @@ public class ManageController {
 	// 회의록 페이지
 	@GetMapping("/meetings")
 	public String meetingsForm() {
-		return "manage/meetings";
+		return "manage/meeting";
 	}
 	
-	// 회의록 페이지
+	// 대쉬보드 페이지
 	@GetMapping("/pmDashboard")
 	public String pmDashboardForm() {
 		return "manage/pmDashboard";
 	}
 	
+	// 공지사항 조회
+	@GetMapping("/notice")
+	public String noticeList() {
+		return "manage/noticeList";
+	}
 }
