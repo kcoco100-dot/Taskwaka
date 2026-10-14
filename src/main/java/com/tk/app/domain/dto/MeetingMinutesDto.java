@@ -17,4 +17,10 @@ public class MeetingMinutesDto {
 	private String authorName; // 작성자 이름
 	
 	private int canModify; // 수정, 삭제 가능 여부 1=가능, 0=불가능
+	
+	// 회의록 등록에서 필요한 컬럼
+	private Long workspaceId; // 현재 워크 번호
+	private Long projectId; // 등록할 프로젝트 번호
+	private Long subTaskId; // 하위업무 번호
+	private Long memberId; // 로그인 회원 번호
 }

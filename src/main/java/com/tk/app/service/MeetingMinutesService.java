@@ -16,6 +16,22 @@ public class MeetingMinutesService {
 		this.meetingMinutesMapper = meetingMinutesMapper;
 	}
 	
+	// 워크 회의록 등록
+	public int insertMeetingMinutes(
+			long workspaceId, long projectId, long subTaskId, long memberId,
+			String title, String content) {
+		
+		MeetingMinutesDto meeting = new MeetingMinutesDto();
+		meeting.setWorkspaceId(workspaceId);
+		meeting.setProjectId(projectId);
+		meeting.setSubTaskId(subTaskId);
+		meeting.setMemberId(memberId);
+		meeting.setTitle(title);
+		meeting.setContent(content);
+		
+		return meetingMinutesMapper.insertMeetingMinutes(meeting);
+	}
+	
 	// 워크 회의록 목록 조회 및 검색
 	public List<MeetingMinutesDto> findMeetingMinutes(
 			long workspaceId, long memberID, String kwd, int offset, int size) {

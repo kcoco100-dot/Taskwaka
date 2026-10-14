@@ -245,6 +245,37 @@ public class Home2Controller {
 
 		return "home/meetingsDetail";
 	}
+	
+	// 회의록 등록
+	@PostMapping("meetingsIn")
+	public String insertMeetingMinutes(
+			@PathVariable("domainKey") String domainKey,
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("projectId") long projectId,
+			@RequestParam("subTaskId") long subTaskId,
+			@RequestParam("title") String title,
+			@RequestParam("content") String content,
+			HttpServletResponse response,
+			Model model) throws Exception {
+		
+			if (title.isBlank() || title.getBytes(StandardCharsets.UTF_8).length > 200 || content.isBlank()) {
+				response.sendError(400, "제목은 UTF-8 기준 200바이트 이내이며, 제목과 내용은 공백만 입력할 수 없습니다.");
+				return null;
+			}
+
+			int insertCount = 
+					meetingMinutesService.insertMeetingMinutes(
+							workspace.getWorkspaceId(), projectId, subTaskId, 
+							workspace.getMemberId(), title, content);
+			
+			// 등록 검사 결과 및 정상 반환
+			if(insertCount != 1) {
+				response.sendError(403, "선택한 프로젝트와 하위업무에는 회의록을 등록할 수 없습니다.");
+				return null;
+			}
+
+			return "redirect:/" + domainKey + "/home/meetings";
+	}
 
 	// HOME 회의록 수정 화면 조회
 	@GetMapping("/meetingsEdit")

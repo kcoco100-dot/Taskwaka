@@ -10,6 +10,9 @@ import com.tk.app.domain.dto.MeetingMinutesDto;
 @Mapper
 public interface MeetingMinutesMapper {
 	
+	// 회의록 등록
+	public int insertMeetingMinutes(MeetingMinutesDto meeting);
+	
 	// 업무 회의록 목록 조회
 	public List<MeetingMinutesDto> findMeetingMinutes(
 			@Param("workspaceId") long workspaceId,
