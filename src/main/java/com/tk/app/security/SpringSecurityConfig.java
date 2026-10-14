@@ -104,8 +104,12 @@ public class SpringSecurityConfig {
 						        throw new ServletException(
 						                "로그인 정보 저장 실패", e);
 						    }
-						    response.sendRedirect(
-						            request.getContextPath() + "/main");
+						    String target = authentication.getAuthorities().stream()
+						            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))
+						            ? "/admin"
+						            : "/main";
+
+						    response.sendRedirect(request.getContextPath() + target);
 						})
 						.failureHandler(new LoginFailureHandler(memberService)))
 
