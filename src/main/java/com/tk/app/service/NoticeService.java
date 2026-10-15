@@ -190,7 +190,82 @@ public class NoticeService {
 	}
 	
 	// 공지사항 수정
-	public int noticeEdit(long workspaceId, long noticeId, String title, String content) {
+	// 수정 시 삭제할 파일이 여러개일 수 있기 때문에 List 로
+	// deleteFileIds : 사용자가 삭제하려고 선택한 파일 목록
+	// files : 새로 첨부한 파일 목록
+	public int noticeEdit(
+			long workspaceId, long noticeId, String title, String content,
+			List<Long> deleteFileIds, List<MultipartFile> files) throws Exception {
+		
+		NoticeDto notice = noticeMapper.findWorkspaceDetailNotice(workspaceId, noticeId);
+		
+		if(notice == null) {
+			throw new Exception("수정할 공지가 없습니다.");
+		}
+		
+		// 현재 워크 공지에 속한 기존 파일 전체
+		List<NoticeFileDto> noticeFiles = noticeMapper.findWorkspaceFiles(workspaceId, noticeId);
+		// 번호 검사를 통과한 실제 삭제 대상 파일 목록
+		List<NoticeFileDto> deleteFiles = new ArrayList<>();
+		
+		if(deleteFileIds != null) {
+			for(Long deleteFileId : deleteFileIds) {
+				if(deleteFileId == null || deleteFileId <= 0) {
+					throw new Exception("삭제할 첨부파일 번호가 올바르지 않습니다.");
+				}
+				
+				// 삭제 요청에 같은 파일 번호가 두번 들어온 경우를 막기 위함
+				for(NoticeFileDto deleteFile : deleteFiles) {
+					if(deleteFileId.equals(deleteFile.getNoticeFileId())) {
+						throw new Exception("삭제할 첨부파일 번호가 중복되었습니다.");
+					}
+				}
+				
+				// found : 선택한 번호가 기존 파일 목록에 있었는지 확인하는 변수
+				boolean found = false;
+				
+				for(NoticeFileDto noticeFile : noticeFiles) {
+					// 삭제하려고 하는 파일이 기존 공지 파일 목록에 있는지 비교함
+					if(deleteFileId.equals(noticeFile.getNoticeFileId())) {
+						// 일치하는 파일을 dto 대상에 넣음
+						deleteFiles.add(noticeFile);
+						// 찾았다 라고 기록한다.
+						found = true;
+						break;
+					}
+				}
+				
+				if(!found) {
+					throw new Exception("현재 공지에 속하지 않는 첨부파일입니다.");
+				}
+			}
+		} 
+		
+		// 새 파일 검증 및 갯수 검사
+		String errorMessage = validateNoticeFiles(files);
+		// 정상 파일이 아닐때 에러 메시지
+		if(errorMessage != null) {
+			throw new Exception(errorMessage);
+		}
+		
+		// 새 파일 갯수를 계산할 함수
+		int newFileCount = 0;
+		
+		if(files != null) {
+			// 새로 업로드한 files 순회
+			for(MultipartFile file : files) {
+				// 파일이 존재하고, 비어있지 않을 때만 갯수를 증가시킴
+				if(file != null && !file.isEmpty()) {
+					newFileCount++;
+				}
+			}
+		}
+		
+		// 기존 5개중 2개를 삭제하고 새 파일 2개를 추가하면 5-2+2=5 이므로 통과
+		int totalFileCount = noticeFiles.size() - deleteFiles.size() + newFileCount;
+		if(totalFileCount > 5) {
+			throw new Exception("첨부파일은 5개까지만 등록할 수 있습니다.");
+		}
 		
 		return noticeMapper.noticeEdit(workspaceId, noticeId, title, content);
 	}

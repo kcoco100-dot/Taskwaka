@@ -30,6 +30,12 @@ public interface NoticeMapper {
 			@Param("title") String title, 
 			@Param("content") String content);
 	
+	// 공지 수정 시 파일삭제
+	public int deleteNoticeFile(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId,
+			@Param("noticeFileId") long noticeFileId);
+	
 	// 공지 삭제
 	public int deleteNotice(
 			@Param("workspaceId") long workspaceId,

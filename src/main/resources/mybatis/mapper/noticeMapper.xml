@@ -27,10 +27,14 @@
 	</insert>
 	
 	<!-- 공지사항 파일 첨부 등록 보기 -->
-	<!-- 공지사항 첨부파일 이름만 보여주는거라서 noticeId, originalName -->
+	<!-- 공지사항 파일 첨부 수정하기 -->
 	<select id="findWorkspaceFiles" resultType="com.tk.app.domain.dto.NoticeFileDto">
 		SELECT nf.notice_id AS "noticeId", 
-		       nf.original_name AS "originalName"
+			   nf.notice_file_id AS "noticeFileId",
+		       nf.original_name AS "originalName",
+		       nf.stored_name AS "storedName",
+		       nf.file_path AS "filePath",
+		       nf.file_size AS "fileSize"
 		FROM notice_files nf
 		JOIN notice n ON n.notice_id = nf.notice_id
 		WHERE n.workspace_id = #{workspaceId}
@@ -40,6 +44,23 @@
 		      AND n.deleted IS NULL
 		ORDER BY nf.notice_file_id
 	</select>
+	
+	<!-- 공지사항 수정 시 파일 삭제하기 -->
+	<delete id="deleteNoticeFile">
+		DELETE 
+		FROM notice_files
+		WHERE notice_file_id = #{noticeFileId}
+			 AND notice_id = #{noticeId}
+			 AND EXISTS (
+			 	 SELECT 1
+			 	 FROM notice 
+			 	 WHERE workspace_id = #{workspaceId}
+			 	 	AND notice_id = #{noticeId}
+			 	 	AND notice_type = 'WORKSPACE'
+			 	 	AND status = 1
+			 	 	AND deleted IS NULL
+	    )
+	</delete>
 
 	<!-- 공개된 워크 공지 목록 조회 -->
 	<select id="findWorkspaceNotice" resultType="com.tk.app.domain.dto.NoticeDto">

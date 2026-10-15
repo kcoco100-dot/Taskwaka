@@ -634,7 +634,7 @@ public class Home2Controller {
 
 		// updatedCount 에 수정된 행수를 담는다.
 		int updatedCount = noticeService.noticeEdit(
-				workspace.getWorkspaceId(), noticeId, title, content);
+				workspace.getWorkspaceId(), noticeId, title, content, null, null);
 
 		// 수정할 공지가 없을 경우
 		if (updatedCount == 0) {

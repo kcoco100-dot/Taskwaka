@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class NoticeFileDto {
+	private Long noticeFileId; // 공지 파일 번호
 	private Long noticeId; // 공지번호
 	private String originalName; // 사용자가 올린 원본 파일명
 	private String storedName; // 서버 파일명
