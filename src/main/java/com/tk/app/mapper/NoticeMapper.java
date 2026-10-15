@@ -22,6 +22,12 @@ public interface NoticeMapper {
 	// 공지 파일처리
 	public int insertNoticeFile(NoticeFileDto noticeFile);
 	
+	// 파일 다운로드 : 파일 한개 조회용
+	public NoticeFileDto findWorkspaceFile(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId,
+			@Param("noticeFileId") long noticeFileId);
+	
 	// 공지 수정
 	// 변경되는 값 : title, content
 	public int noticeEdit(

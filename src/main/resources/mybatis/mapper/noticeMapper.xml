@@ -45,6 +45,25 @@
 		ORDER BY nf.notice_file_id
 	</select>
 	
+	<!-- 공지사항 파일 다운로드 : 파일 한개 조회용 -->
+	<!-- 파일 하나만 조회하기 때문에 ORDER BY 필요없음 -->
+	<select id="findWorkspaceFile" resultType="com.tk.app.domain.dto.NoticeFileDto">
+		SELECT nf.notice_id AS "noticeId", 
+			   nf.notice_file_id AS "noticeFileId",
+		       nf.original_name AS "originalName",
+		       nf.stored_name AS "storedName",
+		       nf.file_path AS "filePath",
+		       nf.file_size AS "fileSize"
+		FROM notice_files nf
+		JOIN notice n ON n.notice_id = nf.notice_id
+		WHERE n.workspace_id = #{workspaceId}
+			  AND n.notice_id = #{noticeId}
+			  AND nf.notice_file_id = #{noticeFileId}
+		      AND n.notice_type = 'WORKSPACE'
+		      AND n.status = 1
+		      AND n.deleted IS NULL
+	</select>	
+	
 	<!-- 공지사항 수정 시 파일 삭제하기 -->
 	<delete id="deleteNoticeFile">
 		DELETE 
