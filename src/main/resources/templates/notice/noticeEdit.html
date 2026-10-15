@@ -19,7 +19,8 @@
                 <p class="page-description">공지사항의 내용을 수정하세요.</p>
             </div>
             
-			<form id="noticeEditForm" method="post" th:action="@{/{domainKey}/home/noticeEdit(domainKey=${domainKey})}">
+			<form id="noticeEditForm" method="post" enctype="multipart/form-data"
+				th:action="@{/{domainKey}/home/noticeEdit(domainKey=${domainKey})}">
 			    <input type="hidden" name="noticeId" th:value="${notice.noticeId}">
 			
 			    <div class="mb-3">
@@ -33,6 +34,22 @@
 			        <textarea id="noticeContent" name="content" class="form-control"
 			                  rows="12" required th:text="${notice.content}"></textarea>
 			    </div>
+			    
+				<p class="notice-attachments">
+				    첨부파일
+				    <span th:if="${#lists.isEmpty(noticeFile)}">첨부파일이 없습니다.</span>
+				    <span th:each="file : ${noticeFile}">
+				    		<span th:text="${file.originalName}">파일명</span>
+				    		<label>
+				    			<input type="checkbox" name="deleteFileIds" th:value="${file.noticeFileId}">
+				    			삭제
+				    		</label>
+				    	</span>
+				</p>
+				
+				<label>
+					<input type="file" name="files" multiple="multiple">
+				</label>
 			
 			    <div class="shell-actions">
 			        <button type="submit" class="shell-action shell-action-primary">

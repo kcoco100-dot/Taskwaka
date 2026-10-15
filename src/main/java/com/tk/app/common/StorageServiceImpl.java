@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,9 +25,11 @@ import com.tk.app.exception.StorageFileNotFoundException;
 
 import jakarta.servlet.ServletContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class StorageServiceImpl implements StorageService {
 	private final ServletContext servletContext;
 	private final FileManager fileManager;
@@ -58,6 +61,8 @@ public class StorageServiceImpl implements StorageService {
 	 */
 	@Override
 	public String uploadFileToServer(MultipartFile multiFile, String directoryPath) {
+		Path destinationFile = null;
+		
 		try {
 			if(multiFile == null || multiFile.isEmpty()) {
 				return null;
@@ -84,7 +89,7 @@ public class StorageServiceImpl implements StorageService {
 			  normalize() : 경로에서 .(현재 디렉토리) 또는 .. (상위 디렉토리)와 같은 특수한 요소들을 정리하여 경로를 정규화하는 역할
 			  toAbsolutePath() : 경로를 절대 경로로 변환하는 데 사용
 			*/
-			Path destinationFile = location.resolve(Paths.get(saveFilename))
+			destinationFile = location.resolve(Paths.get(saveFilename))
 					.normalize()
 					.toAbsolutePath();
 			
@@ -93,11 +98,22 @@ public class StorageServiceImpl implements StorageService {
 			
 			// 파일 경로를 Path로 처리하거나 복사할 때 추가적인 옵션(예: 덮어쓰기, 스트림 처리)이 필요할 때 사용
 			// 파일을 저장할 때 더 많은 제어가 필요하거나 복잡한 처리가 필요한 경우에 적합
-			Files.copy(multiFile.getInputStream(), destinationFile);
+			try(InputStream inputStream = multiFile.getInputStream()) {
+				Files.copy(inputStream, destinationFile);
+			}
 			
 	        return saveFilename;
 
 		} catch (Exception e) {
+			// 같은 이름의 기존 파일이 있어서 업로드에 실패할 경우 삭제를 건너 뛰도록
+			if(destinationFile != null && !(e instanceof FileAlreadyExistsException)) {
+				try {
+					Files.deleteIfExists(destinationFile);
+				} catch (Exception e2) {
+					log.error("불완전한 업로드 파일 정리 실패: " + destinationFile, e2);
+				}
+			}
+			
 			throw new StorageException("Failed to store file.", e);
 		}
 	}

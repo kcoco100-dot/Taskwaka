@@ -326,7 +326,17 @@ public class NoticeService {
 		
 		// 기존 파일 삭제용 반복문
 		for(NoticeFileDto deleteFile : deleteFiles) {
-			
+			// 실제 파일 삭제 처리
+			try {
+				boolean deleted = storageService.deleteFile(deleteFile.getFilePath(), deleteFile.getStoredName());
+				
+				if(!deleted) {
+					// 어떤 파일 삭제가 실패했는지 보여줌
+					log.error("첨부파일 정리 실패: " + deleteFile.getStoredName());
+				}
+			} catch (Exception e) {
+				log.error("첨부파일 삭제 중 오류가 발생했습니다.", e);
+			}
 		}
 		
 		return updatedCount;

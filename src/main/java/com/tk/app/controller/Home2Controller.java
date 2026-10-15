@@ -602,7 +602,11 @@ public class Home2Controller {
 		if (notice == null) {
 			throw new Exception("공지를 찾을 수 없습니다.");
 		}
-
+		
+		// 파일 목록 조회
+		List<NoticeFileDto> noticeFile = noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
+		
+		model.addAttribute("noticeFile", noticeFile);
 		model.addAttribute("notice", notice);
 
 		return "notice/noticeEdit";
@@ -615,7 +619,10 @@ public class Home2Controller {
 			@RequestAttribute("workspace") WorkspaceDto workspace, 
 			@RequestParam("noticeId") long noticeId,
 			@RequestParam("title") String title, 
-			@RequestParam("content") String content, Model model,
+			@RequestParam("content") String content,
+			@RequestParam(required = false, name = "files") List<MultipartFile> files,
+			@RequestParam(required = false, name = "deleteFileIds") List<Long> deleteFileIds,
+			Model model,
 			HttpServletResponse response) throws Exception {
 
 		// 제목 DB에 200자 이내로
@@ -626,15 +633,19 @@ public class Home2Controller {
 			notice.setTitle(title);
 			notice.setContent(content);
 
+			List<NoticeFileDto> noticeFile = noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
+			
 			model.addAttribute("notice", notice);
+			model.addAttribute("noticeFile", noticeFile);
 			model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
 
+			
 			return "notice/noticeEdit";
 		}
 
 		// updatedCount 에 수정된 행수를 담는다.
 		int updatedCount = noticeService.noticeEdit(
-				workspace.getWorkspaceId(), noticeId, title, content, null, null);
+				workspace.getWorkspaceId(), noticeId, title, content, deleteFileIds, files);
 
 		// 수정할 공지가 없을 경우
 		if (updatedCount == 0) {
