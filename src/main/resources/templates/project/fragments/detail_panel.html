@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<!-- ==========================================================================
+	     [공통 프래그먼트] 우측 오버레이 상세 패널 (업무 탭 / 간트차트 탭 / 캘린더 탭 공용)
+	     사용법: <aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
+	     ========================================================================== -->
+	<aside th:fragment="detailPanel" class="common-detail-panel" id="taskDetailSidePanel">
+		<link rel="stylesheet" th:href="@{/dist/css/project/detail_panel.css}">
+
+		<div class="pane-resizer-bar" id="paneResizerBar" title="좌우로 드래그하여 패널 너비 조절"></div>
+
+		<!-- 상단 바 -->
+		<div class="detail-top-nav">
+			<div style="display:flex; align-items:center; gap:8px;">
+				<span>🌿</span>
+				<span id="detailProjectTitle" th:text="${projectName != null ? projectName : 'Taskwaka 프로젝트'}">Taskwaka 프로젝트</span>
+				<span class="detail-type-chip" id="detailEntityTypeBadge">메인 업무</span>
+			</div>
+			<div style="display:flex; align-items:center; gap:6px;">
+				<!-- 하위업무일 때만 노출되는 삭제 버튼 -->
+				<button type="button" class="btn-detail-top-del" id="btnDetailDeleteSubtask" style="display:none;" onclick="requestDeleteCurrentSubTask()" title="하위업무 삭제">삭제</button>
+				<button type="button" class="detail-close-btn" onclick="closeDetailPanel()" title="닫기 (ESC)">✕</button>
+			</div>
+		</div>
+
+		<!-- 본문 스크롤 영역 -->
+		<div class="detail-content-scroll">
+			<!-- 담당자 메타 헤더 -->
+			<div class="detail-meta-header">
+				<div class="detail-author-box">
+					<div class="detail-avatar-badge" id="detailAuthorAvatar">담당</div>
+					<div>
+						<span class="detail-author-name" id="detailAuthorName">-</span>
+						<span class="detail-created-date" id="detailCreatedDate">-</span>
+					</div>
+				</div>
+				<div class="detail-header-tools">
+					<span class="readonly-notice-badge" id="detailReadonlyBadge" style="display:none;">조회 전용</span>
+				</div>
+			</div>
+
+			<!-- 업무/하위업무 제목 (우측 패널에서 실시간 수정) -->
+			<div class="detail-title-row">
+				<input type="text" class="detail-task-title-input" id="detailTaskTitle" value="" placeholder="제목을 입력하세요" onchange="onDetailFieldChange('title', this.value)">
+			</div>
+
+			<!-- 속성 카드 (상태, 담당자, 시작일, 마감일, 진척도) -->
+			<div class="detail-props-card">
+				<div class="detail-prop-row">
+					<span class="prop-label">상태</span>
+					<div>
+						<span class="badge-status badge-req" id="detailStatusBadge" onclick="cycleDetailStatus()">
+							<span id="detailStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
+						</span>
+					</div>
+				</div>
+
+				<div class="detail-prop-row">
+					<span class="prop-label">담당자</span>
+					<!-- 참여 인원(task_members / sub_task_members) 목록만 동적으로 바인딩 -->
+					<select class="inline-edit-select" id="detailAssigneeSelect" onchange="onDetailFieldChange('projectMemberId', this.value)">
+					</select>
+				</div>
+
+				<div class="detail-prop-row">
+					<span class="prop-label">시작일</span>
+					<input type="date" class="inline-edit-date" id="detailStartDate" onchange="onDetailFieldChange('startAt', this.value)">
+				</div>
+
+				<div class="detail-prop-row">
+					<span class="prop-label">마감일</span>
+					<input type="date" class="inline-edit-date" id="detailEndDate" onchange="onDetailFieldChange('endAt', this.value)">
+				</div>
+
+				<div class="detail-prop-row">
+					<span class="prop-label">진척도</span>
+					<div class="detail-progress-control">
+						<input type="range" id="detailProgressRange" min="0" max="100" step="5" value="0"
+						       oninput="document.getElementById('detailProgressLabel').textContent = this.value + '%'"
+						       onchange="onDetailFieldChange('progress', this.value)">
+						<span class="progress-val-text" id="detailProgressLabel">0%</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- 상세 내용 (실시간 저장) -->
+			<div class="detail-section-block">
+				<label class="detail-block-title" for="detailContentText">
+					<span>📄 상세 내용</span>
+				</label>
+				<textarea class="detail-desc-textarea" id="detailContentText" placeholder="업무에 대한 상세 내용을 입력해 주세요..." onchange="onDetailContentChange(this.value)"></textarea>
+			</div>
+
+			<!-- 첨부파일 -->
+			<div class="detail-section-block" id="detailAttachmentSection">
+				<div class="detail-block-title">
+					<span>📎 첨부파일</span>
+					<span style="font-size:11.5px; color:var(--text-muted);" id="attachedFileCount">(0)</span>
+				</div>
+				<div class="detail-file-dropzone" id="fileDropzone">
+					<div class="file-upload-trigger-row">
+						<span style="font-size:12px; color:var(--text-sub);">파일을 끌어다 놓거나 선택하세요</span>
+						<label class="btn-upload-attach">
+							<span>＋ 파일 첨부</span>
+							<input type="file" style="display:none;" onchange="handleFileUpload(this)">
+						</label>
+					</div>
+					<div class="file-list-box" id="attachedFileList"></div>
+				</div>
+			</div>
+
+			<!-- [메인 업무 선택 시 노출] 하위업무 목록 섹션 -->
+			<div class="detail-subtasks-section" id="detailSubtasksSection">
+				<div class="detail-section-Header-line">
+					<div class="detail-section-title">
+						<span>ㄴ 하위업무</span>
+						<span style="color:var(--text-muted); font-size:12px;" id="detailSubtaskCount">0</span>
+					</div>
+					<!-- 상위 메인 업무 담당자에게만 하위업무 추가 버튼 노출 -->
+					<button type="button" class="btn-detail-add-subtask" id="btnDetailAddSubtask" onclick="detailAddSubtaskClick()">＋ 하위업무 추가</button>
+				</div>
+				<div class="detail-subtask-box" id="detailSubtaskBox"></div>
+			</div>
+
+			<!-- ==========================================================================
+			     [하위업무 선택 시 노출] 일일 보고서 (Daily Report) 섹션
+			     - 하위업무 담당자 본인에게만 작성 폼 노출
+			     - 상급자 확인 전(modifiable == true)까지만 수정/삭제 버튼 활성화
+			     ========================================================================== -->
+			<div class="detail-daily-report-section" id="detailDailyReportSection" style="display:none;">
+				<div class="detail-section-Header-line">
+					<div class="detail-section-title">
+						<span>📝 일일 업무 보고서</span>
+						<span style="color:var(--text-muted); font-size:12px;" id="dailyReportCount">(0)</span>
+					</div>
+				</div>
+
+				<!-- 하위업무 담당자 전용 작성/수정 폼 -->
+				<div class="daily-report-form-card" id="dailyReportWriteFormBox" style="display:none;">
+					<div class="report-form-header">
+						<span id="dailyReportFormTitle">새 일일 보고서 작성</span>
+						<button type="button" class="btn-cancel-edit-report" id="btnCancelReportEdit" style="display:none;" onclick="resetDailyReportForm()">작성 취소</button>
+					</div>
+					<input type="hidden" id="editingDailyReportId" value="">
+					<div class="report-form-row">
+						<div class="report-field-item">
+							<label>보고일자</label>
+							<input type="date" class="inline-edit-date" id="dailyReportDateInput">
+						</div>
+						<div class="report-field-item">
+							<label>달성 진척도(%)</label>
+							<input type="number" class="inline-edit-input" id="dailyReportProgressInput" min="0" max="100" step="5" value="0" style="width:75px;">
+						</div>
+					</div>
+					<textarea class="detail-desc-textarea" id="dailyReportContentInput" style="min-height:80px;" placeholder="오늘 진행한 하위업무 내용과 특이사항을 보고해 주세요..."></textarea>
+					<div style="display:flex; justify-content:flex-end;">
+						<button type="button" class="btn-submit-daily-report" id="btnSubmitDailyReport" onclick="submitDailyReportForm()">보고서 등록</button>
+					</div>
+				</div>
+
+				<!-- 등록된 일일 보고서 목록 -->
+				<div class="daily-report-list-box" id="dailyReportListBox"></div>
+			</div>
+
+		</div>
+
+		<script th:src="@{/dist/js/project/detail_panel.js}"></script>
+	</aside>
+</body>
+</html>

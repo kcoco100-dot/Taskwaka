@@ -1,44 +1,232 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-  <div th:fragment="content">
-    <style>
-      .gantt-board { background: #FFFFFF; border: 1px solid var(--border-main); border-radius: 14px; overflow: hidden; display: flex; box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03); }
-      .gantt-tasks { width: 320px; border-right: 1px solid var(--border-main); background: #FFFFFF; }
-      .gantt-row-head { height: 44px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border-main); padding: 12px 16px; font-size: 13px; font-weight: 700; color: var(--text-main); }
-      .gantt-row { height: 44px; border-bottom: 1px solid var(--border-main); padding: 12px 16px; font-size: 13px; color: var(--text-main); display: flex; align-items: center; }
-      .gantt-canvas { flex: 1; overflow-x: auto; }
-      .gantt-timeline-header { height: 44px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border-main); display: flex; }
-      .day-col { width: 100px; padding: 12px 10px; font-size: 12px; color: var(--text-sub); border-right: 1px solid var(--border-main); text-align: center; }
-      .day-col.today { background: var(--primary-green-light); color: var(--primary-green); font-weight: 700; }
-      .timeline-track { height: 44px; border-bottom: 1px solid var(--border-main); position: relative; display: flex; align-items: center; }
-      .gantt-bar-item { position: absolute; height: 18px; border-radius: 6px; font-size: 11px; font-weight: 600; color: #FFFFFF; display: flex; align-items: center; padding-left: 8px; }
-    </style>
+	<div th:fragment="content">
 
-    <div class="gantt-board">
-      <div class="gantt-tasks">
-        <div class="gantt-row-head">업무명</div>
-        <div class="gantt-row">Taskwaka 사용 가이드 영상 🎬</div>
-        <div class="gantt-row">프로필 사진 등록 👩‍💼</div>
-      </div>
+		<!-- 간트차트 전용 외부 CSS 연결 -->
+		<link rel="stylesheet" th:href="@{/dist/css/project/gantt.css}">
 
-      <div class="gantt-canvas">
-        <div style="width: 600px;">
-          <div class="gantt-timeline-header">
-            <div class="day-col">09-30</div>
-            <div class="day-col today">10-01 (오늘)</div>
-            <div class="day-col">10-02</div>
-            <div class="day-col">10-03</div>
-          </div>
-          <div class="timeline-track">
-            <div class="gantt-bar-item" style="left: 10px; width: 180px; background: var(--accent-green);">진행중 (50%)</div>
-          </div>
-          <div class="timeline-track">
-            <div class="gantt-bar-item" style="left: 100px; width: 140px; background: var(--primary-green-dark);">완료</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+		<!-- 상위 래퍼 -->
+		<div class="gantt-split-view-wrapper" id="ganttSplitViewWrapper">
+
+			<!-- [상단/본문] 간트차트 메인 페이지 -->
+			<div class="gantt-main-page" id="ganttMainPage">
+
+				<!-- 상단 컨트롤 툴바 -->
+				<div class="gantt-toolbar">
+					<div class="gantt-toolbar-left">
+						<span class="gantt-toolbar-title">📅 프로젝트 일정 간트차트</span>
+						<div class="gantt-legend-group">
+							<span class="legend-item"><i class="dot-main"></i>메인 업무</span>
+							<span class="legend-item"><i class="dot-sub"></i>하위 업무</span>
+							<span class="legend-item"><i class="dot-today"></i>오늘(Today)</span>
+						</div>
+					</div>
+					<div class="gantt-toolbar-right">
+						<button type="button" class="btn-gantt-tool" onclick="scrollToToday()">오늘로 이동</button>
+						<button type="button" class="btn-gantt-tool" onclick="expandAllGanttGroups(true)">전체 펼치기</button>
+						<button type="button" class="btn-gantt-tool" onclick="expandAllGanttGroups(false)">전체 접기</button>
+					</div>
+				</div>
+
+				<!-- 간트차트 보드 (좌측 업무 트리 + 우측 타임라인 그리드) -->
+				<div class="gantt-board-container">
+
+					<!-- [좌측] 업무/하위업무 목록 영역 -->
+					<div class="gantt-left-pane" id="ganttLeftPane">
+						<div class="gantt-left-header">
+							<div class="col-g-name">업무명</div>
+							<div class="col-g-status">상태</div>
+							<div class="col-g-period">일정 기간</div>
+						</div>
+
+						<div class="gantt-left-body" id="ganttLeftBody">
+							<!-- 서버 사이드 Thymeleaf 데이터가 있을 때 렌더링, 없으면 JS에서 기본/API 렌더링 -->
+							<th:block th:if="${tasks != null and !#lists.isEmpty(tasks)}">
+								<th:block th:each="task : ${tasks}">
+									<!-- 메인 업무 행 -->
+									<div class="gantt-tree-row main-row"
+									     th:attr="data-type='task', data-id=${task.taskId}, data-parent-id='', data-start=${task.startAt}, data-end=${task.endAt}, data-progress=${task.progress != null ? task.progress : 0}, data-status=${task.status != null ? task.status : 0}, data-title=${task.title}"
+									     onclick="onGanttItemClick('task', this.getAttribute('data-id'), this)">
+										<div class="col-g-name">
+											<span class="btn-gantt-toggle"
+											      th:if="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}"
+											      onclick="event.stopPropagation(); toggleGanttSubRows(this)">－</span>
+											<span class="btn-gantt-toggle-empty"
+											      th:unless="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}"></span>
+											<span class="gantt-row-title" th:text="${task.title}">메인 업무명</span>
+										</div>
+										<div class="col-g-status">
+											<span class="badge-status"
+											      th:classappend="${task.status == 1 or task.status == 3} ? 'badge-done' : (${task.status == 2} ? 'badge-feedback' : (${task.status == 4} ? 'badge-hold' : 'badge-req'))"
+											      th:text="${task.status == 1 ? '● 진행' : (task.status == 2 ? '● 피드백' : (task.status == 3 ? '● 완료' : (task.status == 4 ? '● 보류' : '● 요청')))}">● 요청</span>
+										</div>
+										<div class="col-g-period" th:text="${(task.startAt != null ? task.startAt : '-') + ' ~ ' + (task.endAt != null ? task.endAt : '-')}">2026-10-01 ~ 2026-10-15</div>
+									</div>
+
+									<!-- 하위 업무 행 -->
+									<th:block th:if="${task.subTasks != null}">
+										<div class="gantt-tree-row sub-row"
+										     th:each="sub : ${task.subTasks}"
+										     th:attr="data-type='subtask', data-id=${sub.subTaskId}, data-parent-id=${task.taskId}, data-start=${sub.startAt}, data-end=${sub.endAt}, data-progress=${sub.progress != null ? sub.progress : 0}, data-status=${sub.status != null ? sub.status : 0}, data-title=${sub.title}"
+										     onclick="onGanttItemClick('subtask', this.getAttribute('data-id'), this)">
+											<div class="col-g-name indent-sub">
+												<span class="sub-branch-icon">ㄴ</span>
+												<span class="gantt-row-title" th:text="${sub.title}">하위 업무명</span>
+											</div>
+											<div class="col-g-status">
+												<span class="badge-status"
+												      th:classappend="${sub.status == 1 or sub.status == 3} ? 'badge-done' : (${sub.status == 2} ? 'badge-feedback' : (${sub.status == 4} ? 'badge-hold' : 'badge-req'))"
+												      th:text="${sub.status == 1 ? '● 진행' : (sub.status == 2 ? '● 피드백' : (sub.status == 3 ? '● 완료' : (sub.status == 4 ? '● 보류' : '● 요청')))}">● 요청</span>
+											</div>
+											<div class="col-g-period" th:text="${(sub.startAt != null ? sub.startAt : '-') + ' ~ ' + (sub.endAt != null ? sub.endAt : '-')}">2026-10-02 ~ 2026-10-10</div>
+										</div>
+									</th:block>
+								</th:block>
+							</th:block>
+						</div>
+					</div>
+
+					<!-- [우측] 타임라인 차트 영역 -->
+					<div class="gantt-right-pane" id="ganttRightPane">
+						<!-- 상단 월/일자 타임라인 헤더 (JS에서 동적 렌더링) -->
+						<div class="gantt-timeline-header" id="ganttTimelineHeader">
+							<div class="gantt-month-row" id="ganttMonthRow"></div>
+							<div class="gantt-day-row" id="ganttDayRow"></div>
+						</div>
+
+						<!-- 타임라인 바 그리드 본문 (JS에서 동적 렌더링) -->
+						<div class="gantt-timeline-body" id="ganttTimelineBody">
+							<div class="gantt-today-line" id="ganttTodayLine" title="오늘 (Today)"></div>
+							<div class="gantt-bars-container" id="ganttBarsContainer"></div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<!-- ==========================================================================
+			     [우측 오버레이] 일정 상세 패널 (일정 바 또는 목록 행 클릭 시 오픈)
+			     ========================================================================== -->
+			<aside class="gantt-detail-panel" id="ganttDetailSidePanel">
+				<div class="pane-resizer-bar" id="ganttPaneResizerBar" title="좌우로 드래그하여 패널 너비 조절"></div>
+
+				<div class="detail-top-nav">
+					<div style="display:flex; align-items:center; gap:8px;">
+						<span>🌿</span>
+						<span id="ganttDetailProjectTitle" th:text="${projectName != null ? projectName : 'Taskwaka 시작가이드'}">Taskwaka 시작가이드</span>
+						<span class="detail-type-chip" id="ganttDetailTypeBadge">메인 업무</span>
+					</div>
+					<button type="button" class="detail-close-btn" onclick="closeGanttDetailPanel()" title="닫기 (ESC)">✕</button>
+				</div>
+
+				<div class="detail-content-scroll">
+					<!-- 작성자 및 생성일 메타 헤더 -->
+					<div class="detail-meta-header">
+						<div class="detail-author-box">
+							<div class="detail-avatar-badge" id="ganttDetailAuthorAvatar">담당</div>
+							<div>
+								<span class="detail-author-name" id="ganttDetailAuthorName">담당 멤버</span>
+								<span class="detail-created-date" id="ganttDetailCreatedDate">-</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- 일정(업무/하위업무) 제목 실시간 수정 -->
+					<div class="detail-title-row">
+						<input type="text" class="detail-task-title-input" id="ganttDetailTitleInput" value="" placeholder="일정 제목을 입력하세요" onchange="onGanttDetailFieldChange('title', this.value)">
+					</div>
+
+					<!-- 주요 속성 카드 (상태, 담당자, 시작일, 마감일, 진척도) -->
+					<div class="detail-props-card">
+						<div class="detail-prop-row">
+							<span class="prop-label">상태</span>
+							<div>
+								<span class="badge-status badge-req" id="ganttDetailStatusBadge" onclick="cycleGanttDetailStatus()">
+									<span id="ganttDetailStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
+								</span>
+							</div>
+						</div>
+
+						<div class="detail-prop-row">
+							<span class="prop-label">담당자</span>
+							<select class="inline-edit-select" id="ganttDetailAssigneeSelect" onchange="onGanttDetailFieldChange('projectMemberId', this.value)">
+								<option value="1">박혜림</option>
+								<option value="2">김철수</option>
+								<option value="3">이영희</option>
+							</select>
+						</div>
+
+						<div class="detail-prop-row">
+							<span class="prop-label">시작일</span>
+							<input type="date" class="inline-edit-date" id="ganttDetailStartDate" onchange="onGanttDetailFieldChange('startAt', this.value)">
+						</div>
+
+						<div class="detail-prop-row">
+							<span class="prop-label">마감일</span>
+							<input type="date" class="inline-edit-date" id="ganttDetailEndDate" onchange="onGanttDetailFieldChange('endAt', this.value)">
+						</div>
+
+						<div class="detail-prop-row">
+							<span class="prop-label">진척도</span>
+							<div class="detail-progress-control">
+								<input type="range" id="ganttDetailProgressRange" min="0" max="100" step="5" value="0"
+								       oninput="document.getElementById('ganttDetailProgressLabel').textContent = this.value + '%'"
+								       onchange="onGanttDetailFieldChange('progress', this.value)">
+								<span class="progress-val-text" id="ganttDetailProgressLabel">0%</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- 상세 내용 -->
+					<div class="detail-section-block">
+						<label class="detail-block-title" for="ganttDetailContentText">
+							<span>📄 상세 내용</span>
+						</label>
+						<textarea class="detail-desc-textarea" id="ganttDetailContentText" placeholder="일정에 대한 상세 내용을 입력해 주세요..." onchange="onGanttDetailContentChange(this.value)"></textarea>
+					</div>
+
+					<!-- 첨부파일 -->
+					<div class="detail-section-block">
+						<div class="detail-block-title">
+							<span>📎 첨부파일</span>
+							<span style="font-size:11.5px; color:var(--text-muted);" id="ganttAttachedFileCount">(0)</span>
+						</div>
+						<div class="detail-file-dropzone">
+							<div class="file-upload-trigger-row">
+								<span style="font-size:12px; color:var(--text-sub);">파일을 끌어다 놓거나 선택하세요</span>
+								<label class="btn-upload-attach">
+									<span>＋ 파일 첨부</span>
+									<input type="file" style="display:none;" onchange="handleGanttFileUpload(this)">
+								</label>
+							</div>
+							<div class="file-list-box" id="ganttAttachedFileList"></div>
+						</div>
+					</div>
+
+					<!-- 하위업무 목록 섹션 (메인 업무 선택 시에만 노출) -->
+					<div class="detail-subtasks-section" id="ganttDetailSubtasksSection">
+						<div class="detail-section-title">
+							<span>ㄴ 하위업무 일정</span>
+							<span style="color:var(--text-muted); font-size:12px;" id="ganttDetailSubtaskCount">0</span>
+						</div>
+						<div class="detail-subtask-box" id="ganttDetailSubtaskBox"></div>
+					</div>
+				</div>
+			</aside>
+
+		</div>
+
+		<!-- Thymeleaf 전역 변수 바인딩 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
+			const currentProjectId = /*[[${projectId}]]*/ 1;
+			/*]]>*/
+		</script>
+
+		<!-- 간트차트 전용 외부 JS 연결 -->
+		<script th:src="@{/dist/js/project/gantt.js}"></script>
+	</div>
 </body>
 </html>
