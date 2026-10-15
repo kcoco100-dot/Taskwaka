@@ -2,34 +2,24 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
 	<div th:fragment="content">
-
-		<!-- 분리된 CSS 외부 파일 연결 -->
 		<link rel="stylesheet" th:href="@{/dist/css/project/task.css}">
 
-		<!-- 상위 래퍼 -->
 		<div class="task-split-view-wrapper" id="taskSplitViewWrapper">
-
-			<!-- [좌측] 업무 목록 페이지 (그룹 구조 완전 제거) -->
 			<div class="task-tree-page" id="taskTreeMainPage">
 				<div class="task-scroll-wrapper">
-
-					<!-- 최상단 공통 컬럼 헤더 (9개 열) -->
 					<ul class="task-grid-header task-grid-columns">
-						<li>업무명</li>
+						<li>업무 / 하위업무명</li>
 						<li>상태</li>
 						<li>담당자</li>
 						<li>시작일</li>
 						<li>마감일</li>
 						<li>진척도</li>
-						<li>작성자</li>
 						<li>등록일</li>
 						<li>수정일</li>
 					</ul>
 
-					<!-- 단일 업무 목록 테이블 -->
 					<div class="task-box-inner">
 						<ul class="task-tree-list" id="mainTaskList">
-							<!-- 서버 사이드 Thymeleaf 목록 렌더링 -->
 							<th:block th:if="${tasks != null}">
 								<th:block th:each="task : ${tasks}">
 									<li th:replace="~{project/fragments/task_items :: mainTaskItem}"></li>
@@ -37,142 +27,34 @@
 							</th:block>
 						</ul>
 					</div>
-
-					<div class="btn-add-task-row" onclick="requestCreateMainTask()">＋ 새 업무 추가</div>
-
 				</div>
 			</div>
 
-			<!-- [우측] 오버레이 상세 패널 -->
-			<aside class="task-detail-panel" id="taskDetailSidePanel">
-				<div class="pane-resizer-bar" id="paneResizerBar" title="좌우로 드래그하여 패널 너비 조절"></div>
-
-				<div class="detail-top-nav">
-					<div style="display:flex; align-items:center; gap:6px;">
-						<span>🌿</span>
-						<span id="detailProjectTitle" th:text="${projectName != null ? projectName : 'Taskwaka 시작가이드'}">Taskwaka 시작가이드</span>
-					</div>
-					<button type="button" class="detail-close-btn" onclick="closeDetailPanel()" title="닫기 (ESC)">✕</button>
-				</div>
-
-				<div class="detail-content-scroll">
-					<div class="detail-meta-header">
-						<div class="detail-author-box">
-							<div class="detail-avatar-badge" id="detailAuthorAvatar">혜림</div>
-							<div>
-								<span class="detail-author-name" id="detailAuthorName">박혜림</span>
-								<span class="detail-created-date" id="detailCreatedDate">-</span>
-							</div>
-						</div>
-						<div class="detail-header-tools">
-							<button type="button" class="btn-link-action" onclick="alert('피드 게시물로 이동합니다.');">게시글 바로가기 ↗</button>
-						</div>
-					</div>
-
-					<div class="detail-title-row">
-						<input type="text" class="detail-task-title-input" id="detailTaskTitle" value="" onchange="onDetailTitleChange(this.value)">
-					</div>
-
-					<div class="detail-prop-row">
-						<span class="prop-label">상태</span>
-						<div style="position:relative;">
-							<span class="badge-status badge-req" id="detailStatusBadge" onclick="cycleDetailStatus(this)">
-								<span id="detailStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
-							</span>
-						</div>
-					</div>
-
-					<div>
-						<button type="button" class="btn-expand-more-props" onclick="toggleExtendedProps(this)">
-							<span id="extendPropsIcon">＋</span> 추가 항목 보기
-						</button>
-						<div class="detail-extended-props" id="extendedPropsContainer">
-							<div class="detail-prop-row">
-								<span class="prop-label">담당자</span>
-								<select class="inline-edit-select" id="detailAssigneeSelect">
-									<option value="박혜림" selected>박혜림</option>
-									<option value="김철수">김철수</option>
-									<option value="이영희">이영희</option>
-									<option value="-">-</option>
-								</select>
-							</div>
-							<div class="detail-prop-row">
-								<span class="prop-label">시작일</span>
-								<input type="date" class="inline-edit-date" id="detailStartDate" onchange="onDetailDateChange('startAt', this.value)">
-							</div>
-							<div class="detail-prop-row">
-								<span class="prop-label">마감일</span>
-								<input type="date" class="inline-edit-date" id="detailEndDate" onchange="onDetailDateChange('endAt', this.value)">
-							</div>
-						</div>
-					</div>
-
-					<!-- 상세 내용 -->
-					<div class="detail-section-block">
-						<label class="detail-block-title" for="detailContentText">
-							<span>📄 상세 내용</span>
-						</label>
-						<textarea class="detail-desc-textarea" id="detailContentText" placeholder="업무에 대한 상세한 설명과 가이드를 입력해 주세요..." onchange="onDetailContentChange(this.value)"></textarea>
-					</div>
-
-					<!-- 파일 첨부 -->
-					<div class="detail-section-block">
-						<div class="detail-block-title">
-							<span>📎 첨부파일</span>
-							<span style="font-size:11.5px; color:var(--text-muted);" id="attachedFileCount">(0)</span>
-						</div>
-						<div class="detail-file-dropzone" id="fileDropzone">
-							<div class="file-upload-trigger-row">
-								<span style="font-size:12px; color:var(--text-sub);">파일을 끌어다 놓거나 선택하세요</span>
-								<label class="btn-upload-attach">
-									<span>＋ 파일 첨부</span>
-									<input type="file" style="display:none;" onchange="handleFileUpload(this)">
-								</label>
-							</div>
-							<div class="file-list-box" id="attachedFileList"></div>
-						</div>
-					</div>
-
-					<!-- 하위업무 섹션 -->
-					<div class="detail-subtasks-section">
-						<div class="detail-section-title">
-							<span>ㄴ 하위업무</span>
-							<span style="color:var(--text-muted); font-size:12px;" id="detailSubtaskCount">0</span>
-						</div>
-						<div class="detail-subtask-box" id="detailSubtaskBox"></div>
-						<button type="button" class="btn-detail-add-subtask" onclick="detailAddSubtaskClick()">＋ 하위업무 추가</button>
-					</div>
-				</div>
-			</aside>
+			<!-- 공통 우측 상세 패널 Include -->
+			<aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
 		</div>
 
-		<!-- ==========================================================================
-       [모달 1] 오버레이 상세 패널 디자인을 계승한 업무 / 하위업무 등록 모달
-       ========================================================================== -->
+		<!-- 하위업무 등록 모달 -->
 		<div class="custom-modal-backdrop" id="taskCreateModal" onclick="handleCreateBackdropClick(event)">
 			<div class="task-create-modal-card">
-				<!-- 상단 헤더 바 (상세 패널과 동일한 웜 베이지 헤더) -->
 				<div class="detail-top-nav">
 					<div style="display:flex; align-items:center; gap:6px;">
 						<span>🌿</span>
-						<span id="createModalHeaderTitle">새 업무 등록</span>
+						<span id="createModalHeaderTitle">새 하위업무 등록</span>
 					</div>
 					<button type="button" class="detail-close-btn" onclick="closeCreateTaskModal()" title="닫기 (ESC)">✕</button>
 				</div>
 
-				<!-- 모달 본문 -->
 				<div class="create-modal-body">
-					<!-- 제목 입력 (필수) -->
 					<div class="detail-title-row">
-						<input type="text" class="create-title-input" id="createTaskTitleInput" placeholder="업무 제목을 입력하세요 *">
+						<input type="text" class="create-title-input" id="createTaskTitleInput" placeholder="하위업무 제목을 입력하세요 *">
 					</div>
 
-					<!-- 주요 속성 박스 (상태, 담당자 필수, 시작일/마감일) -->
 					<div class="create-props-card">
 						<div class="detail-prop-row">
 							<span class="prop-label">상태</span>
 							<div>
-								<span class="badge-status badge-req" id="createStatusBadge" onclick="cycleCreateModalStatus()" title="클릭하여 상태 변경">
+								<span class="badge-status badge-req" id="createStatusBadge" onclick="cycleCreateModalStatus()">
 									<span id="createStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
 								</span>
 							</div>
@@ -180,11 +62,7 @@
 
 						<div class="detail-prop-row">
 							<span class="prop-label">담당자<span class="req-star">*</span></span>
-							<select class="inline-edit-select" id="createAssigneeSelect" style="width: 150px; padding: 4px 8px;">
-								<option value="1" selected>박혜림</option>
-								<option value="2">김철수</option>
-								<option value="3">이영희</option>
-							</select>
+							<select class="inline-edit-select" id="createAssigneeSelect" style="width: 180px; padding: 5px 8px;"></select>
 						</div>
 
 						<div class="detail-prop-row">
@@ -198,75 +76,45 @@
 						</div>
 					</div>
 
-					<!-- 상세 내용 입력 (필수 - NOT NULL 대응) -->
 					<div class="detail-section-block">
 						<label class="detail-block-title" for="createTaskContentInput">
 							<span>📄 상세 내용<span class="req-star">*</span></span>
 						</label>
-						<textarea class="detail-desc-textarea" id="createTaskContentInput" style="min-height: 130px;" placeholder="업무에 대한 상세한 설명과 가이드를 입력해 주세요 (필수 입력)..."></textarea>
-					</div>
-
-					<!-- 파일 첨부 (상세 패널과 동일한 디자인) -->
-					<div class="detail-section-block">
-						<div class="detail-block-title">
-							<span>📎 첨부파일</span>
-							<span style="font-size:11.5px; color:var(--text-muted);" id="createAttachedFileCount">(0)</span>
-						</div>
-						<div class="detail-file-dropzone" id="createFileDropzone">
-							<div class="file-upload-trigger-row">
-								<span style="font-size:12px; color:var(--text-sub);">파일을 끌어다 놓거나 선택하세요</span>
-								<label class="btn-upload-attach">
-									<span>＋ 파일 첨부</span>
-									<input type="file" id="createTaskFileInput" multiple style="display:none;">
-								</label>
-							</div>
-							<div class="file-list-box" id="createAttachedFileList"></div>
-						</div>
+						<textarea class="detail-desc-textarea" id="createTaskContentInput" style="min-height: 120px;" placeholder="하위업무에 대한 상세 설명을 입력해 주세요..."></textarea>
 					</div>
 				</div>
 
-				<!-- 하단 액션 푸터 -->
 				<div class="create-modal-footer">
 					<button type="button" class="btn-modal-cancel" onclick="closeCreateTaskModal()">취소</button>
-					<button type="button" class="btn-modal-submit" onclick="submitCreateTaskModal()">등록하기</button>
+					<button type="button" class="btn-modal-submit" onclick="submitCreateSubTaskModal()">하위업무 등록</button>
 				</div>
 			</div>
 		</div>
 
-		<!-- ==========================================================================
-       [모달 2] 삭제 확인 모달
-       ========================================================================== -->
+		<!-- 삭제 확인 모달 -->
 		<div class="custom-modal-backdrop" id="deleteConfirmModal" onclick="handleBackdropClick(event)">
 			<div class="custom-modal-card">
 				<div class="modal-header-area">
-					<div class="modal-icon-badge">
-						<svg style="width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;" viewBox="0 0 24 24">
-							<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-							<line x1="12" y1="9" x2="12" y2="13"></line>
-							<line x1="12" y1="17" x2="12.01" y2="17"></line>
-						</svg>
-					</div>
+					<div class="modal-icon-badge">⚠️</div>
 					<div class="modal-title-group">
-						<div class="modal-main-title" id="modalTargetTitle">항목 삭제 확인</div>
-						<div class="modal-desc-text" id="modalDescNotice">선택한 항목을 영구 삭제하시겠습니까?</div>
+						<div class="modal-main-title" id="modalTargetTitle">하위업무 삭제 확인</div>
+						<div class="modal-desc-text" id="modalDescNotice">선택한 하위업무를 영구 삭제하시겠습니까?</div>
 					</div>
 				</div>
 				<div class="modal-actions-area">
 					<button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">취소</button>
-					<button type="button" class="btn-modal-confirm" id="btnModalConfirmDelete" onclick="executeConfirmedDelete()">삭제하기</button>
+					<button type="button" class="btn-modal-confirm" onclick="executeConfirmedDelete()">삭제하기</button>
 				</div>
 			</div>
 		</div>
 
-		<!-- Thymeleaf 인라인 전역 변수 설정 -->
 		<script th:inline="javascript">
 			/*<![CDATA[*/
 			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
 			const currentProjectId = /*[[${projectId}]]*/ 1;
+			const currentProjectMemberId = /*[[${currentProjectMemberId}]]*/ 1;
 			/*]]>*/
 		</script>
-
-		<!-- 분리된 JS 외부 파일 연결 -->
 		<script th:src="@{/dist/js/project/task.js}"></script>
 	</div>
 </body>

@@ -1,23 +1,40 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.TaskMapper">
 
-    <!-- 1. 프로젝트 내 전체 업무 목록 -->
-    <select id="selectTaskListByProject" resultType="com.tk.app.domain.dto.TaskDto">
-        SELECT 
-            t.task_id AS taskId,
-            t.project_id AS projectId,
-            t.project_member_id AS projectMemberId,
-            NVL(md.name, '미지정') AS memberName,
-            t.title AS title,
-            t.content AS content,
-            t.task_level AS taskLevel,
-            TO_CHAR(t.start_at, 'YYYY-MM-DD') AS startAt,
-            TO_CHAR(t."END", 'YYYY-MM-DD') AS endAt,
-            t.status AS status,
-            t.progress AS progress,
+    <!-- 메인 업무 ResultMap (하위업무 컬렉션 포함) -->
+    <resultMap id="TaskWithSubTasksMap" type="com.tk.app.domain.dto.TaskDto">
+        <id property="taskId" column="task_id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="projectMemberId" column="project_member_id"/>
+        <result property="assigneeName" column="assignee_name"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content" jdbcType="CLOB" javaType="java.lang.String"/>
+        <result property="taskLevel" column="task_level"/>
+        <result property="startAt" column="start_at"/>
+        <result property="endAt" column="end_at"/>
+        <result property="status" column="status"/>
+        <result property="progress" column="progress"/>
+        <result property="created" column="created"/>
+        <result property="updated" column="updated"/>
+        <collection property="subTasks" ofType="com.tk.app.domain.dto.SubTaskDto"
+                    column="task_id" select="selectSubTasksByTaskId"/>
+    </resultMap>
+
+    <!-- 1. 프로젝트별 메인 업무 목록 조회 -->
+    <select id="selectTasksByProjectId" resultMap="TaskWithSubTasksMap">
+        SELECT
+            t.task_id,
+            t.project_id,
+            t.project_member_id,
+            NVL(md.name, '담당자#' || t.project_member_id) AS assignee_name,
+            t.title,
+            t.content,
+            t.task_level,
+            TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_at,
+            TO_CHAR(t."END", 'YYYY-MM-DD') AS end_at,
+            t.status,
+            t.progress,
             TO_CHAR(t.created, 'YYYY-MM-DD HH24:MI') AS created,
             TO_CHAR(t.updated, 'YYYY-MM-DD HH24:MI') AS updated
         FROM tasks t
@@ -26,23 +43,47 @@
         LEFT JOIN member_details md ON wm.member_id = md.member_id
         WHERE t.project_id = #{projectId}
           AND t.deleted IS NULL
-        ORDER BY t.task_level DESC, t.task_id ASC
+        ORDER BY t.task_id ASC
     </select>
 
-    <!-- 2. 업무별 하위 업무 목록 조회 -->
-    <select id="selectSubTaskListByTask" resultType="com.tk.app.domain.dto.SubTaskDto">
-        SELECT 
+    <!-- 2. 메인 업무 단건 상세 조회 -->
+    <select id="selectTaskById" resultMap="TaskWithSubTasksMap">
+        SELECT
+            t.task_id,
+            t.project_id,
+            t.project_member_id,
+            NVL(md.name, '담당자#' || t.project_member_id) AS assignee_name,
+            t.title,
+            t.content,
+            t.task_level,
+            TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_at,
+            TO_CHAR(t."END", 'YYYY-MM-DD') AS end_at,
+            t.status,
+            t.progress,
+            TO_CHAR(t.created, 'YYYY-MM-DD HH24:MI') AS created,
+            TO_CHAR(t.updated, 'YYYY-MM-DD HH24:MI') AS updated
+        FROM tasks t
+        LEFT JOIN project_members pm ON t.project_member_id = pm.project_member_id
+        LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        LEFT JOIN member_details md ON wm.member_id = md.member_id
+        WHERE t.task_id = #{taskId}
+          AND t.deleted IS NULL
+    </select>
+
+    <!-- 3. 특정 메인 업무의 하위업무 목록 조회 -->
+    <select id="selectSubTasksByTaskId" resultType="com.tk.app.domain.dto.SubTaskDto">
+        SELECT
             st.sub_task_id AS subTaskId,
             st.task_id AS taskId,
             st.project_id AS projectId,
             st.project_member_id AS projectMemberId,
-            NVL(md.name, '미지정') AS memberName,
-            st.title AS title,
-            st.content AS content,
+            NVL(md.name, '담당자#' || st.project_member_id) AS assigneeName,
+            st.title,
+            st.content,
             TO_CHAR(st.start_at, 'YYYY-MM-DD') AS startAt,
             TO_CHAR(st."END", 'YYYY-MM-DD') AS endAt,
-            st.status AS status,
-            st.progress AS progress,
+            st.status,
+            st.progress,
             TO_CHAR(st.created, 'YYYY-MM-DD HH24:MI') AS created,
             TO_CHAR(st.updated, 'YYYY-MM-DD HH24:MI') AS updated
         FROM sub_tasks st
@@ -54,78 +95,65 @@
         ORDER BY st.sub_task_id ASC
     </select>
 
-    <!-- 3. 메인 업무 단건 상세 조회 -->
-    <select id="selectTaskById" resultType="com.tk.app.domain.dto.TaskDto">
-        SELECT 
-            t.task_id AS taskId,
-            t.project_id AS projectId,
-            t.project_member_id AS projectMemberId,
-            NVL(md.name, '미지정') AS memberName,
-            t.title AS title,
-            t.content AS content,
-            t.task_level AS taskLevel,
-            TO_CHAR(t.start_at, 'YYYY-MM-DD') AS startAt,
-            TO_CHAR(t."END", 'YYYY-MM-DD') AS endAt,
-            t.status AS status,
-            t.progress AS progress,
-            TO_CHAR(t.created, 'YYYY-MM-DD HH24:MI') AS created,
-            TO_CHAR(t.updated, 'YYYY-MM-DD HH24:MI') AS updated
-        FROM tasks t
-        LEFT JOIN project_members pm ON t.project_member_id = pm.project_member_id
+    <!-- 4. 하위업무 단건 상세 조회 -->
+    <select id="selectSubTaskById" resultType="com.tk.app.domain.dto.SubTaskDto">
+        SELECT
+            st.sub_task_id AS subTaskId,
+            st.task_id AS taskId,
+            st.project_id AS projectId,
+            st.project_member_id AS projectMemberId,
+            NVL(md.name, '담당자#' || st.project_member_id) AS assigneeName,
+            st.title,
+            st.content,
+            TO_CHAR(st.start_at, 'YYYY-MM-DD') AS startAt,
+            TO_CHAR(st."END", 'YYYY-MM-DD') AS endAt,
+            st.status,
+            st.progress,
+            TO_CHAR(st.created, 'YYYY-MM-DD HH24:MI') AS created,
+            TO_CHAR(st.updated, 'YYYY-MM-DD HH24:MI') AS updated
+        FROM sub_tasks st
+        LEFT JOIN project_members pm ON st.project_member_id = pm.project_member_id
         LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
         LEFT JOIN member_details md ON wm.member_id = md.member_id
-        WHERE t.task_id = #{taskId}
-          AND t.deleted IS NULL
+        WHERE st.sub_task_id = #{subTaskId}
+          AND st.deleted IS NULL
     </select>
 
-    <!-- 4. 새 메인 업무 등록 -->
-    <insert id="insertTask" parameterType="com.tk.app.domain.dto.TaskDto">
-        <selectKey keyProperty="taskId" resultType="long" order="BEFORE">
-            SELECT seq_tasks.NEXTVAL FROM dual
-        </selectKey>
-        INSERT INTO tasks (
-            task_id, project_id, project_member_id, title, content,
-            task_level, start_at, "END", status, progress, created, updated
-        ) VALUES (
-            #{taskId}, #{projectId}, #{projectMemberId}, #{title}, #{content, jdbcType=CLOB},
-            #{taskLevel}, NVL(TO_DATE(#{startAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'), SYSDATE),
-            NVL(TO_DATE(#{endAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'), SYSDATE + 7), #{status}, #{progress}, SYSDATE, SYSDATE
-        )
-    </insert>
-
-    <!-- 5. 업무 인라인 즉시 수정 -->
-    <update id="updateTaskField">
+    <!-- 5. 메인 업무 상세 패널 수정 -->
+    <update id="updateTaskDetail" parameterType="com.tk.app.domain.dto.TaskDto">
         UPDATE tasks
         <set>
-            <if test="fieldName == 'title'"> title = #{fieldValue}, </if>
-            <if test="fieldName == 'status'"> status = #{fieldValue}, </if>
-            <if test="fieldName == 'progress'"> progress = #{fieldValue}, </if>
-            <if test="fieldName == 'startAt'"> start_at = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'), </if>
-            <if test="fieldName == 'endAt'"> "END" = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'), </if>
-            <if test="fieldName == 'taskLevel'"> task_level = #{fieldValue}, </if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="content != null">content = #{content, jdbcType=CLOB},</if>
+            <if test="projectMemberId != null">project_member_id = #{projectMemberId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="progress != null">progress = #{progress},</if>
+            <if test="startAt != null and startAt != ''">start_at = TO_DATE(#{startAt}, 'YYYY-MM-DD'),</if>
+            <if test="endAt != null and endAt != ''">"END" = TO_DATE(#{endAt}, 'YYYY-MM-DD'),</if>
             updated = SYSDATE
         </set>
         WHERE task_id = #{taskId}
     </update>
 
-    <!-- 6. 상세창 전체 수정 -->
-    <update id="updateTaskDetail" parameterType="com.tk.app.domain.dto.TaskDto">
+    <!-- 6. 메인 업무 단일 필드 수정 -->
+    <update id="updateTaskField">
         UPDATE tasks
-        SET title = #{title},
-            content = #{content, jdbcType=CLOB},
-            status = #{status},
-            <if test="startAt != null and startAt != ''">start_at = TO_DATE(#{startAt}, 'YYYY-MM-DD'),</if>
-            <if test="endAt != null and endAt != ''">"END" = TO_DATE(#{endAt}, 'YYYY-MM-DD'),</if>
+        <set>
+            <choose>
+                <when test="fieldName == 'title'">title = #{fieldValue},</when>
+                <when test="fieldName == 'content'">content = #{fieldValue, jdbcType=CLOB},</when>
+                <when test="fieldName == 'status'">status = TO_NUMBER(#{fieldValue}),</when>
+                <when test="fieldName == 'progress'">progress = TO_NUMBER(#{fieldValue}),</when>
+                <when test="fieldName == 'projectMemberId'">project_member_id = TO_NUMBER(#{fieldValue}),</when>
+                <when test="fieldName == 'startAt'">start_at = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'),</when>
+                <when test="fieldName == 'endAt'">"END" = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'),</when>
+            </choose>
             updated = SYSDATE
+        </set>
         WHERE task_id = #{taskId}
     </update>
 
-    <!-- 7. 메인 업무 삭제 -->
-    <delete id="deleteTask">
-        DELETE FROM tasks WHERE task_id = #{taskId}
-    </delete>
-
-    <!-- 8. 하위업무 등록 -->
+    <!-- 7. 하위업무 등록 -->
     <insert id="insertSubTask" parameterType="com.tk.app.domain.dto.SubTaskDto">
         <selectKey keyProperty="subTaskId" resultType="long" order="BEFORE">
             SELECT seq_sub_tasks.NEXTVAL FROM dual
@@ -134,33 +162,227 @@
             sub_task_id, task_id, project_member_id, project_id,
             title, content, start_at, "END", status, progress, created, updated
         ) VALUES (
-            #{subTaskId}, #{taskId}, #{projectMemberId}, #{projectId},
-            #{title}, NVL(#{content, jdbcType=CLOB}, '내용 없음'), NVL(TO_DATE(#{startAt, jdbcType=DATE}, 'YYYY-MM-DD'), SYSDATE),
-            NVL(TO_DATE(#{endAt, jdbcType=DATE}, 'YYYY-MM-DD'), SYSDATE + 7), NVL(#{status}, 0), NVL(#{progress}, 0), SYSDATE, SYSDATE
+            #{subTaskId},
+            #{taskId},
+            #{projectMemberId},
+            #{projectId},
+            #{title},
+            #{content, jdbcType=CLOB},
+            NVL(TO_DATE(#{startAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'), SYSDATE),
+            NVL(TO_DATE(#{endAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'), SYSDATE + 7),
+            #{status},
+            #{progress},
+            SYSDATE,
+            SYSDATE
         )
     </insert>
 
-    <!-- 9. 하위업무 인라인 수정 -->
-    <update id="updateSubTaskField">
+    <!-- 8. 하위업무 상세 패널 전체 수정 -->
+    <update id="updateSubTaskDetail" parameterType="com.tk.app.domain.dto.SubTaskDto">
         UPDATE sub_tasks
         <set>
-            <if test="fieldName == 'title'"> title = #{fieldValue}, </if>
-            <if test="fieldName == 'status'"> status = #{fieldValue}, </if>
-            <if test="fieldName == 'progress'"> progress = #{fieldValue}, </if>
-            <if test="fieldName == 'startAt'"> start_at = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'), </if>
-            <if test="fieldName == 'endAt'"> "END" = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'), </if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="content != null">content = #{content, jdbcType=CLOB},</if>
+            <if test="projectMemberId != null">project_member_id = #{projectMemberId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="progress != null">progress = #{progress},</if>
+            <if test="startAt != null and startAt != ''">start_at = TO_DATE(#{startAt}, 'YYYY-MM-DD'),</if>
+            <if test="endAt != null and endAt != ''">"END" = TO_DATE(#{endAt}, 'YYYY-MM-DD'),</if>
             updated = SYSDATE
         </set>
         WHERE sub_task_id = #{subTaskId}
     </update>
 
-    <!-- 10. 하위업무 삭제 -->
-    <delete id="deleteSubTask">
-        DELETE FROM sub_tasks WHERE sub_task_id = #{subTaskId}
-    </delete>
+    <!-- 9. 하위업무 단일 필드 실시간 수정 -->
+    <update id="updateSubTaskField">
+        UPDATE sub_tasks
+        <set>
+            <choose>
+                <when test="fieldName == 'title'">title = #{fieldValue},</when>
+                <when test="fieldName == 'content'">content = #{fieldValue, jdbcType=CLOB},</when>
+                <when test="fieldName == 'status'">status = TO_NUMBER(#{fieldValue}),</when>
+                <when test="fieldName == 'progress'">progress = TO_NUMBER(#{fieldValue}),</when>
+                <when test="fieldName == 'projectMemberId'">project_member_id = TO_NUMBER(#{fieldValue}),</when>
+                <when test="fieldName == 'startAt'">start_at = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'),</when>
+                <when test="fieldName == 'endAt'">"END" = TO_DATE(#{fieldValue}, 'YYYY-MM-DD'),</when>
+            </choose>
+            updated = SYSDATE
+        </set>
+        WHERE sub_task_id = #{subTaskId}
+    </update>
 
-    <delete id="deleteSubTasksByTaskId">
-        DELETE FROM sub_tasks WHERE task_id = #{taskId}
-    </delete>
+    <!-- 10. 하위업무 소프트 삭제 -->
+    <update id="softDeleteSubTask">
+        UPDATE sub_tasks
+        SET deleted = SYSDATE, updated = SYSDATE
+        WHERE sub_task_id = #{subTaskId}
+    </update>
+
+    <!-- 11. 참여 인원 (task_members / sub_task_members) 조회 및 등록 -->
+    <select id="selectTaskMembers" resultType="com.tk.app.domain.dto.TaskMemberDto">
+        SELECT
+            tm.task_id AS taskId,
+            tm.project_member_id AS projectMemberId,
+            wm.member_id AS memberId,
+            NVL(md.name, '멤버#' || tm.project_member_id) AS memberName,
+            pm.role AS role,
+            md.profile AS profile,
+            TO_CHAR(tm.created, 'YYYY-MM-DD') AS created
+        FROM task_members tm
+        JOIN project_members pm ON tm.project_member_id = pm.project_member_id
+        LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        LEFT JOIN member_details md ON wm.member_id = md.member_id
+        WHERE tm.task_id = #{taskId}
+          AND pm.status = 0
+        ORDER BY pm.role DESC, tm.project_member_id ASC
+    </select>
+
+    <select id="selectSubTaskMembers" resultType="com.tk.app.domain.dto.TaskMemberDto">
+        SELECT
+            stm.sub_task_id AS subTaskId,
+            stm.task_id AS taskId,
+            stm.project_member_id AS projectMemberId,
+            wm.member_id AS memberId,
+            NVL(md.name, '멤버#' || stm.project_member_id) AS memberName,
+            pm.role AS role,
+            md.profile AS profile,
+            TO_CHAR(stm.created, 'YYYY-MM-DD') AS created
+        FROM sub_task_members stm
+        JOIN project_members pm ON stm.project_member_id = pm.project_member_id
+        LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        LEFT JOIN member_details md ON wm.member_id = md.member_id
+        WHERE stm.sub_task_id = #{subTaskId}
+          AND pm.status = 0
+        ORDER BY pm.role DESC, stm.project_member_id ASC
+    </select>
+
+    <select id="selectProjectMembers" resultType="com.tk.app.domain.dto.TaskMemberDto">
+        SELECT
+            pm.project_member_id AS projectMemberId,
+            wm.member_id AS memberId,
+            NVL(md.name, '멤버#' || pm.project_member_id) AS memberName,
+            pm.role AS role,
+            md.profile AS profile
+        FROM project_members pm
+        LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        LEFT JOIN member_details md ON wm.member_id = md.member_id
+        WHERE pm.project_id = #{projectId}
+          AND pm.status = 0
+        ORDER BY pm.role DESC, pm.project_member_id ASC
+    </select>
+
+    <insert id="insertTaskMember">
+        MERGE INTO task_members tm
+        USING dual
+        ON (tm.task_id = #{taskId} AND tm.project_member_id = #{projectMemberId})
+        WHEN NOT MATCHED THEN
+            INSERT (task_id, project_member_id, created)
+            VALUES (#{taskId}, #{projectMemberId}, SYSDATE)
+    </insert>
+
+    <insert id="insertSubTaskMember">
+        MERGE INTO sub_task_members stm
+        USING dual
+        ON (stm.sub_task_id = #{subTaskId} AND stm.project_member_id = #{projectMemberId})
+        WHEN NOT MATCHED THEN
+            INSERT (sub_task_id, task_id, project_member_id, created)
+            VALUES (#{subTaskId}, #{taskId}, #{projectMemberId}, SYSDATE)
+    </insert>
+
+    <!-- 12. 일일 보고서 (daily_reports) 조회 / 등록 / 수정 / 삭제 -->
+    <select id="selectDailyReportsBySubTaskId" resultType="com.tk.app.domain.dto.DailyReportDto">
+        SELECT
+            dr.daily_report_id AS dailyReportId,
+            dr.sub_task_id AS subTaskId,
+            dr.project_member_id AS projectMemberId,
+            NVL(md.name, '담당자#' || dr.project_member_id) AS writerName,
+            TO_CHAR(dr.report_date, 'YYYY-MM-DD') AS reportDate,
+            dr.content,
+            dr.progress,
+            dr.status,
+            TO_CHAR(dr.created, 'YYYY-MM-DD HH24:MI') AS created,
+            TO_CHAR(dr.updated, 'YYYY-MM-DD HH24:MI') AS updated,
+            rr.status AS reviewStatus,
+            TO_CHAR(rr.viewed, 'YYYY-MM-DD HH24:MI') AS viewedAt,
+            CASE
+                WHEN dr.status = 0 AND rr.viewed IS NULL AND rr.reviewed IS NULL THEN 1
+                ELSE 0
+            END AS modifiable
+        FROM daily_reports dr
+        LEFT JOIN project_members pm ON dr.project_member_id = pm.project_member_id
+        LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        LEFT JOIN member_details md ON wm.member_id = md.member_id
+        LEFT JOIN report_reviews rr ON dr.daily_report_id = rr.daily_report_id
+        WHERE dr.sub_task_id = #{subTaskId}
+          AND dr.deleted IS NULL
+        ORDER BY dr.report_date DESC, dr.daily_report_id DESC
+    </select>
+
+    <select id="selectDailyReportById" resultType="com.tk.app.domain.dto.DailyReportDto">
+        SELECT
+            dr.daily_report_id AS dailyReportId,
+            dr.sub_task_id AS subTaskId,
+            dr.project_member_id AS projectMemberId,
+            TO_CHAR(dr.report_date, 'YYYY-MM-DD') AS reportDate,
+            dr.content,
+            dr.progress,
+            dr.status,
+            CASE
+                WHEN dr.status = 0 AND rr.viewed IS NULL AND rr.reviewed IS NULL THEN 1
+                ELSE 0
+            END AS modifiable
+        FROM daily_reports dr
+        LEFT JOIN report_reviews rr ON dr.daily_report_id = rr.daily_report_id
+        WHERE dr.daily_report_id = #{dailyReportId}
+          AND dr.deleted IS NULL
+    </select>
+
+    <insert id="insertDailyReport" parameterType="com.tk.app.domain.dto.DailyReportDto">
+        <selectKey keyProperty="dailyReportId" resultType="long" order="BEFORE">
+            SELECT seq_daily_reports.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO daily_reports (
+            daily_report_id, sub_task_id, project_member_id,
+            report_date, content, progress, status, created, updated
+        ) VALUES (
+            #{dailyReportId},
+            #{subTaskId},
+            #{projectMemberId},
+            NVL(TO_DATE(#{reportDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'), SYSDATE),
+            #{content, jdbcType=CLOB},
+            NVL(#{progress}, 0),
+            0,
+            SYSDATE,
+            SYSDATE
+        )
+    </insert>
+
+    <update id="updateDailyReport" parameterType="com.tk.app.domain.dto.DailyReportDto">
+        UPDATE daily_reports dr
+        SET
+            dr.report_date = NVL(TO_DATE(#{reportDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'), dr.report_date),
+            dr.content = #{content, jdbcType=CLOB},
+            dr.progress = NVL(#{progress}, dr.progress),
+            dr.updated = SYSDATE
+        WHERE dr.daily_report_id = #{dailyReportId}
+          AND dr.status = 0
+          AND NOT EXISTS (
+              SELECT 1 FROM report_reviews rr
+              WHERE rr.daily_report_id = dr.daily_report_id
+                AND (rr.viewed IS NOT NULL OR rr.reviewed IS NOT NULL)
+          )
+    </update>
+
+    <update id="softDeleteDailyReport">
+        UPDATE daily_reports dr
+        SET dr.deleted = SYSDATE, dr.updated = SYSDATE
+        WHERE dr.daily_report_id = #{dailyReportId}
+          AND dr.status = 0
+          AND NOT EXISTS (
+              SELECT 1 FROM report_reviews rr
+              WHERE rr.daily_report_id = dr.daily_report_id
+                AND (rr.viewed IS NOT NULL OR rr.reviewed IS NOT NULL)
+          )
+    </update>
 
 </mapper>

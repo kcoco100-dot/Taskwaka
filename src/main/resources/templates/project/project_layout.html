@@ -233,7 +233,8 @@ body {
 					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='task')}">📋 전체 업무</a></li>
 					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='gantt')}">📉 간트차트</a></li>
 					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='calendar')}">📅 캘린더</a></li>
-					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='file')}">📁 파일함</a></li>
+					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='document')}">📄 문서함</a></li>
+					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='notice')}">📢 업무 공지</a></li>
 				</ul>
 			</div>
 			
@@ -270,8 +271,11 @@ body {
 						class="tab-btn"
 						th:classappend="${activeTab == 'calendar'} ? 'active'">캘린더</a> 
 					<a
-						th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='file')}"
-						class="tab-btn" th:classappend="${activeTab == 'file'} ? 'active'">파일</a>
+						th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='document')}"
+						class="tab-btn" th:classappend="${activeTab == 'document'} ? 'active'">문서</a>
+					<a
+						th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='notice')}"
+						class="tab-btn" th:classappend="${activeTab == 'notice'} ? 'active'">업무 공지</a>
 				</nav>
 			</div>
 
@@ -290,8 +294,11 @@ body {
 					<div th:case="'calendar'">
 						<div th:replace="~{project/fragments/calendar :: content}"></div>
 					</div>
-					<div th:case="'file'">
-						<div th:replace="~{project/fragments/file :: content}"></div>
+					<div th:case="'document'">
+						<div th:replace="~{project/fragments/document :: content}"></div>
+					</div>
+					<div th:case="'notice'">
+						<div th:replace="~{project/fragments/notice :: content}"></div>
 					</div>
 				</div>
 			</section>
