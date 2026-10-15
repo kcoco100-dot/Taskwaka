@@ -24,6 +24,7 @@ public class NoticeService {
 	
 	private final NoticeMapper noticeMapper;
 	private final StorageService storageService;
+	private final NoticeEditSaveService noticeEditSaveService;
 	
 	@Value("${file.upload-root}")
 	private String uploadPath;
@@ -90,9 +91,11 @@ public class NoticeService {
 		
 	}
 	
-	public NoticeService(NoticeMapper noticeMapper, StorageService storageService) {
+	// 생성자 주입
+	public NoticeService(NoticeMapper noticeMapper, StorageService storageService, NoticeEditSaveService noticeEditSaveService) {
 		this.noticeMapper = noticeMapper;
 		this.storageService = storageService;
+		this.noticeEditSaveService = noticeEditSaveService;
 	}
 	
 	// 워크 공지 목록 조회
@@ -267,7 +270,67 @@ public class NoticeService {
 			throw new Exception("첨부파일은 5개까지만 등록할 수 있습니다.");
 		}
 		
-		return noticeMapper.noticeEdit(workspaceId, noticeId, title, content);
+		// 새 파일 처리를 위한 목록 두개 준비
+		List<NoticeFileDto> newFiles = new ArrayList<>();
+		List<String> storedNames = new ArrayList<>();
+		
+		// DB 저장 후 실제 파일을 삭제할 수 있게 반환 위치 옮기기
+		int updatedCount;
+		
+		try {
+			// 새 파일이 있으면
+			if(files != null) {
+				for(MultipartFile file : files) {
+					if(file == null || file.isEmpty()) {
+						continue;
+					}
+					// 파일 업로드 및 서버 저장 파일명을 받는 부분
+					String storedName = storageService.uploadFileToServer(file, uploadPath);
+					
+					if(storedName == null || storedName.isBlank()) {
+						throw new Exception("첨부파일을 저장할 수 없습니다.");
+
+					}
+					// storedNames 목록에 업로드한 서버 파일명 추가
+					storedNames.add(storedName);
+					
+					// 업로드한 파일 정보를 dto 에 담기
+					NoticeFileDto noticeFile = new NoticeFileDto();
+					noticeFile.setOriginalName(file.getOriginalFilename());
+					noticeFile.setStoredName(storedName);
+					noticeFile.setFilePath(uploadPath);
+					noticeFile.setFileSize(file.getSize());
+					
+					newFiles.add(noticeFile);
+				}
+
+			}
+			
+			// 저장 서비스가 반환한 수정 행 수를 updatedCount 에 담음
+			updatedCount = noticeEditSaveService.saveNoticeEdit(workspaceId, noticeId, title, content, newFiles, deleteFiles);
+			
+		} catch (Exception e) {
+			// storedNames 목록에서 서버 저장 파일명을 하나씩 꺼내 storedName 변수에 담는다.
+			for(String storedName : storedNames) {
+				try {
+					boolean deleted = storageService.deleteFile(uploadPath, storedName);
+					if(!deleted) {
+						log.error("첨부파일 정리 실패:" + storedName);
+					}
+				} catch (Exception e2) {
+					log.error("첨부파일 정리 중 오류가 발생했습니다.", e2);
+				}
+			}
+			throw e;
+		}
+		
+		// 기존 파일 삭제용 반복문
+		for(NoticeFileDto deleteFile : deleteFiles) {
+			
+		}
+		
+		return updatedCount;
+		
 	}
 	
 	// 공지사항 삭제
