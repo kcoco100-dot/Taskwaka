@@ -1,0 +1,162 @@
+/* TASKWAKA - 헤더 프로필 버튼 전용
+ * 워크챗 멤버 목록의 둥근 사각형 아바타(37x37 / radius 13px)를 헤더에 적용.
+ * .team-profile / #profileToggle / .profile-dropdown을 유지해 기존 header.js 사용.
+ */
+.team-header-right .profile-dropdown > button.team-profile.header-profile-trigger,
+.preview-nav .profile-dropdown > button.team-profile.header-profile-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: auto;
+    height: auto;
+    min-height: 50px;
+    padding: 5px 9px 5px 6px;
+    border: 1px solid transparent;
+    border-radius: 15px;
+    background: transparent;
+    color: #594331;
+    box-shadow: none;
+    font: inherit;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color .16s, border-color .16s;
+}
+.team-header-right .profile-dropdown > button.team-profile.header-profile-trigger:hover,
+.preview-nav .profile-dropdown > button.team-profile.header-profile-trigger:hover,
+.team-header-right .profile-dropdown > button.team-profile.header-profile-trigger[aria-expanded="true"],
+.preview-nav .profile-dropdown > button.team-profile.header-profile-trigger[aria-expanded="true"] {
+    background: #f1f5ed;
+    border-color: #e2eadb;
+}
+.team-header-right .profile-dropdown > button.team-profile.header-profile-trigger:focus-visible,
+.preview-nav .profile-dropdown > button.team-profile.header-profile-trigger:focus-visible {
+    outline: 2px solid #8ba37a;
+    outline-offset: 2px;
+}
+.header-profile-avatar {
+    box-sizing: border-box;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
+    overflow: hidden;
+    border-radius: 13px;
+    background: #dce8d0;
+    color: #5f7951;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.header-profile-fallback {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 3px;
+}
+.header-profile-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+.header-profile-label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    gap: 2px;
+}
+.header-profile-name {
+    display: block;
+    overflow: hidden;
+    max-width: 130px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 750;
+    color: #574938;
+}
+.header-profile-subtitle {
+    color: #9a9084;
+    font-size: 10px;
+    font-weight: 500;
+}
+.header-profile-chevron {
+    flex: 0 0 auto;
+    color: #9a9084;
+    transition: transform .16s;
+}
+.header-profile-trigger[aria-expanded="true"] .header-profile-chevron {
+    transform: rotate(180deg);
+}
+/* 작은 화면: 아바타를 우선으로 표시 */
+@media (max-width: 570px) {
+    .header-profile-label { display: none; }
+    .team-header-right .profile-dropdown > button.team-profile.header-profile-trigger,
+    .preview-nav .profile-dropdown > button.team-profile.header-profile-trigger {
+        gap: 4px;
+        padding-right: 5px;
+    }
+}
+
+
+/* V7: 헤더 알림/워크챗 버튼 스타일. 기존 header.css와 충돌하지 않도록 상세 선택자 사용 */
+.team-header-right { display: flex; align-items: center; gap: 8px; }
+.team-header-right > button.header-action-button {
+    box-sizing: border-box;
+    display: inline-flex !important;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    width: auto !important;
+    min-width: 0;
+    min-height: 38px;
+    height: auto;
+    margin: 0;
+    padding: 8px 12px !important;
+    border: 1px solid #e8e2d9 !important;
+    border-radius: 11px !important;
+    background: #faf8f5 !important;
+    color: #6d6155 !important;
+    font: inherit;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.3;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+}
+.team-header-right > button.header-action-button svg { display:block; flex:0 0 auto; }
+.team-header-right > button.header-action-button:hover,
+.team-header-right > button.header-action-button[aria-expanded="true"] {
+    background: #ecf3e8 !important;
+    border-color: #d5e4cc !important;
+    color: #58734a !important;
+}
+.team-header-right > button.header-action-button:focus-visible {outline:2px solid #8ba37a;outline-offset:2px;}
+.team-header-right > button.header-action-button--chat {
+    background:#edf4e8 !important;
+    border-color:#dae8d1 !important;
+    color:#58734a !important;
+}
+.team-header-right .profile-dropdown { flex: 0 0 auto; position: relative; }
+.team-header-right .profile-dropdown .profile-menu { z-index: 1000; }
+@media(max-width: 700px) {
+    .team-header-right {gap:5px;}
+    .team-header-right > button.header-action-button {padding:8px !important;}
+}
+@media(max-width: 450px) {
+    .team-header-right > button.header-action-button > span { display:none; }
+}
+
+.preview-nav {display:flex;align-items:center;gap:8px;}
+.preview-nav > button.header-action-button {display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid #e6e2db;border-radius:11px;background:#faf8f5;color:#6d6155;cursor:pointer;font:inherit;font-size:12px;font-weight:700;white-space:nowrap;}
+.preview-nav > button.header-action-button--chat {background:#edf4e8;border-color:#dae8d1;color:#58734a;}
+.preview-nav > button.header-action-button svg {display:block;}
+@media(max-width:450px){.preview-nav > button.header-action-button span{display:none;}}

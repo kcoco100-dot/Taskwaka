@@ -32,13 +32,17 @@ public class WorkCreateController {
 	
 	@PostMapping
 	public String insertWork(
-			@RequestParam(name = "status") int status,
+			@RequestParam(name = "status", required = false) Integer status,
 			Authentication authentication,
 			WorkCreateDto dto,
 			RedirectAttributes redirectAttributes,
 			Model model) {
 		
 		try {
+			if (status == null || (status != 0 && status != 1)) {
+		        throw new IllegalArgumentException("워크 공개 여부는 공개 또는 비공개만 선택할 수 있습니다.");
+		        }
+		        
 			dto.setStatus(status);
 			
 			if(authentication == null || ! authentication.isAuthenticated()) {
@@ -53,7 +57,7 @@ public class WorkCreateController {
 			
 			return "redirect:/main";
 			
-        } catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
             log.error("워크 생성 입력 오류 : {}", e.getMessage());
 
             String message = e.getMessage();

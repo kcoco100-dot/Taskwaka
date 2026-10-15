@@ -17,7 +17,7 @@
             </div>
 
             <p class="form-error" id="serverError"
-               th:if="${errorMessage != null}"
+               th:if="${errorMessage != null and errorField == null}"
                th:text="${errorMessage}">
             </p>
             

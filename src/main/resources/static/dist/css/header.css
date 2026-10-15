@@ -1,4 +1,4 @@
-﻿@charset "UTF-8";
+@charset "UTF-8";
 
 .team-header {
     display: flex;
@@ -65,7 +65,9 @@
     gap: 8px;
 }
 
-.team-header-right button {
+/* 프로필/워크챗/알림 버튼은 header-profile.css에서 관리합니다.
+   기본 버튼 규칙은 별도 스타일이 없는 직계 버튼에만 적용합니다. */
+.team-header-right > button:not(.header-action-button) {
     padding: 8px 12px;
     border: 0;
     border-radius: 8px;
@@ -77,26 +79,12 @@
     transition: background-color 0.2s;
 }
 
-.team-header-right button:hover {
+.team-header-right > button:not(.header-action-button):hover {
     background: #F7F3EE;
 }
 
-.team-header-right .team-profile {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    margin-left: 8px;
-    border: 1px solid #DCE5D2;
-    border-radius: 50%;
-    background: #EEF4E6;
-    color: #4F6242;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-.team-header-right .team-profile:hover {
-    background: #E3EDD8;
-}
+/* 기존 원형 프로필 버튼 스타일은 제거했습니다.
+   현재 둥근 사각형 아바타와 이름은 header-profile.css가 담당합니다. */
 
 .team-header a:focus-visible,
 .team-header button:focus-visible {

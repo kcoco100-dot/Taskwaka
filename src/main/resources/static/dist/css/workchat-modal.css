@@ -1,0 +1,1165 @@
+/* TASKWAKA 워크챗 UI — 모달 디자인 전용. 기존 header.css와 분리 */
+.workchat-overlay[hidden] { display: none !important; }
+.workchat-overlay,
+.workchat-overlay * { box-sizing: border-box; }
+
+.workchat-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(39, 35, 30, .42);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.workchat-dialog {
+  width: min(1000px, 100%);
+  height: min(690px, calc(100dvh - 48px));
+  display: grid;
+  grid-template-columns: 328px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid #eae5df;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 22px 70px rgba(42, 34, 26, .26);
+  color: #42392f;
+  font-family: inherit;
+}
+.workchat-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: #fcfaf7;
+  border-right: 1px solid #ebe7e0;
+}
+.workchat-sidebar-header { padding: 28px 22px 16px; }
+.workchat-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #8c9e7e;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.workchat-title-line { display: flex; align-items: center; gap: 9px; }
+.workchat-title-line h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.045em;
+}
+.workchat-beta {
+  display: inline-block;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: #e8eedf;
+  color: #647b52;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.workchat-subtitle { margin: 8px 0 0; color: #94887d; font-size: 12px; }
+.workchat-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 39px;
+  margin: 0 18px 23px;
+  padding: 0 12px;
+  border: 1px solid #eeeae4;
+  border-radius: 10px;
+  background: #f4f1ec;
+  color: #a19a91;
+}
+.workchat-search svg { flex-shrink: 0; }
+.workchat-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #7f766d;
+  font: inherit;
+  font-size: 12px;
+}
+.workchat-search input::placeholder { color: #ada49a; }
+.workchat-section-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px 10px;
+  color: #776c61;
+  font-size: 12px;
+  font-weight: 750;
+}
+.workchat-room-count { color: #a49a8f; font-weight: 500; }
+.workchat-room-list { flex: 1; min-height: 0; overflow-y: auto; padding: 0 10px; }
+.workchat-room {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 77px;
+  padding: 12px 11px;
+  border-radius: 12px;
+  color: #42392f;
+}
+.workchat-room--selected { background: #edf2e8; }
+.workchat-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.workchat-avatar--green { background: #dce8d0; color: #5f7951; }
+.workchat-avatar--sand { background: #f1dfcd; color: #a17655; }
+.workchat-avatar--lilac { background: #e9e2ed; color: #806b91; }
+.workchat-avatar--mini { width: 34px; height: 34px; border-radius: 12px; font-size: 12px; }
+.workchat-room-content { flex: 1; min-width: 0; }
+.workchat-room-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.workchat-room-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 750;
+}
+.workchat-room-time { flex-shrink: 0; color: #a49b93; font-size: 10px; }
+.workchat-room-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 6px; }
+.workchat-room-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #9a9188;
+  font-size: 11px;
+}
+.workchat-unread {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: #8ba37a;
+  color: white;
+  font-size: 10px;
+  font-weight: 750;
+}
+.workchat-sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 22px;
+  border-top: 1px solid #ebe7e0;
+  color: #756a5f;
+  font-size: 11px;
+}
+.workchat-sidebar-footer strong { display: block; margin-bottom: 2px; color: #473d34; font-size: 12px; }
+.workchat-chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #fff; }
+.workchat-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 77px;
+  padding: 15px 21px;
+  border-bottom: 1px solid #f0ece6;
+  background: #fff;
+}
+.workchat-chat-heading { flex: 1; min-width: 0; }
+.workchat-chat-heading strong { display: block; color: #40362b; font-size: 15px; }
+.workchat-chat-heading small { display: block; margin-top: 5px; color: #9a9288; font-size: 11px; }
+.workchat-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #ece7e1;
+  border-radius: 10px;
+  background: #faf9f7;
+  color: #74685d;
+  cursor: pointer;
+}
+.workchat-close:hover { background: #f0ebe5; }
+.workchat-close:focus-visible { outline: 3px solid #8aa578; outline-offset: 2px; }
+.workchat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 23px 28px 25px;
+  background: #f9f8f4;
+}
+.workchat-day {
+  align-self: center;
+  padding: 6px 13px;
+  border-radius: 99px;
+  background: #eeece7;
+  color: #978d82;
+  font-size: 10px;
+}
+.workchat-message { display: flex; gap: 9px; align-items: flex-start; max-width: 85%; }
+.workchat-message--mine { margin-left: auto; flex-direction: row-reverse; }
+.workchat-message-content { min-width: 0; }
+.workchat-sender { display: block; margin: 0 0 6px; color: #6c6157; font-size: 11px; font-weight: 750; }
+.workchat-bubble-row { display: flex; align-items: flex-end; gap: 7px; }
+.workchat-message--mine .workchat-bubble-row { flex-direction: row-reverse; }
+.workchat-bubble {
+  max-width: 355px;
+  padding: 11px 14px;
+  border: 1px solid #efebe6;
+  border-radius: 5px 15px 15px 15px;
+  background: #fff;
+  color: #51473c;
+  font-size: 12px;
+  line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  box-shadow: 0 2px 6px rgba(49, 38, 26, .025);
+}
+.workchat-message--mine .workchat-bubble {
+  border-color: #dce6d3;
+  border-radius: 15px 5px 15px 15px;
+  background: #e6eedf;
+}
+.workchat-message-time { color: #aa9f94; font-size: 10px; white-space: nowrap; }
+.workchat-composer { padding: 16px 21px 13px; border-top: 1px solid #f0ece6; background: #fff; }
+.workchat-composer-row { display: flex; align-items: center; gap: 9px; }
+.workchat-attach {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 37px;
+  height: 37px;
+  border: 1px solid #eae6e0;
+  border-radius: 10px;
+  background: #faf8f5;
+  color: #a19990;
+  font-size: 22px;
+}
+.workchat-input {
+  flex: 1;
+  min-width: 0;
+  height: 39px;
+  padding: 0 13px;
+  border: 1px solid #ebe8e3;
+  border-radius: 10px;
+  background: #f9f8f6;
+  color: #8e857a;
+  font: inherit;
+  font-size: 12px;
+}
+.workchat-input::placeholder { color: #b3aaa0; }
+.workchat-send {
+  flex-shrink: 0;
+  height: 39px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 10px;
+  background: #a5b699;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+.workchat-composer-note { margin: 10px 0 0; color: #b2a99e; font-size: 10px; text-align: center; }
+.workchat-composer button:disabled { cursor: not-allowed; }
+@media (max-width: 700px) {
+  .workchat-overlay { padding: 10px; }
+  .workchat-dialog {
+    width: 100%;
+    height: calc(100dvh - 20px);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(190px, 238px) minmax(0, 1fr);
+    border-radius: 16px;
+  }
+  .workchat-sidebar { border-right: 0; border-bottom: 1px solid #ebe7e0; }
+  .workchat-sidebar-header { padding: 13px 16px 7px; }
+  .workchat-title-line h2 { font-size: 20px; }
+  .workchat-subtitle, .workchat-sidebar-footer { display: none; }
+  .workchat-search { margin: 7px 14px 8px; height: 31px; }
+  .workchat-section-caption { padding: 0 16px 4px; }
+  .workchat-room-list { display: flex; overflow-x: auto; overflow-y: hidden; padding: 0 9px 8px; }
+  .workchat-room { flex: 0 0 220px; min-height: 62px; padding: 8px; }
+  .workchat-chat-header { min-height: 61px; padding: 10px 14px; }
+  .workchat-messages { padding: 15px 14px; gap: 12px; }
+  .workchat-message { max-width: 96%; }
+  .workchat-bubble { font-size: 11px; padding: 9px 11px; }
+  .workchat-composer { padding: 11px 12px 9px; }
+  .workchat-composer-note { font-size: 9px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .workchat-dialog { animation: workchat-appear .2s ease-out; }
+  @keyframes workchat-appear { from { opacity: .3; transform: translateY(9px) scale(.99); } to { opacity: 1; transform: none; } }
+}
+
+
+/* v2: 세 가지 목록 탭 + 독립적인 화면 시안 */
+.workchat-dialog { position: relative; grid-template-columns: 345px minmax(0,1fr); }
+.workchat-dialog-close { position: absolute; z-index: 10; top: 20px; right: 20px; }
+.workchat-sidebar-header { padding-bottom: 18px; }
+.workchat-title-line { padding-right: 0; }
+.workchat-sidebar { overflow: hidden; }
+.workchat-tab-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; padding: 0 12px 16px; }
+.workchat-tab { appearance: none; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; padding: 11px 3px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: #867c70; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
+.workchat-tab:hover { background: #f2eee7; }
+.workchat-tab--active, .workchat-tab[aria-selected="true"] { background: #e9f0e4; color: #516b44; border-color: #d9e5d2; }
+.workchat-tab svg { flex-shrink: 0; }
+.workchat-tab:focus-visible { outline: 2px solid #769469; outline-offset: 2px; }
+.workchat-search { margin-bottom: 19px; }
+.workchat-panel { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.workchat-panel[hidden], .workchat-view[hidden] { display: none !important; }
+.workchat-list { flex: 1; min-height: 0; overflow-y: auto; padding: 0 10px 14px; }
+.workchat-list-item { display: flex; align-items: center; gap: 11px; min-height: 76px; padding: 12px 11px; border-radius: 12px; color: #42392f; }
+.workchat-list-item--selected { background: #edf2e8; }
+.workchat-list-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.workchat-list-name { font-size: 13px; color: #40372f; font-weight: 750; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.workchat-list-sub, .workchat-list-bottom { color: #988d82; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.workchat-list-top, .workchat-list-bottom { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.workchat-list-top small { flex-shrink: 0; font-size: 10px; font-weight: 500; color: #a69c93; }
+.workchat-list-bottom > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.workchat-avatar--peach { background: #f5e1dc; color: #ab7167; }
+.workchat-avatar--slate { background: #dfe6eb; color: #627989; }
+.workchat-avatar--large { width: 64px; height: 64px; border-radius: 22px; font-size: 19px; }
+.workchat-role-pill { display: inline-flex; padding: 4px 7px; border-radius: 6px; background: #dce8d2; color: #617a52; font-size: 10px; font-weight: 750; white-space: nowrap; }
+.workchat-status-pill { display: inline-flex; flex-shrink: 0; padding: 4px 7px; border-radius: 6px; background: #dce8d2; color: #617a52; font-size: 10px; font-weight: 750; }
+.workchat-status-pill--neutral { background: #f2eee7; color: #988a7a; }
+.workchat-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.workchat-view { display: flex; flex-direction: column; flex: 1; min-height: 0; min-width: 0; }
+.workchat-view .workchat-chat-header { padding-right: 72px; }
+.workchat-overview { flex: 1; min-height: 0; overflow-y: auto; padding: 50px 45px 35px; background: #faf9f6; }
+.workchat-overview-kicker { display: inline-block; margin-bottom: 9px; font-size: 10px; letter-spacing: .17em; color: #86a273; font-weight: 800; }
+.workchat-overview h3 { margin: 0 0 10px; font-size: 25px; font-weight: 800; letter-spacing: -.04em; color: #41382e; }
+.workchat-overview > p { margin: 0; color: #8f8478; font-size: 12px; line-height: 1.9; max-width: 420px; }
+.workchat-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; max-width: 400px; margin: 28px 0; }
+.workchat-summary-grid > div { background: #fff; border: 1px solid #efeae3; border-radius: 14px; padding: 18px; }
+.workchat-summary-grid strong { display: block; color: #5e7950; font-size: 26px; font-weight: 800; }
+.workchat-summary-grid small { display: block; margin-top: 4px; color: #94877b; font-size: 11px; }
+.workchat-profile-preview { display: flex; gap: 16px; align-items: center; background: #fff; border: 1px solid #ece6df; border-radius: 17px; padding: 20px; max-width: 480px; }
+.workchat-info-label { color: #9e958a; font-size: 10px; }
+.workchat-profile-preview h4 { margin: 6px 0; font-size: 16px; font-weight: 800; }
+.workchat-profile-preview h4 .workchat-role-pill { vertical-align: middle; margin-left: 5px; }
+.workchat-profile-preview p { margin: 0; color: #908578; font-size: 11px; }
+.workchat-profile-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 12px; }
+.workchat-profile-tags span { padding: 5px 8px; border-radius: 6px; font-size: 10px; background: #f4f1eb; color: #91867a; }
+.workchat-outline-button { margin-top: 20px; width: 100%; max-width: 480px; border: 1px solid #dce5d3; border-radius: 10px; background: #e9f0e3; color: #5c7650; font-size: 12px; font-weight: 700; padding: 13px; cursor: not-allowed; }
+.workchat-overview--meeting { padding-top: 55px; }
+.workchat-meeting-summary { display: grid; gap: 0; margin: 28px 0; max-width: 460px; background: #fff; border: 1px solid #ece6df; border-radius: 14px; overflow: hidden; }
+.workchat-meeting-summary > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 19px; }
+.workchat-meeting-summary > div + div { border-top: 1px solid #f0ebe6; }
+.workchat-meeting-summary span { display: flex; align-items: center; gap: 7px; color: #938779; font-size: 12px; }
+.workchat-meeting-summary strong { font-size: 12px; color: #554a3f; text-align: right; }
+.workchat-agenda { max-width: 460px; background: #fff; border: 1px solid #ece6df; border-radius: 14px; padding: 19px 21px; }
+.workchat-agenda h4 { margin: 0 0 16px; font-size: 13px; }
+.workchat-agenda > div { display: flex; gap: 13px; margin-top: 12px; font-size: 12px; color: #74695e; }
+.workchat-agenda > div span { color: #8fa481; font-weight: 800; font-size: 11px; }
+@media (max-width: 700px) {
+  .workchat-dialog { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(250px, 275px) minmax(0,1fr); }
+  .workchat-dialog-close { top: 13px; right: 13px; }
+  .workchat-tab-bar { padding: 0 10px 7px; }
+  .workchat-tab { padding: 8px 3px; font-size: 11px; }
+  .workchat-search { margin-bottom: 7px; }
+  .workchat-panel .workchat-list { display: flex; flex-direction: row; gap: 7px; overflow-x: auto; overflow-y: hidden; padding: 0 8px 12px; }
+  .workchat-panel .workchat-list-item { flex: 0 0 225px; min-height: 65px; padding: 9px; }
+  .workchat-view .workchat-chat-header { padding-right: 55px; }
+  .workchat-overview { padding: 22px 18px; }
+  .workchat-overview h3 { font-size: 20px; }
+  .workchat-summary-grid { margin: 16px 0; }
+  .workchat-profile-preview { padding: 14px; }
+  .workchat-meeting-summary { margin: 18px 0; }
+  .workchat-agenda { padding: 14px; }
+}
+
+/* V3 — 직급별 그룹 목록 + 채팅방/회의방 만들기 시안 */
+.workchat-member-groups { display:block; padding-top:2px; }
+.workchat-role-group { margin: 1px 0 14px; }
+.workchat-role-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; padding: 10px 12px 7px; border-bottom:1px solid #ede9e2; margin: 0 4px 4px; }
+.workchat-role-heading-title { display:inline-flex; align-items:center; gap:7px; }
+.workchat-role-heading-title strong { font-size:12px; color:#5b5044; letter-spacing:.015em; }
+.workchat-role-heading-title small { font-size:10px; color:#aa9f95; font-weight:500; }
+.workchat-role-dot { width:7px; height:7px; border-radius:50%; background:#8ba77b; }
+.workchat-role-dot--dl { background:#a598c5; }
+.workchat-role-dot--tl { background:#d9aa80; }
+.workchat-role-dot--aa { background:#8eaaac; }
+.workchat-role-qty { font-size:10px; color:#a09589; }
+.workchat-member-groups .workchat-list-item { min-height:62px; padding:9px 11px; }
+.workchat-member-groups .workchat-avatar { width:37px; height:37px; border-radius:13px; font-size:12px; }
+.workchat-member-groups .workchat-list-content { gap:4px; }
+.workchat-role-pill--dl { background:#ebe6f1; color:#79678d; }
+.workchat-role-pill--tl { background:#f6e9dd; color:#9f7651; }
+.workchat-role-pill--aa { background:#e4eef0; color:#617e86; }
+.workchat-action-wrap { padding: 0 18px 16px; }
+.workchat-create-button { display:flex; align-items:center; gap:9px; width:100%; min-height:43px; padding:9px 12px; border:1px solid #cfdcca; border-radius:11px; background:#eaf1e6; color:#526e45; font:inherit; font-size:12px; font-weight:800; cursor:pointer; transition:background .16s ease, border-color .16s ease; }
+.workchat-create-button svg { flex:none; }
+.workchat-create-button:hover { background:#e0ebdb; border-color:#c3d5ba; }
+.workchat-create-button:focus-visible,.workchat-back-button:focus-visible,.workchat-invite-person:focus-within { outline:2px solid #7c9c6c; outline-offset:2px; }
+.workchat-create-button span:nth-child(2) { flex:1; text-align:left; }
+.workchat-create-plus { display:grid; place-items:center; width:22px; height:22px; background:#d9e8d3; border-radius:7px; font-size:18px; font-weight:600; }
+.workchat-action-wrap p { margin:7px 2px 0; color:#a49a90; font-size:10px; }
+.workchat-create-header { gap:10px; }
+.workchat-back-button { display:inline-flex; align-items:center; justify-content:center; gap:2px; margin-left:auto; padding:8px 10px; border:1px solid #ebe6dd; background:#fff; color:#786d61; border-radius:9px; font:inherit; font-size:11px; font-weight:700; cursor:pointer; }
+.workchat-back-button:hover { background:#f5f2ed; }
+.workchat-create-body { flex:1; min-height:0; overflow:auto; padding:32px 36px 38px; background:#faf9f6; }
+.workchat-create-kicker { color:#87a078; font-size:10px; font-weight:850; letter-spacing:.13em; }
+.workchat-create-body h3 { margin:8px 0 7px; color:#40392f; font-size:23px; letter-spacing:-.04em; }
+.workchat-create-description { margin:0 0 22px; color:#978a7f; font-size:12px; line-height:1.65; }
+.workchat-create-card { padding:22px; background:#fff; border:1px solid #ede8e0; border-radius:16px; }
+.workchat-form-label { display:block; margin-bottom:8px; color:#665b51; font-size:12px; font-weight:800; }
+.workchat-form-input { width:100%; min-width:0; height:41px; padding:0 12px; border:1px solid #e6e1da; border-radius:9px; outline:none; background:#fdfcfb; color:#655a50; font:inherit; font-size:12px; font-weight:500; }
+.workchat-form-input:focus { border-color:#9ab68b; box-shadow:0 0 0 2px #ebf2e7; }
+.workchat-form-input::placeholder { color:#b1a69a; }
+.workchat-form-dual { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; }
+.workchat-form-dual .workchat-form-label { min-width:0; }
+.workchat-form-dual .workchat-form-input { display:block; margin-top:8px; }
+.workchat-invite-caption { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:22px 0 11px; }
+.workchat-invite-caption strong { font-size:12px; color:#64594e; }
+.workchat-invite-caption span { padding:4px 8px; border-radius:7px; background:#e9f0e4; color:#638055; font-size:10px; font-weight:700; }
+.workchat-invite-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.workchat-invite-person { display:flex; align-items:center; gap:8px; min-width:0; min-height:53px; padding:8px 10px; border:1px solid #eee8e1; border-radius:11px; background:#fff; cursor:pointer; transition:background .15s; }
+.workchat-invite-person:hover { background:#faf9f6; }
+.workchat-invite-person:has(input:checked) { background:#f0f6eb; border-color:#cfe0c5; }
+.workchat-invite-person input { position:absolute; width:1px; height:1px; opacity:0; }
+.workchat-invite-person .workchat-avatar { width:30px; height:30px; border-radius:10px; font-size:10px; }
+.workchat-invite-text { flex:1; min-width:0; }
+.workchat-invite-text strong { display:block; font-size:11px; color:#574d42; }
+.workchat-invite-text small { display:block; margin-top:3px; font-size:10px; color:#a3998f; }
+.workchat-invite-check { display:grid; place-items:center; flex-shrink:0; width:17px; height:17px; border:1px solid #dcd6cc; border-radius:50%; color:transparent; font-size:10px; }
+.workchat-invite-person input:checked ~ .workchat-invite-check { background:#81a16f; border-color:#81a16f; color:#fff; }
+.workchat-create-note { margin:14px 0 12px; color:#aea297; font-size:10px; line-height:1.5; }
+.workchat-confirm-button { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:43px; padding:0 14px; border:0; border-radius:9px; font:inherit; font-size:12px; font-weight:800; background:#e7eee1; color:#8c9f80; cursor:not-allowed; }
+.workchat-confirm-button span { font-size:10px; font-weight:600; }
+@media (max-width:700px) {
+  .workchat-dialog { grid-template-rows:minmax(310px,335px) minmax(0,1fr); }
+  .workchat-action-wrap { padding:0 13px 9px; }
+  .workchat-action-wrap p { display:none; }
+  .workchat-panel .workchat-list.workchat-member-groups { display:flex; flex-direction:row; align-items:flex-start; gap:8px; overflow-x:auto; overflow-y:hidden; padding:0 9px 8px; }
+  .workchat-role-group { flex:0 0 225px; max-height:160px; overflow-y:auto; margin:0; border:1px solid #eee7e0; border-radius:11px; }
+  .workchat-role-heading { margin:0; padding:7px 9px; }
+  .workchat-panel .workchat-member-groups .workchat-list-item { flex:0 0 auto; min-height:46px; padding:5px 9px; }
+  .workchat-member-groups .workchat-avatar { width:30px; height:30px; border-radius:10px; font-size:10px; }
+  .workchat-create-body { padding:18px 14px 24px; }
+  .workchat-create-body h3 { font-size:18px; }
+  .workchat-create-card { padding:14px; }
+  .workchat-invite-grid { gap:6px; }
+  .workchat-invite-person { padding:6px; gap:5px; }
+  .workchat-create-header { padding-right:55px !important; }
+  .workchat-back-button { padding:6px; font-size:10px; }
+}
+
+/* V4 — 통합 만들기 버튼과 일반채팅/팀채팅/회의방 선택 */
+.workchat-sidebar-header {position:relative; z-index:5;}
+.workchat-title-line {gap:9px; padding-right:0;}
+.workchat-create-trigger {display:grid; place-items:center; flex:none; width:40px; height:40px; margin-left:auto; border:1px solid #dbe7d3; border-radius:12px; background:#edf4e8; color:#5c7a4c; cursor:pointer; transition:background .15s,transform .15s;}
+.workchat-create-trigger:hover,.workchat-create-trigger[aria-expanded="true"] {background:#dcebd5; transform:translateY(-1px);}
+.workchat-create-trigger:focus-visible,.workchat-type-option:focus-visible {outline:2px solid #77986c; outline-offset:2px;}
+.workchat-type-popover[hidden] {display:none!important;}
+.workchat-type-popover {position:absolute; left:15px; right:15px; top:105px; z-index:20; padding:16px 12px 13px; border:1px solid #e7e4db; border-radius:16px; background:#fff; box-shadow:0 15px 38px rgba(59,47,36,.19);}
+.workchat-type-popover:before {content:""; position:absolute; right:51px; top:-7px; width:12px; height:12px; border-left:1px solid #e7e4db; border-top:1px solid #e7e4db; background:#fff; transform:rotate(45deg);}
+.workchat-type-popover-top {display:flex; align-items:baseline; gap:8px; padding:0 4px 13px;}
+.workchat-type-popover-top strong {font-size:13px; color:#4b4136;}
+.workchat-type-popover-top span {font-size:10px; color:#ab9e90;}
+.workchat-type-options {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px;}
+.workchat-type-option {min-width:0; display:flex; flex-direction:column; gap:6px; align-items:center; justify-content:center; padding:12px 3px 11px; border:1px solid transparent; border-radius:12px; background:transparent; color:#5d5246; font:inherit; cursor:pointer;}
+.workchat-type-option:hover {background:#f1f6ed; border-color:#dce8d4;}
+.workchat-type-option .workchat-type-icon {display:grid; place-items:center; color:#607d50; height:30px;}
+.workchat-type-option strong {font-size:11px; white-space:nowrap;}
+.workchat-type-option small {font-size:9px; color:#afa397; white-space:nowrap;}
+.workchat-picker-view .workchat-chat-header {background:#fff;}
+.workchat-picker-body {display:flex; flex-direction:column; flex:1; min-height:0; padding:23px 28px 20px; background:#faf9f6;}
+.workchat-step-label {font-size:10px; letter-spacing:.13em; color:#88a377; font-weight:800;}
+.workchat-picker-body h3 {margin:7px 0 5px; font-size:23px; letter-spacing:-.04em;}
+.workchat-picker-body > p {margin:0 0 17px; color:#998e82; font-size:12px;}
+.workchat-picker-search {display:flex; gap:9px; align-items:center; border:1px solid #e3dfd7; border-radius:24px; padding:0 14px; height:42px; background:#fff; color:#a1988f;}
+.workchat-picker-search:focus-within {border-color:#94ae85; box-shadow:0 0 0 2px #eaf2e4;}
+.workchat-picker-search input {border:0; outline:0; flex:1; min-width:0; background:transparent; color:#544c41; font:inherit; font-size:12px;}
+.workchat-picker-selection {display:flex; justify-content:space-between; padding:16px 0 7px; color:#71685d; font-size:12px;}
+.workchat-picker-selection strong {font-size:11px; color:#668156;}
+.workchat-picker-chips {display:flex; align-items:center; gap:6px; min-height:39px; flex-wrap:wrap; padding-bottom:11px; border-bottom:1px solid #eee9e1;}
+.workchat-picker-empty {font-size:11px; color:#b0a59a;}
+.workchat-picker-chip {display:inline-flex; align-items:center; padding:6px 10px; border-radius:15px; background:#e7f0df; color:#5a754c; font-size:11px; font-weight:700;}
+.workchat-picker-list {flex:1; overflow-y:auto; min-height:0; padding:7px 2px 10px;}
+.workchat-picker-group {margin:7px 0 13px;}
+.workchat-picker-group[hidden],.workchat-picker-person[hidden] {display:none!important;}
+.workchat-picker-heading {display:flex; align-items:center; gap:8px; padding:8px 10px; font-size:12px; border-bottom:1px solid #eeeae3; color:#62574c;}
+.workchat-picker-heading small {margin-left:auto; color:#aaa095;}
+.workchat-picker-person {display:flex; gap:12px; align-items:center; min-height:52px; padding:8px 11px; border-radius:10px; cursor:pointer;}
+.workchat-picker-person:hover {background:#f0f4ec;}
+.workchat-picker-person:has(input:checked) {background:#eaf3e4;}
+.workchat-picker-person .workchat-avatar {width:34px; height:34px; font-size:11px;}
+.workchat-picker-person-label {display:flex; flex-direction:column; flex:1; gap:3px;}
+.workchat-picker-person-label strong {font-size:12px; color:#51483e;}
+.workchat-picker-person-label small {font-size:10px; color:#a3998f;}
+.workchat-picker-person input {position:absolute; opacity:0; width:1px; height:1px;}
+.workchat-picker-check {display:grid; place-items:center; width:19px; height:19px; border:1px solid #d6d0c7; border-radius:50%; font-size:11px; color:transparent;}
+.workchat-picker-person input:checked + .workchat-picker-check {background:#7f9f70; border-color:#7f9f70; color:#fff;}
+.workchat-picker-person:focus-within {outline:2px solid #91b285; outline-offset:-2px;}
+.workchat-picker-footer {display:flex; flex-direction:column; gap:10px; padding-top:14px; border-top:1px solid #ece7df;}
+.workchat-picker-footer > span {font-size:10px; color:#a89d91;}
+.workchat-picker-footer button {display:flex; justify-content:space-between; width:100%; padding:12px 14px; border:0; border-radius:9px; background:#e4eddf; color:#8a9f7c; font:inherit; font-size:12px; font-weight:800; cursor:not-allowed;}
+.workchat-picker-footer button span {font-size:10px;}
+.workchat-agenda-label {margin-top:17px;}
+.workchat-agenda-input {height:auto; min-height:76px; padding:10px 12px; line-height:1.5; resize:vertical;}
+@media(max-width:700px){
+  .workchat-sidebar-header {padding:12px 16px 7px;}
+  .workchat-create-trigger {height:33px;width:33px;border-radius:10px;}
+  .workchat-create-trigger svg {width:19px;height:19px;}
+  .workchat-type-popover {top:77px;left:10px;right:10px;padding:10px;}
+  .workchat-picker-body {padding:13px 15px;}
+  .workchat-picker-body h3 {font-size:19px;}
+  .workchat-picker-search {height:37px;}
+  .workchat-picker-chips {min-height:29px;}
+  .workchat-picker-person {min-height:45px;}
+  .workchat-create-body {padding:18px 16px;}
+}
+
+
+/* V5: 선택 인원이 많아도 모달과 입력 폼 전체가 움직이지 않도록 내부 스크롤 고정 */
+.workchat-dialog { overflow: clip; grid-template-rows: minmax(0, 1fr); }
+.workchat-main { min-height: 0; height: 100%; overflow: clip; }
+.workchat-view { min-height: 0; overflow: clip; }
+.workchat-view .workchat-chat-header { flex: 0 0 auto; }
+.workchat-picker-body { min-height: 0; overflow: clip; }
+.workchat-picker-body > .workchat-step-label,
+.workchat-picker-body > h3,
+.workchat-picker-body > p,
+.workchat-picker-search,
+.workchat-picker-selection,
+.workchat-picker-chips,
+.workchat-picker-footer { flex-shrink: 0; }
+.workchat-picker-chips {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 41px;
+  max-height: 41px;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #c9d6c0 transparent;
+}
+.workchat-picker-chip, .workchat-picker-empty { flex: 0 0 auto; white-space: nowrap; }
+.workchat-picker-list {
+  flex: 1 1 0;
+  height: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.workchat-picker-footer { background: #faf9f6; }
+.workchat-create-body { overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+.workchat-picker-person { scroll-margin: 12px; }
+.workchat-picker-person:focus-within { scroll-margin-block: 8px; }
+
+/* 채팅방 탭: 아무 방도 선택하지 않았을 때 */
+.workchat-panel[data-workchat-panel="chats"] .workchat-list-item[role="button"] { cursor: pointer; }
+.workchat-panel[data-workchat-panel="chats"] .workchat-list-item[role="button"]:hover { background: #f3f2ec; }
+.workchat-panel[data-workchat-panel="chats"] .workchat-list-item--selected[role="button"],
+.workchat-panel[data-workchat-panel="chats"] .workchat-list-item--selected[role="button"]:hover { background: #eaf2e5; }
+.workchat-panel[data-workchat-panel="chats"] .workchat-list-item[role="button"]:focus-visible { outline: 2px solid #85a678; outline-offset: -3px; }
+.workchat-view--empty { background: #faf9f6; }
+.workchat-empty-panel {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 28px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.workchat-empty-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 98px;
+  height: 98px;
+  border-radius: 30px;
+  background: #edf3e8;
+  color: #79996b;
+  margin-bottom: 24px;
+}
+.workchat-empty-kicker { color: #8da67d; font-size: 10px; letter-spacing: .14em; font-weight: 800; }
+.workchat-empty-panel h3 { margin: 11px 0 10px; font-size: 23px; color: #473d33; letter-spacing: -.04em; }
+.workchat-empty-panel > p { margin: 0; color: #968d83; font-size: 12px; line-height: 1.85; }
+.workchat-empty-actions { display: grid; width: min(100%, 410px); grid-template-columns: repeat(2,minmax(0,1fr)); gap: 11px; margin: 30px 0 21px; }
+.workchat-empty-action { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; min-height: 145px; padding: 18px 12px; border: 1px solid #e6e6dd; border-radius: 15px; background: #fff; color: #50483c; font: inherit; cursor: pointer; transition: transform .16s, background .16s, border-color .16s, box-shadow .16s; }
+.workchat-empty-action:hover { transform: translateY(-2px); border-color: #c8ddbf; background: #f9fcf7; box-shadow: 0 7px 18px #53462e0a; }
+.workchat-empty-action:focus-visible { outline: 2px solid #83a477; outline-offset: 3px; }
+.workchat-empty-action-icon { display: grid; place-items: center; height: 36px; color: #708e60; }
+.workchat-empty-action strong { font-size: 13px; }
+.workchat-empty-action small { color: #a39c91; font-size: 11px; }
+.workchat-empty-footnote { color: #b3aa9f; font-size: 10px; line-height: 1.6; }
+@media (max-width: 700px) {
+  .workchat-dialog { grid-template-rows: minmax(310px, 335px) minmax(0,1fr); }
+  .workchat-main { height: auto; }
+  .workchat-empty-panel { padding: 16px 12px; }
+  .workchat-empty-icon { width: 58px; height: 58px; border-radius: 18px; margin-bottom: 10px; }
+  .workchat-empty-icon svg { width: 31px; height: 31px; }
+  .workchat-empty-panel h3 { font-size: 17px; margin: 6px 0 4px; }
+  .workchat-empty-panel > p { font-size: 11px; line-height: 1.6; }
+  .workchat-empty-actions { margin: 14px 0 9px; gap: 8px; }
+  .workchat-empty-action { min-height: 90px; padding: 10px 6px; gap: 4px; }
+  .workchat-empty-action-icon { height: 23px; }
+  .workchat-empty-action-icon svg { width: 18px; height: 18px; }
+  .workchat-empty-action strong { font-size: 11px; }
+  .workchat-empty-action small { font-size: 9px; }
+  .workchat-empty-footnote { font-size: 9px; }
+  .workchat-picker-chips { min-height: 33px; max-height: 33px; }
+}
+
+
+/* V7: 레이아웃 CSS 충돌 방어. 모달 내용은 모달 안에 꽉 차게, 넘치는 목록만 스크롤. */
+body.workchat-open { overflow: hidden; }
+body > .workchat-overlay:not([hidden]) {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 20000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    overflow: hidden !important;
+}
+body > .workchat-overlay .workchat-dialog {
+    box-sizing: border-box !important;
+    display: grid !important;
+    position: relative !important;
+    width: min(1000px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    height: min(690px, calc(100dvh - 32px)) !important;
+    max-height: calc(100dvh - 32px) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    grid-template-columns: 345px minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    justify-items: stretch !important;
+    overflow: hidden !important;
+}
+body > .workchat-overlay .workchat-sidebar,
+body > .workchat-overlay .workchat-main {
+    box-sizing: border-box !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: stretch !important;
+    overflow: hidden !important;
+}
+body > .workchat-overlay .workchat-main .workchat-view {min-height:0;}
+body > .workchat-overlay .workchat-sidebar .workchat-panel,
+body > .workchat-overlay .workchat-sidebar .workchat-list,
+body > .workchat-overlay .workchat-picker-list {min-height:0;}
+@media (max-width: 700px) {
+    body > .workchat-overlay:not([hidden]) {padding: 10px !important;}
+    body > .workchat-overlay .workchat-dialog {
+        width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px) !important;
+        height: calc(100dvh - 20px) !important;
+        max-height: calc(100dvh - 20px) !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: clamp(200px, 37dvh, 310px) minmax(0, 1fr) !important;
+    }
+    body > .workchat-overlay .workchat-sidebar,
+    body > .workchat-overlay .workchat-main {height: 100% !important;}
+}
+
+/* 2026-10-15: 스크롤/레이아웃 수정 — 모달 최상위 자동 스크롤 방지 */
+/* overflow:hidden은 포커스 이동 시 내부적으로 scrollTop이 바뀔 수 있음. */
+body > .workchat-overlay .workchat-dialog,
+body > .workchat-overlay .workchat-sidebar,
+body > .workchat-overlay .workchat-main {
+    overflow: clip !important;
+}
+
+/* 각 탭의 화면 자체는 고정, 실제 내용 영역만 스크롤 */
+body > .workchat-overlay .workchat-view {
+    min-height: 0 !important;
+    overflow: clip !important;
+}
+body > .workchat-overlay .workchat-panel {
+    min-height: 0 !important;
+    overflow: clip !important;
+}
+body > .workchat-overlay .workchat-list,
+body > .workchat-overlay .workchat-picker-list,
+body > .workchat-overlay .workchat-overview,
+body > .workchat-overlay .workchat-create-body {
+    min-height: 0 !important;
+    overscroll-behavior: contain;
+}
+
+/* 직급 그룹이 상위 페이지의 section 스타일에 영향받지 않도록 크기 초기화 */
+body > .workchat-overlay .workchat-member-groups > .workchat-role-group {
+    display: block !important;
+    flex: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+/* V10: 이전 모달 높이 복원 + 좁은 좌측 탭 + 넓은 우측 화면 */
+/* 아래 규칙은 기존 V7 스크롤 수정 내용을 유지하면서 비율만 조정합니다. */
+body > .workchat-overlay:not([hidden]) {
+    padding: 10px !important;
+}
+body > .workchat-overlay .workchat-dialog {
+    width: min(1000px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    height: min(730px, calc(100dvh - 20px)) !important;
+    max-height: calc(100dvh - 20px) !important;
+    grid-template-columns: 275px minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+}
+/* 요청에 따라 상단 X 버튼은 표시하지 않습니다. */
+body > .workchat-overlay .workchat-dialog-close,
+body > .workchat-overlay .workchat-close {
+    display: none !important;
+}
+/* 왼쪽 탭을 좁혀도 항목이 과밀하게 보이지 않도록 여백만 조절 */
+body > .workchat-overlay .workchat-sidebar-header {
+    padding: 20px 15px 12px !important;
+}
+body > .workchat-overlay .workchat-tab-bar {
+    padding: 0 9px 10px !important;
+}
+body > .workchat-overlay .workchat-search {
+    margin: 0 11px 13px !important;
+}
+body > .workchat-overlay .workchat-section-caption {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+/* 우측 상단은 깔끔하게 고정, 나머지 영역은 내용이 사용 */
+body > .workchat-overlay .workchat-main > .workchat-view:not([hidden]) {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    flex-direction: column !important;
+}
+body > .workchat-overlay .workchat-main .workchat-chat-header {
+    flex: 0 0 72px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 12px 23px !important;
+}
+body > .workchat-overlay .workchat-main .workchat-overview {
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 26px 36px !important;
+}
+/* 회의 상세: 오른쪽 폭을 적극 활용하고 남는 위아래 여백을 고르게 분산 */
+body > .workchat-overlay .workchat-main .workchat-overview--meeting {
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+}
+body > .workchat-overlay .workchat-overview--meeting .workchat-meeting-summary,
+body > .workchat-overlay .workchat-overview--meeting .workchat-agenda,
+body > .workchat-overlay .workchat-overview--meeting .workchat-outline-button {
+    width: 100%;
+    max-width: none;
+    flex-shrink: 0;
+}
+body > .workchat-overlay .workchat-meeting-summary {
+    margin: 24px 0 !important;
+}
+body > .workchat-overlay .workchat-agenda {
+    padding: 21px 24px !important;
+}
+body > .workchat-overlay .workchat-outline-button {
+    margin-top: 20px !important;
+}
+/* 여러 명 선택할 때는 기존 선택 목록의 내부 스크롤을 유지 */
+body > .workchat-overlay .workchat-picker-body {
+    min-height: 0 !important;
+}
+/* 모바일에서는 목록/본문 2단 구조를 그대로 사용 */
+@media (max-width: 700px) {
+    body > .workchat-overlay:not([hidden]) {
+        padding: 8px !important;
+    }
+    body > .workchat-overlay .workchat-dialog {
+        width: calc(100vw - 16px) !important;
+        max-width: calc(100vw - 16px) !important;
+        height: calc(100dvh - 16px) !important;
+        max-height: calc(100dvh - 16px) !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        grid-template-rows: clamp(200px, 37dvh, 310px) minmax(0, 1fr) !important;
+    }
+    body > .workchat-overlay .workchat-sidebar-header {
+        padding: 12px 14px 7px !important;
+    }
+    body > .workchat-overlay .workchat-main .workchat-chat-header {
+        flex-basis: 58px !important;
+        height: 58px !important;
+        min-height: 58px !important;
+        padding: 9px 13px !important;
+    }
+    body > .workchat-overlay .workchat-main .workchat-overview {
+        padding: 16px !important;
+    }
+    body > .workchat-overlay .workchat-main .workchat-overview--meeting {
+        display: block;
+    }
+    body > .workchat-overlay .workchat-agenda {
+        padding: 14px 16px !important;
+    }
+}
+
+/* V11 - 모달 가로 폭 확대 (높이 및 좌우 비율 유지) */
+@media (min-width: 701px) {
+    body > .workchat-overlay .workchat-dialog {
+        width: min(1150px, calc(100vw - 20px)) !important;
+        max-width: calc(100vw - 20px) !important;
+        grid-template-columns: 27.5% minmax(0, 1fr) !important;
+    }
+}
+
+
+/* V12 | 워크챗 왼쪽 메뉴 축소 + 멤버 상세 한 화면 표시 */
+/* 이름/사진 모두 동일한 아바타 영역을 사용합니다. */
+.workchat-overlay .workchat-avatar {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: clip;
+    letter-spacing: -.02em;
+    line-height: 1;
+}
+.workchat-overlay .workchat-avatar > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (min-width: 701px) {
+    /* 가로 1150px / 높이 730px / 좌우 27.5%:72.5%는 V11 그대로 */
+    body > .workchat-overlay .workchat-sidebar-header {
+        padding: 16px 13px 9px !important;
+    }
+    body > .workchat-overlay .workchat-title-line h2 {
+        font-size: 21px;
+    }
+    body > .workchat-overlay .workchat-eyebrow {
+        font-size: 9px;
+        margin-bottom: 4px;
+    }
+    body > .workchat-overlay .workchat-beta {
+        font-size: 9px;
+        padding: 3px 5px;
+    }
+    body > .workchat-overlay .workchat-subtitle {
+        margin-top: 5px;
+        font-size: 11px;
+    }
+    body > .workchat-overlay .workchat-create-trigger {
+        width: 36px;
+        height: 36px;
+    }
+    body > .workchat-overlay .workchat-tab-bar {
+        padding: 0 8px 8px !important;
+        gap: 3px;
+    }
+    body > .workchat-overlay .workchat-tab {
+        padding: 8px 2px;
+        gap: 4px;
+        font-size: 11px;
+    }
+    body > .workchat-overlay .workchat-tab svg {
+        width: 15px;
+        height: 15px;
+    }
+    body > .workchat-overlay .workchat-search {
+        height: 35px;
+        margin: 0 10px 10px !important;
+        padding: 0 9px;
+    }
+    body > .workchat-overlay .workchat-search input {
+        font-size: 11px;
+    }
+    body > .workchat-overlay .workchat-section-caption {
+        padding: 0 13px 7px !important;
+        font-size: 11px;
+    }
+    body > .workchat-overlay .workchat-list {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+    body > .workchat-overlay .workchat-list-item {
+        min-height: 64px;
+        padding: 9px 8px;
+        gap: 8px;
+    }
+    body > .workchat-overlay .workchat-list-item .workchat-avatar {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        border-radius: 12px;
+        font-size: 11px;
+    }
+    body > .workchat-overlay .workchat-list-name {
+        font-size: 12px;
+    }
+    body > .workchat-overlay .workchat-list-sub,
+    body > .workchat-overlay .workchat-list-bottom {
+        font-size: 10px;
+    }
+    body > .workchat-overlay .workchat-member-groups > .workchat-role-group {
+        margin-bottom: 7px !important;
+    }
+    body > .workchat-overlay .workchat-role-heading {
+        padding: 7px 8px 5px;
+        margin-bottom: 2px;
+    }
+    body > .workchat-overlay .workchat-member-groups .workchat-list-item {
+        min-height: 51px;
+        padding: 6px 8px;
+    }
+    body > .workchat-overlay .workchat-member-groups .workchat-list-item .workchat-avatar {
+        width: 33px;
+        height: 33px;
+        flex-basis: 33px;
+        border-radius: 11px;
+    }
+    body > .workchat-overlay .workchat-sidebar-footer {
+        padding: 11px 13px;
+    }
+}
+
+/* 워크 멤버 탭 상세: 카드와 문단 여백을 압축하여 한 화면 안에 모두 표시 */
+body > .workchat-overlay .workchat-view--members .workchat-overview {
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+    padding: 17px 27px 20px !important;
+    overflow-y: clip !important;
+}
+body > .workchat-overlay .workchat-view--members .workchat-overview-kicker {
+    margin-bottom: 5px;
+}
+body > .workchat-overlay .workchat-view--members .workchat-overview h3 {
+    margin-bottom: 7px;
+    font-size: 22px;
+}
+body > .workchat-overlay .workchat-view--members .workchat-overview > p {
+    max-width: 650px;
+    font-size: 11px;
+    line-height: 1.65;
+}
+body > .workchat-overlay .workchat-view--members .workchat-summary-grid {
+    max-width: none;
+    gap: 10px;
+    margin: 17px 0;
+}
+body > .workchat-overlay .workchat-view--members .workchat-summary-grid > div {
+    padding: 12px 15px;
+}
+body > .workchat-overlay .workchat-view--members .workchat-summary-grid strong {
+    font-size: 23px;
+}
+body > .workchat-overlay .workchat-view--members .workchat-profile-preview {
+    max-width: none;
+    padding: 13px 16px;
+    gap: 13px;
+}
+body > .workchat-overlay .workchat-view--members .workchat-profile-preview .workchat-avatar--large {
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    border-radius: 17px;
+    font-size: 15px;
+}
+body > .workchat-overlay .workchat-view--members .workchat-profile-tags {
+    margin-top: 8px;
+}
+body > .workchat-overlay .workchat-view--members .workchat-outline-button {
+    max-width: none;
+    margin-top: 13px !important;
+    padding: 11px;
+}
+
+/* 낮은 화면에서는 화면 잘림보다 접근성을 우선: 스크롤 허용 */
+@media (min-width: 701px) and (max-height: 600px) {
+    body > .workchat-overlay .workchat-view--members .workchat-overview {
+        justify-content: flex-start;
+        overflow-y: auto !important;
+    }
+}
+
+/* 모바일에는 기존 상하 2단 구조를 유지하되 멤버 정보 여백을 더 줄임 */
+@media (max-width: 700px) {
+    body > .workchat-overlay .workchat-view--members .workchat-overview {
+        justify-content: flex-start;
+        padding: 9px 13px 12px !important;
+        overflow-y: auto !important;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-overview h3 {
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-overview > p {
+        font-size: 10px;
+        line-height: 1.5;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-summary-grid {
+        margin: 9px 0;
+        gap: 8px;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-summary-grid > div {
+        padding: 9px 11px;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-profile-preview {
+        padding: 9px 11px;
+        gap: 9px;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-profile-preview .workchat-avatar--large {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        border-radius: 13px;
+        font-size: 12px;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-profile-tags {
+        margin-top: 5px;
+    }
+    body > .workchat-overlay .workchat-view--members .workchat-outline-button {
+        margin-top: 8px !important;
+        padding: 9px;
+    }
+}
+
+
+/* V13 — 실제 TASKWAKA layout3 / main.css 기준 크기·타이포 보정.
+   workchat-modal.html의 section 태그를 div로 바꿔 전역 section 여백/최소 높이 충돌 제거. */
+@media (min-width: 701px) {
+  body > .workchat-overlay:not([hidden]) { padding: 16px !important; }
+  body > .workchat-overlay .workchat-dialog {
+    width: min(1320px, calc(100vw - 32px)) !important;
+    max-width: calc(100vw - 32px) !important;
+    height: min(820px, calc(100dvh - 32px)) !important;
+    max-height: calc(100dvh - 32px) !important;
+    grid-template-columns: 27.5% minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+  body > .workchat-overlay .workchat-sidebar-header {
+    padding: 23px 20px 14px !important;
+  }
+  body > .workchat-overlay .workchat-title-line h2 { font-size: 26px; }
+  body > .workchat-overlay .workchat-tab-bar { padding: 0 15px 13px !important; gap: 6px; }
+  body > .workchat-overlay .workchat-tab { padding: 11px 5px; font-size: 13px; }
+  body > .workchat-overlay .workchat-tab svg { width: 18px; height: 18px; }
+  body > .workchat-overlay .workchat-search { height: 41px; margin: 0 16px 13px !important; }
+  body > .workchat-overlay .workchat-search input { font-size: 13px; }
+  body > .workchat-overlay .workchat-section-caption { padding: 0 19px 10px !important; font-size: 13px; }
+  body > .workchat-overlay .workchat-list { padding-left: 12px; padding-right: 12px; }
+  body > .workchat-overlay .workchat-list-item { min-height: 78px; padding: 11px 10px; gap: 11px; }
+  body > .workchat-overlay .workchat-list-item .workchat-avatar { width: 42px; height: 42px; flex: 0 0 42px; font-size: 13px; }
+  body > .workchat-overlay .workchat-list-name { font-size: 14px; }
+  body > .workchat-overlay .workchat-list-sub,
+  body > .workchat-overlay .workchat-list-bottom { font-size: 12px; }
+  body > .workchat-overlay .workchat-role-heading { padding: 9px 10px 7px; }
+  body > .workchat-overlay .workchat-role-heading-title strong { font-size: 13px; }
+  body > .workchat-overlay .workchat-role-heading-title small,
+  body > .workchat-overlay .workchat-role-qty { font-size: 11px; }
+  body > .workchat-overlay .workchat-member-groups .workchat-list-item { min-height: 62px; padding: 9px 10px; }
+  body > .workchat-overlay .workchat-member-groups .workchat-list-item .workchat-avatar { width: 38px; height: 38px; flex-basis: 38px; font-size: 12px; }
+  body > .workchat-overlay .workchat-sidebar-footer { padding: 16px 19px; font-size: 12px; }
+  body > .workchat-overlay .workchat-main .workchat-chat-header {
+    flex: 0 0 81px !important;
+    height: 81px !important;
+    min-height: 81px !important;
+    padding: 16px 28px !important;
+  }
+  body > .workchat-overlay .workchat-main .workchat-overview { padding: 36px 45px !important; }
+  body > .workchat-overlay .workchat-view--members .workchat-overview {
+    justify-content: safe center;
+    padding: 28px 42px !important;
+    overflow-y: auto !important;
+  }
+}
+/* 공통 글자 가독성 개선: CSS에서 작은 10~12px 문구를 한 단계 키움 */
+body > .workchat-overlay .workchat-eyebrow,
+body > .workchat-overlay .workchat-overview-kicker,
+body > .workchat-overlay .workchat-step-label,
+body > .workchat-overlay .workchat-create-kicker { font-size: 11px; }
+body > .workchat-overlay .workchat-subtitle,
+body > .workchat-overlay .workchat-overview > p,
+body > .workchat-overlay .workchat-view--members .workchat-overview > p,
+body > .workchat-overlay .workchat-create-description { font-size: 14px; line-height: 1.7; }
+body > .workchat-overlay .workchat-chat-heading strong { font-size: 17px; }
+body > .workchat-overlay .workchat-chat-heading small { font-size: 12px; }
+body > .workchat-overlay .workchat-overview h3,
+body > .workchat-overlay .workchat-view--members .workchat-overview h3 { font-size: 27px; }
+body > .workchat-overlay .workchat-summary-grid strong,
+body > .workchat-overlay .workchat-view--members .workchat-summary-grid strong { font-size: 27px; }
+body > .workchat-overlay .workchat-summary-grid small,
+body > .workchat-overlay .workchat-profile-preview p,
+body > .workchat-overlay .workchat-meeting-summary span,
+body > .workchat-overlay .workchat-meeting-summary strong,
+body > .workchat-overlay .workchat-agenda > div,
+body > .workchat-overlay .workchat-outline-button { font-size: 13px; }
+body > .workchat-overlay .workchat-profile-preview h4 { font-size: 17px; }
+body > .workchat-overlay .workchat-profile-tags span,
+body > .workchat-overlay .workchat-info-label { font-size: 12px; }
+body > .workchat-overlay .workchat-picker-body > p,
+body > .workchat-overlay .workchat-picker-search input,
+body > .workchat-overlay .workchat-picker-person-label strong,
+body > .workchat-overlay .workchat-picker-heading,
+body > .workchat-overlay .workchat-create-body,
+body > .workchat-overlay .workchat-form-input { font-size: 13px; }
+body > .workchat-overlay .workchat-picker-person-label small,
+body > .workchat-overlay .workchat-picker-selection,
+body > .workchat-overlay .workchat-picker-chip,
+body > .workchat-overlay .workchat-form-label { font-size: 12px; }
+body > .workchat-overlay .workchat-picker-body h3,
+body > .workchat-overlay .workchat-create-body h3 { font-size: 26px; }
+body > .workchat-overlay .workchat-picker-footer > span,
+body > .workchat-overlay .workchat-create-note { font-size: 11px; }
+/* 일부 내용을 초과하는 회의방 / 참여자 선택은 해당 내부 영역에서만 스크롤. */
+body > .workchat-overlay .workchat-overview,
+body > .workchat-overlay .workchat-picker-list,
+body > .workchat-overlay .workchat-create-body { overscroll-behavior: contain; }
+@media (max-width: 700px) {
+  body > .workchat-overlay .workchat-overview h3,
+  body > .workchat-overlay .workchat-view--members .workchat-overview h3 { font-size: 19px; }
+  body > .workchat-overlay .workchat-overview > p,
+  body > .workchat-overlay .workchat-view--members .workchat-overview > p { font-size: 12px; }
+  body > .workchat-overlay .workchat-main .workchat-chat-header { padding: 9px 13px !important; }
+  body > .workchat-overlay .workchat-picker-body h3,
+  body > .workchat-overlay .workchat-create-body h3 { font-size: 20px; }
+}
+/* V14: 워크 멤버 / 회의방 상세 내용을 위쪽에 정렬 */
+@media (min-width: 701px) {
+    body > .workchat-overlay .workchat-view--members .workchat-overview,
+    body > .workchat-overlay .workchat-main .workchat-overview--meeting {
+        justify-content: flex-start !important;
+        padding-top: 28px !important;
+    }
+}

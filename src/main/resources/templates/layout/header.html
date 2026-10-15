@@ -17,31 +17,47 @@
 		
 		
 		<div class="team-header-right">
-		    <button type="button">알림</button>
-		    <button type="button">워크챗</button>
+		    <button type="button" class="header-action-button" title="알림 (디자인 미리보기)"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span>알림</span></button>
+		    <button type="button" class="header-action-button header-action-button--chat" id="workchatToggle" aria-controls="workchatModal" aria-expanded="false" title="워크챗 열기"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 0 1-8 8c-1 0-2.1-.2-3.1-.6L4 20l1-4.2A8 8 0 1 1 20 11.5Z"/></svg><span>워크챗</span></button>
 		
 		    <div class="profile-dropdown">
-		        <button type="button" class="team-profile" id="profileToggle"
-		                aria-expanded="false" aria-controls="profileMenu">
-		            프로필
-		        </button>
-		
-		        <div class="profile-menu" id="profileMenu" hidden>
-		            <a th:href="@{/member/mypage}"> 마이페이지 </a>
+                <!-- 프로필 버튼 ID/클래스 유지: 기존 header.js 드롭다운과 연동 -->
+                <button type="button" class="team-profile header-profile-trigger" id="profileToggle"
+                        aria-expanded="false" aria-controls="profileMenu" title="내 프로필 메뉴">
+                    <span class="header-profile-avatar" aria-hidden="true">
+                        <!-- 프로필 사진이 등록되면 사진 표시 -->
+                        <img class="header-profile-photo" alt=""
+                             th:if="${profileImageUrl != null and !#strings.isEmpty(profileImageUrl)}"
+                             th:src="${profileImageUrl}">
+                        <!-- 사진이 없으면 이름 끝 두 글자 (이름 미연결 시 '나') -->
+                        <span class="header-profile-fallback"
+                              th:unless="${profileImageUrl != null and !#strings.isEmpty(profileImageUrl)}"
+                              th:text="${profileName != null and !#strings.isEmpty(profileName) ? ( #strings.length(profileName) > 2 ? #strings.substring(profileName, #strings.length(profileName) - 2) : profileName ) : '나'}">나</span>
+                    </span>
+                    <span class="header-profile-label">
+                        <strong class="header-profile-name"
+                                th:text="${profileName != null and !#strings.isEmpty(profileName) ? profileName : '내 프로필'}">내 프로필</strong>
+                        <small class="header-profile-subtitle">내 계정</small>
+                    </span>
+                    <svg class="header-profile-chevron" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
 
-		            <div class="profile-menu-divider"></div>
-		
-		            <form th:action="@{/member/logout}" method="post">
-		                <button type="submit" class="logout-button"> 로그아웃 </button>
-		            </form>
-		        </div>
-		    </div>
+                <div class="profile-menu" id="profileMenu" hidden>
+                    <a th:href="@{/member/mypage}">마이페이지</a>
+                    <div class="profile-menu-divider"></div>
+                    <form th:action="@{/member/logout}" method="post">
+                        <button type="submit" class="logout-button">로그아웃</button>
+                    </form>
+                </div>
+            </div>
 		</div>
 	</div>
 
+<link rel="stylesheet" th:href="@{/dist/css/workchat-modal.css(v=13)}">
+<link rel="stylesheet" th:href="@{/dist/css/header-profile.css(v=9)}">
+<!-- 실제 모달 구조는 templates/work/workchat-modal.html 에서 관리 -->
+<th:block th:replace="~{work/workchat-modal :: workchatModal}"></th:block>
 <script type="text/javascript" th:src="@{/dist/js/header.js}"></script>
+<script type="text/javascript" th:src="@{/dist/js/workchat-modal.js(v=13)}"></script>
 </th:block>
-
-
-	
 </html>
