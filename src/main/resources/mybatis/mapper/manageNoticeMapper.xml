@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.ManageNoticeMapper">
+
+	<sql id="where-list">
+        <if test="kwd != null and kwd != ''">
+            <choose>
+                <when test="schType == 'all'">
+                    AND (INSTR(title, #{kwd}) &gt; 0 OR INSTR(content, #{kwd}) &gt; 0)
+                </when>
+                <when test="schType == 'title'">
+                    AND INSTR(title, #{kwd}) &gt; 0
+                </when>
+                <when test="schType == 'content'">
+                    AND INSTR(content, #{kwd}) &gt; 0
+                </when>
+            </choose>
+        </if>
+    </sql>
+
+	<select id="dataCount" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM notice
+        WHERE deleted IS NULL
+        <include refid="where-list"/>
+    </select>
+
+	<!-- 공지사항 목록 조회 -->
+	<select id="selectNoticeList" parameterType="map" resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT n.notice_id, n.workspace_id, n.project_id, md.name AS member_name, n.task_id, n.member_id, n.notice_type, n.title, n.status, n.view_count, n.created,
+            (SELECT COUNT(notice_file_id)
+             FROM notice_files f 
+             WHERE f.notice_id = n.notice_id) AS file_count
+        FROM notice n
+        LEFT JOIN member_details md ON n.member_id = md.member_id
+        WHERE n.deleted IS NULL
+        <include refid="where-list"/>
+        ORDER BY n.notice_id DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 공지사항 상세 조회 -->
+    <select id="selectNoticeDetail" parameterType="long" resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT n.notice_id, n.workspace_id, n.project_id, n.task_id, n.member_id, 
+            n.notice_type, n.title, n.content, n.created, n.updated, n.status, n.view_count,
+            f.notice_file_id, f.file_size, f.original_name, f.stored_name, f.file_path, f.uploaded
+        FROM notice n
+        LEFT JOIN notice_files f ON n.notice_id = f.notice_id
+        WHERE n.notice_id = #{notice_id} AND n.deleted IS NULL
+    </select>
+    
+    <!-- 조회수 증가 -->
+    <update id="updateViewCount" parameterType="long">
+        UPDATE notice
+        SET view_count = view_count + 1
+        WHERE notice_id = #{notice_id}
+    </update>
+
+    <!-- 공지사항 게시글 등록 -->
+    <insert id="insertNotice" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
+        <selectKey keyProperty="notice_id" resultType="long" order="BEFORE">
+            SELECT seq_notice.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO notice (notice_id, notice_type, workspace_id, project_id, task_id, member_id, 
+            title, content, status, view_count, created)
+        VALUES (#{notice_id}, #{notice_type}, #{workspace_id}, #{project_id}, #{task_id}, #{member_id},
+            #{title}, #{content}, #{status}, 0, SYSDATE)
+    </insert>
+
+    <!-- 공지사항 첨부파일 등록 -->
+    <insert id="insertNoticeFile" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
+        INSERT INTO notice_files (notice_file_id, notice_id, original_name, stored_name, file_path, file_size, uploaded)
+        VALUES (seq_notice_files.NEXTVAL, #{notice_id}, #{original_name}, #{stored_name}, #{file_path}, #{file_size}, SYSDATE)
+    </insert>
+
+    <!-- 공지사항 게시글 수정 -->
+    <update id="updateNotice" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
+        UPDATE notice
+        SET title = #{title}, content = #{content}, status = #{status}, updated = SYSDATE
+        WHERE notice_id = #{notice_id}
+    </update>
+
+    <!-- 공지사항 첨부파일 삭제 -->
+    <delete id="deleteNoticeFile" parameterType="long">
+        DELETE FROM notice_files
+        WHERE notice_id = #{notice_id}
+    </delete>
+
+    <!-- 공지사항 삭제  -->
+    <update id="deleteNotice" parameterType="map">
+        UPDATE notice
+        SET deleted = SYSDATE
+        WHERE notice_id = #{notice_id}
+          AND (
+              member_id = #{requester_member_id}
+              <!-- 조건: 요청자가 해당 워크스페이스의 PM(role=70)인 경우 -->
+              OR EXISTS (
+                  SELECT 1 
+                  FROM workspace_members wm 
+                  WHERE wm.workspace_id = notice.workspace_id 
+                    AND wm.member_id = #{requester_member_id} 
+                    AND wm.role = 70
+              )
+              
+              <!-- 조건: 요청자가 해당 프로젝트의 PM(role=70)인 경우 -->
+              OR EXISTS (
+                  SELECT 1 
+                  FROM project_members pm 
+                  WHERE pm.project_id = notice.project_id 
+                    AND pm.member_id = #{requester_member_id} 
+                    AND pm.role = 70
+              )
+          )
+	</update>
+	
+</mapper>

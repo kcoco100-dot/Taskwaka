@@ -52,7 +52,7 @@
                 공지사항<span aria-hidden="true">⌄</span>
             </button>
             <ul id="notice-submenu" class="submenu">
-                <li><a th:href="@{/notice}" th:classappend="${activeMenu == 'notice' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'notice' ? 'page' : null}">공지사항 조회</a></li>
+                 <li><a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}" th:classappend="${activeMenu == 'noticeList' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeList' ? 'page' : null}">공지사항 조회</a></li>
                 <li><a th:href="@{/noticeCreate}" th:classappend="${activeMenu == 'noticeCreate' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeCreate' ? 'page' : null}">공지등록</a></li>
                 <li><a th:href="@{/noticeEdit}" th:classappend="${activeMenu == 'noticeEdit' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeEdit' ? 'page' : null}">공지수정</a></li>
             </ul>

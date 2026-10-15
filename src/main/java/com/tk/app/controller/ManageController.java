@@ -236,9 +236,5 @@ public class ManageController {
 		return "manage/pmDashboard";
 	}
 	
-	// 공지사항 조회
-	@GetMapping("/notice")
-	public String noticeList() {
-		return "manage/noticeList";
-	}
+
 }
