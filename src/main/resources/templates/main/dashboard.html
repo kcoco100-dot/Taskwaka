@@ -36,7 +36,7 @@
 							<th:block th:text="${remainingCount}">03</th:block>
 							<span>건</span>
 						</p>
-						<p class="overview-stat-description">진행 중 2 · 검토 중 1</p>
+						<p class="overview-stat-description" th:text="|할일 ${view} · 진행 중 ${working} · 검토 중 ${preview}|">진행 중 2 · 검토 중 1</p>
 					</article>
 
 					<article class="overview-stat">
@@ -61,24 +61,24 @@
 							</span>
 						</div>
 						<p class="overview-stat-value">
-							02
+							<th:block th:text="${#lists.size(todayTasks)}">02</th:block>
 							<span>건</span>
 						</p>
-						<p class="overview-stat-description">회의 1 · 마감 1</p>
+						<p class="overview-stat-description">업무 기간에 포함된 오늘의 담당 업무</p>
 					</article>
 
 					<article class="overview-stat">
 						<div class="overview-stat-heading">
-							<span>이번 달 완료</span>
+							<span>이번 달 마감 중 완료</span>
 							<span class="overview-stat-icon overview-tone-green">
 								<span class="overview-icon" aria-hidden="true">✓</span>
 							</span>
 						</div>
 						<p class="overview-stat-value">
-							12
+							<th:block th:text="${monthlyCompletedCount}">12</th:block>
 							<span>건</span>
 						</p>
-						<p class="overview-stat-description">이번 달 목표 20건 중</p>
+						<p class="overview-stat-description">종료일이 이번 달인 담당 업무 기준</p>
 					</article>
 				</div>
 				<div class="overview-grid">

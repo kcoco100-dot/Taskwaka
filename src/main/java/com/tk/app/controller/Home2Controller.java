@@ -150,6 +150,9 @@ public class Home2Controller {
 		// 업무 정보 가져오기
 		List<MyTaskDto> todayTasks = new ArrayList<>();
 		
+		// 완료 업무
+		int monthlyCompletedCount = 0;
+		
 		for(MyTaskDto task : myTasks) {
 			// 시작일
 			LocalDate start = LocalDate.parse(task.getStartAt());
@@ -160,9 +163,16 @@ public class Home2Controller {
 			if(!today.isBefore(start) && !today.isAfter(end)) {
 				todayTasks.add(task);
 			}
+			
+			if(task.getStatus() != null && task.getStatus() == 3
+					&& end.getYear() == today.getYear()
+					&& end.getMonthValue() == today.getMonthValue()) {
+				monthlyCompletedCount++;
+			}
 		}
 		
 		model.addAttribute("todayTasks", todayTasks);
+		model.addAttribute("monthlyCompletedCount", monthlyCompletedCount);
 
 		// 참여 프로젝트 화면에서 사용중인 service 재사용
 		// 회원이 참여하는 프로젝트 목록 가져오기
