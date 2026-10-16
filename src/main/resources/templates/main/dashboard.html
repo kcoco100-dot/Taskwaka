@@ -19,7 +19,7 @@
 						<p class="page-description">오늘 해야 할 일부터 우리 팀의 성장까지, 함께 확인해보세요.</p>
 					</div>
 					<div class="overview-date">
-						<span class="overview-example">예시 현황</span>
+						<span class="overview-example">업무 현황</span>
 						<span th:text="${today}">2026.10.07 · 수요일</span>
 					</div>
 				</div>
@@ -182,7 +182,7 @@
 								<span class="overview-icon" aria-hidden="true">→</span>
 							</a>
 						</div>
-						<div class="overview-week" aria-label="2026년 10월 5일부터 11일까지">
+						<div class="overview-week" th:attr="aria-label=|${weekDates[0]}부터 ${weekDates[6]}까지|">
 							<div th:each="date:${weekDates}" th:classappend="${date == today ? 'overview-week-today' : ''}">
 							
 								<!-- 캘린더 날짜 표시 -->
@@ -200,14 +200,24 @@
 							</div>
 						</div>
 						<ul class="overview-schedule-list">
+							<li th:if="${#lists.isEmpty(todayTasks)}">
+								오늘에 해당하는 담당 업무가 없습니다.
+							</li>
 							<li th:each="task:${todayTasks}">
-								<span class="overview-schedule-time">10:00</span>
+								<span class="overview-schedule-time">업무</span>
 								<span class="overview-schedule-line" aria-hidden="true"></span>
 								<div>
 									<h3 th:text="${task.title}">개발팀 주간 회의</h3>
 									<p th:text="${task.subject}">자바 프로젝트 · 회의실 A</p>
 								</div>
-								<span class="overview-badge overview-badge-ongoing">회의</span>
+								
+								<th:block th:switch="${task.status}">
+						            <span th:case="0" class="overview-badge overview-badge-planned">할일</span>
+						            <span th:case="1" class="overview-badge overview-badge-ongoing">진행중</span>
+						            <span th:case="2" class="overview-badge overview-badge-review">검토중</span>
+						            <span th:case="3" class="overview-badge overview-badge-ongoing">완료</span>
+							     </th:block>
+							     
 							</li>
 						</ul>
 					</article>
