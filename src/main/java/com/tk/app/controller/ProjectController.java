@@ -79,9 +79,13 @@ public class ProjectController {
             @RequestParam(value = "status", defaultValue = "0") Integer status,
             @RequestParam(value = "startAt", required = false) String startAt,
             @RequestParam(value = "endAt", required = false) String endAt,
-            @RequestParam(value = "currentProjectMemberId", defaultValue = "1") Long currentProjectMemberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
+    	SessionInfo currentProjectMember = userDetails.getMember();
+    	
+    	Long currentProjectMemberId = currentProjectMember.getMember_id();
+    	
         SubTaskDto dto = new SubTaskDto();
         dto.setProjectId(projectId);
         dto.setTaskId(taskId);
