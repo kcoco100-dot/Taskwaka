@@ -1,8 +1,11 @@
 package com.tk.app.service;
 
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.ProjectDto;
 import com.tk.app.domain.dto.SubTaskDto;
@@ -10,7 +13,7 @@ import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.domain.dto.TaskMemberDto;
 import com.tk.app.mapper.ProjectMapper;
 import com.tk.app.mapper.TaskMapper;
-import com.tk.app.service.TaskService;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -154,5 +157,96 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     public ProjectDto getProjectById (Long projectId) {
     	return projectMapper.selectProjectById(projectId);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public com.tk.app.domain.dto.DashboardSummaryDto getDashboardSummary(Long projectId) {
+        return taskMapper.selectProjectDashboardSummary(projectId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SubTaskDto> getUpcomingSubTasks(Long projectId) {
+        return taskMapper.selectUpcomingSubTasks(projectId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.tk.app.domain.dto.NoticeDto> getRecentProjectNotices(Long projectId) {
+        return taskMapper.selectRecentProjectNotices(projectId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.tk.app.domain.dto.CalendarEventDto> getCalendarEvents(Long projectId) {
+        return taskMapper.selectCalendarEventsByProject(projectId);
+    }
+
+    @Override
+    public com.tk.app.domain.dto.CalendarEventDto createPersonalEvent(com.tk.app.domain.dto.CalendarEventDto dto) {
+        dto.setScheduleType("PERSONAL");
+        taskMapper.insertCalendarEvent(dto);
+        return dto;
+    }
+
+    @Override
+    public boolean deletePersonalEvent(Long scheduleId) {
+        return taskMapper.deleteCalendarEvent(scheduleId) > 0;
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isTeamLeaderOrAbove(Long projectMemberId) {
+        if (projectMemberId == null) return false;
+        Map<String, Object> info = taskMapper.selectProjectMemberRoleInfo(projectMemberId);
+        if (info == null || info.get("role") == null) {
+            // DB에 테스트 멤버 role이 아직 없을 경우 기본 번호(1번)는 리더로 허용
+            return projectMemberId == 1L;
+        }
+        int role = Integer.parseInt(String.valueOf(info.get("role")));
+        return role >= 30; // 30=TL(팀 리더), 50=DT, 70=PM
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Long getMemberIdByProjectMemberId(Long projectMemberId) {
+        if (projectMemberId == null) return 1L;
+        Map<String, Object> info = taskMapper.selectProjectMemberRoleInfo(projectMemberId);
+        if (info != null && info.get("memberId") != null) {
+            return Long.valueOf(String.valueOf(info.get("memberId")));
+        }
+        return 1L;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader) {
+        return taskMapper.selectTaskNoticesByProject(projectId, isLeader);
+    }
+
+    @Override
+    public Map<String, Object> getTaskNoticeDetail(Long noticeId, boolean incrementView) {
+        if (incrementView) {
+            taskMapper.incrementNoticeViewCount(noticeId);
+        }
+        return taskMapper.selectTaskNoticeDetail(noticeId);
+    }
+
+    @Override
+    public Map<String, Object> createTaskNotice(Map<String, Object> param) {
+        taskMapper.insertTaskNotice(param);
+        Long noticeId = Long.valueOf(String.valueOf(param.get("noticeId")));
+        return taskMapper.selectTaskNoticeDetail(noticeId);
+    }
+
+    @Override
+    public void updateTaskNotice(Map<String, Object> param) {
+        taskMapper.updateTaskNotice(param);
+    }
+
+    @Override
+    public void deleteTaskNotice(Long noticeId) {
+        taskMapper.softDeleteTaskNotice(noticeId);
     }
 }

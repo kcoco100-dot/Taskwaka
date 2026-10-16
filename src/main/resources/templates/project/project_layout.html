@@ -240,7 +240,7 @@ body {
 			
 			<div class="menu-group">
 				<div class="return-home">
-					<a th:href="@{/{domainKey}/home/workspace(domainKey=${domainKey})}"> 홈으로 돌아가기 </a>
+					<a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}"> 홈으로 돌아가기 </a>
 				</div>
 			</div>
 		</aside>
@@ -294,9 +294,11 @@ body {
 					<div th:case="'calendar'">
 						<div th:replace="~{project/fragments/calendar :: content}"></div>
 					</div>
+					<!-- 
 					<div th:case="'document'">
 						<div th:replace="~{project/fragments/document :: content}"></div>
 					</div>
+					 -->
 					<div th:case="'notice'">
 						<div th:replace="~{project/fragments/notice :: content}"></div>
 					</div>

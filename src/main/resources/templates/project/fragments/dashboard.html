@@ -1,63 +1,171 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-  <div th:fragment="content">
-    <style>
-      .feed-container { display: flex; gap: 24px; max-width: 1040px; }
-      .feed-main { flex: 1; display: flex; flex-direction: column; gap: 16px; }
-      .panel-card { background: #FFFFFF; border: 1px solid var(--border-main); border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03); }
-      .post-form-header { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border-main); padding-bottom: 8px; }
-      .post-type-btn { padding: 6px 12px; border: none; border-radius: 6px; background: transparent; color: var(--text-sub); font-size: 13px; font-weight: 600; cursor: pointer; }
-      .post-type-btn.active { background: var(--primary-green-light); color: var(--primary-green); }
-      .post-textarea { width: 100%; height: 60px; border: none; outline: none; resize: none; font-size: 13.5px; color: var(--text-main); }
-      .btn-submit { padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary-green); color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-      .btn-submit:hover { background: var(--primary-green-dark); }
-      .pinned-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; background: var(--primary-green-light); color: var(--primary-green); font-size: 11px; font-weight: 700; margin-right: 6px; }
-      .feed-side { width: 260px; height: fit-content; }
-    </style>
+	<div th:fragment="content">
+		<link rel="stylesheet" th:href="@{/dist/css/project/project_dashboard.css}">
 
-    <div class="feed-container">
-      <div class="feed-main">
-        <div class="panel-card">
-          <div class="post-form-header">
-            <button class="post-type-btn active">📝 글 작성</button>
-            <button class="post-type-btn">📋 업무 등록</button>
-            <button class="post-type-btn">📅 일정 등록</button>
-          </div>
-          <textarea class="post-textarea" placeholder="팀원들에게 공유할 내용을 작성해 주세요..."></textarea>
-          <div style="text-align: right; margin-top: 8px;">
-            <button class="btn-submit">등록하기</button>
-          </div>
-        </div>
+		<div class="dash-split-wrapper" id="dashSplitWrapper">
+			<!-- 대시보드 메인 영역 -->
+			<div class="dash-main-container">
 
-        <div class="panel-card" style="padding: 14px 18px; background: var(--bg-card-sub);">
-          <span class="pinned-badge">📌 공지</span>
-          <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">
-            Taskwaka가 처음이라면 이것부터 따라 해 보세요 🤗
-          </span>
-        </div>
+				<!-- 1. 상단 프로젝트 진행률 요약 섹션 -->
+				<section class="dash-progress-card">
+					<div class="dash-card-header">
+						<div>
+							<h3 class="dash-section-title">📊 현재 프로젝트 진행 현황</h3>
+							<p class="dash-section-sub">전체 업무 및 하위업무 기준 실시간 달성률입니다.</p>
+						</div>
+						<div class="dash-rate-highlight">
+							<span class="rate-label">전체 완료율</span>
+							<strong class="rate-number" th:text="|${summary != null ? summary.completionRate : 0}%|">0%</strong>
+						</div>
+					</div>
 
-        <div class="panel-card">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <strong style="color: var(--text-main); font-size: 14px;">Taskwaka 운영자</strong>
-            <span style="color: var(--text-muted); font-size: 12px;">2026-10-01 17:30</span>
-          </div>
-          <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-sub);">
-            만나서 반가워요 👋 이 공간은 Taskwaka 이용을 돕기 위한 프로젝트입니다. 캘린더, 업무, 파일 기능을 자유롭게 테스트해 보세요.
-          </p>
-        </div>
-      </div>
+					<!-- 전체 진행률 프로그레스 바 -->
+					<div class="dash-total-bar-bg">
+						<div class="dash-total-bar-fill" th:style="|width: ${summary != null ? summary.completionRate : 0}%;|"></div>
+					</div>
 
-      <aside class="feed-side panel-card">
-        <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; color: var(--text-main);">참여자 (1)</div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary-green-light); color: var(--primary-green); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">
-            혜림
-          </div>
-          <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">박혜림 (나)</span>
-        </div>
-      </aside>
-    </div>
-  </div>
+					<!-- 4개 통계 KPI 그리드 -->
+					<div class="dash-kpi-grid">
+						<div class="kpi-item">
+							<span class="kpi-icon total">📋</span>
+							<div class="kpi-info">
+								<span class="kpi-label">전체 업무</span>
+								<strong class="kpi-val" th:text="|${summary != null ? summary.totalCount : 0}개|">0개</strong>
+							</div>
+						</div>
+
+						<div class="kpi-item">
+							<span class="kpi-icon done">✅</span>
+							<div class="kpi-info">
+								<span class="kpi-label">완료된 업무</span>
+								<strong class="kpi-val text-green" th:text="|${summary != null ? summary.completedCount : 0}개|">0개</strong>
+							</div>
+						</div>
+
+						<div class="kpi-item">
+							<span class="kpi-icon progress">🔥</span>
+							<div class="kpi-info">
+								<span class="kpi-label">진행 중인 업무</span>
+								<strong class="kpi-val text-blue" th:text="|${summary != null ? summary.inProgressCount : 0}개|">0개</strong>
+							</div>
+						</div>
+
+						<div class="kpi-item">
+							<span class="kpi-icon rate">🎯</span>
+							<div class="kpi-info">
+								<span class="kpi-label">대기/요청 업무</span>
+								<strong class="kpi-val text-muted" th:text="|${summary != null ? summary.pendingCount : 0}개|">0개</strong>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- 2. 하단 2단 그리드: [좌] 업무 목록(임박한 순) / [우] 프로젝트 공지 -->
+				<div class="dash-bottom-grid">
+
+					<!-- [좌측] 마감 임박 업무 목록 (클릭 시 우측 상세 패널 오픈) -->
+					<section class="dash-panel-card">
+						<div class="dash-panel-header">
+							<h4 class="dash-panel-title">⏰ 마감 임박 업무 목록</h4>
+							<a class="btn-dash-more" th:href="@{|/${domainKey}/project/${projectId}?tab=task|}">전체보기 →</a>
+						</div>
+
+						<div class="dash-list-body">
+							<div class="dash-empty-box" th:if="${upcomingTasks == null or #lists.isEmpty(upcomingTasks)}">
+								마감 예정인 미완료 업무가 없습니다.
+							</div>
+
+							<ul class="dash-upcoming-list" th:if="${upcomingTasks != null and !#lists.isEmpty(upcomingTasks)}">
+								<li class="dash-upcoming-row task-item-row sub-task"
+								    th:each="item : ${upcomingTasks}"
+								    th:attr="data-subtask-id=${item.subTaskId}, data-end=${item.endAt}"
+								    th:onclick="|openSubTaskDetailPanel(${item.subTaskId}, this)|">
+									<div class="up-left">
+										<span class="badge-status"
+										      th:classappend="${item.status == 1} ? 'badge-done' : (${item.status == 2} ? 'badge-feedback' : 'badge-req')"
+										      th:text="${item.status == 1 ? '● 진행' : (item.status == 2 ? '● 피드백' : '● 요청')}">● 진행</span>
+										<span class="up-title task-title-text" th:text="${item.title}">업무명</span>
+									</div>
+									<div class="up-right">
+										<span class="up-assignee col-assignee" th:text="${item.assigneeName}">담당자</span>
+										<span class="up-due date-cell" th:text="${item.endAt != null ? item.endAt : '-'}">2026-10-20</span>
+										<span class="dday-chip">임박</span>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</section>
+
+					<!-- [우측] 프로젝트 공지사항 -->
+					<section class="dash-panel-card">
+						<div class="dash-panel-header">
+							<h4 class="dash-panel-title">📢 프로젝트 공지사항</h4>
+						</div>
+
+						<div class="dash-list-body">
+							<div class="dash-empty-box" th:if="${notices == null or #lists.isEmpty(notices)}">
+								등록된 공지사항이 없습니다.
+							</div>
+
+							<ul class="dash-notice-list" th:if="${notices != null and !#lists.isEmpty(notices)}">
+								<li class="dash-notice-row" th:each="notice : ${notices}">
+									<div class="notice-top">
+										<span class="notice-badge">공지</span>
+										<span class="notice-title" th:text="${notice.title}">공지 제목</span>
+									</div>
+									<div class="notice-meta">
+										<span th:text="${notice.createdAt != null ? notice.createdAt : '-'}">2026-10-16</span>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</section>
+
+				</div>
+			</div>
+
+			<!-- 공통 우측 오버레이 상세 패널 Include (임박 업무 클릭 시 슬라이드 오픈) -->
+			<aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
+		</div>
+
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
+			const currentProjectId = /*[[${projectId}]]*/ 1;
+			const currentProjectMemberId = /*[[${currentProjectMemberId}]]*/ 1;
+			/*]]>*/
+		</script>
+		<script>
+			// 마감일 기준 D-Day 배지 자동 계산
+			document.addEventListener('DOMContentLoaded', () => {
+				const today = new Date();
+				today.setHours(0, 0, 0, 0);
+
+				document.querySelectorAll('.dash-upcoming-row').forEach(row => {
+					const endStr = row.getAttribute('data-end');
+					const chip = row.querySelector('.dday-chip');
+					if (!endStr || !chip) return;
+
+					const parts = endStr.split('-');
+					if (parts.length !== 3) return;
+					const endDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+					const diff = Math.floor((endDate - today) / (1000 * 60 * 60 * 24));
+
+					if (diff < 0) {
+						chip.textContent = '지연 (D+' + Math.abs(diff) + ')';
+						chip.classList.add('overdue');
+					} else if (diff === 0) {
+						chip.textContent = 'D-Day';
+						chip.classList.add('urgent');
+					} else {
+						chip.textContent = 'D-' + diff;
+						if (diff <= 3) chip.classList.add('urgent');
+					}
+				});
+			});
+		</script>
+	</div>
 </body>
 </html>

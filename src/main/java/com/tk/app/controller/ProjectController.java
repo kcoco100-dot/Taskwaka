@@ -1,10 +1,14 @@
 package com.tk.app.controller;
 
 import com.tk.app.domain.dto.ProjectDto;
+import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.domain.dto.SubTaskDto;
+import com.tk.app.security.CustomUserDetails;
 import com.tk.app.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,25 +25,40 @@ public class ProjectController {
     public String projectDetail(
             @PathVariable("domainKey") String domainKey,
             @PathVariable("projectId") Long projectId,
-            @RequestParam(name = "tab", defaultValue = "feed") String tab,
-            @RequestParam(name = "currentMemberId", defaultValue = "1") Long currentProjectMemberId,
+            @RequestParam(name = "tab", defaultValue = "dashboard") String tab,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
-
-        if (!tab.matches("feed|dashboard|task|gantt|calendar|file")) {
-            tab = "feed";
+        
+    	SessionInfo currentProjectMember = userDetails.getMember();
+    	
+    	Long currentProjectMemberId = currentProjectMember.getMember_id();
+    	
+    	System.out.println("currentProjectMemberId: " + currentProjectMemberId);
+    	
+     // 탭 정규식 허용 범위에 notice 추가
+        if (!tab.matches("notice|dashboard|task|gantt|calendar|file|document")) {
+            tab = "dashboard";
         }
 
+        boolean isTeamLeader = taskService.isTeamLeaderOrAbove(currentProjectMemberId);
+        ProjectDto pDto = taskService.getProjectById(projectId);
+        
+        model.addAttribute("isTeamLeader", isTeamLeader);
         model.addAttribute("domainKey", domainKey);
         model.addAttribute("projectId", projectId);
         model.addAttribute("activeTab", tab);
-        
-        ProjectDto pDto = taskService.getProjectById(projectId);
-        
-        
         model.addAttribute("projectName", pDto.getSubject());
         model.addAttribute("currentProjectMemberId", currentProjectMemberId);
-
-        if ("task".equals(tab) || "gantt".equals(tab)) {
+        
+        if ("dashboard".equals(tab)) {
+            model.addAttribute("summary", taskService.getDashboardSummary(projectId));
+            model.addAttribute("upcomingTasks", taskService.getUpcomingSubTasks(projectId));
+            model.addAttribute("notices", taskService.getRecentProjectNotices(projectId));
+            model.addAttribute("tasks", taskService.getTaskList(projectId));
+        } else if ("task".equals(tab) || "gantt".equals(tab) || "calendar".equals(tab)) {
+            model.addAttribute("tasks", taskService.getTaskList(projectId));
+        }else if ("notice".equals(tab)) {
+            model.addAttribute("taskNotices", taskService.getTaskNoticeList(projectId, isTeamLeader));
             model.addAttribute("tasks", taskService.getTaskList(projectId));
         }
 

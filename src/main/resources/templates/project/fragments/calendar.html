@@ -1,43 +1,148 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-<style>
-.cal-panel { background: #FFFFFF; border: 1px solid var(--border-main); border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03); }
-.cal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.cal-title-h3 { font-size: 20px; font-weight: 700; color: var(--text-main); }
-.cal-grid-box { border: 1px solid var(--border-main); border-radius: 10px; overflow: hidden; }
-.cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--bg-sidebar); border-bottom: 1px solid var(--border-main); text-align: center; padding: 10px 0; font-size: 13px; font-weight: 700; color: var(--text-sub); }
-.cal-month-cells { display: grid; grid-template-columns: repeat(7, 1fr); min-height: 280px; }
-.cal-cell-item { border-right: 1px solid var(--border-main); border-bottom: 1px solid var(--border-main); padding: 8px; min-height: 80px; font-size: 12px; }
-.cal-cell-item:nth-child(7n) { border-right: none; }
-.event-chip { margin-top: 4px; padding: 3px 6px; border-radius: 4px; background: var(--primary-green-light); color: var(--primary-green); font-size: 11px; font-weight: 700; }
-</style>
-  <div th:fragment="content">
+	<div th:fragment="content">
+		<link rel="stylesheet" th:href="@{/dist/css/project/calendar.css}">
 
-    <div class="cal-panel">
-      <div class="cal-top">
-        <h3 class="cal-title-h3">2026년 10월</h3>
-        <button class="btn-submit" style="padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer;">＋ 일정 추가</button>
-      </div>
+		<div class="cal-split-view-wrapper" id="calSplitViewWrapper">
 
-      <div class="cal-grid-box">
-        <div class="cal-weekdays">
-          <div style="color: var(--status-danger);">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div style="color: #6A8695;">토</div>
-        </div>
-        <div class="cal-month-cells">
-          <div class="cal-cell-item" style="color: var(--text-muted);">27</div>
-          <div class="cal-cell-item" style="color: var(--text-muted);">28</div>
-          <div class="cal-cell-item" style="color: var(--text-muted);">29</div>
-          <div class="cal-cell-item">30</div>
-          <div class="cal-cell-item" style="background: var(--bg-card-sub);">
-            <strong style="color: var(--primary-green);">1</strong>
-            <div class="event-chip">영상 시청 마감</div>
-          </div>
-          <div class="cal-cell-item">2</div>
-          <div class="cal-cell-item" style="color: #6A8695;">3</div>
-        </div>
-      </div>
-    </div>
-  </div>
+			<!-- [좌측/본문] 월간 캘린더 메인 영역 -->
+			<div class="cal-main-page">
+
+				<!-- 상단 캘린더 컨트롤 툴바 -->
+				<div class="cal-toolbar">
+					<div class="cal-toolbar-left">
+						<div class="cal-nav-group">
+							<button type="button" class="btn-cal-nav" onclick="changeCalendarMonth(-1)" title="이전 달">◀</button>
+							<h3 class="cal-current-ym" id="calCurrentYearMonth">2026년 10월</h3>
+							<button type="button" class="btn-cal-nav" onclick="changeCalendarMonth(1)" title="다음 달">▶</button>
+							<button type="button" class="btn-cal-today" onclick="goCalendarToday()">오늘</button>
+						</div>
+
+						<!-- 범례 & 필터 -->
+						<div class="cal-legend-group">
+							<label class="cal-filter-label">
+								<input type="checkbox" id="filterMainTask" checked onchange="renderCalendarGrid()">
+								<span class="dot-cal-main"></span>메인 업무
+							</label>
+							<label class="cal-filter-label">
+								<input type="checkbox" id="filterSubTask" checked onchange="renderCalendarGrid()">
+								<span class="dot-cal-sub"></span>하위 업무
+							</label>
+							<label class="cal-filter-label">
+								<input type="checkbox" id="filterPersonal" checked onchange="renderCalendarGrid()">
+								<span class="dot-cal-personal"></span>개인 일정
+							</label>
+						</div>
+					</div>
+
+					<div class="cal-toolbar-right">
+						<button type="button" class="btn-add-personal-event" onclick="openPersonalEventModal()">＋ 개인 일정 추가</button>
+					</div>
+				</div>
+
+				<!-- 월간 캘린더 보드 -->
+				<div class="cal-board-box">
+					<!-- 요일 헤더 (일 ~ 토) -->
+					<div class="cal-weekday-header">
+						<div class="sun">일</div>
+						<div>월</div>
+						<div>화</div>
+						<div>수</div>
+						<div>목</div>
+						<div>금</div>
+						<div class="sat">토</div>
+					</div>
+
+					<!-- 날짜 그리드 (JS에서 42칸 동적 렌더링) -->
+					<div class="cal-days-grid" id="calDaysGrid"></div>
+				</div>
+
+			</div>
+
+			<!-- [우측] 공통 모듈로 분리된 업무/하위업무 상세 드로어 패널 Include -->
+			<aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
+
+		</div>
+
+		<!-- ==========================================================================
+		     [모달 1] 개인 일정 추가 모달 (calendar_events 테이블 연동)
+		     ========================================================================== -->
+		<div class="custom-modal-backdrop" id="personalEventCreateModal" onclick="if(event.target === this) closePersonalEventModal()">
+			<div class="cal-modal-card">
+				<div class="detail-top-nav">
+					<div style="display:flex; align-items:center; gap:6px;">
+						<span>🗓️</span>
+						<span>새 개인 일정 등록</span>
+					</div>
+					<button type="button" class="detail-close-btn" onclick="closePersonalEventModal()" title="닫기 (ESC)">✕</button>
+				</div>
+
+				<div class="cal-modal-body">
+					<div class="cal-form-group">
+						<label>일정 제목 <span class="req-star">*</span></label>
+						<input type="text" class="cal-input" id="personalEventTitleInput" placeholder="개인 일정 제목을 입력하세요">
+					</div>
+
+					<div class="cal-form-row">
+						<div class="cal-form-group">
+							<label>시작일 <span class="req-star">*</span></label>
+							<input type="date" class="cal-input" id="personalEventStartInput">
+						</div>
+						<div class="cal-form-group">
+							<label>종료일 <span class="req-star">*</span></label>
+							<input type="date" class="cal-input" id="personalEventEndInput">
+						</div>
+					</div>
+
+					<div class="cal-form-group">
+						<label>일정 메모</label>
+						<textarea class="cal-textarea" id="personalEventContentInput" placeholder="개인 일정에 대한 상세 메모를 입력하세요..."></textarea>
+					</div>
+				</div>
+
+				<div class="cal-modal-footer">
+					<button type="button" class="btn-modal-cancel" onclick="closePersonalEventModal()">취소</button>
+					<button type="button" class="btn-modal-submit" onclick="submitPersonalEventModal()">일정 등록</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ==========================================================================
+		     [모달 2] 개인 일정 상세 보기 & 삭제 모달
+		     ========================================================================== -->
+		<div class="custom-modal-backdrop" id="personalEventDetailModal" onclick="if(event.target === this) closePersonalDetailModal()">
+			<div class="cal-modal-card" style="width: 440px;">
+				<div class="detail-top-nav">
+					<div style="display:flex; align-items:center; gap:6px;">
+						<span>📌</span>
+						<span>개인 일정 상세</span>
+					</div>
+					<button type="button" class="detail-close-btn" onclick="closePersonalDetailModal()">✕</button>
+				</div>
+
+				<div class="cal-modal-body">
+					<div class="personal-detail-title" id="viewPersonalTitle">일정 제목</div>
+					<div class="personal-detail-period" id="viewPersonalPeriod">2026-10-16 ~ 2026-10-16</div>
+					<div class="personal-detail-content" id="viewPersonalContent">메모 내용</div>
+				</div>
+
+				<div class="cal-modal-footer">
+					<button type="button" class="btn-modal-confirm" onclick="deleteActivePersonalEvent()">일정 삭제</button>
+					<button type="button" class="btn-modal-cancel" onclick="closePersonalDetailModal()">닫기</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Thymeleaf 전역 변수 바인딩 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
+			const currentProjectId = /*[[${projectId}]]*/ 1;
+			const currentProjectMemberId = /*[[${currentProjectMemberId}]]*/ 1;
+			/*]]>*/
+		</script>
+		<script th:src="@{/dist/js/project/calendar.js}"></script>
+	</div>
 </body>
 </html>

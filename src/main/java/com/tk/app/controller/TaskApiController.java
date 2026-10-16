@@ -152,4 +152,106 @@ public class TaskApiController {
         }
         return ResponseEntity.ok(res);
     }
+    
+    // 11. 캘린더 일정 (업무 연동 + 개인 일정 추가/삭제) API 
+    @GetMapping("/calendar-events")
+    public ResponseEntity<List<com.tk.app.domain.dto.CalendarEventDto>> getCalendarEvents(
+            @PathVariable("projectId") Long projectId) {
+        return ResponseEntity.ok(taskService.getCalendarEvents(projectId));
+    }
+
+    @PostMapping("/calendar-events")
+    public ResponseEntity<com.tk.app.domain.dto.CalendarEventDto> createCalendarEvent(
+            @PathVariable("projectId") Long projectId,
+            @RequestBody com.tk.app.domain.dto.CalendarEventDto dto) {
+        dto.setProjectId(projectId);
+        return ResponseEntity.ok(taskService.createPersonalEvent(dto));
+    }
+
+    @DeleteMapping("/calendar-events/{scheduleId}")
+    public ResponseEntity<Map<String, Object>> deleteCalendarEvent(
+            @PathVariable("scheduleId") Long scheduleId) {
+        boolean deleted = taskService.deletePersonalEvent(scheduleId);
+        Map<String, Object> res = new HashMap<>();
+        res.put("success", deleted);
+        return ResponseEntity.ok(res);
+    }
+    
+ // ================= 12. 업무공지 (notice) CRUD API (팀 리더 전용 작성/수정/삭제) =================
+    @GetMapping("/notices/{noticeId}")
+    public ResponseEntity<Map<String, Object>> getTaskNoticeDetail(
+            @PathVariable("noticeId") Long noticeId,
+            @RequestParam(value = "incView", defaultValue = "true") boolean incView) {
+        return ResponseEntity.ok(taskService.getTaskNoticeDetail(noticeId, incView));
+    }
+
+    @PostMapping("/notices")
+    public ResponseEntity<Map<String, Object>> createTaskNotice(
+            @PathVariable("projectId") Long projectId,
+            @RequestBody Map<String, Object> req) {
+
+        Long currentPmId = req.get("currentProjectMemberId") != null
+                ? Long.valueOf(String.valueOf(req.get("currentProjectMemberId"))) : 1L;
+
+        Map<String, Object> res = new HashMap<>();
+        if (!taskService.isTeamLeaderOrAbove(currentPmId)) {
+            res.put("success", false);
+            res.put("message", "팀 리더만 공지를 작성할 수 있습니다.");
+            return ResponseEntity.status(403).body(res);
+        }
+
+        req.put("projectId", projectId);
+        req.put("memberId", taskService.getMemberIdByProjectMemberId(currentPmId));
+        if (req.get("taskId") != null && String.valueOf(req.get("taskId")).isBlank()) {
+            req.put("taskId", null);
+        }
+
+        Map<String, Object> created = taskService.createTaskNotice(req);
+        res.put("success", true);
+        res.put("notice", created);
+        return ResponseEntity.ok(res);
+    }
+
+    @PutMapping("/notices/{noticeId}")
+    public ResponseEntity<Map<String, Object>> updateTaskNotice(
+            @PathVariable("noticeId") Long noticeId,
+            @RequestBody Map<String, Object> req) {
+
+        Long currentPmId = req.get("currentProjectMemberId") != null
+                ? Long.valueOf(String.valueOf(req.get("currentProjectMemberId"))) : 1L;
+
+        Map<String, Object> res = new HashMap<>();
+        if (!taskService.isTeamLeaderOrAbove(currentPmId)) {
+            res.put("success", false);
+            res.put("message", "팀 리더만 공지를 수정할 수 있습니다.");
+            return ResponseEntity.status(403).body(res);
+        }
+
+        req.put("noticeId", noticeId);
+        if (req.get("taskId") != null && String.valueOf(req.get("taskId")).isBlank()) {
+            req.put("taskId", null);
+        }
+
+        taskService.updateTaskNotice(req);
+        res.put("success", true);
+        res.put("notice", taskService.getTaskNoticeDetail(noticeId, false));
+        return ResponseEntity.ok(res);
+    }
+
+    @DeleteMapping("/notices/{noticeId}")
+    public ResponseEntity<Map<String, Object>> deleteTaskNotice(
+            @PathVariable("noticeId") Long noticeId,
+            @RequestParam(value = "currentProjectMemberId", defaultValue = "1") Long currentPmId) {
+
+        Map<String, Object> res = new HashMap<>();
+        if (!taskService.isTeamLeaderOrAbove(currentPmId)) {
+            res.put("success", false);
+            res.put("message", "팀 리더만 공지를 삭제할 수 있습니다.");
+            return ResponseEntity.status(403).body(res);
+        }
+
+        taskService.deleteTaskNotice(noticeId);
+        res.put("success", true);
+        return ResponseEntity.ok(res);
+    }
 }

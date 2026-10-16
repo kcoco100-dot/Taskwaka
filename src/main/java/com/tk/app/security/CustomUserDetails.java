@@ -17,24 +17,24 @@ import com.tk.app.domain.dto.SessionInfo;
 public class CustomUserDetails implements UserDetails {
 	private static final long serialVersionUID = 1L;
 	
-	private final SessionInfo memebr;
+	private final SessionInfo member;
 	private final List<String> roles; // 여러 권한 처리를 위해 리스트로 관리
 	private final boolean disabled;
 	
 	private CustomUserDetails(Builder builder) {
-		this.memebr = builder.memebr;
+		this.member = builder.member;
 		this.roles = builder.roles;
 		this.disabled = builder.disabled;
 	}
 
 	// Builder 클래스 정의
 	public static class Builder {
-		private SessionInfo memebr;
+		private SessionInfo member;
 		private List<String> roles;
 		private boolean disabled = false;
         
-		public Builder sessionInfo(SessionInfo memebr) {
-			this.memebr = memebr;
+		public Builder sessionInfo(SessionInfo member) {
+			this.member = member;
 			return this;
 		}
 
@@ -49,7 +49,7 @@ public class CustomUserDetails implements UserDetails {
 		}        
 
 		public CustomUserDetails build() {
-			if (this.memebr == null) {
+			if (this.member == null) {
 				throw new IllegalStateException("SessionInfo 객체는 필수입니다.");
 			}
         	
@@ -90,12 +90,12 @@ public class CustomUserDetails implements UserDetails {
 	// @Nullable : 해당값이 null 일 수 있음을 명시
 	@Override
 	public @Nullable String getPassword() {
-		return memebr.getPassword();
+		return member.getPassword();
 	}
 
 	@Override
 	public String getUsername() { 
-		return memebr.getLogin_id();
+		return member.getLogin_id();
 	}
 
 	@Override 
@@ -119,7 +119,7 @@ public class CustomUserDetails implements UserDetails {
 	}
 	
 	public SessionInfo getMember() { 
-		return memebr;
+		return member;
 	}
 	
 	// 나머지 설정 디폴트(재정의 하지 않아도 됨)

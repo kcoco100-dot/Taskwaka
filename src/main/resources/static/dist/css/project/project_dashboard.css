@@ -1,0 +1,306 @@
+/* ==========================================================================
+   [CSS] 대시보드 탭 스타일 (웜 베이지 & 세이지 그린 테마)
+   ========================================================================== */
+.content-area:has(.dash-split-wrapper) {
+	padding: 0 !important;
+	overflow: hidden !important;
+	height: 100% !important;
+}
+
+.dash-split-wrapper {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	min-height: calc(100vh - 154px);
+	position: relative;
+	overflow: hidden;
+	background: var(--bg-body, #FCFBF8);
+}
+
+.dash-main-container {
+	flex: 1;
+	height: 100%;
+	overflow-y: auto;
+	padding: 24px 28px 40px 28px;
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+}
+
+/* 1. 상단 진행률 카드 */
+.dash-progress-card {
+	background: #FFFFFF;
+	border: 1px solid var(--border-main, #E8E2D9);
+	border-radius: 16px;
+	padding: 22px 26px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03);
+}
+
+.dash-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.dash-section-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 800;
+	color: var(--text-main, #594331);
+}
+
+.dash-section-sub {
+	margin: 4px 0 0 0;
+	font-size: 12.5px;
+	color: var(--text-sub, #786B5E);
+}
+
+.dash-rate-highlight {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.rate-label {
+	font-size: 12.5px;
+	font-weight: 700;
+	color: var(--text-sub, #786B5E);
+}
+
+.rate-number {
+	font-size: 26px;
+	font-weight: 800;
+	color: var(--primary-green, #4F6242);
+}
+
+.dash-total-bar-bg {
+	width: 100%;
+	height: 12px;
+	background: var(--bg-sidebar, #F7F3EE);
+	border-radius: 999px;
+	overflow: hidden;
+	border: 1px solid var(--border-main, #E8E2D9);
+}
+
+.dash-total-bar-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #4F6242 0%, #8FA37E 100%);
+	border-radius: 999px;
+	transition: width 0.4s ease;
+}
+
+.dash-kpi-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 14px;
+	margin-top: 4px;
+}
+
+.kpi-item {
+	background: var(--bg-card-sub, #FCFAF6);
+	border: 1px solid var(--border-main, #E8E2D9);
+	border-radius: 12px;
+	padding: 14px 16px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.kpi-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	background: #FFFFFF;
+	border: 1px solid var(--border-main, #E8E2D9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 18px;
+}
+
+.kpi-info {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.kpi-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-sub, #786B5E);
+}
+
+.kpi-val {
+	font-size: 18px;
+	font-weight: 800;
+	color: var(--text-main, #594331);
+}
+
+.text-green { color: var(--primary-green, #4F6242); }
+.text-blue { color: #0284C7; }
+.text-muted { color: var(--text-sub, #786B5E); }
+
+/* 2. 하단 2단 그리드 (임박 업무 + 공지) */
+.dash-bottom-grid {
+	display: grid;
+	grid-template-columns: 1.35fr 1fr;
+	gap: 20px;
+}
+
+.dash-panel-card {
+	background: #FFFFFF;
+	border: 1px solid var(--border-main, #E8E2D9);
+	border-radius: 16px;
+	padding: 20px 22px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03);
+}
+
+.dash-panel-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--border-main, #E8E2D9);
+	padding-bottom: 12px;
+}
+
+.dash-panel-title {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 800;
+	color: var(--text-main, #594331);
+}
+
+.btn-dash-more {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--primary-green, #4F6242);
+	text-decoration: none;
+}
+
+.dash-empty-box {
+	padding: 36px 16px;
+	text-align: center;
+	font-size: 13px;
+	color: var(--text-muted, #A89B8C);
+}
+
+.dash-upcoming-list,
+.dash-notice-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.dash-upcoming-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 11px 14px;
+	border-radius: 10px;
+	border: 1px solid var(--border-light, #F1F3F7);
+	background: #FAF8F5;
+	cursor: pointer;
+	transition: all 0.15s;
+}
+
+.dash-upcoming-row:hover {
+	background: var(--primary-green-light, #EEF4E6);
+	border-color: var(--primary-green-border, #DCE5D2);
+}
+
+.up-left {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	overflow: hidden;
+}
+
+.up-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-main, #594331);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.up-right {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-shrink: 0;
+	font-size: 12px;
+	color: var(--text-sub, #786B5E);
+}
+
+.dday-chip {
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	background: #E2E8F0;
+	color: #475569;
+}
+
+.dday-chip.urgent {
+	background: #FEF3C7;
+	color: #92400E;
+}
+
+.dday-chip.overdue {
+	background: #FEE2E2;
+	color: #DC2626;
+}
+
+.dash-notice-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 11px 14px;
+	border-radius: 10px;
+	border: 1px solid var(--border-light, #F1F3F7);
+	background: #FFFFFF;
+}
+
+.notice-top {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	overflow: hidden;
+}
+
+.notice-badge {
+	padding: 2px 7px;
+	border-radius: 5px;
+	background: var(--primary-green-light, #EEF4E6);
+	color: var(--primary-green, #4F6242);
+	font-size: 11px;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.notice-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-main, #594331);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.notice-meta {
+	font-size: 11.5px;
+	color: var(--text-muted, #A89B8C);
+	flex-shrink: 0;
+}
