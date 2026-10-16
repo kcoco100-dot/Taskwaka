@@ -100,6 +100,31 @@ public class Home2Controller {
 
 		model.addAttribute("myTasks", myTasks);
 		
+		// 오늘 할일 집계 로직
+		int view = 0; // 할일
+		int working = 0; // 진행중
+		int preview = 0; // 검토중
+		
+		// 업무 가져오기
+		for(MyTaskDto task : myTasks) {
+			if(task.getStatus() != null) {
+				if(task.getStatus() == 0) {
+					view++;
+				} else if(task.getStatus() == 1) {
+					working++;
+				} else if(task.getStatus() == 2) {
+					preview++;
+				}
+			}  
+		}
+		
+		// 업무 총 건수 계산
+		int remainingCount = view + working + preview;
+		model.addAttribute("remainingCount", remainingCount);
+		model.addAttribute("view", view);
+		model.addAttribute("working", working);
+		model.addAttribute("preview", preview);
+		
 		// 홈 화면에 대시보드 캘린더 데이터 표시하기
 		LocalDate today = LocalDate.now();
 		
