@@ -1,16 +1,14 @@
 package com.tk.app.security;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
-import com.tk.app.domain.dto.MemberDto;
 import com.tk.app.service.MemberService;
 
 import jakarta.servlet.ServletException;
@@ -45,20 +43,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 					memberService.updateFailureCount(login_id);
 				}
 
-				if (cnt >= 4) {
-
-					MemberDto dto = memberService.findById(login_id);
-
-					if (dto != null) {
-
-						Map<String, Object> map = new HashMap<>();
-
-						map.put("status", 1);
-						map.put("member_id", dto.getMember_id());
-
-						memberService.updateMemberEnabled(map);
-					}
-				}
+				
 
 				errorMsg = "아이디 또는 패스워드가 일치하지 않습니다.";
 			} else if (exception instanceof InternalAuthenticationServiceException) {
@@ -69,17 +54,35 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 				// 인증 거부 - 계정 비활성화
 
 				errorMsg = "계정이 비활성화 되었습니다. 관리자에게 문의 하세요.";
+			} else if (exception instanceof LockedException) {
+				errorMsg = "로그인 5회 실패로 계정이 잠겼습니다.";
 			}
 		} catch (Exception e) {
 			log.info("onAuthenticationFailure : " + errorMsg, e);
 		}
 
-		String loginId = request.getParameter("login_id");
-		String redirectUrl = "/member/login?error";
 
-		if (loginId != null && !loginId.isBlank() && memberService.checkFailureCount(loginId) >= 5) {
-			redirectUrl = "/member/login?error=locked";
+		String redirectUrl = "/member/login?error";
+		
+		try {
+			if (exception instanceof DisabledException) {
+		        redirectUrl = "/member/login?error=disabled";
+			
+			} else if(exception instanceof LockedException) {
+		        redirectUrl = "/member/login?error=locked";
+		        
+		    } else if (exception instanceof BadCredentialsException
+		            && login_id != null
+		            && !login_id.isBlank()
+		            && memberService.checkFailureCount(login_id) >= 5) {
+		
+		        redirectUrl = "/member/login?error=locked";
+		    }
+		
+		} catch (Exception e) {
+		    log.error("로그인 잠금 상태 조회 실패", e);
 		}
+
 
 		response.sendRedirect(request.getContextPath() + redirectUrl);
 

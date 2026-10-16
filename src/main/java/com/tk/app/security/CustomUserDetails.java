@@ -20,11 +20,13 @@ public class CustomUserDetails implements UserDetails {
 	private final SessionInfo member;
 	private final List<String> roles; // 여러 권한 처리를 위해 리스트로 관리
 	private final boolean disabled;
+	private final boolean locked;
 	
 	private CustomUserDetails(Builder builder) {
 		this.member = builder.member;
 		this.roles = builder.roles;
 		this.disabled = builder.disabled;
+		this.locked = builder.locked;
 	}
 
 	// Builder 클래스 정의
@@ -32,6 +34,7 @@ public class CustomUserDetails implements UserDetails {
 		private SessionInfo member;
 		private List<String> roles;
 		private boolean disabled = false;
+		private boolean locked = false;
         
 		public Builder sessionInfo(SessionInfo member) {
 			this.member = member;
@@ -47,6 +50,11 @@ public class CustomUserDetails implements UserDetails {
 			this.disabled = disabled;
 			return this;
 		}        
+		
+		public Builder locked(boolean locked) {
+			this.locked = locked;
+			return this;
+		}
 
 		public CustomUserDetails build() {
 			if (this.member == null) {
@@ -124,7 +132,7 @@ public class CustomUserDetails implements UserDetails {
 	
 	// 나머지 설정 디폴트(재정의 하지 않아도 됨)
 	@Override public boolean isAccountNonExpired() { return true; }
-	@Override public boolean isAccountNonLocked() { return true; }
+	@Override public boolean isAccountNonLocked() { return !locked; }
 	@Override public boolean isCredentialsNonExpired() { return true; }
 
 }

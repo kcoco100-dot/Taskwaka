@@ -52,4 +52,6 @@ public interface MemberMapper {
 	public void insertAuthority(MemberDto dto) throws SQLException;
 	public void deleteAuthority(Map<String, Object> map) throws SQLException;
 	public String findByAuthority(String login_id);
+	// 동일 비밀번호 재설정 금지
+	public String findPasswordByMemberId(Long member_id);
 }

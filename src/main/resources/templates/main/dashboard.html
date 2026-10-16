@@ -20,7 +20,7 @@
 					</div>
 					<div class="overview-date">
 						<span class="overview-example">예시 현황</span>
-						<span>2026.10.07 · 수요일</span>
+						<span th:text="${today}">2026.10.07 · 수요일</span>
 					</div>
 				</div>
 
@@ -33,7 +33,7 @@
 							</span>
 						</div>
 						<p class="overview-stat-value">
-							03
+							<th:block th:text="${remainingCount}">03</th:block>
 							<span>건</span>
 						</p>
 						<p class="overview-stat-description">진행 중 2 · 검토 중 1</p>
@@ -183,55 +183,31 @@
 							</a>
 						</div>
 						<div class="overview-week" aria-label="2026년 10월 5일부터 11일까지">
-							<div>
-								<span>월</span>
-								<strong>5</strong>
-							</div>
-							<div>
-								<span>화</span>
-								<strong>6</strong>
-							</div>
-							<div class="overview-week-today" aria-current="date">
-								<span>수</span>
-								<strong>7</strong>
-								<span class="overview-day-dot" aria-hidden="true"></span>
-							</div>
-							<div>
-								<span>목</span>
-								<strong>8</strong>
-							</div>
-							<div>
-								<span>금</span>
-								<strong>9</strong>
-								<span class="overview-day-dot" aria-hidden="true"></span>
-							</div>
-							<div class="overview-week-weekend">
-								<span>토</span>
-								<strong>10</strong>
-							</div>
-							<div class="overview-week-weekend">
-								<span>일</span>
-								<strong>11</strong>
+							<div th:each="date:${weekDates}" th:classappend="${date == today ? 'overview-week-today' : ''}">
+							
+								<!-- 캘린더 날짜 표시 -->
+								<th:block th:switch="${date.dayOfWeek.value}">
+						            <span th:case="1">월</span>
+						            <span th:case="2">화</span>
+						            <span th:case="3">수</span>
+						            <span th:case="4">목</span>
+						            <span th:case="5">금</span>
+						            <span th:case="6">토</span>
+						            <span th:case="7">일</span>
+						        </th:block>
+
+								<strong th:text="${date.dayOfMonth}">5</strong>
 							</div>
 						</div>
 						<ul class="overview-schedule-list">
-							<li>
+							<li th:each="task:${todayTasks}">
 								<span class="overview-schedule-time">10:00</span>
 								<span class="overview-schedule-line" aria-hidden="true"></span>
 								<div>
-									<h3>개발팀 주간 회의</h3>
-									<p>자바 프로젝트 · 회의실 A</p>
+									<h3 th:text="${task.title}">개발팀 주간 회의</h3>
+									<p th:text="${task.subject}">자바 프로젝트 · 회의실 A</p>
 								</div>
 								<span class="overview-badge overview-badge-ongoing">회의</span>
-							</li>
-							<li>
-								<span class="overview-schedule-time">18:00</span>
-								<span class="overview-schedule-line overview-schedule-line-deadline" aria-hidden="true"></span>
-								<div>
-									<h3>로그인 화면 UI 디자인 마감</h3>
-									<p>자바 프로젝트 · 결과물 공유</p>
-								</div>
-								<span class="overview-badge overview-badge-review">마감</span>
 							</li>
 						</ul>
 					</article>

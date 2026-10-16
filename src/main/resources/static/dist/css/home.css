@@ -136,3 +136,82 @@ body:has(.home-layout) > main {
 .home-layout .sidemenu .project-menu-group > li {
     flex-shrink: 0;
 }
+
+#myTaskCalendar .fc-toolbar-title {
+    color: #594331;
+    font-family: inherit;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+#myTaskCalendar .fc-button-primary {
+    padding: 8px 12px;
+    border: 1px solid #71865B;
+    border-radius: 8px;
+    background: #71865B;
+    color: #FFFFFF;
+    font-size: 14px;
+    box-shadow: none;
+}
+
+#myTaskCalendar .fc-button-primary:not(:disabled):hover,
+#myTaskCalendar .fc-button-primary:not(:disabled):active {
+    border-color: #465B38;
+    background: #465B38;
+}
+
+#myTaskCalendar .fc-button-primary:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+
+#myTaskCalendar .fc-button-primary:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+#myTaskCalendar .fc-col-header-cell {
+    background: #F7F3EE;
+}
+
+#myTaskCalendar .fc-col-header-cell-cushion {
+    padding: 12px 0;
+    color: #594331;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+#myTaskCalendar .fc-daygrid-day-number {
+    padding: 8px 10px;
+    color: #594331;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+#myTaskCalendar .fc-scrollgrid,
+#myTaskCalendar th,
+#myTaskCalendar td {
+    border-color: #E8E2D9;
+}
+
+#myTaskCalendar .fc-daygrid-day.fc-day-today {
+    background: #EEF4E6;
+}
+
+#myTaskCalendar .fc-day-today .fc-daygrid-day-number {
+    color: #465B38;
+    font-weight: 700;
+}
+
+#myTaskCalendar .fc-h-event {
+    border: 1px solid #B6C6A6;
+    border-radius: 6px;
+    background: #8fbc8f;
+}
+
+#myTaskCalendar .fc-h-event .fc-event-main {
+    padding: 3px 6px;
+    color: #465B38;
+    font-size: 13px;
+}
