@@ -2,8 +2,6 @@ package com.tk.app.controller;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +99,45 @@ public class Home2Controller {
 				worksapce.getWorkspaceId(), worksapce.getMemberId());
 
 		model.addAttribute("myTasks", myTasks);
+		
+		// 홈 화면에 대시보드 캘린더 데이터 표시하기
+		LocalDate today = LocalDate.now();
+		
+		// 오늘을 기준으로 보여줌
+		model.addAttribute("today", today);
+		
+		// 오늘이 속한 주의 월요일 구하기
+		// 주를 구할 변수 선언
+		List<LocalDate> weekDates = new ArrayList<>();
+		
+		// 월요일 날짜를 담을 변수 선언
+		// 월요일 계산 = 오늘의 요일 숫자 - 1
+		LocalDate monday = today.minusDays(today.getDayOfWeek().getValue() - 1);
+				
+		// 실제 월요일을 구하는 로직
+		for(int i = 0; i < 7; i++) {
+			weekDates.add(monday.plusDays(i));
+		}
+		
+		model.addAttribute("weekDates", weekDates);
+		
+		// 오늘 업무를 담을 목록 만들기
+		// 업무 정보 가져오기
+		List<MyTaskDto> todayTasks = new ArrayList<>();
+		
+		for(MyTaskDto task : myTasks) {
+			// 시작일
+			LocalDate start = LocalDate.parse(task.getStartAt());
+			// 종료일
+			LocalDate end = LocalDate.parse(task.getEndAt());
+			
+			// 시작일 <= 오늘 <= 종료일인 업무만
+			if(!today.isBefore(start) && !today.isAfter(end)) {
+				todayTasks.add(task);
+			}
+		}
+		
+		model.addAttribute("todayTasks", todayTasks);
 
 		// 참여 프로젝트 화면에서 사용중인 service 재사용
 		// 회원이 참여하는 프로젝트 목록 가져오기
