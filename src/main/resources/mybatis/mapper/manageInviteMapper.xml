@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.ManageInviteMapper">
+
+	<select id="selectWorkspaceIdByDomainKey" parameterType="String" resultType="Long">
+        SELECT workspace_id
+        FROM workspace_domains
+        WHERE domain_key = #{domainKey} 
+          AND active = 'Y'
+    </select>
+
+    <!-- 초대 가능한 인원 목록 조회 -->
+    <select id="selectEligibleMembers" parameterType="map" resultType="com.tk.app.domain.dto.ManageInviteDto">
+        SELECT DISTINCT
+            m.member_id AS memberId,
+            md.name AS name,
+            md.email AS email
+        FROM members m
+        JOIN member_details md ON m.member_id = md.member_id
+        WHERE m.status = 0
+          AND m.member_id NOT IN (
+              SELECT member_id 
+              FROM workspace_members 
+              WHERE workspace_id = #{workspaceId}
+          )
+        <if test="keyword != null and keyword != ''">
+          AND (
+              md.name LIKE '%' || #{keyword} || '%' 
+              OR md.email LIKE '%' || #{keyword} || '%'
+          )
+        </if>
+    </select>
+
+    <!-- 검색 기능 -->
+    <select id="selectMemberInfoForInvite" parameterType="Long" resultType="com.tk.app.domain.dto.ManageInviteDto">
+        SELECT 
+            md.name AS name,
+            md.email AS email
+        FROM member_details md
+        WHERE md.member_id = #{memberId}
+    </select>
+
+    <!-- 초대 이력 생성 -->
+    <insert id="insertManageInvite" parameterType="com.tk.app.domain.dto.ManageInviteDto">
+        INSERT INTO workspace_invites (
+            invite_key, workspace_id, inviter_id, email, name, status, expires, created, invite_status
+        ) VALUES (
+            #{inviteKey}, #{workspaceId}, #{inviterId}, #{email}, #{name}, #{status},
+            TO_DATE(#{expires}, 'YYYY-MM-DD HH24:MI:SS'), SYSDATE, #{inviteStatus}
+        )
+    </insert>
+
+    <!-- 발송된 초대 검증 조회 -->
+    <select id="selectManageInviteByKey" parameterType="String" resultType="com.tk.app.domain.dto.ManageInviteDto">
+        SELECT
+            invite_key AS inviteKey,
+            workspace_id AS workspaceId,
+            inviter_id AS inviterId,
+            accepted_member_id AS acceptedMemberId,
+            email, name, status,
+            TO_CHAR(expires, 'YYYY-MM-DD HH24:MI:SS') AS expires,
+            TO_CHAR(accepted, 'YYYY-MM-DD HH24:MI:SS') AS accepted,
+            TO_CHAR(created, 'YYYY-MM-DD HH24:MI:SS') AS created,
+            invite_status AS inviteStatus
+        FROM workspace_invites
+        WHERE invite_key = #{inviteKey}
+    </select>
+
+    <!-- 초대 링크 사용 완료 상태 갱신 -->
+    <update id="updateManageInviteAccept" parameterType="com.tk.app.domain.dto.ManageInviteDto">
+        UPDATE workspace_invites
+        SET
+            accepted_member_id = #{acceptedMemberId},
+            accepted = SYSDATE,
+            invite_status = #{inviteStatus}
+        WHERE invite_key = #{inviteKey}
+    </update>
+
+    <!-- 수락 완료시 워크 등록 -->
+    <insert id="insertManageInviteMember" parameterType="com.tk.app.domain.dto.ManageInviteDto">
+        INSERT INTO workspace_members (
+            workspace_member_id, workspace_id, member_id, status, joined, role
+        ) VALUES (
+            seq_workspace_members.NEXTVAL, #{workspaceId}, #{memberId}, #{status}, SYSDATE, #{role}
+        )
+    </insert>
+
+    <select id="selectSearchEligibleMembers" parameterType="map" resultType="com.tk.app.domain.dto.ManageInviteDto">
+        SELECT DISTINCT
+            m.member_id AS memberId,
+            md.name AS name,
+            md.email AS email
+        FROM members m
+        JOIN member_details md ON m.member_id = md.member_id
+        WHERE m.status = 0
+          AND m.member_id NOT IN (
+              SELECT member_id 
+              FROM workspace_members 
+              WHERE workspace_id = #{workspaceId}
+          )
+        <if test="keyword != null and keyword != ''">
+          AND (
+              md.name LIKE '%' || #{keyword} || '%' 
+              OR md.email LIKE '%' || #{keyword} || '%'
+          )
+        </if>
+        ORDER BY md.name ASC
+    </select>
+
+</mapper>
