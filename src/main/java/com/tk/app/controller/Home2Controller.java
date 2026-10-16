@@ -2,12 +2,14 @@ package com.tk.app.controller;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.util.HtmlUtils;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
 import com.tk.app.common.PaginateUtil;
+import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.MeetingMinutesDto;
 import com.tk.app.domain.dto.MyTaskDto;
 import com.tk.app.domain.dto.NoticeDto;
@@ -53,6 +56,7 @@ public class Home2Controller {
 	private final PaginateUtil paginateUtil;
 	private final MyTaskService myTaskService;
 	private final TaskService taskService;
+	private final StorageService storageService;
 
 	@ModelAttribute("domainKey")
 	public String setDomainKey(@PathVariable("domainKey") String domainKey) {
@@ -588,6 +592,20 @@ public class Home2Controller {
 		}
 
 		return "redirect:/" + domainKey + "/home/notice";
+	}
+	
+	// 공지사항 파일 다운로드
+	@GetMapping("/noticeFileDownload")
+	public ResponseEntity<?> downloadFile(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestParam("noticeId") long noticeId,
+			@RequestParam("noticeFileId") long noticeFileId) throws Exception {
+
+		// 다운로드에 필요한 파일 DB 정보 확보
+		NoticeFileDto noticeFile = noticeService.findWorkspaceFile(
+				workspace.getWorkspaceId(), noticeId, noticeFileId);
+		
+		return storageService.downloadFile(noticeFile.getFilePath(), noticeFile.getStoredName(), noticeFile.getOriginalName());
 	}
 
 	// 공지사항 수정

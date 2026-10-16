@@ -348,4 +348,14 @@ public class NoticeService {
 		
 		return noticeMapper.deleteNotice(workspaceId, noticeId);
 	}
+	
+	// 공지사항 다운로드 : 파일 한개 조회용
+	public NoticeFileDto findWorkspaceFile(long workspaceId, long noticeId, long noticeFileId) throws Exception {
+		
+		NoticeFileDto noticeFile = noticeMapper.findWorkspaceFile(workspaceId, noticeId, noticeFileId);
+		if(noticeFile == null) {
+			throw new Exception("다운로드할 첨부파일이 없습니다.");
+		}
+		return noticeFile;
+	}
 }

@@ -41,8 +41,9 @@
 				<p class="notice-attachments">
 				    첨부파일
 				    <span th:if="${#lists.isEmpty(noticeFile)}">첨부파일이 없습니다.</span>
-				    <span th:each="file : ${noticeFile}"
-				          th:text="${file.originalName}">파일이름</span>
+				    <a th:each="file : ${noticeFile}" th:text="${file.originalName}"
+				       th:href="@{/{domainKey}/home/noticeFileDownload(domainKey=${domainKey}, 
+				       noticeId=${notice.noticeId}, noticeFileId=${file.noticeFileId})}">파일이름</a>
 				</p>
 				
             </div>
