@@ -28,8 +28,8 @@
       --border-sub: #DED5C9;
       --badge-active-bg: #EEF4E6;
       --badge-active-text: #4F6242;
-      --badge-inactive-bg: #F3EBE2;
-      --badge-inactive-text: #795C43;
+      --badge-inactive-bg: #FBEBEB;
+	  --badge-inactive-text: #B91C1C;
       --badge-danger-bg: #FBEBEB;
       --badge-danger-text: #B91C1C;
       --status-danger: #D9534F;
@@ -71,7 +71,7 @@
     .warm-input:focus, .warm-select:focus, .warm-textarea:focus { border-color: var(--accent-green); box-shadow: 0 0 0 2px var(--primary-green-light); }
     .btn-sage { padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary-green); color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
     .btn-sage:hover { background: var(--primary-green-dark); }
-    .btn-subtle { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-main); background: var(--bg-sidebar); color: var(--text-main); font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-subtle { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-main); background: var(--bg-sidebar); color: var(--text-main); font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; width: 100px; text-align: center;}
     .btn-subtle:hover { background: var(--bg-hover); }
     .btn-danger { padding: 6px 12px; border-radius: 6px; border: 1px solid #FECACA; background: var(--badge-danger-bg); color: var(--badge-danger-text); font-size: 12px; font-weight: 700; cursor: pointer; }
     .btn-danger:hover { background: #FEE2E2; }
@@ -83,6 +83,9 @@
     .badge-active { background: var(--badge-active-bg); color: var(--badge-active-text); }
     .badge-inactive { background: var(--badge-inactive-bg); color: var(--badge-inactive-text); }
   </style>
+	<th:block>
+		<link rel="stylesheet" th:href="@{/dist/css/admin-user-detail.css}">
+	</th:block>
 </head>
 <body>
 
@@ -96,7 +99,17 @@
     </div>
     <div class="header-right">
       <a href="/project?tab=feed" class="btn-nav-switch">🌿 프로젝트 워크스페이스</a>
-      <button class="profile-btn" title="관리자">관리</button>
+      <div class="profile-dropdown">
+
+    <button type="button" class="profile-btn"id="profileToggle" title="관리자">관리</button>
+
+    <div class="profile-menu" id="profileMenu" hidden>
+        <form th:action="@{/member/logout}" method="post">
+            <button type="submit" class="logout-button">로그아웃</button>
+        </form>
+    </div>
+
+</div>
     </div>
   </header>
 
@@ -156,6 +169,7 @@
       <section class="content-area">
         <div th:switch="${activeSection}">
           <div th:case="'user'"><div th:replace="~{admin/fragments/user :: content}"></div></div>
+          <div th:case="'userDetail'"><div th:replace="~{admin/fragments/user_detail :: content}"></div></div>
           <div th:case="'domain'"><div th:replace="~{admin/fragments/domain :: content}"></div></div>
           <div th:case="'notice'"><div th:replace="~{admin/fragments/notice :: content}"></div></div>
           <div th:case="'inquiry'"><div th:replace="~{admin/fragments/inquiry :: content}"></div></div>

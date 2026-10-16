@@ -165,7 +165,7 @@
 	
 	<update id="updateMemberPassword" parameterType="MemberDto">
 	    UPDATE members
-	    SET password = #{password}
+	    SET password = #{password}, fail_cnt = 0, blocked_until = NULL
 	    WHERE member_id = #{member_id}
 	</update>
 	
@@ -197,5 +197,11 @@
         seq_social_accounts.NEXTVAL, #{member_id}, #{sns_provider}, #{sns_id}, SYSDATE
     )
 	</insert>
+	
+	<select id="findPasswordByMemberId" parameterType="Long" resultType="String">
+	    SELECT password
+	    FROM members
+	    WHERE member_id = #{member_id}
+	</select>
 	
 </mapper>

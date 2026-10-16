@@ -4,11 +4,79 @@
 <mapper namespace="com.tk.app.admin.mapper.AdminMemberMapper">
 
 	<select id="findAllMembers" resultType="com.tk.app.admin.domain.dto.AdminMemberDto">	
-		SELECT m.member_id, m.login_id, m.status, m.joined, d.name, d.email
+		SELECT m.member_id, m.login_id, m.status, m.fail_cnt, m.joined, m.last_login, m.withdrawn, d.name, d.email
 		FROM MEMBERS m
 		LEFT JOIN MEMBER_DETAILS d 
 		ON m.MEMBER_ID = d.MEMBER_ID
-		ORDER BY m.joined DESC;
+		ORDER BY m.joined DESC
 	</select>
+	
+	<select id="findMemberWorkspaces" parameterType="Long" resultType="com.tk.app.admin.domain.dto.AdminWorkspaceMemberDto">
+		SELECT m.LOGIN_ID, w.SUBJECT, 
+		    CASE
+		        WHEN wm.role = 70 THEN 'PM'
+		        WHEN wm.role = 50 THEN 'DT'
+		        WHEN wm.role = 30 THEN 'TL'
+		        WHEN wm.role = 10 THEN 'AA'
+		        ELSE '기타'
+		    END AS role_name      
+		FROM WORKSPACE_MEMBERS wm
+		JOIN WORKSPACES w
+		ON wm.WORKSPACE_ID = w.WORKSPACE_ID
+		JOIN MEMBERS m
+		ON wm.MEMBER_ID = m.MEMBER_ID
+		WHERE wm.MEMBER_ID = #{member_id}
+	</select>
+	
+	<select id="findMemberById" parameterType="long" resultType="com.tk.app.admin.domain.dto.AdminMemberDto">
+		SELECT m.member_id, m.login_id, m.status, m.fail_cnt, m.joined, m.last_login, m.withdrawn, d.name, d.email
+		FROM MEMBERS m
+		LEFT JOIN MEMBER_DETAILS d
+		ON m.member_id = d.member_id
+		WHERE m.member_id = #{member_id}
+	</select>
+	
+	<select id="searchMembers" parameterType="string" resultType="com.tk.app.admin.domain.dto.AdminMemberDto">
+		SELECT m.member_id, m.login_id, m.status, m.joined, m.last_login, m.withdrawn, d.name, d.email
+		FROM MEMBERS m
+		LEFT JOIN MEMBER_DETAILS d
+		ON m.member_id = d.member_id
+		WHERE d.name LIKE '%' || #{keyword} || '%'
+		OR d.email LIKE '%' || #{keyword} || '%'
+		ORDER BY m.joined DESC
+	</select>
+	
+	<select id="searchMembersByStatus" resultType="com.tk.app.admin.domain.dto.AdminMemberDto">
+		SELECT m.member_id, m.login_id, m.status, m.fail_cnt, m.joined, m.last_login, m.withdrawn, d.name, d.email
+		FROM MEMBERS m
+		LEFT JOIN MEMBER_DETAILS d
+		ON m.member_id = d.member_id
+		<where>
+			<if test="keyword != null and keyword != ''">
+				AND (
+				d.name LIKE '%' || #{keyword} || '%' 
+				OR d.email LIKE '%' || #{keyword} ||'%'
+				)
+			</if>
+			<if test="status != null">
+				AND m.status = #{status}
+			</if>
+		</where>
+		ORDER BY m.joined DESC
+	</select>
+	
+	<update id="updateMemberStatus">
+		UPDATE members
+		SET status = #{status}
+		WHERE member_id = #{member_id}
+			AND NOT EXISTS (
+				SELECT 1
+				FROM SECURITY
+				WHERE MEMBER_ID = #{member_id}
+					AND ROLE = 'ADMIN'
+			)
+	</update>
+	
+	
 
 </mapper>

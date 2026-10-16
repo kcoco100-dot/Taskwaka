@@ -265,29 +265,41 @@ public class MemberServiceImpl implements MemberService {
 	@Transactional
 	@Override
 	public boolean resetPassword(String tokenHash, String newPassword) {
-	
+
 	    Map<String, Object> map = Map.of("token_hash", tokenHash);
-	
+
 	    Long memberId = mapper.findResetMemberId(map);
-	
+
 	    if (memberId == null) {
 	        return false;
 	    }
-	
+
+
+	    String oldPassword = mapper.findPasswordByMemberId(memberId);
+
+	    if (oldPassword == null) {
+	        throw new IllegalStateException("회원 비밀번호 조회 실패");
+	    }
+
+	    if (passwordEncoder.matches(newPassword, oldPassword)) {
+	        throw new IllegalArgumentException(
+	                "기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.");
+	    }
+
 	    if (mapper.useResetToken(map) != 1) {
 	        return false;
 	    }
-	
+
 	    MemberDto dto = new MemberDto();
 	    dto.setMember_id(memberId);
 	    dto.setPassword(passwordEncoder.encode(newPassword));
-	
+
 	    try {
 	        mapper.updateMemberPassword(dto);
 	    } catch (SQLException e) {
 	        throw new IllegalStateException("비밀번호 변경 실패", e);
 	    }
-	
+
 	    return true;
 	}
 

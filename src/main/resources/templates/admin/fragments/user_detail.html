@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+    <div class="member-detail">
+
+        <a class="back-link" th:href="@{/admin/user}">
+            ← 회원 목록으로
+        </a>
+
+        <h2 class="detail-title">회원 상세 조회</h2>
+
+        <div class="detail-card">
+            <h3>회원 기본 정보</h3>
+
+            <table class="detail-table">
+                <tr>
+                    <th>이름</th>
+                    <td th:text="${member.name}"></td>
+                </tr>
+                <tr>
+                    <th>이메일</th>
+                    <td th:text="${member.email}"></td>
+                </tr>
+                <tr>
+                    <th>로그인 아이디</th>
+                    <td th:text="${member.login_id}"></td>
+                </tr>
+                <tr>
+                    <th>회원 상태</th>
+                    <td th:text="${member.status == 0 ? '활성' : '비활성'}"></td>
+                </tr>
+                <tr>
+                    <th>가입일</th>
+                    <td th:text="${#dates.format(member.joined, 'yyyy-MM-dd')}"></td>
+                </tr>
+                <tr>
+                    <th>최근 접속일</th>
+                    <td th:text="${member.last_login == null ? '-' : #dates.format(member.last_login, 'yyyy-MM-dd')}"></td>
+                </tr>
+                <tr>
+                    <th>탈퇴일</th>
+                    <td th:text="${member.withdrawn == null ? '-' : #dates.format(member.withdrawn, 'yyyy-MM-dd')}"></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="detail-card">
+            <h3>소속 워크 목록</h3>
+
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>워크 이름</th>
+                        <th>역할</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="workspace : ${workspaces}">
+                        <td th:text="${workspace.subject}"></td>
+                        <td th:text="${workspace.role_name}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(workspaces)}">
+                        <td colspan="2">소속된 워크가 없습니다.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

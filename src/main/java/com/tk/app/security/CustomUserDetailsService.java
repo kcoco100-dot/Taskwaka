@@ -54,6 +54,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 		return CustomUserDetails.builder()
 				.sessionInfo(info)
 				.disabled(member.getStatus() != 0)
+				.locked(member.getFail_cnt() >= 5)
 				.roles(authorities)
 				.build();
 
