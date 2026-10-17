@@ -4,37 +4,49 @@
     gap: 24px;
 }
 
-.tree-preview {
-    min-height: 360px;
+.tree-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(260px, 1fr);
+    gap: 20px;
+    height: clamp(420px, 38vw, 560px);
     margin: 24px 0;
 }
 
 .growth-content .tree-preview {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 20px;
     padding: 28px 20px;
+    min-width: 0;
+    height: 100%;
     box-sizing: border-box;
+    overflow: hidden;
     border: 1px solid #D5E2C7;
     border-radius: 16px;
-    background: #F4F8EE;
+    background: #E7EDC8 url("backgrounds/warm-cottage.png") center center / cover no-repeat;
 }
 
 .tree-preview-label {
+    position: absolute;
+    top: 24px;
     padding: 6px 14px;
     border-radius: 20px;
-    background: #E3EDD8;
+    background: rgba(255, 252, 240, 0.92);
     color: #4F6242;
     font-size: 14px;
     font-weight: 600;
 }
 
 .tree-image-area {
-    position: relative;
-    width: min(100%, 280px);
-    height: 240px;
+    position: absolute;
+    left: 50%;
+    bottom: 7%;
+    transform: translateX(-50%);
+    width: clamp(190px, 24%, 300px);
+    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -50,9 +62,269 @@
 }
 
 .tree-preview-description {
+    position: absolute;
+    bottom: 20px;
+    max-width: calc(100% - 32px);
     margin: 0;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    background: rgba(255, 252, 240, 0.92);
+    color: #654B38;
     text-align: center;
     line-height: 1.6;
+}
+
+.tree-shop {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid #E4DDCF;
+    border-radius: 16px;
+    background: #FFFCF6;
+    color: #594331;
+}
+
+.tree-shop-heading {
+    padding: 18px 16px 12px;
+}
+
+.tree-shop-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.tree-shop-title-row h2 {
+    margin: 0;
+    color: #594331;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.tree-shop-preview-badge {
+    flex-shrink: 0;
+    padding: 4px 7px;
+    border-radius: 6px;
+    background: #F1EBDD;
+    color: #88745D;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.tree-shop-heading > p {
+    margin: 7px 0 12px;
+    color: #95836E;
+    font-size: 12px;
+}
+
+.tree-shop-wallet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #E0E8D3;
+    border-radius: 9px;
+    background: #EFF4E6;
+    color: #596E45;
+    font-size: 11px;
+}
+
+.tree-shop-wallet strong {
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+.tree-shop-categories {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    margin: 0 16px;
+    padding: 4px;
+    border-radius: 10px;
+    background: #F0EDE5;
+}
+
+.tree-shop-category {
+    padding: 8px 2px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #8B7B66;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tree-shop-category:hover {
+    color: #4F6242;
+    background: #E7EBDD;
+}
+
+.tree-shop-category.is-active {
+    background: #647B50;
+    color: #FFFFFF;
+    box-shadow: 0 2px 5px rgba(79, 98, 66, 0.15);
+}
+
+.tree-shop-category:focus-visible {
+    outline: 2px solid #647B50;
+    outline-offset: 2px;
+}
+
+.tree-shop-catalog {
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #D6DDC8 transparent;
+}
+
+.tree-shop-panel {
+    min-height: 0;
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+}
+
+.tree-shop-panel[hidden] {
+    display: none;
+}
+
+.tree-shop-panel h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin: 0 0 10px;
+    color: #6A5741;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tree-shop-panel h3 span {
+    color: #9D8E79;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.tree-shop-products {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tree-shop-product {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    padding: 7px;
+    border: 1px solid #EAE4D8;
+    border-radius: 10px;
+    background: #FFFFFF;
+}
+
+.tree-shop-product.is-equipped {
+    border-color: #AEBF96;
+    background: #F4F8ED;
+}
+
+.tree-shop-thumbnail,
+.tree-shop-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #F4F2E9;
+}
+
+.tree-shop-thumbnail img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tree-shop-item-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background: rgba(255, 252, 240, 0.95);
+    color: #647B50;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.tree-shop-item-name {
+    color: #66513C;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.tree-shop-price {
+    display: block;
+    margin-top: auto;
+    padding: 5px 2px;
+    border-radius: 5px;
+    background: #F6F0E3;
+    color: #99723A;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.tree-shop-price.is-default {
+    background: #E6EEDB;
+    color: #60774C;
+}
+
+.tree-shop-icon > span:first-child {
+    font-size: 38px;
+    line-height: 1;
+}
+
+.tree-shop-icon-fruit { background: #FFF2DE; }
+.tree-shop-icon-accessory { background: #EFF2E4; }
+.tree-shop-icon-gold { background: #FFF0C5; }
+.tree-shop-icon-silver { background: #EDF1F5; }
+.tree-shop-icon-pet { background: #F4EDE1; }
+.tree-shop-icon-quokka { background: #F1E4CE; }
+
+.tree-shop-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    border-top: 1px dashed #E3DDCF;
+    background: #F8F5EC;
+    color: #8A795F;
+    font-size: 10px;
+    text-align: center;
+}
+
+.tree-shop-footer small {
+    color: #A0947F;
+    font-size: 10px;
 }
 
 .growth-stages ol {
@@ -95,23 +367,18 @@
     object-fit: contain;
 }
 
-.growth-stages li:nth-child(1) img { width: 56%; }
-.growth-stages li:nth-child(2) img { width: 66%; }
-.growth-stages li:nth-child(3) img { width: 78%; }
-.growth-stages li:nth-child(4) img { width: 90%; }
-
-@media (max-width: 900px) {
-    .growth-stages ol {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+.growth-stages li:nth-child(1) img { 
+	width: 56%; 
 }
 
-@media (max-width: 520px) {
-    .growth-stages ol {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+.growth-stages li:nth-child(2) img { 
+	width: 66%; 
+}
 
-    .growth-stage-image {
-        height: 112px;
-    }
+.growth-stages li:nth-child(3) img { 
+	width: 78%; 
+}
+
+.growth-stages li:nth-child(4) img { 
+	width: 90%; 
 }

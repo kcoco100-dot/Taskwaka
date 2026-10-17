@@ -31,20 +31,178 @@
                 </div>
 
                 <!-- 나무 이미지와 커스텀 아이템 -->
-                <div class="tree-preview">
-                		<span class="tree-preview-label">나무 미리보기</span>
-                    
-                    <div class="tree-image-area">
-                        <img class="tree-image" src="/dist/tree/line/seed.png"
-                                th:src="@{/dist/tree/line/seed.png}" alt="씨앗 단계의 팀 성장나무">
-                    
-                    <!-- 추후 착용 아이템 이미지 여기에 추가 예정 -->
+                <div class="tree-workspace">
+                    <div class="tree-preview">
+                        <span class="tree-preview-label">나무 미리보기</span>
+
+                        <div class="tree-image-area">
+                            <img class="tree-image" src="/dist/tree/line/seed.png"
+                                    th:src="@{/dist/tree/line/seed.png}" alt="씨앗 단계의 팀 성장나무">
+
+                        <!-- 추후 착용 아이템 이미지 여기에 추가 예정 -->
+                        </div>
+
+                        <p class="tree-preview-description">
+                            팀 활동으로 모은 경험치로 나무가 성장해요!
+                        </p>
                     </div>
-                    
-                    <p class="tree-preview-description">
-                        팀 활동으로 모은 경험치로 나무가 성장해요!
-                    </p>
-                    
+
+                <aside class="tree-shop" aria-labelledby="tree-shop-title">
+                    <div class="tree-shop-heading">
+                        <div class="tree-shop-title-row">
+                            <h2 id="tree-shop-title"><span aria-hidden="true">🛍️</span> 나무 상점</h2>
+                            <span class="tree-shop-preview-badge">미리보기</span>
+                        </div>
+                        <p>우리 팀의 정원을 꾸며보세요.</p>
+                        <div class="tree-shop-wallet"><span>구매 가능 경험치</span><strong>— EXP</strong></div>
+                    </div>
+
+                    <div class="tree-shop-categories" role="group" aria-label="상점 아이템 분류">
+                        <button type="button" class="tree-shop-category is-active" 
+                        		data-shop-category="background" aria-pressed="true" 
+                      		aria-controls="shop-background">배경</button>
+                        <button type="button" class="tree-shop-category" 
+                        		data-shop-category="fruit" aria-pressed="false" 
+                        		aria-controls="shop-fruit">열매</button>
+                        <button type="button" class="tree-shop-category" 
+                        		data-shop-category="accessory" aria-pressed="false" 
+                        		aria-controls="shop-accessory">착용</button>
+                        <button type="button" class="tree-shop-category" 
+                        		data-shop-category="pet" aria-pressed="false" 
+                        		aria-controls="shop-pet">펫</button>
+                    </div>
+
+					<!-- 배경템 -->
+                    <div class="tree-shop-catalog">
+                        <section id="shop-background" class="tree-shop-panel" data-shop-items="background" 
+                        		aria-labelledby="shop-background-title">
+                            <h3 id="shop-background-title">배경 이미지 <span>4가지 풍경</span></h3>
+                            <ul class="tree-shop-products">
+                                <li class="tree-shop-product is-equipped">
+                                    <div class="tree-shop-thumbnail">
+                                    <img th:src="@{/dist/tree/backgrounds/warm-cottage.png}" alt="" loading="lazy">
+                                    <span class="tree-shop-item-badge">기본</span></div>
+                                    <strong class="tree-shop-item-name">따뜻한 집</strong>
+                                    <span class="tree-shop-price is-default">✓ 적용 중</span>
+                                </li>
+                                <li class="tree-shop-product">
+                                    <div class="tree-shop-thumbnail">
+                                    <img th:src="@{/dist/tree/backgrounds/green-forest.png}" alt="" loading="lazy"></div>
+                                    <strong class="tree-shop-item-name">초록 숲</strong>
+                                    <span class="tree-shop-price">10 EXP</span>
+                                </li>
+                                <li class="tree-shop-product">
+                                    <div class="tree-shop-thumbnail">
+                                    <img th:src="@{/dist/tree/backgrounds/seaside.png}" alt="" loading="lazy"></div>
+                                    <strong class="tree-shop-item-name">바닷가</strong>
+                                    <span class="tree-shop-price">10 EXP</span>
+                                </li>
+                                <li class="tree-shop-product">
+                                    <div class="tree-shop-thumbnail">
+                                    <img th:src="@{/dist/tree/backgrounds/starry-night.png}" alt="" loading="lazy"></div>
+                                    <strong class="tree-shop-item-name">별빛 밤</strong>
+                                    <span class="tree-shop-price">10 EXP</span>
+                                </li>
+                            </ul>
+                        </section>
+
+						<!-- 열매 아이템 -->
+                        <section id="shop-fruit" class="tree-shop-panel" data-shop-items="fruit" aria-labelledby="shop-fruit-title" hidden>
+                            <h3 id="shop-fruit-title">열매 아이템 <span>한 세트에 5알</span></h3>
+                            <ul class="tree-shop-products">
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-fruit">
+	                                		<span aria-hidden="true">🟠</span>
+	                                		<span class="tree-shop-item-badge">5알</span>
+                                		</div>
+                                		
+                                		<strong class="tree-shop-item-name">감</strong>
+                                		<span class="tree-shop-price">30 EXP</span>
+                                	</li>
+                                	
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-fruit">
+                                			<span aria-hidden="true">🍎</span>
+                                			<span class="tree-shop-item-badge">5알</span>
+                                		</div>
+                                		
+                                		<strong class="tree-shop-item-name">사과</strong>
+                                			<span class="tree-shop-price">30 EXP</span>
+                                	</li>
+                                	
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-fruit">
+                                			<span aria-hidden="true">🍊</span>
+                                			<span class="tree-shop-item-badge">5알</span>
+                                		</div>
+                                		
+                                		<strong class="tree-shop-item-name">오렌지</strong>
+                                		<span class="tree-shop-price">30 EXP</span>
+                                	</li>
+                                	
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-fruit">
+                                			<span aria-hidden="true">🍊</span>
+                                			<span class="tree-shop-item-badge">5알</span>
+                               		</div>
+                               		
+                               		<strong class="tree-shop-item-name">귤</strong>
+                               		<span class="tree-shop-price">30 EXP</span>
+                               	</li>
+                            </ul>
+                        </section>
+
+						<!-- 착용 아이템 -->
+                        <section id="shop-accessory" class="tree-shop-panel" data-shop-items="accessory" aria-labelledby="shop-accessory-title" hidden>
+                            <h3 id="shop-accessory-title">착용 아이템 <span>나무에 특별함을</span></h3>
+                            <ul class="tree-shop-products">
+                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-accessory"><span aria-hidden="true">👒</span></div><strong class="tree-shop-item-name">모자</strong><span class="tree-shop-price">20 EXP</span></li>
+                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-accessory"><span aria-hidden="true">🎄</span></div><strong class="tree-shop-item-name">트리 장식</strong><span class="tree-shop-price">20 EXP</span></li>
+                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-gold"><span aria-hidden="true">✨</span></div><strong class="tree-shop-item-name">금 장식</strong><span class="tree-shop-price">100 EXP</span></li>
+                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-silver"><span aria-hidden="true">❄️</span></div><strong class="tree-shop-item-name">은 장식</strong><span class="tree-shop-price">50 EXP</span></li>
+                            </ul>
+                        </section>
+
+						<!-- 펫 -->
+                        <section id="shop-pet" class="tree-shop-panel" data-shop-items="pet" aria-labelledby="shop-pet-title" hidden>
+                            <h3 id="shop-pet-title">펫 <span>정원의 작은 친구</span></h3>
+                            <ul class="tree-shop-products">
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-pet">
+                                			<span aria-hidden="true">🐶</span>
+                                		</div>
+                                		<strong class="tree-shop-item-name">강아지</strong>
+                                		<span class="tree-shop-price">200 EXP</span>
+                                	</li>
+                                	
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-pet">
+	                                		<span aria-hidden="true">🐢</span>
+                                		</div>
+                                		<strong class="tree-shop-item-name">거북이</strong>
+                                		<span class="tree-shop-price">200 EXP</span>
+                                	</li>
+                                	
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-pet">
+                                			<span aria-hidden="true">🐱</span>
+                                		</div>
+                                		<strong class="tree-shop-item-name">고양이</strong>
+                                		<span class="tree-shop-price">200 EXP</span>
+                                	</li>
+                                	
+                                <li class="tree-shop-product">
+                                		<div class="tree-shop-icon tree-shop-icon-quokka">
+                                			<span aria-hidden="true">🐾</span>
+                                		</div><strong class="tree-shop-item-name">쿼카</strong>
+                                		<span class="tree-shop-price">400 EXP</span>
+                                	</li>
+                            </ul>
+                        </section>
+                    </div>
+
+                    <div class="tree-shop-footer"><span>5단계부터 아이템을 구매할 수 있어요.</span><small>상점 구매 기능은 준비 중입니다.</small></div>
+                </aside>
                 </div>
 
                 <!-- 성장 단계와 진행률 -->
@@ -68,17 +226,12 @@
 
                 </div>
 
-                <!-- 추후 상점과 커스텀 기능 -->
-                <div class="tree-custom">
-                    <h2>나무 꾸미기</h2>
-                    <p>5단계부터 아이템을 구매할 수 있습니다.</p>
-
-                </div>
-
             </div>
         </div>
     </div>
 </th:block>
 
-<th:block layout:fragment="script"></th:block>
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/tree/growthTree.js}"></script>
+</th:block>
 </html>
