@@ -1,0 +1,19 @@
+[33mcommit 53e7ca738bc6773d14f3995672723412f00bdcd6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: unknown <leehc9965@gmail.com>
+Date:   Fri Oct 16 17:53:06 2026 +0900
+
+    1016 워크채 구현중 도윤
+
+ src/main/java/com/tk/app/chat/ChatController.java  |  69 [32m++++[m
+ src/main/java/com/tk/app/chat/ChatMessage.java     |  12 [32m+[m
+ .../java/com/tk/app/chat/UserSessionRegistry.java  |  25 [32m++[m
+ src/main/java/com/tk/app/chat/WebSocketConfig.java |  37 [32m++[m
+ .../com/tk/app/chat/WebSocketEventListener.java    |  81 [32m+++++[m
+ .../app/controller/WorkChatMemberController.java   |  50 [32m+++[m
+ .../com/tk/app/domain/dto/WorkChatMemberDto.java   |  19 [32m+[m
+ .../com/tk/app/mapper/WorkChatMemberMapper.java    |  13 [32m+[m
+ .../com/tk/app/service/WorkChatMemberService.java  |  10 [32m+[m
+ .../tk/app/service/WorkChatMemberServiceImpl.java  |  67 [32m++++[m
+ .../mybatis/mapper/workChatMemberMapper.xml        |  15 [32m+[m
+ src/main/resources/templates/chat/main.html        | 394 [32m+++++++++++++++++++++[m
+ 12 files changed, 792 insertions(+)

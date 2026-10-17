@@ -10,6 +10,7 @@
     <link rel="stylesheet" th:href="@{/dist/manage/meetings.css}">
     <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
     <link rel="stylesheet" th:href="@{/dist/css/meetingsDetail.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
     <style>
         [v-cloak] { display: none; }
         .meetings-detail-container { background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #E8E2D9; }
@@ -40,6 +41,7 @@
                             <tr>
                                 <th scope="col">회의 제목</th>
                                 <th scope="col" class="meeting-date">회의일</th>
+                                <th scope="col" class="meeting-date">작성일</th>
                                 <th scope="col" class="meeting-writer">작성자</th>
                             </tr>
                         </thead>
@@ -52,6 +54,7 @@
                                     <p class="meeting-summary">{{ meeting.summary || truncateContent(meeting.content) }}</p>
                                 </td>
                                 <td class="meeting-date">{{ meeting.meetingDate }}</td>
+								<td class="meeting-date">{{ meeting.createdDate || '-' }}</td>
                                 <td class="meeting-writer">{{ meeting.authorName }}</td>
                             </tr>
                             <tr v-if="meetingList.length === 0">
@@ -60,17 +63,14 @@
                         </tbody>
                     </table>
                 </div>
-
-                <nav class="meetings-pagination" aria-label="회의록 페이지 이동" style="display:flex; justify-content:center; gap:8px; margin-top:20px;">
-                    <button type="button" class="project-button" :disabled="searchParams.page <= 1" @click="fetchMeetingList(searchParams.page - 1)">이전</button>
-                    
-                    <template v-for="num in pageNumbers" :key="num">
-                        <span v-if="num === searchParams.page" class="project-current-page" aria-current="page">{{ num }}</span>
-                        <button v-else type="button" class="project-button" @click="fetchMeetingList(num)">{{ num }}</button>
-                    </template>
-                    
-                    <button type="button" class="project-button" :disabled="searchParams.page >= pageInfo.totalPage || pageInfo.totalPage === 0" @click="fetchMeetingList(searchParams.page + 1)">다음</button>
-                </nav>
+				<nav class="project-pagination" aria-label="회의록 목록 페이지" v-if="pageInfo.totalPage > 0" style="justify-content: center;">
+				    <button type="button" class="project-button" :disabled="searchParams.page <= 1" @click="fetchMeetingList(searchParams.page - 1)">이전</button>
+				    <template v-for="num in pageNumbers" :key="num">
+				        <span v-if="num === searchParams.page" class="project-current-page" aria-current="page">{{ num }}</span>
+				        <button v-else type="button" class="project-button" @click="fetchMeetingList(num)">{{ num }}</button>
+				    </template>
+				    <button type="button" class="project-button" :disabled="searchParams.page >= pageInfo.totalPage"@click="fetchMeetingList(searchParams.page + 1)">다음</button>
+				</nav>
             </div>
         </div>
 

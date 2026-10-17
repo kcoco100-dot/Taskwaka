@@ -15,7 +15,7 @@ public class ManageMeetingsDto {
     private String title;
     private String content;
     private String meetingDate;
- 
+    private String createdDate;
     private String authorName;
     private String summary;
 }

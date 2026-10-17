@@ -2,8 +2,6 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout3}">
-
-<!-- CSS 영역: 기존 프로젝트 리스트용 CSS 재활용 및 상세페이지 전용 스타일 추가 -->
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
@@ -12,75 +10,666 @@
 </th:block>
 
 <th:block layout:fragment="content">
-    <div class="home-layout manage-layout project-list-layout">
+<div class="home-layout manage-layout project-list-layout">
 
-        <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
-        
-        <section class="section project-list-page">
-            <div class="page-heading">
-                <div>
-                    <h1 class="page-title">프로젝트 상세 정보</h1>
-                    <p class="page-description">프로젝트의 진행 상황과 상세 내용을 확인합니다.</p>
-                </div>
+    <!-- 기존 사이드바 유지 -->
+    <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
 
-                <a class="project-button project-button-primary" th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">목록으로</a>
+    <section class="section project-list-page pd-page">
+
+        <!-- 페이지 제목 -->
+        <div class="page-heading">
+            <div>
+                <h1 class="page-title">프로젝트 상세 정보</h1>
+                <p class="page-description">
+                    프로젝트의 업무와 진행 현황을 관리합니다.
+                </p>
             </div>
 
-            <div class="project-detail-panel">
-                
-                <div class="detail-row">
-                    <div class="detail-label">프로젝트 명</div>
-                    <div class="detail-value">
-                        <strong style="font-size: 20px; color: var(--primary-green, #4F6242);" th:text="${project.subject}">프로젝트 명</strong>
-                    </div>
+            <a class="project-button project-button-primary"
+               th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">
+                목록으로
+            </a>
+        </div>
+
+        <!-- 프로젝트 기본 정보 -->
+        <div class="project-detail-panel">
+
+            <div class="pd-header">
+                <div>
+                    <span class="pd-caption">PROJECT OVERVIEW</span>
+
+                    <h2 th:text="${project.subject}">
+                        프로젝트명
+                    </h2>
+
+                    <p class="pd-period">
+                        <span th:text="${project.start_date}">
+                            시작일
+                        </span>
+                        ~
+                        <span th:text="${project.end_date}">
+                            종료일
+                        </span>
+                    </p>
                 </div>
 
-                <div class="detail-row">
-                    <div class="detail-label">프로젝트 기간</div>
-                    <div class="detail-value">
-                        <span th:text="${project.start_date}">시작일</span> 
-                        <span style="color: #A89B8C; margin: 0 8px;">~</span> 
-                        <span th:text="${project.end_date}">종료일</span>
-                    </div>
+                <div class="pd-status">
+                    <span th:if="${project.status == 0}"
+                          class="project-status project-status-planned">
+                        예정
+                    </span>
+
+                    <span th:if="${project.status == 1}"
+                          class="project-status project-status-progress">
+                        진행 중
+                    </span>
+
+                    <span th:if="${project.status == 2}"
+                          class="project-status project-status-completed">
+                        완료
+                    </span>
+
+                    <span th:if="${project.status == 3}"
+                          class="project-status project-status-paused">
+                        보류
+                    </span>
+                </div>
+            </div>
+
+            <!-- 프로젝트 요약 카드 -->
+            <div class="pd-summary">
+
+                <div class="pd-summary-card">
+                    <span>프로젝트 진행률</span>
+
+                    <strong th:text="${project.progress} + '%'">
+                        0%
+                    </strong>
+
+                    <progress max="100"
+                              th:value="${project.progress}">
+                    </progress>
+
+                    <small>현재 프로젝트에 저장된 진행률</small>
                 </div>
 
-                <div class="detail-row">
-                    <div class="detail-label">책임자 / 참여인원</div>
-                    <div class="detail-value">
-                        <span class="project-name" style="font-weight: 700;" th:text="${project.pm_name != null ? project.pm_name : '담당자 미정'}">책임자 이름</span>
-                        <span style="margin-left: 12px; color: var(--accent-green, #71865B); font-size: 14px;" th:text="'(현재 참여 인원: ' + ${project.member_count} + '명)'"></span>
-                    </div>
+                <div class="pd-summary-card">
+                    <span>프로젝트 업무</span>
+                    <strong id="taskCount">0개</strong>
+                    <small id="taskCompleteCount">
+                        승인 완료 0개
+                    </small>
                 </div>
 
-                <div class="detail-row">
-                    <div class="detail-label">진행 상태 / 진행률</div>
-                    <div class="detail-value" style="display: flex; align-items: center; gap: 20px;">
+                <div class="pd-summary-card">
+                    <span>프로젝트 책임자</span>
 
-                        <span th:if="${project.status == 0}" class="project-status project-status-planned">예정</span>
-                        <span th:if="${project.status == 1}" class="project-status project-status-progress">진행 중</span>
-                        <span th:if="${project.status == 2}" class="project-status project-status-completed">완료</span>
-                        <span th:if="${project.status == 3}" class="project-status project-status-paused">보류</span>
-                        
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <progress max="100" th:value="${project.progress}" style="width: 250px; height: 10px;"></progress>
-                            <strong style="color: var(--primary-green-dark, #465B38);" th:text="${project.progress} + '%'">0%</strong>
+                    <strong th:text="${project.pm_name != null ? project.pm_name : '미정'}">
+                        담당 PM
+                    </strong>
+
+                    <small th:text="'참여 인원 ' + ${project.member_count} + '명'">
+                        참여 인원
+                    </small>
+                </div>
+
+            </div>
+
+            <!-- 프로젝트 상세 내용 -->
+            <div class="pd-section">
+                <h3>프로젝트 상세 내용</h3>
+
+                <div class="content-box"
+                     th:text="${project.content != null and project.content != '' ? project.content : '등록된 상세 내용이 없습니다.'}">
+                    프로젝트 내용
+                </div>
+            </div>
+       
+
+        
+<!-- 프로젝트 업무 관리 -->
+<div class="pd-integrated-task">
+
+    <div class="pd-list-header">
+        <div>
+            <h3>프로젝트 업무 관리</h3>
+            <p>업무별 비중의 합계는 100%가 되어야 합니다.</p>
+        </div>
+        <span class="pd-task-count" id="taskCount">총 0개 업무</span>
+    </div>
+
+    <!-- 이미지 형태의 업무 리스트 -->
+    <div class="pd-simple-task-list" id="taskList">
+        <!-- JavaScript에서 업무를 렌더링 -->
+    </div>
+
+    <!-- 새 업무 등록 버튼 -->
+    <button type="button"
+            class="pd-task-add-trigger"
+            id="openTaskForm"
+            aria-expanded="false"
+            aria-controls="taskEditor">
+        <span class="pd-add-title">⊕ 새 업무 등록</span>
+        <span class="pd-add-subtitle">
+            업무명 · 담당 TL · 기간 · 단계 · 진행률 비중
+        </span>
+    </button>
+
+    <!-- 버튼을 누른 후에만 표시되는 입력 영역 -->
+    <div class="pd-task-editor" id="taskEditor" hidden>
+        <div class="pd-editor-heading">
+            <h3 id="taskFormTitle">새 업무 등록</h3>
+            <button type="button"
+                    class="pd-editor-close"
+                    id="closeTaskForm"
+                    aria-label="입력창 닫기">×</button>
+        </div>
+
+        <form id="taskForm">
+            <input type="hidden" id="editingTaskId">
+
+            <div class="pd-editor-grid">
+                <div class="pd-form-group">
+                    <label for="taskTitle">업무명 *</label>
+                    <input id="taskTitle" type="text"
+                           maxlength="200"
+                           placeholder="업무명을 입력하세요" required>
+                </div>
+
+                <div class="pd-form-group">
+                    <label for="taskTl">담당 TL *</label>
+                    <select id="taskTl" required>
+                        <option value="">담당 TL 선택</option>
+                        <option value="김팀장">김팀장</option>
+                        <option value="이팀장">이팀장</option>
+                        <option value="박팀장">박팀장</option>
+                    </select>
+                </div>
+
+                <div class="pd-form-group">
+                    <label for="taskStart">시작일 *</label>
+                    <input id="taskStart" type="date" required>
+                </div>
+
+                <div class="pd-form-group">
+                    <label for="taskEnd">종료일 *</label>
+                    <input id="taskEnd" type="date" required>
+                </div>
+
+                <div class="pd-form-group">
+                    <label for="taskStage">진행단계 *</label>
+                    <select id="taskStage" required>
+                        <option value="1">1단계 · 기획</option>
+                        <option value="2">2단계 · 설계</option>
+                        <option value="3">3단계 · 개발</option>
+                        <option value="4">4단계 · 테스트</option>
+                        <option value="5">5단계 · 완료</option>
+                    </select>
+                </div>
+
+                <div class="pd-form-group">
+                    <label for="taskWeight">배정 비중 (%) *</label>
+                    <input id="taskWeight" type="number"
+                           min="0.01" max="100" step="0.01"
+                           placeholder="예: 20" required>
+                </div>
+            </div>
+
+            <p class="pd-weight-help" id="weightHelp">
+                남은 배정 비중: 0%
+            </p>
+
+            <div class="pd-editor-actions">
+                <button type="button"
+                        class="pd-cancel-btn"
+                        id="cancelTaskForm">취소</button>
+                <button type="submit"
+                        class="pd-save-btn"
+                        id="submitTaskButton">업무 등록</button>
+            </div>
+        </form>
+    </div>
+
+    <p class="pd-demo-note">
+        현재 업무 등록·수정·삭제는 화면 테스트용입니다.
+        실제 데이터베이스와는 연결되지 않았습니다.
+    </p>
+</div>
+<!-- 프로젝트 업무 관리 끝 -->
+
+ </div>
+        <!-- 프로젝트 관리 버튼 -->
+        <div class="pd-bottom-actions">
+            <button type="button"
+                    class="project-button project-edit">
+                프로젝트 수정
+            </button>
+
+            <button type="button"
+                    class="project-button project-delete"
+                    onclick="alert('프로젝트 삭제는 추후 서버와 연결합니다.')">
+                프로젝트 삭제
+            </button>
+        </div>
+    </section>
+</div>
+
+<!-- 업무 등록 / 수정 모달 -->
+<div id="taskModal" class="pd-modal" hidden>
+
+    <div class="pd-modal-backdrop" data-close-modal></div>
+
+    <div class="pd-modal-content"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="taskModalTitle">
+
+        <div class="pd-modal-header">
+            <div>
+                <h2 id="taskModalTitle">업무 등록</h2>
+                <p>프로젝트 업무 정보를 입력합니다.</p>
+            </div>
+
+            <button type="button"
+                    class="pd-modal-close"
+                    id="closeTaskModal"
+                    aria-label="닫기">
+                &times;
+            </button>
+        </div>
+
+        <form id="taskForm">
+            <input type="hidden" id="editingTaskId">
+
+            <div class="pd-form-group">
+                <label for="taskTitle">업무명 *</label>
+                <input type="text"
+                       id="taskTitle"
+                       placeholder="업무명을 입력하세요"
+                       maxlength="200"
+                       required>
+            </div>
+
+            <div class="pd-form-group">
+                <label for="taskTl">담당 TL *</label>
+
+                <!-- 서버 연동 전 임시 선택 목록 -->
+                <select id="taskTl" required>
+                    <option value="">담당 TL 선택</option>
+                    <option value="김팀장">김팀장</option>
+                    <option value="이팀장">이팀장</option>
+                    <option value="박팀장">박팀장</option>
+                </select>
+            </div>
+
+            <div class="pd-form-grid">
+                <div class="pd-form-group">
+                    <label for="taskStart">시작일 *</label>
+                    <input type="date"
+                           id="taskStart"
+                           required>
+                </div>
+
+                <div class="pd-form-group">
+                    <label for="taskEnd">종료일 *</label>
+                    <input type="date"
+                           id="taskEnd"
+                           required>
+                </div>
+            </div>
+
+            <div class="pd-form-group">
+                <label for="taskStage">진행단계 *</label>
+
+                <select id="taskStage" required>
+                    <option value="1">1단계 · 기획</option>
+                    <option value="2">2단계 · 설계</option>
+                    <option value="3">3단계 · 개발</option>
+                    <option value="4">4단계 · 테스트</option>
+                    <option value="5">5단계 · 완료</option>
+                </select>
+            </div>
+
+            <div class="pd-form-group">
+                <label for="taskWeight">진행률 배정 비중 (%) *</label>
+
+                <input type="number"
+                       id="taskWeight"
+                       min="0.01"
+                       max="100"
+                       step="0.01"
+                       placeholder="예: 20"
+                       required>
+
+                <small id="weightHelp">
+                    전체 업무 비중의 합계는 100%를 넘을 수 없습니다.
+                </small>
+            </div>
+
+            <div class="pd-modal-actions">
+                <button type="button"
+                        class="pd-cancel-btn"
+                        id="cancelTaskModal">
+                    취소
+                </button>
+
+                <button type="submit"
+                        class="pd-save-btn">
+                    저장
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</th:block>
+
+
+<th:block layout:fragment="script">
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 화면 테스트용 데이터 (DB와 연결되지 않음)
+    let tasks = [
+        { id:1, title:'요구사항 분석', tl:'김팀장',
+          start:'2026-10-01', end:'2026-10-15',
+          stage:1, weight:20, approval:'approved' },
+        { id:2, title:'UI/UX 디자인', tl:'이팀장',
+          start:'2026-10-16', end:'2026-10-31',
+          stage:2, weight:20, approval:'approved' },
+        { id:3, title:'백엔드 개발', tl:'박팀장',
+          start:'2026-11-01', end:'2026-11-30',
+          stage:3, weight:30, approval:'pending' },
+        { id:4, title:'프론트엔드 개발', tl:'이팀장',
+          start:'2026-11-01', end:'2026-11-30',
+          stage:3, weight:20, approval:'waiting' },
+        { id:5, title:'통합 테스트', tl:'정팀장',
+          start:'2026-12-01', end:'2026-12-20',
+          stage:4, weight:10, approval:'planned' }
+    ];
+
+    let nextId = 6;
+
+    const list = document.getElementById('taskList');
+    const editor = document.getElementById('taskEditor');
+    const trigger = document.getElementById('openTaskForm');
+    const form = document.getElementById('taskForm');
+
+    const fields = {
+        id: document.getElementById('editingTaskId'),
+        title: document.getElementById('taskTitle'),
+        tl: document.getElementById('taskTl'),
+        start: document.getElementById('taskStart'),
+        end: document.getElementById('taskEnd'),
+        stage: document.getElementById('taskStage'),
+        weight: document.getElementById('taskWeight')
+    };
+
+    // 정팀장도 예시 데이터에서 선택 가능하도록 추가
+    const tlSelect = fields.tl;
+    if (!Array.from(tlSelect.options).some(o => o.value === '정팀장')) {
+        tlSelect.add(new Option('정팀장', '정팀장'));
+    }
+
+    const statusLabels = {
+        approved: '승인 완료',
+        pending: '진행 중',
+        waiting: '결재 대기',
+        planned: '예정'
+    };
+
+    const format = value =>
+        Number(Number(value).toFixed(2)).toString();
+
+    const totalWeight = excludeId =>
+        tasks.filter(t => t.id !== excludeId)
+             .reduce((sum, t) => sum + t.weight, 0);
+
+    // HTML 이스케이프
+    function escapeHtml(value) {
+        const el = document.createElement('span');
+        el.textContent = String(value ?? '');
+        return el.innerHTML;
+    }
+
+    function renderTasks() {
+        list.innerHTML = '';
+
+        if (!tasks.length) {
+            list.innerHTML =
+                '<p class="pd-empty-list">등록된 업무가 없습니다.</p>';
+        }
+
+        tasks.forEach((task, index) => {
+            const item = document.createElement('div');
+            item.className = 'pd-simple-task';
+
+            // 최종 승인된 비중만 막대를 채움
+            const approved = task.approval === 'approved';
+            const status = statusLabels[task.approval] || '예정';
+
+            item.innerHTML = `
+                <div class="pd-simple-task-top">
+                    <div class="pd-task-identity">
+                        <span class="pd-task-name">
+                            ${index + 1}. ${escapeHtml(task.title)}
+                        </span>
+                        <small>${escapeHtml(task.tl)}</small>
+                    </div>
+                    <span class="pd-status-pill ${task.approval}">
+                        ${status}
+                    </span>
+                </div>
+
+                <div class="pd-simple-task-bottom">
+                    <div class="pd-simple-progress">
+                        <div class="pd-simple-progress-fill"
+                             style="width:${approved ? 100 : 0}%">
                         </div>
                     </div>
+                    <span class="pd-task-weight">
+                        ${format(task.weight)}% 비중
+                    </span>
                 </div>
 
-                <div class="detail-row" style="border-bottom: none; display: block;">
-                    <div class="detail-label" style="margin-bottom: 16px;">프로젝트 상세 내용</div>
-                    <div class="content-box" th:text="${project.content != null and project.content != '' ? project.content : '등록된 상세 내용이 없습니다.'}">
-                        내용
-                    </div>
+                <div class="pd-task-actions">
+                    <span class="pd-task-dates">
+                        ${escapeHtml(task.start)}
+                        ~
+                        ${escapeHtml(task.end)}
+                    </span>
+                    <button type="button"
+                            data-action="edit"
+                            data-id="${task.id}">수정</button>
+                    <button type="button"
+                            class="pd-delete-link"
+                            data-action="delete"
+                            data-id="${task.id}">삭제</button>
                 </div>
-                
-                <div class="bottom-actions">
-                    <button type="button" class="project-button project-edit" style="background-color: #EEF4E6; color: #465B38; border-color: #DCE5D2;">수정하기</button>
-                    <button type="button" class="project-button project-delete" style="background-color: #FDE8E8; color: #D9534F; border-color: #FAD1D1;">삭제하기</button>
-                </div>
-            </div>
-        </section>
-    </div>
+            `;
+            list.appendChild(item);
+        });
+
+        document.getElementById('taskCount').textContent =
+            '총 ' + tasks.length + '개 업무';
+
+        const approvedCount = tasks.filter(
+            t => t.approval === 'approved'
+        ).length;
+
+        const summaryCount = document.getElementById(
+            'taskCompleteCount'
+        );
+        if (summaryCount) {
+            summaryCount.textContent =
+                '승인 완료 ' + approvedCount + '개';
+        }
+
+        updateWeightHelp();
+    }
+
+    function updateWeightHelp() {
+        const editingId = fields.id.value
+            ? Number(fields.id.value) : null;
+
+        const available = Math.max(
+            0, 100 - totalWeight(editingId)
+        );
+
+        document.getElementById('weightHelp').textContent =
+            '남은 배정 비중: ' + format(available) +
+            '% (전체 업무 비중 합계는 100% 이하)';
+    }
+
+    function resetForm() {
+        form.reset();
+        fields.id.value = '';
+        fields.weight.readOnly = false;
+        document.getElementById('taskFormTitle').textContent =
+            '새 업무 등록';
+        document.getElementById('submitTaskButton').textContent =
+            '업무 등록';
+        updateWeightHelp();
+    }
+
+    function openEditor(task = null) {
+        resetForm();
+
+        if (task) {
+            fields.id.value = task.id;
+            fields.title.value = task.title;
+            fields.tl.value = task.tl;
+            fields.start.value = task.start;
+            fields.end.value = task.end;
+            fields.stage.value = task.stage;
+            fields.weight.value = task.weight;
+            fields.weight.readOnly =
+                task.approval === 'approved';
+
+            document.getElementById('taskFormTitle').textContent =
+                '업무 수정';
+            document.getElementById('submitTaskButton').textContent =
+                '수정 완료';
+        }
+
+        trigger.hidden = true;
+        editor.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+        updateWeightHelp();
+
+        editor.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+        });
+        fields.title.focus({preventScroll:true});
+    }
+
+    function closeEditor() {
+        editor.hidden = true;
+        trigger.hidden = false;
+        trigger.setAttribute('aria-expanded', 'false');
+        resetForm();
+    }
+
+    trigger.addEventListener('click', () => openEditor());
+
+    document.getElementById('closeTaskForm')
+        .addEventListener('click', closeEditor);
+    document.getElementById('cancelTaskForm')
+        .addEventListener('click', closeEditor);
+
+    fields.weight.addEventListener('input', updateWeightHelp);
+
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const editId = fields.id.value
+            ? Number(fields.id.value) : null;
+        const existing = tasks.find(t => t.id === editId);
+
+        const title = fields.title.value.trim();
+        const tl = fields.tl.value;
+        const start = fields.start.value;
+        const end = fields.end.value;
+        const stage = Number(fields.stage.value);
+        const weight = Number(fields.weight.value);
+
+        if (!title || !tl || !start || !end ||
+            !Number.isFinite(weight) ||
+            weight <= 0 || weight > 100) {
+            alert('모든 필수 항목을 정확히 입력해 주세요.');
+            return;
+        }
+
+        if (start > end) {
+            alert('종료일은 시작일보다 빠를 수 없습니다.');
+            return;
+        }
+
+        if (totalWeight(editId) + weight > 100.000001) {
+            alert('전체 업무의 배정 비중은 100%를 초과할 수 없습니다.');
+            return;
+        }
+
+        if (existing && existing.approval === 'approved' &&
+            existing.weight !== weight) {
+            alert('승인 완료된 업무의 비중은 변경할 수 없습니다.');
+            return;
+        }
+
+        const data = {
+            id: existing ? existing.id : nextId++,
+            title, tl, start, end, stage, weight,
+            approval: existing ? existing.approval : 'planned'
+        };
+
+        if (existing) {
+            tasks = tasks.map(t => t.id === existing.id ? data : t);
+        } else {
+            tasks.push(data);
+        }
+
+        renderTasks();
+        closeEditor();
+    });
+
+    list.addEventListener('click', event => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+
+        const id = Number(button.dataset.id);
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+
+        if (button.dataset.action === 'edit') {
+            openEditor(task);
+            return;
+        }
+
+        if (button.dataset.action === 'delete') {
+            if (task.approval === 'approved') {
+                alert('승인 완료된 업무는 삭제할 수 없습니다.');
+                return;
+            }
+
+            if (!confirm(
+                '"' + task.title + '" 업무를 삭제하시겠습니까?'
+            )) return;
+
+            tasks = tasks.filter(t => t.id !== id);
+
+            if (fields.id.value === String(id)) {
+                closeEditor();
+            }
+
+            renderTasks();
+        }
+    });
+
+    renderTasks();
+});
+</script>
 </th:block>
+
+
 </html>

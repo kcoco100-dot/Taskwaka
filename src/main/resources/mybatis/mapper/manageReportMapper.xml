@@ -19,8 +19,6 @@
         <if test="projectId != null"> AND p.project_id = #{projectId} </if>
         <if test="workspaceId != null"> AND p.workspace_id = #{workspaceId} </if>
         <if test="reportCategory == null or reportCategory == 0 or reportCategory == 1">
-            <!-- 프로젝트 보고서는 프로젝트 역할 DT가 작성 -->
-            <!-- 조회는 모든 프로젝트 역할에 허용 -->
         </if>
 
         UNION ALL
