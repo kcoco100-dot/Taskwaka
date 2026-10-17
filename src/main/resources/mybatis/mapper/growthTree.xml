@@ -12,5 +12,19 @@
 		FROM growth_levels
 		ORDER BY level_no ASC
 	</select>
+	
+	<!-- 성장나무 일괄 생성 조회 -->
+	<select id="findGrowthTree" resultType="com.tk.app.domain.dto.GrowthTreeDto">
+		SELECT t.workspace_id AS "workspaceId", 
+			   t.growth_level_id AS "growthLevelId",
+			   g.level_no AS "levelNo",
+			   g.level_name AS "levelName", 
+			   t.total_exp AS "totalExp",
+			   g.tree_image_path AS "treeImagePath"
+		FROM growth_tree t
+		JOIN growth_levels g
+		  ON t.growth_level_id = g.growth_level_id
+		WHERE t.workspace_id = #{workspaceId}
+	</select>
 
 </mapper>

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
 import com.tk.app.domain.dto.GrowthLevelDto;
+import com.tk.app.domain.dto.GrowthTreeDto;
 import com.tk.app.service.GrowthTreeService;
 
 import lombok.RequiredArgsConstructor;
@@ -40,12 +41,18 @@ public class HomeGrowthTreeController {
 
 	// 성장나무 화면
 	@GetMapping("/growthTree")
-	public String growthTree(Model model) {
+	public String growthTree(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			Model model) {
 		
 		List<GrowthLevelDto> growthLevels = growthTreeService.findGrowthLevels();
+		// 나무 생성
+		GrowthTreeDto growthTree = growthTreeService.findGrowthTree(workspace.getWorkspaceId());
 		
 		model.addAttribute("growthLevels", growthLevels);
+		model.addAttribute("growthTree", growthTree);
 		
 		return "tree/growthTree";
 	}
+
 }

@@ -25,8 +25,8 @@
 
                 <!-- 성장 상태 -->
                 <div class="growth-summary">
-                    <div>현재 단계 <strong>—</strong></div>
-                    <div>누적 경험치 <strong>— EXP</strong></div>
+                    <div>현재 단계 <strong th:text="${growthTree.levelName}">—</strong></div>
+                    <div>누적 경험치 <strong th:text="|${growthTree.totalExp} EXP|">— EXP</strong></div>
                     <div>구매 가능 경험치 <strong>— EXP</strong></div>
                 </div>
 
@@ -36,8 +36,8 @@
                         <span class="tree-preview-label">나무 미리보기</span>
 
                         <div class="tree-image-area">
-                            <img class="tree-image" src="/dist/tree/line/seed.png"
-                                    th:src="@{/dist/tree/line/seed.png}" alt="씨앗 단계의 팀 성장나무">
+                            <img class="tree-image" src="/dist/tree/line/seed.png" th:alt="|${growthTree.levelName} 단계의 팀 성장나무|"
+                                    th:src="@{${growthTree.treeImagePath}}" alt="씨앗 단계의 팀 성장나무">
 
                         <!-- 추후 착용 아이템 이미지 여기에 추가 예정 -->
                         </div>
