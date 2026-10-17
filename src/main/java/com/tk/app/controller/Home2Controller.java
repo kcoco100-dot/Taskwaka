@@ -83,12 +83,6 @@ public class Home2Controller {
 		return "manage/meetings";
 	}
 
-	// 성장나무 화면
-	@GetMapping("/growthTree")
-	public String growthTree() {
-		return "tree/growthTree";
-	}
-
 	@GetMapping("/manageCalender")
 	public String manageCalender() {
 		return "manage/manageCalender";

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.GrowthTreeMapper">
+
+	<!-- 성장나무 단계 조회 -->
+	<select id="findGrowthLevels" resultType="com.tk.app.domain.dto.GrowthLevelDto">
+		SELECT growth_level_id AS "growthLevelId", 
+		    level_no AS "levelNo", level_name AS "levelName",
+		    min_exp AS "minExp", max_exp AS "maxExp",
+		    tree_image_path AS "treeImagePath"
+		FROM growth_levels
+		ORDER BY level_no ASC
+	</select>
+
+</mapper>

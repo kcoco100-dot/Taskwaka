@@ -51,35 +51,12 @@
                 <div class="growth-stages">
                     <h2>성장 단계</h2>
                     <ol>
-                        <li>
+                        <li th:each="level : ${growthLevels}">
                             <div class="growth-stage-image">
-                                <img src="/dist/tree/line/seed.png" th:src="@{/dist/tree/line/seed.png}" alt="" loading="lazy">
+                                <img src="/dist/tree/line/seed.png" 
+                                	    th:src="@{${level.treeImagePath}}" alt="" loading="lazy">
                             </div>
-                            <span>씨앗</span>
-                        </li>
-                        <li>
-                            <div class="growth-stage-image">
-                                <img src="/dist/tree/line/sprout.png" th:src="@{/dist/tree/line/sprout.png}" alt="" loading="lazy">
-                            </div>
-                            <span>새싹</span>
-                        </li>
-                        <li>
-                            <div class="growth-stage-image">
-                                <img src="/dist/tree/line/small-tree.png" th:src="@{/dist/tree/line/small-tree.png}" alt="" loading="lazy">
-                            </div>
-                            <span>작은 나무</span>
-                        </li>
-                        <li>
-                            <div class="growth-stage-image">
-                                <img src="/dist/tree/line/big-tree.png" th:src="@{/dist/tree/line/big-tree.png}" alt="" loading="lazy">
-                            </div>
-                            <span>큰 나무</span>
-                        </li>
-                        <li>
-                            <div class="growth-stage-image">
-                                <img src="/dist/tree/line/king-tree-crowned.png" th:src="@{/dist/tree/line/king-tree-crowned.png}" alt="" loading="lazy">
-                            </div>
-                            <span>왕 나무</span>
+                            <span th:text="${level.levelName}">씨앗</span>
                         </li>
                     </ol>
 
