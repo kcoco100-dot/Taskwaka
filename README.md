@@ -245,7 +245,7 @@ Taskwaka는 팀의 협업 과정을 하나의 워크에 모아 다음 흐름을 
 
 회원 정보와 상태 등을 관리하는 화면입니다.
 
-<img width="1612" height="643" alt="관리자" src="https://github.com/user-attachments/assets/0baf1d4d-53ab-4254-a8c0-177cd09f5a27" />
+<img width="1451" height="579" alt="관리자2" src="https://github.com/user-attachments/assets/193affd9-692f-482c-810c-44472d43bc9a" />
 
 ---
 
