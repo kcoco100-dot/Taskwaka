@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,6 +32,8 @@ import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.NoticeFileDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
 import com.tk.app.domain.dto.TaskDto;
+import com.tk.app.exception.StorageException;
+import com.tk.app.exception.StorageFileNotFoundException;
 import com.tk.app.service.MeetingMinutesService;
 import com.tk.app.service.MyTaskService;
 import com.tk.app.service.NoticeService;
@@ -314,19 +317,49 @@ public class Home2Controller {
 	public String meetingsDetail(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam("meetingMinuteId") long meetingMinuteId, 
-			Model model) throws Exception {
+			Model model,
+			HttpServletResponse response) {
 
-		MeetingMinutesDto meeting = 
-				meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
-				workspace.getMemberId(), meetingMinuteId);
+		try {
+			MeetingMinutesDto meeting = 
+					meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
+					workspace.getMemberId(), meetingMinuteId);
 
-		if (meeting == null) {
-			throw new Exception("회의록을 찾을 수 없습니다.");
+			if (meeting == null) {
+				response.setStatus(HttpStatus.NOT_FOUND.value());
+				model.addAttribute("title", "자료를 찾을 수 없습니다.");
+				model.addAttribute("message", "회의록을 찾을 수 없습니다.");
+				return "error/error2";
+			}
+
+			model.addAttribute("meeting", meeting);
+
+			return "home/meetingsDetail";
+			
+			// DataAccessException : DB 처리 실패 오류
+		} catch (DataAccessException e) {
+			log.error("meetingsDetail - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("회의록 상세 조회 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-
-		model.addAttribute("meeting", meeting);
-
-		return "home/meetingsDetail";
 	}
 	
 	// 회의록 등록
@@ -382,8 +415,10 @@ public class Home2Controller {
 			@RequestParam("title") String title,
 			@RequestParam("content") String content,
 			HttpServletResponse response,
-			Model model) throws Exception {
-		
+			Model model) {
+
+		try {
+
 			if (title.isBlank() || title.getBytes(StandardCharsets.UTF_8).length > 200 || content.isBlank()) {
 				response.sendError(400, "제목은 UTF-8 기준 200바이트 이내이며, 제목과 내용은 공백만 입력할 수 없습니다.");
 				return null;
@@ -393,7 +428,7 @@ public class Home2Controller {
 					meetingMinutesService.insertMeetingMinutes(
 							workspace.getWorkspaceId(), projectId, subTaskId, 
 							workspace.getMemberId(), title, content);
-			
+
 			// 등록 검사 결과 및 정상 반환
 			if(insertCount != 1) {
 				response.sendError(403, "선택한 프로젝트와 하위업무에는 회의록을 등록할 수 없습니다.");
@@ -401,6 +436,30 @@ public class Home2Controller {
 			}
 
 			return "redirect:/" + domainKey + "/home/meetings";
+		} catch (DataAccessException e) {
+			log.error("insertMeetingMinutes - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("회의록 등록 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
+		}
 	}
 
 	// HOME 회의록 수정 화면 조회
@@ -409,27 +468,55 @@ public class Home2Controller {
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam("meetingMinuteId") long meetingMinuteId, 
 			HttpServletResponse response, 
-			Model model) throws Exception {
+			Model model) {
 
-		MeetingMinutesDto meeting = 
-				meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
-				workspace.getMemberId(), meetingMinuteId);
+		try {
+			MeetingMinutesDto meeting = 
+					meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
+					workspace.getMemberId(), meetingMinuteId);
 
-		// 회의록이 없으면
-		if (meeting == null) {
-			response.sendError(404, "회의록을 찾을 수 없습니다.");
-			return null;
+			// 회의록이 없으면
+			if (meeting == null) {
+				response.sendError(404, "회의록을 찾을 수 없습니다.");
+				return null;
+			}
+
+			// 회의록 수정 권한이 없으면
+			if (meeting.getCanModify() == 0) {
+				response.sendError(403, "회의록 수정 권한이 없습니다. 관리자에게 문의하세요.");
+				return null;
+			}
+
+			model.addAttribute("meeting", meeting);
+
+			return "home/meetingsEdit";
+			
+		} catch (DataAccessException e) {
+			log.error("meetingsEdit - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("회의록 수정 화면 조회 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-
-		// 회의록 수정 권한이 없으면
-		if (meeting.getCanModify() == 0) {
-			response.sendError(403, "회의록 수정 권한이 없습니다. 관리자에게 문의하세요.");
-			return null;
-		}
-
-		model.addAttribute("meeting", meeting);
-
-		return "home/meetingsEdit";
 	}
 
 	// 회의록 수정 저장
@@ -439,41 +526,67 @@ public class Home2Controller {
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam("meetingMinuteId") long meetingMinuteId, @RequestParam("title") String title,
 			@RequestParam("content") String content, 
-			HttpServletResponse response, Model model) throws Exception {
+			HttpServletResponse response, Model model) {
 
-		MeetingMinutesDto meeting = meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
-				workspace.getMemberId(), meetingMinuteId);
+		try {
+			MeetingMinutesDto meeting = meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
+					workspace.getMemberId(), meetingMinuteId);
 
-		if (meeting == null) {
-			response.sendError(404, "회의록을 찾을 수 없습니다.");
-			return null;
+			if (meeting == null) {
+				response.sendError(404, "회의록을 찾을 수 없습니다.");
+				return null;
+			}
+
+			if (meeting.getCanModify() == 0) {
+				response.sendError(403, "회의록 수정 권한이 없습니다. 관리자에게 문의하세요.");
+				return null;
+			}
+
+			if (title.isBlank() || title.length() > 200 || content.isBlank()) {
+				meeting.setTitle(title);
+				meeting.setContent(content);
+
+				model.addAttribute("meeting", meeting);
+				model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
+
+				return "home/meetingsEdit";
+			}
+
+			int updateCount = meetingMinutesService.meetingsEdit(
+					workspace.getWorkspaceId(), workspace.getMemberId(),
+					meetingMinuteId, title, content);
+
+			if (updateCount == 0) {
+				response.sendError(404, "수정할 회의록이 없습니다.");
+				return null;
+			}
+
+			return "redirect:/" + domainKey + "/home/meetingsDetail?meetingMinuteId=" + meetingMinuteId;
+		} catch (DataAccessException e) {
+			
+			log.error("meetingsEdit - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("회의록 수정 저장 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-
-		if (meeting.getCanModify() == 0) {
-			response.sendError(403, "회의록 수정 권한이 없습니다. 관리자에게 문의하세요.");
-			return null;
-		}
-
-		if (title.isBlank() || title.length() > 200 || content.isBlank()) {
-			meeting.setTitle(title);
-			meeting.setContent(content);
-
-			model.addAttribute("meeting", meeting);
-			model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
-
-			return "home/meetingsEdit";
-		}
-
-		int updateCount = meetingMinutesService.meetingsEdit(
-				workspace.getWorkspaceId(), workspace.getMemberId(),
-				meetingMinuteId, title, content);
-
-		if (updateCount == 0) {
-			response.sendError(404, "수정할 회의록이 없습니다.");
-			return null;
-		}
-
-		return "redirect:/" + domainKey + "/home/meetingsDetail?meetingMinuteId=" + meetingMinuteId;
 	}
 
 	// 회의록 삭제
@@ -481,35 +594,59 @@ public class Home2Controller {
 	public String meetingsDelete(@PathVariable("domainKey") String domainKey,
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam("meetingMinuteId") long meetingMinuteId, 
-			HttpServletResponse response, Model model)
-			throws Exception {
+			HttpServletResponse response, Model model) {
 
-		// meetingsDelete 는 int 를 반환하기 때문에 dto 에 담을 수 없음!!!
-		// 삭제가 아닌 삭제 조회로 해야 함
-		MeetingMinutesDto meeting = 
-				meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
-				workspace.getMemberId(), meetingMinuteId);
+		try {
+			// meetingsDelete 는 int 를 반환하기 때문에 dto 에 담을 수 없음!!!
+			// 삭제가 아닌 삭제 조회로 해야 함
+			MeetingMinutesDto meeting = 
+					meetingMinutesService.findMeetingDetailMinutes(workspace.getWorkspaceId(),
+					workspace.getMemberId(), meetingMinuteId);
 
-		if (meeting == null) {
-			response.sendError(404, "회의록을 찾을 수 없습니다.");
-			return null;
+			if (meeting == null) {
+				response.sendError(404, "회의록을 찾을 수 없습니다.");
+				return null;
+			}
+
+			if (meeting.getCanModify() == 0) {
+				response.sendError(403, "삭제할 권한이 없습니다. 관리자에게 문의하세요.");
+				return null;
+			}
+
+			int deleteCount = meetingMinutesService.meetingsDelete(
+					workspace.getWorkspaceId(), workspace.getMemberId(),
+					meetingMinuteId);
+
+			if (deleteCount == 0) {
+				response.sendError(404, "삭제할 회의록이 없습니다.");
+				return null;
+			}
+
+			return "redirect:/" + domainKey + "/home/meetings";
+			
+		} catch (DataAccessException e) {
+			log.error("meetingsDelete - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("회의록 삭제 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-
-		if (meeting.getCanModify() == 0) {
-			response.sendError(403, "삭제할 권한이 없습니다. 관리자에게 문의하세요.");
-			return null;
-		}
-
-		int deleteCount = meetingMinutesService.meetingsDelete(
-				workspace.getWorkspaceId(), workspace.getMemberId(),
-				meetingMinuteId);
-
-		if (deleteCount == 0) {
-			response.sendError(404, "삭제할 회의록이 없습니다.");
-			return null;
-		}
-
-		return "redirect:/" + domainKey + "/home/meetings";
 	}
 
 	// manage - meetings 페이지
@@ -588,22 +725,55 @@ public class Home2Controller {
 	@GetMapping("/noticeDetail")
 	public String noticeDetail(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
-			@RequestParam("noticeId") long noticeId, Model model) throws Exception {
+			@RequestParam("noticeId") long noticeId, Model model,
+			HttpServletResponse response) {
 
-		NoticeDto notice = noticeService.findWorkspaceDetailNotice(workspace.getWorkspaceId(), noticeId);
+		try {
+			NoticeDto notice = noticeService.findWorkspaceDetailNotice(workspace.getWorkspaceId(), noticeId);
 
-		if (notice == null) {
-			throw new Exception("공지를 찾을 수 없습니다.");
+			if (notice == null) {
+				response.setStatus(HttpStatus.NOT_FOUND.value());
+				model.addAttribute("title", "자료를 찾을 수 없습니다.");
+				model.addAttribute("message", "공지를 찾을 수 없습니다.");
+				return "error/error2";
+			}
+
+			// 등록된 공지사항의 첨부파일 조회
+			List<NoticeFileDto> noticeFile = 
+					noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
+
+			model.addAttribute("notice", notice);
+			model.addAttribute("noticeFile", noticeFile);
+
+			return "notice/noticeDetail";
+			
+		} catch (DataAccessException e) {
+			
+			log.error("noticeDetail - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("공지 상세 조회 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-		
-		// 등록된 공지사항의 첨부파일 조회
-		List<NoticeFileDto> noticeFile = 
-				noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
-
-		model.addAttribute("notice", notice);
-		model.addAttribute("noticeFile", noticeFile);
-
-		return "notice/noticeDetail";
 	}
 
 	// 공지사항 등록
@@ -624,46 +794,85 @@ public class Home2Controller {
 			@RequestParam("title") String title,
 			@RequestParam("content") String content,
 			@RequestParam(value = "files", required = false) List<MultipartFile> files, // required = false 는 첨부파일이 선택사항이기 때문
-			HttpServletResponse response, Model model) throws Exception {
+			HttpServletResponse response, Model model) {
 
-		if (title.isBlank() || title.length() > 200 || content.isBlank()) {
-			NoticeDto notice = new NoticeDto();
-			notice.setTitle(title);
-			notice.setContent(content);
+		try {
+			if (title.isBlank() || title.length() > 200 || content.isBlank()) {
+				NoticeDto notice = new NoticeDto();
+				notice.setTitle(title);
+				notice.setContent(content);
 
-			model.addAttribute("notice", notice);
-			model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
+				model.addAttribute("notice", notice);
+				model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
 
-			return "notice/noticeCreate";
-		}
-		// 첨부파일 검증
-		String errorMessage = noticeService.validateNoticeFiles(files);
-		
-		// 첨부 검사에서 오류 메시지가 있다면
-		if(errorMessage != null) {
-			// 화면에 돌려줄 dto 객체 만들기
-			NoticeDto notice = new NoticeDto();
-			notice.setTitle(title);
-			notice.setContent(content);
+				return "notice/noticeCreate";
+			}
+			// 첨부파일 검증
+			String errorMessage = noticeService.validateNoticeFiles(files);
+
+			// 첨부 검사에서 오류 메시지가 있다면
+			if(errorMessage != null) {
+				// 화면에 돌려줄 dto 객체 만들기
+				NoticeDto notice = new NoticeDto();
+				notice.setTitle(title);
+				notice.setContent(content);
+
+				model.addAttribute("notice", notice);
+				model.addAttribute("errorMessage", errorMessage);
+
+				return "notice/noticeCreate";
+			}
+
+			int insertNotice = noticeService.createWorkspaceNotice(
+					workspace.getWorkspaceId(), workspace.getMemberId(),
+					title, content, files);
+
+			// 0 이랑 비교하는게 아니라 != 1 로 비교함
+			if (insertNotice != 1) {
+				response.sendError(500, "공지를 등록할 수 없습니다.");
+				return null;
+
+			}
+
+			return "redirect:/" + domainKey + "/home/notice";
+		} catch (DataAccessException e) {
 			
-			model.addAttribute("notice", notice);
-			model.addAttribute("errorMessage", errorMessage);
+			log.error("noticeCreate - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+				
+			}
 			
-			return "notice/noticeCreate";
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (StorageException e) {
+			log.error("noticeCreate - StorageException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "파일 처리 오류.");
+			model.addAttribute("message", "첨부파일을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("공지 등록 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-
-		int insertNotice = noticeService.createWorkspaceNotice(
-				workspace.getWorkspaceId(), workspace.getMemberId(),
-				title, content, files);
-
-		// 0 이랑 비교하는게 아니라 != 1 로 비교함
-		if (insertNotice != 1) {
-			response.sendError(500, "공지를 등록할 수 없습니다.");
-			return null;
-
-		}
-
-		return "redirect:/" + domainKey + "/home/notice";
 	}
 	
 	// 공지사항 파일 다운로드
@@ -671,35 +880,90 @@ public class Home2Controller {
 	public ResponseEntity<?> downloadFile(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam("noticeId") long noticeId,
-			@RequestParam("noticeFileId") long noticeFileId) throws Exception {
+			@RequestParam("noticeFileId") long noticeFileId) {
 
-		// 다운로드에 필요한 파일 DB 정보 확보
-		NoticeFileDto noticeFile = noticeService.findWorkspaceFile(
-				workspace.getWorkspaceId(), noticeId, noticeFileId);
-		
-		return storageService.downloadFile(noticeFile.getFilePath(), noticeFile.getStoredName(), noticeFile.getOriginalName());
+		try {
+			// 다운로드에 필요한 파일 DB 정보 확보
+			NoticeFileDto noticeFile = noticeService.findWorkspaceFile(
+					workspace.getWorkspaceId(), noticeId, noticeFileId);
+
+			return storageService.downloadFile(noticeFile.getFilePath(), noticeFile.getStoredName(), noticeFile.getOriginalName());
+		} catch (StorageFileNotFoundException e) {
+			log.error("downloadFile - StorageFileNotFoundException", e);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.header("Content-Type", "text/plain;charset=UTF-8")
+					.body("첨부파일을 찾을 수 없습니다.");
+			
+		// StorageException : 파일처리 실패 예외
+		} catch (StorageException e) {
+			log.error("downloadFile - StorageException", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.header("Content-Type", "text/plain;charset=UTF-8")
+					.body("첨부파일을 처리할 수 없습니다.");
+			
+		} catch (DataAccessException e) {
+			log.error("downloadFile - DataAccessException", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.header("Content-Type", "text/plain;charset=UTF-8")
+					.body("첨부파일 정보를 조회할 수 없습니다.");
+			
+		} catch (Exception e) {
+			log.error("공지 첨부파일 다운로드 중 오류가 발생했습니다.", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.header("Content-Type", "text/plain;charset=UTF-8")
+					.body("첨부파일을 다운로드할 수 없습니다.");
+		}
 	}
 
 	// 공지사항 수정
 	@GetMapping("/noticeEdit")
 	public String noticeEdit(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
-			@RequestParam("noticeId") long noticeId, Model model) throws Exception {
+			@RequestParam("noticeId") long noticeId, Model model,
+			HttpServletResponse response) {
 
-		NoticeDto notice = noticeService.findWorkspaceDetailNotice(
-				workspace.getWorkspaceId(), noticeId);
+		try {
+			NoticeDto notice = noticeService.findWorkspaceDetailNotice(
+					workspace.getWorkspaceId(), noticeId);
 
-		if (notice == null) {
-			throw new Exception("공지를 찾을 수 없습니다.");
+			if (notice == null) {
+				response.setStatus(HttpStatus.NOT_FOUND.value());
+				model.addAttribute("title", "자료를 찾을 수 없습니다.");
+				model.addAttribute("message", "공지를 찾을 수 없습니다.");
+				return "error/error2";
+			}
+
+			// 파일 목록 조회
+			List<NoticeFileDto> noticeFile = noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
+
+			model.addAttribute("noticeFile", noticeFile);
+			model.addAttribute("notice", notice);
+
+			return "notice/noticeEdit";
+		} catch (DataAccessException e) {
+			log.error("noticeEdit - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("공지 수정 화면 조회 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-		
-		// 파일 목록 조회
-		List<NoticeFileDto> noticeFile = noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
-		
-		model.addAttribute("noticeFile", noticeFile);
-		model.addAttribute("notice", notice);
-
-		return "notice/noticeEdit";
 	}
 
 	// 공지사항 수정 저장
@@ -713,37 +977,74 @@ public class Home2Controller {
 			@RequestParam(required = false, name = "files") List<MultipartFile> files,
 			@RequestParam(required = false, name = "deleteFileIds") List<Long> deleteFileIds,
 			Model model,
-			HttpServletResponse response) throws Exception {
+			HttpServletResponse response) {
 
-		// 제목 DB에 200자 이내로
-		if (title.isBlank() || title.length() > 200 || content.isBlank()) {
-			NoticeDto notice = new NoticeDto();
+		try {
+			// 제목 DB에 200자 이내로
+			if (title.isBlank() || title.length() > 200 || content.isBlank()) {
+				NoticeDto notice = new NoticeDto();
 
-			notice.setNoticeId(noticeId);
-			notice.setTitle(title);
-			notice.setContent(content);
+				notice.setNoticeId(noticeId);
+				notice.setTitle(title);
+				notice.setContent(content);
 
-			List<NoticeFileDto> noticeFile = noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
+				List<NoticeFileDto> noticeFile = noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
+
+				model.addAttribute("notice", notice);
+				model.addAttribute("noticeFile", noticeFile);
+				model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
+
+
+				return "notice/noticeEdit";
+			}
+
+			// updatedCount 에 수정된 행수를 담는다.
+			int updatedCount = noticeService.noticeEdit(
+					workspace.getWorkspaceId(), noticeId, title, content, deleteFileIds, files);
+
+			// 수정할 공지가 없을 경우
+			if (updatedCount == 0) {
+				response.sendError(404, "수정할 공지가 없습니다.");
+				return null;
+			}
+
+			return "redirect:/" + domainKey + "/home/noticeDetail?noticeId=" + noticeId;
+		} catch (DataAccessException e) {
+			log.error("saveNotice - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
 			
-			model.addAttribute("notice", notice);
-			model.addAttribute("noticeFile", noticeFile);
-			model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
-
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
 			
-			return "notice/noticeEdit";
+			return "error/error2";
+			
+		} catch (StorageException e) {
+			log.error("saveNotice - StorageException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "파일 처리 오류.");
+			model.addAttribute("message", "첨부파일을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("공지 수정 저장 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-
-		// updatedCount 에 수정된 행수를 담는다.
-		int updatedCount = noticeService.noticeEdit(
-				workspace.getWorkspaceId(), noticeId, title, content, deleteFileIds, files);
-
-		// 수정할 공지가 없을 경우
-		if (updatedCount == 0) {
-			response.sendError(404, "수정할 공지가 없습니다.");
-			return null;
-		}
-
-		return "redirect:/" + domainKey + "/home/noticeDetail?noticeId=" + noticeId;
 	}
 
 	// 공지사항 삭제
@@ -752,18 +1053,43 @@ public class Home2Controller {
 			@PathVariable("domainKey") String domainKey,
 			@RequestAttribute("workspace") WorkspaceDto workspace, 
 			@RequestParam("noticeId") long noticeId,
-			HttpServletResponse response) throws Exception {
+			HttpServletResponse response, Model model) {
 
-		int deletedCount = noticeService.deleteNotice(workspace.getWorkspaceId(), noticeId);
+		try {
+			int deletedCount = noticeService.deleteNotice(workspace.getWorkspaceId(), noticeId);
 
-		// 삭제할 공지가 없을 경우
-		if (deletedCount == 0) {
-			response.sendError(404, "삭제할 공지가 없습니다.");
-			return null;
+			// 삭제할 공지가 없을 경우
+			if (deletedCount == 0) {
+				response.sendError(404, "삭제할 공지가 없습니다.");
+				return null;
+			}
+
+			// 삭제한 공지는 수정 화면에서 다시 조회할 수 없기 때문에 수정과 리다이렉트 주소가 다름
+			return "redirect:/" + domainKey + "/home/notice";
+		} catch (DataAccessException e) {
+			log.error("deleteNotice - DataAccessException", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "데이터 처리 오류.");
+			model.addAttribute("message", "데이터를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			
+			return "error/error2";
+			
+		} catch (Exception e) {
+			log.error("공지 삭제 중 오류가 발생했습니다.", e);
+			if (response.isCommitted()) {
+				return null;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			model.addAttribute("title", "시스템 오류.");
+			model.addAttribute("message", "죄송합니다.<br> <strong>요청을 처리할 수 없습니다.</strong>");
+			
+			return "error/error2";
 		}
-
-		// 삭제한 공지는 수정 화면에서 다시 조회할 수 없기 때문에 수정과 리다이렉트 주소가 다름
-		return "redirect:/" + domainKey + "/home/notice";
 	}
 
 	@GetMapping("/plan")

@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.NoticeFileDto;
+import com.tk.app.exception.StorageException;
+import com.tk.app.exception.StorageFileNotFoundException;
 import com.tk.app.mapper.NoticeMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -152,7 +154,7 @@ public class NoticeService {
 					String storedName = storageService.uploadFileToServer(file, uploadPath);
 					
 					if(storedName == null || storedName.isBlank()) {
-						throw new Exception("첨부파일을 저장할 수 없습니다.");
+						throw new StorageException("첨부파일을 저장할 수 없습니다.");
 					}
 					
 					storedNames.add(storedName);
@@ -288,7 +290,7 @@ public class NoticeService {
 					String storedName = storageService.uploadFileToServer(file, uploadPath);
 					
 					if(storedName == null || storedName.isBlank()) {
-						throw new Exception("첨부파일을 저장할 수 없습니다.");
+						throw new StorageException("첨부파일을 저장할 수 없습니다.");
 
 					}
 					// storedNames 목록에 업로드한 서버 파일명 추가
@@ -354,7 +356,7 @@ public class NoticeService {
 		
 		NoticeFileDto noticeFile = noticeMapper.findWorkspaceFile(workspaceId, noticeId, noticeFileId);
 		if(noticeFile == null) {
-			throw new Exception("다운로드할 첨부파일이 없습니다.");
+			throw new StorageFileNotFoundException("다운로드할 첨부파일이 없습니다.");
 		}
 		return noticeFile;
 	}
