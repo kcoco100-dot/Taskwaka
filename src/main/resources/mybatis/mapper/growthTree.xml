@@ -86,4 +86,21 @@
 		WHERE workspace_id = #{workspaceId}
 	</update>
 	
+	<!-- 미회수 지급 이력 조회 -->
+	<select id="findUnrevokedNoticeCreateExpLogs" resultType="com.tk.app.domain.dto.GrowthExpLogDto">
+		SELECT exp_log_id AS "expLogId", exp
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND notice_id = #{noticeId}
+			AND action_type = #{actionType}
+			AND deleted_at IS NULL
+	</select>
+	
+	<!-- 회수 시간 기록 -->
+	<update id="markNoticeCreateExpLogRevoked" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
+		UPDATE growth_exp_logs SET deleted_at = SYSDATE
+		WHERE exp_log_id = #{expLogId} 
+			AND deleted_at IS NULL
+	</update>
+	
 </mapper>

@@ -352,9 +352,21 @@ public class NoticeService {
 	}
 	
 	// 공지사항 삭제
-	public int deleteNotice(long workspaceId, long noticeId) {
+	@Transactional(rollbackFor = Exception.class)
+	public int deleteNotice(long workspaceId, long noticeId) throws Exception {
 		
-		return noticeMapper.deleteNotice(workspaceId, noticeId);
+		// 공지 삭제 시 경험치 회수
+		int deletedCount = noticeMapper.deleteNotice(workspaceId, noticeId);
+		if(deletedCount == 0) {
+			return 0;
+		} else if(deletedCount != 0 && deletedCount != 1) {
+			throw new IllegalStateException("공지를 정상적으로 삭제할 수 없습니다.");
+		} else if(deletedCount == 1) {
+			growthTreeService.revokeNoticeCreateExp(workspaceId, noticeId);
+		}
+		
+		return deletedCount;
+		
 	}
 	
 	// 공지사항 다운로드 : 파일 한개 조회용

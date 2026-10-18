@@ -31,4 +31,10 @@ public interface GrowthTreeMapper {
 
 	// 변경된 누적 경험치와 성장 단계 저장
 	public int updateGrowthTree(GrowthTreeDto dto);
+	
+	// 미회수 지급 이력 조회
+	public List<GrowthExpLogDto> findUnrevokedNoticeCreateExpLogs(GrowthExpLogDto dto);
+
+	// 회수 시간 기록
+	public int markNoticeCreateExpLogRevoked(GrowthExpLogDto dto);
 }
