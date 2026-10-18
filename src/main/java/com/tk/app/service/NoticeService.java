@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NoticeService {
 	
+	private final GrowthTreeService growthTreeService;
 	private final NoticeMapper noticeMapper;
 	private final StorageService storageService;
 	private final NoticeEditSaveService noticeEditSaveService;
@@ -94,10 +95,12 @@ public class NoticeService {
 	}
 	
 	// 생성자 주입
-	public NoticeService(NoticeMapper noticeMapper, StorageService storageService, NoticeEditSaveService noticeEditSaveService) {
+	public NoticeService(NoticeMapper noticeMapper, StorageService storageService, 
+			NoticeEditSaveService noticeEditSaveService, GrowthTreeService growthTreeService) {
 		this.noticeMapper = noticeMapper;
 		this.storageService = storageService;
 		this.noticeEditSaveService = noticeEditSaveService;
+		this.growthTreeService = growthTreeService;
 	}
 	
 	// 워크 공지 목록 조회
@@ -173,6 +176,9 @@ public class NoticeService {
 					}
 				}
 			}
+			
+			// 공지 등록 성공 시 경험치 +10 추가
+			growthTreeService.grantNoticeCreateExp(workspaceId, memberId, notice.getNoticeId());
 			
 			return insertCount;
 			

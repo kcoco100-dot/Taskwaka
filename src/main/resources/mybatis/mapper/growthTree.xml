@@ -26,5 +26,64 @@
 		  ON t.growth_level_id = g.growth_level_id
 		WHERE t.workspace_id = #{workspaceId}
 	</select>
+	
+	<!-- 성장나무 초기 저장 -->
+	<insert id="growthTreeCreate" parameterType="long">
+		INSERT INTO growth_tree(workspace_growth_id, 
+		    workspace_id, month, growth_level_id,
+		    total_exp, updated_at)
+		VALUES(SEQ_WORKSPACE_GROWTH.NEXTVAL, #{workspaceId},
+				 TO_CHAR(SYSDATE, 'YYYY-MM'),
+		    (SELECT growth_level_id
+		     FROM growth_levels
+		     WHERE min_exp &lt;=0
+		        AND (max_exp IS NULL OR max_exp &gt;=0)
+		    ),
+		    0,
+		    SYSDATE
+		)
+	</insert>
+	
+	<!-- 경험치 지급 이력 -->
+	<insert id="insertGrowthExpLog" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
+		<selectKey keyProperty="expLogId" resultType="long" order="BEFORE">
+			SELECT SEQ_GROWTH_EXP_LOGS.NEXTVAL
+			FROM dual
+		</selectKey>
+		INSERT INTO growth_exp_logs(
+			exp_log_id, workspace_id, member_id, notice_id, 
+			exp, action_type, earned_at)
+		VALUES(#{expLogId}, #{workspaceId}, #{memberId},
+			#{noticeId, jdbcType=NUMERIC}, #{exp}, 
+			#{actionType}, SYSDATE)
+	</insert>
 
+	<!-- 같은 공지의 등록 보상을 이미 지급했는지 확인 -->
+	<select id="countNoticeCreateExpLog" resultType="int" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
+		SELECT COUNT(*)
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND notice_id = #{noticeId}
+			AND action_type = #{actionType}
+	</select>
+	
+	<!-- 동시에 들어온 경험치 요청을 순서대로 처리 -->
+	<!-- FOR UPDATE : 조회한 행에 잠금 처리 -->
+	<select id="findGrowthTreeForUpdate" parameterType="long" resultType="com.tk.app.domain.dto.GrowthTreeDto">
+		SELECT workspace_id AS "workspaceId",
+			growth_level_id AS "growthLevelId",
+			total_exp AS "totalExp"
+		FROM growth_tree
+		WHERE workspace_id = #{workspaceId}
+		FOR UPDATE
+	</select>
+	
+	<!-- 변경된 누적 경험치와 성장 단계 저장 -->
+	<update id="updateGrowthTree" parameterType="com.tk.app.domain.dto.GrowthTreeDto">
+		UPDATE growth_tree SET total_exp = #{totalExp}, 
+			growth_level_id = #{growthLevelId},
+			updated_at = SYSDATE
+		WHERE workspace_id = #{workspaceId}
+	</update>
+	
 </mapper>
