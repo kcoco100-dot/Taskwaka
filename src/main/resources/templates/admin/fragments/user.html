@@ -1,86 +1,96 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-  <div th:fragment="content">
-  
-  	 <style>
-      .member-link {
-        color: #594331;
-        text-decoration: none;
-      }
+	<div th:fragment="content">
 
-      .member-link:hover {
-        text-decoration: underline;
-      }
-    </style>
-    <div class="panel-card">
-    <form th:action="@{/admin/user}" method="get">
-	      <div class="panel-card-title">
-	        <span>전체 회원 목록 조회 및 상태 관리</span>
-	        <div style="display:flex; gap:8px;">
-	          <input type="text" class="warm-input" name="keyword" placeholder="이름 또는 이메일 검색..." style="width:240px;">
-	          <select class="warm-select" name="status">
-		          <option value="">전체 상태</option>
-		          <option value="0">활성</option>
-		          <option value="1">비활성</option>
-	          </select>
-	          <button class="btn-sage" type="submit">조회</button>
-	        </div>
-	      </div>
-      </form>
+		<div class="member-stats">
+			<div class="member-stat-card">
+				<span>전체 회원</span> <strong th:text="|${totalMembers}명|">0명</strong>
+			</div>
 
-      <table class="warm-table">
-        <thead>
-          <tr>
-            <th>이름</th>
-            <th>이메일</th>
-            <th>소속 팀</th>
-            <th>역할</th>
-            <th>회원 상태</th>
-            <th>가입일</th>
-            <th>최근 접속일</th>
-            <th>탈퇴일</th>
-            <th style="text-align:right;">관리 작업</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="member : ${members}">
-            <td>
-            	<strong>
-			        <a class="member-link" th:href="@{/admin/user/{member_id}(member_id=${member.member_id})}" th:text="${member.name}"></a>
-			    </strong>
-            </td>
-            <td th:text="${member.login_id}"></td>
-            <td th:text="${member.email}"></td>
-            <td th:text="${#lists.isEmpty(member.workspaces) ? '-' : member.workspaces.size() + '개 워크'}">
-			</td>
-            <td>
-			    <span th:if="${#lists.isEmpty(member.workspaces)}">-</span>
-			
-			    <span th:unless="${#lists.isEmpty(member.workspaces)}"
-			          th:text="${member.workspaces[0].role_name + (member.workspaces.size() > 1
+			<div class="member-stat-card">
+				<span>활성 회원</span> <strong th:text="|${activeMembers}명|">0명</strong>
+			</div>
+
+			<div class="member-stat-card">
+				<span>비활성 회원</span> <strong th:text="|${inactiveMembers}명|">0명</strong>
+			</div>
+		</div>
+
+		<div class="panel-card">
+			<form th:action="@{/admin/user}" method="get">
+				<div class="panel-card-title">
+					<span>전체 회원 목록 조회 및 상태 관리</span>
+					<div style="display: flex; gap: 8px;">
+						<input type="text" class="warm-input" name="keyword" th:value="${keyword}"
+							placeholder="이름 또는 이메일 검색..." style="width: 240px;"> 
+							<select class="warm-select" name="status">
+							    <option value="" th:selected="${status == null}">전체 상태</option>
+							    <option value="0" th:selected="${status != null and status == 0}">활성</option>
+							    <option value="1" th:selected="${status != null and status == 1}">비활성</option>
+							</select>
+						<button class="btn-sage" type="submit">조회</button>
+					</div>
+				</div>
+			</form>
+
+			<table class="warm-table">
+				<thead>
+					<tr>
+						<th>이름</th>
+						<th>로그인 ID</th>
+						<th>이메일</th>
+						<th>소속 팀</th>
+						<th>역할</th>
+						<th>회원 상태</th>
+						<th>가입일</th>
+						<th>최근 접속일</th>
+						<th>탈퇴일</th>
+						<th>관리 작업</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="member : ${members}">
+						<td><strong> <a class="member-link"
+								th:href="@{/admin/user/{member_id}(member_id=${member.member_id})}"
+								th:text="${member.name}"></a>
+						</strong></td>
+						<td th:text="${member.login_id}"></td>
+						<td th:text="${member.email}"></td>
+						<td
+							th:text="${#lists.isEmpty(member.workspaces) ? '-' : member.workspaces.size() + '개 워크'}">
+						</td>
+						<td><span th:if="${#lists.isEmpty(member.workspaces)}">-</span>
+
+							<span th:unless="${#lists.isEmpty(member.workspaces)}"
+							th:text="${member.workspaces[0].role_name + (member.workspaces.size() > 1
 			          ? ' 외 ' + (member.workspaces.size() - 1) + '개' : '')}">
-			    </span>
-			</td>
-            <td>
-            <span class=""></span>
-            <span class="badge"  th:classappend="${member.status == 0 and member.fail_cnt < 5 ? 'badge-active' : 'badge-inactive'}"
-            	 th:text="${member.status == 2 ? '탈퇴' : member.status == 1 ? '비활성' : member.fail_cnt >= 5 ? '5회 실패' : '활성'}"></span>
-            </td>
-            <td th:text="${#dates.format(member.joined, 'yyyy-MM-dd')}"></td>
-            <td th:text="${member.last_login == null ? '-' : #dates.format(member.last_login, 'yyyy-MM-dd')}"></td>
-            <td th:text="${member.withdrawn == null ? '-' : #dates.format(member.withdrawn, 'yyyy-MM-dd')}"></td>
-            <td style="text-align:right;">
-            		<form th:action="@{/admin/user/status}" method="post">
-            			<input type="hidden" name="member_id" th:value="${member.member_id}">
-            			<input type="hidden" name="status" th:value="${member.status == 0 ? 1 : 0}">
-	                <button type="submit" class="btn-subtle" th:text="${member.status == 0 ? '비활성 전환' : '활성 전환'}"></button>
-            		</form>  
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+						</span></td>
+						<td><span class=""></span> <span class="badge"
+							th:classappend="${member.status == 0 and member.fail_cnt < 5 ? 'badge-active' : 'badge-inactive'}"
+							th:text="${member.status == 2 ? '탈퇴' : member.status == 1 ? '비활성' : member.fail_cnt >= 5 ? '5회 실패' : '활성'}"></span>
+						</td>
+						<td th:text="${#dates.format(member.joined, 'yyyy-MM-dd')}"></td>
+						<td
+							th:text="${member.last_login == null ? '-' : #dates.format(member.last_login, 'yyyy-MM-dd')}"></td>
+						<td
+							th:text="${member.withdrawn == null ? '-' : #dates.format(member.withdrawn, 'yyyy-MM-dd')}"></td>
+						<td style="text-align: right;">
+							<form th:action="@{/admin/user/status}" method="post">
+								<input type="hidden" name="member_id"
+									th:value="${member.member_id}"> <input type="hidden"
+									name="status" th:value="${member.status == 0 ? 1 : 0}">
+								<button type="submit" class="btn-subtle"
+									th:text="${member.status == 0 ? '비활성 전환' : '활성 전환'}"></button>
+							</form>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="member-pagination">
+				<th:block th:utext="${paging}"></th:block>
+			</div>
+		</div>
+	</div>
 </body>
 </html>

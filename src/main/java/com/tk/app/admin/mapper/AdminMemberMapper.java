@@ -1,6 +1,7 @@
 package com.tk.app.admin.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -17,4 +18,9 @@ public interface AdminMemberMapper {
 	public List<AdminMemberDto> searchMembers(String keyword);
 	public List<AdminMemberDto> searchMembersByStatus(@Param("keyword") String keyword, @Param("status") Integer status);
 	public int updateMemberStatus(@Param("member_id") long member_id, @Param("status") int status);
+	
+	public int dataCountMembers(Map<String, Object> map);
+	public List<AdminMemberDto> listMembersByPage(Map<String, Object> map);
+	
+	
 }

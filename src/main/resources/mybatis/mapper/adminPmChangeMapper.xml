@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.admin.mapper.AdminPmChangeMapper">
+
+    <select id="findAllPmChanges" resultType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    SELECT pc.*, w.SUBJECT AS workspace_name,
+	           old_md.NAME AS old_pm_name, new_md.NAME AS new_pm_name
+	    FROM PM_CHANGE pc
+	    JOIN WORKSPACES w
+	    ON pc.WORKSPACE_ID = w.WORKSPACE_ID
+	    JOIN MEMBER_DETAILS old_md
+	    ON pc.OLD_MEMBER_ID = old_md.MEMBER_ID
+	    JOIN MEMBER_DETAILS new_md
+	    ON pc.NEW_MEMBER_ID = new_md.MEMBER_ID
+	    ORDER BY pc.REQUESTED DESC
+	</select>
+
+	
+	<update id="updatePmChangeStatus" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE PM_CHANGE
+	    SET STATUS = #{status},
+	        PROCESSED = SYSDATE,
+	        REJECT_REASON = #{reject_reason, jdbcType=VARCHAR},
+	        ADMIN_ID = #{admin_id}
+	    WHERE PM_CHANGE_ID = #{pm_change_id}
+	    AND STATUS = 0
+	</update>
+	
+	<update id="updateWorkspacePm" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE WORKSPACES
+	    SET MEMBER_ID = #{new_member_id}
+	    WHERE WORKSPACE_ID = #{workspace_id}
+	    AND MEMBER_ID = #{old_member_id}
+	</update>
+	
+	<update id="updateOldPmRole" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE WORKSPACE_MEMBERS
+	    SET ROLE = 50
+	    WHERE WORKSPACE_ID = #{workspace_id}
+	    AND MEMBER_ID = #{old_member_id}
+	    AND ROLE = 70
+	    AND STATUS = 0
+	</update>
+	
+	<update id="updateNewPmRole" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE WORKSPACE_MEMBERS
+	    SET ROLE = 70
+	    WHERE WORKSPACE_ID = #{workspace_id}
+	    AND MEMBER_ID = #{new_member_id}
+	    AND STATUS = 0
+	</update>
+	
+	<select id="findPmChangeById" resultType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    SELECT PM_CHANGE_ID, WORKSPACE_ID, OLD_MEMBER_ID,
+	           NEW_MEMBER_ID, REASON, STATUS
+	    FROM PM_CHANGE
+	    WHERE PM_CHANGE_ID = #{pm_change_id}
+	</select>
+	
+	
+	<select id="countNewPmMember" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto" resultType="int">
+	    SELECT COUNT(*)
+	    FROM WORKSPACE_MEMBERS
+	    WHERE WORKSPACE_ID = #{workspace_id}
+	    AND MEMBER_ID = #{new_member_id}
+	    AND STATUS = 0
+	</select>
+	
+	<select id="findDtProjectIds"
+	        parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto"
+	        resultType="long">
+	    SELECT pm.PROJECT_ID
+	    FROM PROJECT_MEMBERS pm
+	    JOIN WORKSPACE_MEMBERS wm
+	    ON pm.WORKSPACE_MEMBER_ID = wm.WORKSPACE_MEMBER_ID
+	    WHERE wm.WORKSPACE_ID = #{workspace_id}
+	    AND wm.MEMBER_ID = #{new_member_id}
+	    AND wm.ROLE = 50
+	    AND wm.STATUS = 0
+	    AND pm.ROLE = 50
+	    AND pm.STATUS = 0
+	</select>
+	
+	<update id="updateOldPmProjectRole" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE PROJECT_MEMBERS
+	    SET ROLE = 50
+	    WHERE WORKSPACE_MEMBER_ID IN (
+	        SELECT WORKSPACE_MEMBER_ID
+	        FROM WORKSPACE_MEMBERS
+	        WHERE WORKSPACE_ID = #{workspace_id}
+	        AND MEMBER_ID = #{old_member_id}
+	        AND STATUS = 0
+	    )
+	    AND PROJECT_ID IN (
+	        SELECT pm.PROJECT_ID
+	        FROM PROJECT_MEMBERS pm
+	        JOIN WORKSPACE_MEMBERS wm
+	        ON pm.WORKSPACE_MEMBER_ID = wm.WORKSPACE_MEMBER_ID
+	        WHERE wm.WORKSPACE_ID = #{workspace_id}
+	        AND wm.MEMBER_ID = #{new_member_id}
+	        AND wm.ROLE = 50
+	        AND wm.STATUS = 0
+	        AND pm.ROLE = 50
+	        AND pm.STATUS = 0
+	    )
+	    AND ROLE = 70
+	    AND STATUS = 0
+	</update>
+	
+	
+	<update id="updateNewPmProjectRole" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE PROJECT_MEMBERS
+	    SET ROLE = 70
+	    WHERE WORKSPACE_MEMBER_ID IN (
+	        SELECT WORKSPACE_MEMBER_ID
+	        FROM WORKSPACE_MEMBERS
+	        WHERE WORKSPACE_ID = #{workspace_id}
+	        AND MEMBER_ID = #{new_member_id}
+	        AND STATUS = 0
+	    )
+	    AND STATUS = 0
+	</update>
+	
+	
+	<insert id="insertNewPmProjects"
+	        parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    INSERT INTO PROJECT_MEMBERS
+	        (PROJECT_MEMBER_ID, PROJECT_ID, WORKSPACE_MEMBER_ID,
+	         ROLE, STATUS, JOINED)
+	    SELECT seq_project_members.NEXTVAL, p.PROJECT_ID,
+	           wm.WORKSPACE_MEMBER_ID, 70, 0, SYSDATE
+	    FROM PROJECTS p
+	    JOIN WORKSPACE_MEMBERS wm
+	    ON p.WORKSPACE_ID = wm.WORKSPACE_ID
+	    WHERE p.WORKSPACE_ID = #{workspace_id}
+	    AND wm.MEMBER_ID = #{new_member_id}
+	    AND wm.STATUS = 0
+	    AND NOT EXISTS (
+	        SELECT 1
+	        FROM PROJECT_MEMBERS pm
+	        WHERE pm.PROJECT_ID = p.PROJECT_ID
+	        AND pm.WORKSPACE_MEMBER_ID = wm.WORKSPACE_MEMBER_ID
+	    )
+	</insert>
+	
+	
+	<update id="deactivateOldPmProjects" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE PROJECT_MEMBERS
+	    SET STATUS = 1,
+	        LEFT = SYSDATE
+	    WHERE WORKSPACE_MEMBER_ID IN (
+	        SELECT WORKSPACE_MEMBER_ID
+	        FROM WORKSPACE_MEMBERS
+	        WHERE WORKSPACE_ID = #{workspace_id}
+	        AND MEMBER_ID = #{old_member_id}
+	    )
+	    AND ROLE = 70
+	    AND STATUS = 0
+	</update>
+	
+	
+	<select id="countNewPmDt" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto" resultType="int">
+	    SELECT COUNT(*)
+	    FROM WORKSPACE_MEMBERS
+	    WHERE WORKSPACE_ID = #{workspace_id}
+	    AND MEMBER_ID = #{new_member_id}
+	    AND ROLE = 50
+	    AND STATUS = 0
+	</select>
+	
+	
+	<select id="countAllProjects" resultType="int">
+	    SELECT COUNT(*)
+	    FROM PROJECTS
+	    WHERE WORKSPACE_ID = #{workspace_id}
+	</select>
+	
+	<select id="countNewPmProjects" resultType="int">
+	    SELECT COUNT(*)
+	    FROM PROJECT_MEMBERS pm
+	    JOIN PROJECTS p
+	    ON pm.PROJECT_ID = p.PROJECT_ID
+	    JOIN WORKSPACE_MEMBERS wm
+	    ON pm.WORKSPACE_MEMBER_ID = wm.WORKSPACE_MEMBER_ID
+	    WHERE p.WORKSPACE_ID = #{workspace_id}
+	    AND wm.MEMBER_ID = #{new_member_id}
+	    AND pm.ROLE = 70
+	    AND pm.STATUS = 0
+	</select>
+	
+	<!-- 탈퇴한 사용자가 있다면 비활성화 활성화로 바꾸기 -->
+	<update id="reactivateNewPmProjects" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    UPDATE PROJECT_MEMBERS pm
+	    SET ROLE = 70,
+	        STATUS = 0,
+	        LEFT = NULL
+	    WHERE pm.STATUS = 1
+	    AND EXISTS (
+	        SELECT 1
+	        FROM PROJECTS p
+	        JOIN WORKSPACE_MEMBERS wm
+	          ON p.WORKSPACE_ID = wm.WORKSPACE_ID
+	        WHERE p.PROJECT_ID = pm.PROJECT_ID
+	        
+	        AND wm.WORKSPACE_MEMBER_ID = pm.WORKSPACE_MEMBER_ID
+	        AND p.WORKSPACE_ID = #{workspace_id}
+	        AND wm.MEMBER_ID = #{new_member_id}
+	        AND wm.STATUS = 0
+	    )
+	</update>
+	
+	
+	
+</mapper>

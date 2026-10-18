@@ -1,11 +1,13 @@
 package com.tk.app.security;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import com.tk.app.service.MemberService;
@@ -70,6 +72,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SpringSecurityConfig {
 	private final MemberService memberService;
+	private final MemberStatusFilter memberStatusFilter;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -122,7 +125,9 @@ public class SpringSecurityConfig {
 				        .maxSessionsPreventsLogin(false)
 				        .expiredUrl("/member/login"))
 
-				.csrf(AbstractHttpConfigurer::disable);
+				.csrf(AbstractHttpConfigurer::disable)
+		
+				.addFilterBefore(memberStatusFilter, AuthorizationFilter.class);
 
 		return http.build();
 	}
@@ -130,6 +135,17 @@ public class SpringSecurityConfig {
 	@Bean
 	HttpSessionEventPublisher httpSessionEventPublisher() {
 	    return new HttpSessionEventPublisher();
+	}
+	
+	@Bean
+	FilterRegistrationBean<MemberStatusFilter> memberStatusFilterRegistration(MemberStatusFilter filter) {
+		FilterRegistrationBean<MemberStatusFilter> registration = new FilterRegistrationBean<>(filter);
+		
+		
+		registration.setEnabled(false);
+		
+		return registration;
+		
 	}
 
 }

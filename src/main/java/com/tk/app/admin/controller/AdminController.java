@@ -1,7 +1,10 @@
 package com.tk.app.admin.controller;
 
-import java.util.Iterator;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tk.app.admin.domain.dto.AdminMemberDto;
 import com.tk.app.admin.service.AdminMemberService;
+import com.tk.app.common.PaginateUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/admin")
 public class AdminController {
 	private final AdminMemberService service;
+	private final PaginateUtil paginateUtil;
 
     @GetMapping
     public String adminMain() {
@@ -30,25 +35,78 @@ public class AdminController {
     @GetMapping("/user")
     public String user(Model model,
     		@RequestParam (name="keyword", required = false) String keyword,
-    		@RequestParam (name="status", required = false) Integer status ) {
+    		@RequestParam (name="status", required = false) Integer status,
+    		@RequestParam (name="page", defaultValue = "1") int current_page) {
+    	
     	if(keyword == null) {
     		keyword = "";
     	}
     	
     	keyword = keyword.trim();
     	
+    	int size = 10;
+    	
+    	Map<String, Object> map = new HashMap<>();
+    	map.put("keyword", keyword);
+    	map.put("status", status);
+    	
+    	int dataCount = service.dataCountMembers(map);
+    	
+    	Map<String, Object> countMap = new HashMap<>();
+
+    	countMap.put("keyword", "");
+    	countMap.put("status", null);
+    	int totalMembers = service.dataCountMembers(countMap);
+
+    	countMap.put("status", 0);
+    	int activeMembers = service.dataCountMembers(countMap);
+
+    	countMap.put("status", 1);
+    	int inactiveMembers = service.dataCountMembers(countMap);
+    	
+    	int totalPage = paginateUtil.pageCount(dataCount, size);
+    	
+    	current_page = Math.max(1, current_page);
+    	if(totalPage > 0) {
+    		current_page = Math.min(current_page, totalPage);
+    	}
+    	
+    	int offset = (current_page - 1) * size;
+
+    	map.put("offset", offset);
+    	map.put("size", size);
+
     	List<AdminMemberDto> members =
-    	        service.searchMembersByStatus(keyword, status);
+    	        service.listMembersByPage(map);
 
     	for (AdminMemberDto member : members) {
     	    member.setWorkspaces(
     	        service.findMemberWorkspaces(member.getMember_id())
     	    );
     	}
+    	
+    	String listUrl = "/admin/user?keyword="
+    	        + URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+
+    	if (status != null) {
+    	    listUrl += "&status=" + status;
+    	}
+
+    	String paging = paginateUtil.paging(current_page, totalPage, listUrl);
 
     	model.addAttribute("members", members);
+    	model.addAttribute("paging", paging);
+    	model.addAttribute("dataCount", dataCount);
+    	model.addAttribute("totalPage", totalPage);
+    	model.addAttribute("page", current_page);
+    	model.addAttribute("keyword", keyword);
+    	model.addAttribute("status", status);
+    	model.addAttribute("totalMembers", totalMembers);
+    	model.addAttribute("activeMembers", activeMembers);
+    	model.addAttribute("inactiveMembers", inactiveMembers);
     	
-        return adminPage("user", model);
+    return adminPage("user", model);
+        
     }
     
     @GetMapping("/user/{member_id}")

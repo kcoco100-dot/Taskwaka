@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.tk.app.domain.dto.SessionInfo;
+import com.tk.app.repository.ProjectMemberRepository;
 import com.tk.app.security.LoginMemberUtil;
 import com.tk.app.service.WorkspaceService;
 import com.tk.app.admin.domain.dto.WorkspaceDto;
@@ -16,9 +17,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DomainInterceptor implements HandlerInterceptor {
 
     private final WorkspaceService workspaceService;
+    private final ProjectMemberRepository projectMemberRepository;
 
-    public DomainInterceptor(WorkspaceService workspaceService) {
+    public DomainInterceptor(WorkspaceService workspaceService,
+    		ProjectMemberRepository projectMemberRepository) {
+    	
         this.workspaceService = workspaceService;
+        this.projectMemberRepository = projectMemberRepository;
     }
 
     @Override
@@ -72,12 +77,29 @@ public class DomainInterceptor implements HandlerInterceptor {
             response.sendError(403);
             return false;
         }
+        
 
-        // 9. Controller에서도 사용하도록 저장
+        if (path.matches("^/[^/]+/manage(?:/.*)?$")) {
+
+            // 현재 회원의 워크스페이스 역할 조회
+            Integer currentRole =
+                    projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspace.getWorkspaceId(), memberId);
+
+            if (currentRole == null || (currentRole != 50 && currentRole != 70)) {
+
+            		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+                request.getRequestDispatcher("/error/noAuthorized")
+                       .forward(request, response);
+
+                return false;
+            }
+        }
+
+
         request.setAttribute("workspace", workspace);
         request.setAttribute("domainKey", domainKey);
 
-        // 10. 접근 허용
         return true;
     }
 }

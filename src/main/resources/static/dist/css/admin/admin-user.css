@@ -1,0 +1,100 @@
+@charset "UTF-8";
+
+.member-link {
+	color: #594331;
+	text-decoration: none;
+}
+
+.member-link:hover {
+	text-decoration: underline;
+}
+
+.member-stats {
+	display: flex;
+	gap: 15px;
+	margin-bottom: 20px;
+}
+
+.member-stat-card {
+	flex: 1;
+	padding: 20px;
+	background: #f8f6f2;
+	border: 1px solid #e8e0d6;
+	border-radius: 10px;
+}
+
+.member-stat-card span {
+	display: block;
+	font-size: 13px;
+	color: #777;
+	margin-bottom: 10px;
+}
+
+.member-stat-card strong {
+	font-size: 24px;
+	color: #4b5d41;
+}
+
+
+.member-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    margin-bottom: 10px;
+}
+
+.member-pagination a,
+.member-pagination span {
+    display: inline-block;
+    padding: 7px 12px;
+    margin: 0 4px;
+    border: 1px solid #e8e0d6;
+    border-radius: 6px;
+    color: #4b5d41;
+    text-decoration: none;
+}
+
+.member-pagination a:hover {
+    background: #f3f0e9;
+}
+
+.warm-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.warm-table th,
+.warm-table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 14px 8px;
+}
+
+.warm-table td:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.warm-table th:nth-child(1),
+.warm-table td:nth-child(1),
+.warm-table th:nth-child(2),
+.warm
+
+/* 로그인 ID와 이메일 사이 여유 공간 */
+.warm-table th,
+.warm-table td {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+/* 관리 작업 제목만 정렬 */
+.warm-table th:last-child {
+    text-align: center;
+    padding-left: 24px;
+}
+
+/* 관리 작업 버튼은 그대로 */
+.warm-table td:last-child {
+    text-align: center;
+}

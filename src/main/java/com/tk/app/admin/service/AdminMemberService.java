@@ -1,6 +1,7 @@
 package com.tk.app.admin.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.tk.app.admin.domain.dto.AdminMemberDto;
 import com.tk.app.admin.domain.dto.AdminWorkspaceMemberDto;
@@ -12,4 +13,7 @@ public interface AdminMemberService {
 	public List<AdminMemberDto> searchMembers(String keyword);
 	public List<AdminMemberDto> searchMembersByStatus(String keyword, Integer status);
 	public int updateMemberStatus(long member_id, int status); 
+	
+	public int dataCountMembers(Map<String, Object> map);
+	public List<AdminMemberDto> listMembersByPage(Map<String, Object> map);
 }

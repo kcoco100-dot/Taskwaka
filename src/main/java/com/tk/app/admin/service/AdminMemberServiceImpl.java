@@ -1,6 +1,7 @@
 package com.tk.app.admin.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -75,6 +76,26 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 	    } catch (Exception e) {
 	        log.error("회원 상태 변경 실패 - 회원번호: {}, 상태: {}",
 	                  member_id, status, e);
+	        throw e;
+	    }
+	}
+
+	@Override
+	public int dataCountMembers(Map<String, Object> map) {
+	    try {
+	        return adminMemberMapper.dataCountMembers(map);
+	    } catch (Exception e) {
+	        log.error("회원 수 조회 실패", e);
+	        throw e;
+	    }
+	}
+
+	@Override
+	public List<AdminMemberDto> listMembersByPage(Map<String, Object> map) {
+	    try {
+	        return adminMemberMapper.listMembersByPage(map);
+	    } catch (Exception e) {
+	        log.error("회원 페이지 조회 실패", e);
 	        throw e;
 	    }
 	}
