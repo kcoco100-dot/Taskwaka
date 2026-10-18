@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout3}">
+
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
@@ -10,666 +12,345 @@
 </th:block>
 
 <th:block layout:fragment="content">
+
 <div class="home-layout manage-layout project-list-layout">
-
-    <!-- 기존 사이드바 유지 -->
     <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
-
     <section class="section project-list-page pd-page">
-
-        <!-- 페이지 제목 -->
         <div class="page-heading">
             <div>
                 <h1 class="page-title">프로젝트 상세 정보</h1>
-                <p class="page-description">
-                    프로젝트의 업무와 진행 현황을 관리합니다.
-                </p>
+                <p class="page-description">프로젝트의 업무와 진행 현황을 관리합니다.</p>
             </div>
-
-            <a class="project-button project-button-primary"
-               th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">
-                목록으로
-            </a>
+            <a class="project-button project-button-primary" th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">목록으로</a>
         </div>
 
-        <!-- 프로젝트 기본 정보 -->
+        <div class="pd-message" th:if="${message != null}" th:text="${message}"></div>
         <div class="project-detail-panel">
-
             <div class="pd-header">
                 <div>
                     <span class="pd-caption">PROJECT OVERVIEW</span>
-
-                    <h2 th:text="${project.subject}">
-                        프로젝트명
-                    </h2>
-
-                    <p class="pd-period">
-                        <span th:text="${project.start_date}">
-                            시작일
-                        </span>
-                        ~
-                        <span th:text="${project.end_date}">
-                            종료일
-                        </span>
-                    </p>
+                    <h2 th:text="${project.subject}">프로젝트명</h2>
+                    <p class="pd-period"><span th:text="${project.start_date}">시작일</span>~<span th:text="${project.end_date}">종료일</span></p>
                 </div>
 
                 <div class="pd-status">
-                    <span th:if="${project.status == 0}"
-                          class="project-status project-status-planned">
-                        예정
-                    </span>
-
-                    <span th:if="${project.status == 1}"
-                          class="project-status project-status-progress">
-                        진행 중
-                    </span>
-
-                    <span th:if="${project.status == 2}"
-                          class="project-status project-status-completed">
-                        완료
-                    </span>
-
-                    <span th:if="${project.status == 3}"
-                          class="project-status project-status-paused">
-                        보류
-                    </span>
+                    <span th:if="${project.status == 0}" class="project-status project-status-planned">예정</span>
+                    <span th:if="${project.status == 1}" class="project-status project-status-progress">진행 중</span>
+                    <span th:if="${project.status == 2}" class="project-status project-status-completed">완료</span>
+                    <span th:if="${project.status == 3}" class="project-status project-status-paused">보류</span>
                 </div>
             </div>
-
-            <!-- 프로젝트 요약 카드 -->
+            
             <div class="pd-summary">
-
                 <div class="pd-summary-card">
                     <span>프로젝트 진행률</span>
-
-                    <strong th:text="${project.progress} + '%'">
-                        0%
-                    </strong>
-
-                    <progress max="100"
-                              th:value="${project.progress}">
-                    </progress>
-
+                    <strong th:text="|${project.progress}%|">0%</strong>
+                    <progress max="100" th:value="${project.progress}"></progress>
                     <small>현재 프로젝트에 저장된 진행률</small>
                 </div>
 
                 <div class="pd-summary-card">
                     <span>프로젝트 업무</span>
-                    <strong id="taskCount">0개</strong>
-                    <small id="taskCompleteCount">
-                        승인 완료 0개
-                    </small>
+                    <strong th:text="|${#lists.size(taskList)}개|">0개</strong>
+                    <small th:text="|완료 ${#lists.size(taskList.?[status == 3])}개|">완료 0개</small>
                 </div>
 
                 <div class="pd-summary-card">
                     <span>프로젝트 책임자</span>
-
-                    <strong th:text="${project.pm_name != null ? project.pm_name : '미정'}">
-                        담당 PM
-                    </strong>
-
-                    <small th:text="'참여 인원 ' + ${project.member_count} + '명'">
-                        참여 인원
-                    </small>
+                    <strong th:text="${project.pm_name != null ? project.pm_name : '미정'}">담당 PM</strong>
+                    <small th:text="|참여 인원 ${project.member_count}명|">참여 인원</small>
                 </div>
-
             </div>
 
-            <!-- 프로젝트 상세 내용 -->
             <div class="pd-section">
                 <h3>프로젝트 상세 내용</h3>
-
-                <div class="content-box"
-                     th:text="${project.content != null and project.content != '' ? project.content : '등록된 상세 내용이 없습니다.'}">
-                    프로젝트 내용
-                </div>
-            </div>
-       
-
-        
-<!-- 프로젝트 업무 관리 -->
-<div class="pd-integrated-task">
-
-    <div class="pd-list-header">
-        <div>
-            <h3>프로젝트 업무 관리</h3>
-            <p>업무별 비중의 합계는 100%가 되어야 합니다.</p>
-        </div>
-        <span class="pd-task-count" id="taskCount">총 0개 업무</span>
-    </div>
-
-    <!-- 이미지 형태의 업무 리스트 -->
-    <div class="pd-simple-task-list" id="taskList">
-        <!-- JavaScript에서 업무를 렌더링 -->
-    </div>
-
-    <!-- 새 업무 등록 버튼 -->
-    <button type="button"
-            class="pd-task-add-trigger"
-            id="openTaskForm"
-            aria-expanded="false"
-            aria-controls="taskEditor">
-        <span class="pd-add-title">⊕ 새 업무 등록</span>
-        <span class="pd-add-subtitle">
-            업무명 · 담당 TL · 기간 · 단계 · 진행률 비중
-        </span>
-    </button>
-
-    <!-- 버튼을 누른 후에만 표시되는 입력 영역 -->
-    <div class="pd-task-editor" id="taskEditor" hidden>
-        <div class="pd-editor-heading">
-            <h3 id="taskFormTitle">새 업무 등록</h3>
-            <button type="button"
-                    class="pd-editor-close"
-                    id="closeTaskForm"
-                    aria-label="입력창 닫기">×</button>
-        </div>
-
-        <form id="taskForm">
-            <input type="hidden" id="editingTaskId">
-
-            <div class="pd-editor-grid">
-                <div class="pd-form-group">
-                    <label for="taskTitle">업무명 *</label>
-                    <input id="taskTitle" type="text"
-                           maxlength="200"
-                           placeholder="업무명을 입력하세요" required>
-                </div>
-
-                <div class="pd-form-group">
-                    <label for="taskTl">담당 TL *</label>
-                    <select id="taskTl" required>
-                        <option value="">담당 TL 선택</option>
-                        <option value="김팀장">김팀장</option>
-                        <option value="이팀장">이팀장</option>
-                        <option value="박팀장">박팀장</option>
-                    </select>
-                </div>
-
-                <div class="pd-form-group">
-                    <label for="taskStart">시작일 *</label>
-                    <input id="taskStart" type="date" required>
-                </div>
-
-                <div class="pd-form-group">
-                    <label for="taskEnd">종료일 *</label>
-                    <input id="taskEnd" type="date" required>
-                </div>
-
-                <div class="pd-form-group">
-                    <label for="taskStage">진행단계 *</label>
-                    <select id="taskStage" required>
-                        <option value="1">1단계 · 기획</option>
-                        <option value="2">2단계 · 설계</option>
-                        <option value="3">3단계 · 개발</option>
-                        <option value="4">4단계 · 테스트</option>
-                        <option value="5">5단계 · 완료</option>
-                    </select>
-                </div>
-
-                <div class="pd-form-group">
-                    <label for="taskWeight">배정 비중 (%) *</label>
-                    <input id="taskWeight" type="number"
-                           min="0.01" max="100" step="0.01"
-                           placeholder="예: 20" required>
-                </div>
+                <div class="content-box" th:text="${project.content != null and project.content != '' ? project.content : '등록된 상세 내용이 없습니다.'}">프로젝트 내용</div>
             </div>
 
-            <p class="pd-weight-help" id="weightHelp">
-                남은 배정 비중: 0%
-            </p>
+            <div class="pd-integrated-task">
+                <div class="pd-list-header">
+                    <div>
+                        <h3>프로젝트 업무 관리</h3>
+                        <p>업무별 배정 비중의 합계는 100%를 초과할 수 없습니다.</p>
+                    </div>
+                    <span class="pd-task-count" th:text="|총 ${#lists.size(taskList)}개 업무|">총 0개 업무</span>
+                </div>
 
-            <div class="pd-editor-actions">
-                <button type="button"
-                        class="pd-cancel-btn"
-                        id="cancelTaskForm">취소</button>
-                <button type="submit"
-                        class="pd-save-btn"
-                        id="submitTaskButton">업무 등록</button>
-            </div>
-        </form>
-    </div>
+                <div class="pd-simple-task-list">
 
-    <p class="pd-demo-note">
-        현재 업무 등록·수정·삭제는 화면 테스트용입니다.
-        실제 데이터베이스와는 연결되지 않았습니다.
-    </p>
+                    <p class="pd-empty-list" th:if="${#lists.isEmpty(taskList)}">등록된 업무가 없습니다.</p>
+
+                    <div class="pd-simple-task" th:each="task, stat : ${taskList}">
+                        <div class="pd-simple-task-top">
+                            <div class="pd-task-identity">
+                                <span class="pd-task-name" th:text="|${stat.count}. ${task.title}|">업무명</span>
+                                <small th:text="${task.tl_name != null ? task.tl_name : '담당자 미정'}">담당 TL</small>
+                            </div>
+                            <span class="pd-status-pill" th:classappend="${task.status == 3 ? ' approved' : ''}" th:text="${task.status == 0 ? '예정' : task.status == 1 ? '진행 중' : task.status == 2 ? '검토 중' : task.status == 3 ? '완료' : '상태 미정'}">예정</span>
+                        </div>
+
+                        <div class="pd-simple-task-bottom">
+                            <div class="pd-simple-progress">
+                                <div class="pd-simple-progress-fill" th:style="|width:${task.progress}%;|"></div>
+                            </div>
+                            <span class="pd-task-weight" th:text="|진행률 ${task.progress}%|">진행률 0%</span>
+                        </div>
+
+                        <div class="pd-task-actions">
+                            <span class="pd-task-dates" th:text="|${task.start_date} ~ ${task.end_date}|">업무 기간</span>
+                        </div>
+
+                        <div class="pd-task-content" th:if="${task.content != null and task.content != ''}" th:text="${task.content}">업무 내용</div>
+
+                        <div style="display: flex; gap: 15px; justify-content: flex-end; align-items: center; margin-top: 10px;">
+                            
+                            <button type="button" style="color: #007bff; background: none; border: none; font-weight: 500; font-size: 13px; cursor: pointer; padding: 0;" th:onclick="|toggleEditBox(${task.task_id})|">수정</button>
+                            <form method="post" class="pd-task-delete-form" style="margin: 0;" th:action="@{/{domainKey}/manage/detail/{projectId}/tasks/{taskId}/delete(domainKey=${domainKey}, projectId=${project.project_id}, taskId=${task.task_id})}" onsubmit="return handleTaskDelete(event, this);">
+                                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="pd-delete-link" style="background: none; border: none; font-size: 13px; padding: 0; cursor: pointer; color: #dc3545;">삭제</button>
+                            </form>
+                        </div>
+
+                        <div th:id="|taskEditBox_${task.task_id}|" style="display: none; margin-top: 15px;">
+                            <div class="pd-task-editor" style="background-color: #f8f9fa; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
+                                
+                                <div class="pd-editor-heading" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="margin: 0; font-size: 15px; color: #333;">업무 수정</h3>
+                                    <button type="button" th:onclick="|toggleEditBox(${task.task_id})|" style="background: none; border: none; font-size: 16px; cursor: pointer; color: #888;">✕</button>
+                                </div>
+
+                                <form method="post" th:action="@{/{domainKey}/manage/detail/{projectId}/tasks/{taskId}/update(domainKey=${domainKey}, projectId=${project.project_id}, taskId=${task.task_id})}" onsubmit="return handleTaskUpdate(event, this);">
+
+                                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <div class="pd-editor-grid">
+                                        <div class="pd-form-group">
+                                            <label>업무명 *</label>
+                                            <input type="text" name="title" th:value="${task.title}" maxlength="200" required>
+                                        </div>
+
+                                        <div class="pd-form-group">
+                                            <label>담당 TL *</label>
+                                            <select name="project_member_id" required>
+                                                <option th:each="tl : ${tlList}" th:value="${tl.project_member_id}" th:text="${tl.tl_name}" th:selected="${tl.project_member_id == task.project_member_id}"></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="pd-form-group">
+                                            <label>시작일 *</label>
+                                            <input type="date" name="start_date" th:value="${task.start_date}" required>
+                                        </div>
+
+                                        <div class="pd-form-group">
+                                            <label>종료일 *</label>
+                                            <input type="date" name="end_date" th:value="${task.end_date}" required>
+                                        </div>
+
+                                        <div class="pd-form-group">
+                                            <label>진행단계 *</label>
+                                            <input type="number" name="task_level" min="0" max="9" th:value="${task.task_level}" placeholder="예: 1" required>
+                                        </div>
+                                        
+                                        <div class="pd-form-group">
+    <label>배정 비중 (%) *</label>
+    <input type="number" name="progress_weight" min="0.01" max="100" step="0.01" placeholder="예: 20" required>
 </div>
-<!-- 프로젝트 업무 관리 끝 -->
+                                        
+                                    </div>
 
- </div>
-        <!-- 프로젝트 관리 버튼 -->
+                                    <div class="pd-form-group">
+                                        <label>업무 내용 *</label>
+                                        <textarea name="content" rows="4" required th:text="${task.content}"></textarea>
+                                    </div>
+
+                                    <div class="pd-editor-actions" style="margin-top: 15px; text-align: right;">
+                                        <button type="submit" class="pd-save-btn">수정 완료</button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <details class="pd-task-create-box">
+
+                    <summary class="pd-task-add-trigger">
+                        <span class="pd-add-title">⊕ 새 업무 등록</span>
+                        <span class="pd-add-subtitle">업무명 · 담당 TL · 기간 · 단계 · 배정 비중</span>
+                    </summary>
+
+                    <div class="pd-task-editor">
+
+                        <div class="pd-editor-heading">
+                            <h3>새 업무 등록</h3>
+                        </div>
+
+                        <form method="post" th:action="@{/{domainKey}/manage/detail/{projectId}/tasks/write(domainKey=${domainKey}, projectId=${project.project_id})}" onsubmit="return handleTaskCreate(event, this);">
+
+                            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <div class="pd-editor-grid">
+                                <div class="pd-form-group">
+                                    <label for="taskTitle">업무명 *</label>
+                                    <input type="text" id="taskTitle" name="title" maxlength="200" placeholder="업무명을 입력하세요" required>
+                                </div>
+
+                                <div class="pd-form-group">
+                                    <label for="taskTl">담당 TL *</label>
+                                    <select id="taskTl" name="project_member_id" required>
+                                        <option value="">담당 TL 선택</option>
+                                        <option th:each="tl : ${tlList}" th:value="${tl.project_member_id}" th:text="${tl.tl_name}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="pd-form-group">
+                                    <label for="taskStart">시작일 *</label>
+                                    <input type="date" id="taskStart" name="start_date" required>
+                                </div>
+
+                                <div class="pd-form-group">
+                                    <label for="taskEnd">종료일 *</label>
+                                    <input type="date" id="taskEnd" name="end_date" required>
+                                </div>
+
+                                <div class="pd-form-group">
+                                    <label for="taskStage">진행단계 (숫자) *</label>
+                                    <input type="number" id="taskStage" name="task_level" min="0" max="9" placeholder="예: 1" required>
+                                </div>
+
+                                <div class="pd-form-group">
+                                    <label for="taskWeight">배정 비중 (%) *</label>
+                                    <input type="number" id="taskWeight" name="progress_weight" min="0.01" max="100" step="0.01" placeholder="예: 20" required>
+                                </div>
+                            </div>
+
+                            <div class="pd-form-group">
+                                <label for="taskContent">업무 내용 *</label>
+                                <textarea id="taskContent" name="content" rows="4" placeholder="업무 내용을 입력하세요" required></textarea>
+                            </div>
+
+                            <p class="pd-weight-help">업무별 진행 현황을 확인하고 담당 TL과 업무 일정을 관리합니다.</p>
+
+                            <div class="pd-editor-actions">
+                                <button type="submit" class="pd-save-btn">업무 등록</button>
+                            </div>
+                        </form>
+                    </div>
+                </details>
+            </div>
+
+        </div>
+
         <div class="pd-bottom-actions">
-            <button type="button"
-                    class="project-button project-edit">
-                프로젝트 수정
-            </button>
+            <a class="project-button project-edit" th:href="@{/{domainKey}/manage/detail/{projectId}/update(domainKey=${domainKey}, projectId=${project.project_id})}">프로젝트 수정</a>
 
-            <button type="button"
-                    class="project-button project-delete"
-                    onclick="alert('프로젝트 삭제는 추후 서버와 연결합니다.')">
-                프로젝트 삭제
-            </button>
+            <form method="post" th:action="@{/{domainKey}/manage/detail/{projectId}/delete(domainKey=${domainKey}, projectId=${project.project_id})}" onsubmit="return confirm('프로젝트를 삭제하시겠습니까?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="project-button project-delete">프로젝트 삭제</button>
+            </form>
         </div>
     </section>
+
 </div>
-
-<!-- 업무 등록 / 수정 모달 -->
-<div id="taskModal" class="pd-modal" hidden>
-
-    <div class="pd-modal-backdrop" data-close-modal></div>
-
-    <div class="pd-modal-content"
-         role="dialog"
-         aria-modal="true"
-         aria-labelledby="taskModalTitle">
-
-        <div class="pd-modal-header">
-            <div>
-                <h2 id="taskModalTitle">업무 등록</h2>
-                <p>프로젝트 업무 정보를 입력합니다.</p>
-            </div>
-
-            <button type="button"
-                    class="pd-modal-close"
-                    id="closeTaskModal"
-                    aria-label="닫기">
-                &times;
-            </button>
-        </div>
-
-        <form id="taskForm">
-            <input type="hidden" id="editingTaskId">
-
-            <div class="pd-form-group">
-                <label for="taskTitle">업무명 *</label>
-                <input type="text"
-                       id="taskTitle"
-                       placeholder="업무명을 입력하세요"
-                       maxlength="200"
-                       required>
-            </div>
-
-            <div class="pd-form-group">
-                <label for="taskTl">담당 TL *</label>
-
-                <!-- 서버 연동 전 임시 선택 목록 -->
-                <select id="taskTl" required>
-                    <option value="">담당 TL 선택</option>
-                    <option value="김팀장">김팀장</option>
-                    <option value="이팀장">이팀장</option>
-                    <option value="박팀장">박팀장</option>
-                </select>
-            </div>
-
-            <div class="pd-form-grid">
-                <div class="pd-form-group">
-                    <label for="taskStart">시작일 *</label>
-                    <input type="date"
-                           id="taskStart"
-                           required>
-                </div>
-
-                <div class="pd-form-group">
-                    <label for="taskEnd">종료일 *</label>
-                    <input type="date"
-                           id="taskEnd"
-                           required>
-                </div>
-            </div>
-
-            <div class="pd-form-group">
-                <label for="taskStage">진행단계 *</label>
-
-                <select id="taskStage" required>
-                    <option value="1">1단계 · 기획</option>
-                    <option value="2">2단계 · 설계</option>
-                    <option value="3">3단계 · 개발</option>
-                    <option value="4">4단계 · 테스트</option>
-                    <option value="5">5단계 · 완료</option>
-                </select>
-            </div>
-
-            <div class="pd-form-group">
-                <label for="taskWeight">진행률 배정 비중 (%) *</label>
-
-                <input type="number"
-                       id="taskWeight"
-                       min="0.01"
-                       max="100"
-                       step="0.01"
-                       placeholder="예: 20"
-                       required>
-
-                <small id="weightHelp">
-                    전체 업무 비중의 합계는 100%를 넘을 수 없습니다.
-                </small>
-            </div>
-
-            <div class="pd-modal-actions">
-                <button type="button"
-                        class="pd-cancel-btn"
-                        id="cancelTaskModal">
-                    취소
-                </button>
-
-                <button type="submit"
-                        class="pd-save-btn">
-                    저장
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 </th:block>
-
 
 <th:block layout:fragment="script">
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // 화면 테스트용 데이터 (DB와 연결되지 않음)
-    let tasks = [
-        { id:1, title:'요구사항 분석', tl:'김팀장',
-          start:'2026-10-01', end:'2026-10-15',
-          stage:1, weight:20, approval:'approved' },
-        { id:2, title:'UI/UX 디자인', tl:'이팀장',
-          start:'2026-10-16', end:'2026-10-31',
-          stage:2, weight:20, approval:'approved' },
-        { id:3, title:'백엔드 개발', tl:'박팀장',
-          start:'2026-11-01', end:'2026-11-30',
-          stage:3, weight:30, approval:'pending' },
-        { id:4, title:'프론트엔드 개발', tl:'이팀장',
-          start:'2026-11-01', end:'2026-11-30',
-          stage:3, weight:20, approval:'waiting' },
-        { id:5, title:'통합 테스트', tl:'정팀장',
-          start:'2026-12-01', end:'2026-12-20',
-          stage:4, weight:10, approval:'planned' }
-    ];
-
-    let nextId = 6;
-
-    const list = document.getElementById('taskList');
-    const editor = document.getElementById('taskEditor');
-    const trigger = document.getElementById('openTaskForm');
-    const form = document.getElementById('taskForm');
-
-    const fields = {
-        id: document.getElementById('editingTaskId'),
-        title: document.getElementById('taskTitle'),
-        tl: document.getElementById('taskTl'),
-        start: document.getElementById('taskStart'),
-        end: document.getElementById('taskEnd'),
-        stage: document.getElementById('taskStage'),
-        weight: document.getElementById('taskWeight')
-    };
-
-    // 정팀장도 예시 데이터에서 선택 가능하도록 추가
-    const tlSelect = fields.tl;
-    if (!Array.from(tlSelect.options).some(o => o.value === '정팀장')) {
-        tlSelect.add(new Option('정팀장', '정팀장'));
-    }
-
-    const statusLabels = {
-        approved: '승인 완료',
-        pending: '진행 중',
-        waiting: '결재 대기',
-        planned: '예정'
-    };
-
-    const format = value =>
-        Number(Number(value).toFixed(2)).toString();
-
-    const totalWeight = excludeId =>
-        tasks.filter(t => t.id !== excludeId)
-             .reduce((sum, t) => sum + t.weight, 0);
-
-    // HTML 이스케이프
-    function escapeHtml(value) {
-        const el = document.createElement('span');
-        el.textContent = String(value ?? '');
-        return el.innerHTML;
-    }
-
-    function renderTasks() {
-        list.innerHTML = '';
-
-        if (!tasks.length) {
-            list.innerHTML =
-                '<p class="pd-empty-list">등록된 업무가 없습니다.</p>';
-        }
-
-        tasks.forEach((task, index) => {
-            const item = document.createElement('div');
-            item.className = 'pd-simple-task';
-
-            // 최종 승인된 비중만 막대를 채움
-            const approved = task.approval === 'approved';
-            const status = statusLabels[task.approval] || '예정';
-
-            item.innerHTML = `
-                <div class="pd-simple-task-top">
-                    <div class="pd-task-identity">
-                        <span class="pd-task-name">
-                            ${index + 1}. ${escapeHtml(task.title)}
-                        </span>
-                        <small>${escapeHtml(task.tl)}</small>
-                    </div>
-                    <span class="pd-status-pill ${task.approval}">
-                        ${status}
-                    </span>
-                </div>
-
-                <div class="pd-simple-task-bottom">
-                    <div class="pd-simple-progress">
-                        <div class="pd-simple-progress-fill"
-                             style="width:${approved ? 100 : 0}%">
-                        </div>
-                    </div>
-                    <span class="pd-task-weight">
-                        ${format(task.weight)}% 비중
-                    </span>
-                </div>
-
-                <div class="pd-task-actions">
-                    <span class="pd-task-dates">
-                        ${escapeHtml(task.start)}
-                        ~
-                        ${escapeHtml(task.end)}
-                    </span>
-                    <button type="button"
-                            data-action="edit"
-                            data-id="${task.id}">수정</button>
-                    <button type="button"
-                            class="pd-delete-link"
-                            data-action="delete"
-                            data-id="${task.id}">삭제</button>
-                </div>
-            `;
-            list.appendChild(item);
-        });
-
-        document.getElementById('taskCount').textContent =
-            '총 ' + tasks.length + '개 업무';
-
-        const approvedCount = tasks.filter(
-            t => t.approval === 'approved'
-        ).length;
-
-        const summaryCount = document.getElementById(
-            'taskCompleteCount'
-        );
-        if (summaryCount) {
-            summaryCount.textContent =
-                '승인 완료 ' + approvedCount + '개';
-        }
-
-        updateWeightHelp();
-    }
-
-    function updateWeightHelp() {
-        const editingId = fields.id.value
-            ? Number(fields.id.value) : null;
-
-        const available = Math.max(
-            0, 100 - totalWeight(editingId)
-        );
-
-        document.getElementById('weightHelp').textContent =
-            '남은 배정 비중: ' + format(available) +
-            '% (전체 업무 비중 합계는 100% 이하)';
-    }
-
-    function resetForm() {
-        form.reset();
-        fields.id.value = '';
-        fields.weight.readOnly = false;
-        document.getElementById('taskFormTitle').textContent =
-            '새 업무 등록';
-        document.getElementById('submitTaskButton').textContent =
-            '업무 등록';
-        updateWeightHelp();
-    }
-
-    function openEditor(task = null) {
-        resetForm();
-
-        if (task) {
-            fields.id.value = task.id;
-            fields.title.value = task.title;
-            fields.tl.value = task.tl;
-            fields.start.value = task.start;
-            fields.end.value = task.end;
-            fields.stage.value = task.stage;
-            fields.weight.value = task.weight;
-            fields.weight.readOnly =
-                task.approval === 'approved';
-
-            document.getElementById('taskFormTitle').textContent =
-                '업무 수정';
-            document.getElementById('submitTaskButton').textContent =
-                '수정 완료';
-        }
-
-        trigger.hidden = true;
-        editor.hidden = false;
-        trigger.setAttribute('aria-expanded', 'true');
-        updateWeightHelp();
-
-        editor.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest'
-        });
-        fields.title.focus({preventScroll:true});
-    }
-
-    function closeEditor() {
-        editor.hidden = true;
-        trigger.hidden = false;
-        trigger.setAttribute('aria-expanded', 'false');
-        resetForm();
-    }
-
-    trigger.addEventListener('click', () => openEditor());
-
-    document.getElementById('closeTaskForm')
-        .addEventListener('click', closeEditor);
-    document.getElementById('cancelTaskForm')
-        .addEventListener('click', closeEditor);
-
-    fields.weight.addEventListener('input', updateWeightHelp);
-
-    form.addEventListener('submit', event => {
-        event.preventDefault();
-
-        const editId = fields.id.value
-            ? Number(fields.id.value) : null;
-        const existing = tasks.find(t => t.id === editId);
-
-        const title = fields.title.value.trim();
-        const tl = fields.tl.value;
-        const start = fields.start.value;
-        const end = fields.end.value;
-        const stage = Number(fields.stage.value);
-        const weight = Number(fields.weight.value);
-
-        if (!title || !tl || !start || !end ||
-            !Number.isFinite(weight) ||
-            weight <= 0 || weight > 100) {
-            alert('모든 필수 항목을 정확히 입력해 주세요.');
-            return;
-        }
-
-        if (start > end) {
-            alert('종료일은 시작일보다 빠를 수 없습니다.');
-            return;
-        }
-
-        if (totalWeight(editId) + weight > 100.000001) {
-            alert('전체 업무의 배정 비중은 100%를 초과할 수 없습니다.');
-            return;
-        }
-
-        if (existing && existing.approval === 'approved' &&
-            existing.weight !== weight) {
-            alert('승인 완료된 업무의 비중은 변경할 수 없습니다.');
-            return;
-        }
-
-        const data = {
-            id: existing ? existing.id : nextId++,
-            title, tl, start, end, stage, weight,
-            approval: existing ? existing.approval : 'planned'
-        };
-
-        if (existing) {
-            tasks = tasks.map(t => t.id === existing.id ? data : t);
-        } else {
-            tasks.push(data);
-        }
-
-        renderTasks();
-        closeEditor();
-    });
-
-    list.addEventListener('click', event => {
-        const button = event.target.closest('button[data-action]');
-        if (!button) return;
-
-        const id = Number(button.dataset.id);
-        const task = tasks.find(t => t.id === id);
-        if (!task) return;
-
-        if (button.dataset.action === 'edit') {
-            openEditor(task);
-            return;
-        }
-
-        if (button.dataset.action === 'delete') {
-            if (task.approval === 'approved') {
-                alert('승인 완료된 업무는 삭제할 수 없습니다.');
-                return;
-            }
-
-            if (!confirm(
-                '"' + task.title + '" 업무를 삭제하시겠습니까?'
-            )) return;
-
-            tasks = tasks.filter(t => t.id !== id);
-
-            if (fields.id.value === String(id)) {
-                closeEditor();
-            }
-
-            renderTasks();
-        }
-    });
-
-    renderTasks();
-});
-</script>
+	<script th:inline="javascript">
+	    function toggleEditBox(taskId) {
+	        const box = document.getElementById('taskEditBox_' + taskId);
+	        if (box.style.display === 'none') {
+	            box.style.display = 'block';
+	        } else {
+	            box.style.display = 'none';
+	        }
+	    }
+	
+	    async function handleTaskDelete(event, form) {
+	        event.preventDefault();
+	        
+	        if (!confirm('해당 업무를 삭제하시겠습니까?')) {
+	            return false;
+	        }
+	
+	        const url = form.action;
+	        const formData = new FormData(form);
+	
+	        try {
+	            const response = await fetch(url, {
+	                method: 'POST',
+	                body: formData
+	            });
+	
+	            const result = await response.json();
+	
+	            if (result.status === 'success') {
+	                alert(result.message);
+	                location.reload();
+	            } else {
+	                alert(result.message || '업무 삭제에 실패했습니다.');
+	            }
+	        } catch (error) {
+	            console.error('Error:', error);
+	            alert('서버와의 통신에 실패했습니다.');
+	        }
+	    }
+	
+	    async function handleTaskCreate(event, form) {
+	        event.preventDefault(); 
+	
+	        const url = form.action; 
+	        const formData = new FormData(form);
+	
+	        try {
+	            const response = await fetch(url, {
+	                method: 'POST',
+	                body: formData 
+	            });
+	
+	            const result = await response.json();
+	
+	            if (result.status === 'success') {
+	                alert(result.message);
+	                location.reload(); 
+	            } else {
+	                alert(result.message || '업무 등록에 실패했습니다.');
+	            }
+	        } catch (error) {
+	            console.error('Error:', error);
+	            alert('서버와의 통신에 실패했습니다.');
+	        }
+	    }
+	
+	    async function handleTaskUpdate(event, form) {
+	        event.preventDefault(); 
+	
+	        if (!confirm('수정된 내용을 저장하시겠습니까?')) {
+	            return false;
+	        }
+	
+	        const url = form.action;
+	        const formData = new FormData(form);
+	
+	        try {
+	            const response = await fetch(url, {
+	                method: 'POST',
+	                body: formData
+	            });
+	
+	            const result = await response.json();
+	
+	            if (result.status === 'success') {
+	                alert(result.message);
+	                location.reload(); 
+	            } else {
+	                alert(result.message || '업무 수정에 실패했습니다.');
+	            }
+	        } catch (error) {
+	            console.error('Error:', error);
+	            alert('서버와의 통신에 실패했습니다.');
+	        }
+	    }
+	</script>
 </th:block>
-
 
 </html>

@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.ManageProjectMapper">
+
+    <!-- 워크스페이스 번호 -->
+    <select id="findByDomainKey" parameterType="string" resultType="long">
+        SELECT workspace_id
+        FROM workspace_domains
+        WHERE domain_key = #{domainKey} AND active = 'Y'
+    </select>
+
+    <!-- 프로젝트 대표 담당자 -->
+    <sql id="projectPmName">
+        (SELECT md.name
+            FROM project_members pm
+            JOIN workspace_members wm
+                ON pm.workspace_member_id = wm.workspace_member_id
+            JOIN member_details md
+                ON wm.member_id = md.member_id
+            WHERE pm.project_id = p.project_id
+              AND pm.status = 0
+              AND pm.role = 70
+              AND ROWNUM = 1
+        ) AS pm_name
+    </sql>
+
+    <!-- 참여 인원 -->
+    <sql id="projectMemberCount">
+        (SELECT COUNT(*)
+            FROM project_members pm
+            WHERE pm.project_id = p.project_id
+              AND pm.status = 0
+        ) AS member_count
+    </sql>
+
+    <!-- 프로젝트 검색 공통 조건 -->
+    <sql id="projectSearchCondition">
+        <if test="status != null and status != 'all' and status != ''">
+            AND p.status = TO_NUMBER(#{status})
+        </if>
+        <if test="keyword != null and keyword != ''">
+            <choose>
+                <when test='searchType == "subject"'>
+                    AND LOWER(p.subject) LIKE '%' || LOWER(#{keyword}) || '%'
+                </when>
+                <when test='searchType == "content"'>
+                    AND LOWER(p.content) LIKE '%' || LOWER(#{keyword}) || '%'
+                </when>
+                <when test='searchType == "manager"'>
+                    AND EXISTS (
+                        SELECT 1
+                        FROM project_members pm
+                        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+                        JOIN member_details md ON wm.member_id = md.member_id
+                        WHERE pm.project_id = p.project_id AND pm.status = 0 AND pm.role = 70
+                          AND LOWER(md.name) LIKE '%' || LOWER(#{keyword}) || '%')
+                </when>
+                <otherwise>
+                    AND (LOWER(p.subject) LIKE '%' || LOWER(#{keyword}) || '%'
+                        OR LOWER(p.content) LIKE '%' || LOWER(#{keyword}) || '%'
+                        OR EXISTS (
+                            SELECT 1
+                            FROM project_members pm
+                            JOIN workspace_members wm
+                                ON pm.workspace_member_id = wm.workspace_member_id
+                            JOIN member_details md ON wm.member_id = md.member_id
+                            WHERE pm.project_id = p.project_id AND pm.status = 0 AND pm.role = 70
+                              AND LOWER(md.name) LIKE '%' || LOWER(#{keyword}) || '%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+    </sql>
+
+    <!-- 프로젝트 목록 -->
+    <select id="listProject" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+
+        SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date,
+            TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive,
+            TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
+            <include refid="projectPmName"/>,
+            <include refid="projectMemberCount"/>
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+        <include refid="projectSearchCondition"/>
+        ORDER BY p.project_id DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 검색 결과 건수 -->
+    <select id="dataCount" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+        <include refid="projectSearchCondition"/>
+    </select>
+
+    <!-- 프로젝트 등록 -->
+    <insert id="insertProject" parameterType="com.tk.app.domain.dto.ManageDto">
+        <selectKey keyProperty="project_id" resultType="long" order="BEFORE">
+            SELECT seq_projects.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO projects (project_id, workspace_id, subject, content, start_at, "END", status, progress, archive, created)
+        VALUES (#{project_id}, #{workspace_id}, #{subject}, #{content}, TO_DATE(#{start_date}, 'YYYY-MM-DD'),
+            TO_DATE(#{end_date}, 'YYYY-MM-DD'), #{status}, #{progress}, 'N', SYSDATE)
+    </insert>
+
+    <!-- 프로젝트 상세 -->
+    <select id="getProjectDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
+        SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date,
+            TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress,
+            <include refid="projectPmName"/>,
+            <include refid="projectMemberCount"/>
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE p.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+    </select>
+
+    <!-- 프로젝트 관리 권한 -->
+    <select id="countProjectAccess" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        JOIN project_members pm ON p.project_id = pm.project_id
+        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        WHERE p.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y'
+          AND p.deleted IS NULL AND wm.member_id = #{memberId} AND pm.status = 0 AND pm.role = 70
+    </select>
+
+    <!-- 프로젝트 수정 -->
+    <update id="updateProject" parameterType="map">
+        UPDATE projects SET subject = #{subject}, content = #{content}, start_at = TO_DATE(#{start_date}, 'YYYY-MM-DD'),
+            "END" = TO_DATE(#{end_date}, 'YYYY-MM-DD'), status = #{status}, updated = SYSDATE
+        WHERE project_id = #{projectId}
+          AND deleted IS NULL
+          AND EXISTS (
+              SELECT 1
+              FROM workspace_domains wd
+              WHERE wd.workspace_id = projects.workspace_id AND wd.domain_key = #{domainKey} AND wd.active = 'Y')
+    </update>
+
+    <!-- 프로젝트 완전 삭제 -->
+	<delete id="deleteProject" parameterType="map">
+        BEGIN
+            DELETE FROM notice WHERE project_id = #{projectId};
+            DELETE FROM meeting_minutes WHERE project_id = #{projectId};
+            DELETE FROM calendar_events WHERE project_id = #{projectId};
+            DELETE FROM project_reports WHERE project_id = #{projectId};
+            DELETE FROM team_reports WHERE project_id = #{projectId};
+            DELETE FROM sub_tasks WHERE project_id = #{projectId};
+            DELETE FROM tasks WHERE project_id = #{projectId};
+            DELETE FROM project_members WHERE project_id = #{projectId};
+            DELETE FROM projects WHERE project_id = #{projectId};
+        END;
+    </delete>
+
+    <!-- 프로젝트 업무 목록 -->
+   <select id="listManageTasks" parameterType="map" resultType="com.tk.app.domain.dto.ManageTaskDto">
+	    SELECT t.task_id, t.project_id, t.project_member_id, t.title, t.content, t.task_level, TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_date, 
+	        TO_CHAR(t."END", 'YYYY-MM-DD') AS end_date, t.status, t.progress, md.name AS tl_name
+	    FROM tasks t
+	    JOIN projects p ON t.project_id = p.project_id
+	    JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+	    JOIN project_members pm ON t.project_member_id = pm.project_member_id
+	    JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+	    JOIN member_details md ON wm.member_id = md.member_id
+	    WHERE t.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y'
+	      AND p.deleted IS NULL AND t.deleted IS NULL
+	    ORDER BY t.task_id
+	</select>
+
+    <!-- TL 목록 -->
+    <select id="listManageTaskTL" parameterType="map" resultType="map">
+        SELECT pm.project_member_id AS "project_member_id", md.name AS "tl_name"
+        FROM project_members pm
+        JOIN projects p ON pm.project_id = p.project_id
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        JOIN member_details md ON wm.member_id = md.member_id
+        WHERE pm.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+          AND pm.role = 30 AND pm.status = 0
+        ORDER BY md.name
+    </select>
+
+	<!-- 업무 조회 -->
+	<select id="getManageTask" parameterType="map" resultType="com.tk.app.domain.dto.ManageTaskDto">
+	    SELECT t.task_id, t.project_id, t.project_member_id, t.title, t.content, t.task_level, TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_date,
+	    	TO_CHAR(t."END", 'YYYY-MM-DD') AS end_date, t.status, t.progress
+	    FROM tasks t
+	    WHERE t.task_id = #{taskId} AND t.project_id = #{projectId} AND t.deleted IS NULL
+	</select>
+
+    <!-- 프로젝트 업무 담당자 검증 -->
+    <select id="countValidTaskTL" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM project_members pm
+        WHERE pm.project_id = #{projectId} AND pm.project_member_id = #{projectMemberId} AND pm.role = 30 AND pm.status = 0
+    </select>
+
+    <!-- 업무 등록 -->
+	<insert id="insertManageTask" parameterType="com.tk.app.domain.dto.ManageTaskDto">
+	    <selectKey keyProperty="task_id" resultType="Long" order="BEFORE">
+	        SELECT seq_tasks.NEXTVAL FROM dual
+	    </selectKey>
+	    INSERT INTO tasks (task_id, project_id, project_member_id, title, content, task_level,
+	     start_at, "END", status, progress, created)
+	    VALUES (#{task_id}, #{project_id}, #{project_member_id}, #{title}, #{content},
+	        #{task_level}, TO_DATE(#{start_date}, 'YYYY-MM-DD'), TO_DATE(#{end_date}, 'YYYY-MM-DD'),
+	        0, 0, SYSDATE)
+	</insert>
+
+
+    <!-- 업무 수정 -->
+	<update id="updateManageTask" parameterType="com.tk.app.domain.dto.ManageTaskDto">
+	    UPDATE tasks SET project_member_id = #{project_member_id}, title = #{title}, content = #{content}, task_level = #{task_level},
+	    	start_at = TO_DATE(#{start_date}, 'YYYY-MM-DD'), "END" = TO_DATE(#{end_date}, 'YYYY-MM-DD'), updated = SYSDATE
+	    WHERE task_id = #{task_id} AND project_id = #{project_id} AND deleted IS NULL
+	</update>
+
+    <!-- 업무 삭제 -->
+    <update id="deleteManageTask" parameterType="map">
+        UPDATE tasks SET deleted = SYSDATE, updated = SYSDATE
+        WHERE task_id = #{taskId} AND project_id = #{projectId} AND deleted IS NULL
+          AND NOT EXISTS (
+              SELECT 1
+              FROM team_reports tr
+              WHERE tr.task_id = tasks.task_id
+                AND tr.deleted IS NULL)
+    </update>
+
+    <!-- 보고서 등록 여부 -->
+    <select id="countManageTaskReports" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM team_reports
+        WHERE task_id = #{taskId} AND deleted IS NULL
+    </select>
+
+    <!-- 동시 수정 시 비중 계산 보호 -->
+    <select id="lockManageProject" parameterType="map" resultType="long">
+        SELECT p.project_id
+        FROM projects p
+        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE p.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+        FOR UPDATE OF p.project_id
+    </select>
+
+	<select id="getProjectMemberRole" parameterType="map" resultType="Integer">
+        SELECT pm.role
+        FROM project_members pm
+        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        WHERE pm.project_id = #{projectId}
+          AND wm.member_id = #{memberId}
+    </select>
+
+</mapper>

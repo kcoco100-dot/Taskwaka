@@ -12,10 +12,6 @@ import com.tk.app.domain.dto.ManageDto;
 public interface ManageMapper {
 	public Long findByDomainKey(String domainKey) throws Exception;
 	
-	public void insertProject(ManageDto dto) throws SQLException;
-	public void updateProject(ManageDto dto) throws SQLException;
-	public void deleteProject(ManageDto dto) throws SQLException;
-	
 	public List<ManageDto> findById(Map<String, Object> map);
     public List<ManageDto> findPrevPost(Map<String, Object> map);
     public List<ManageDto> findNextPost(Map<String, Object> map);

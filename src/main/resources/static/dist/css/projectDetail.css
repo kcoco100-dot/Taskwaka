@@ -848,3 +848,81 @@
         width: 100%;
     }
 }
+
+
+/* 업무 등록 폼 */
+.pd-task-create-box {
+    margin-top: 20px;
+}
+
+.pd-task-create-box > summary,
+.pd-task-edit-box > summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.pd-task-create-box > summary::-webkit-details-marker,
+.pd-task-edit-box > summary::-webkit-details-marker {
+    display: none;
+}
+
+.pd-task-create-box .pd-task-editor {
+    display: block;
+}
+
+/* 업무 수정 폼 */
+.pd-task-edit-box {
+    margin-top: 12px;
+}
+
+.pd-task-edit-box > summary {
+    display: inline-block;
+    font-size: 12px;
+    color: #607c54;
+}
+
+.pd-task-edit-box[open] {
+    padding: 18px;
+    background: #f9fbf7;
+    border: 1px solid #dce6d7;
+    border-radius: 9px;
+}
+
+.pd-task-edit-box form {
+    margin-top: 15px;
+}
+
+/* 업무 내용 */
+.pd-task-content {
+    margin-top: 10px;
+    white-space: pre-wrap;
+    color: #777;
+    font-size: 12px;
+}
+
+/* 삭제 버튼 */
+.pd-task-delete-form {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.pd-delete-link {
+    border: 0;
+    background: transparent;
+    color: #c65c5c;
+    cursor: pointer;
+}
+
+/* 프로젝트 수정 / 삭제 */
+.pd-bottom-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.pd-bottom-actions form {
+    margin: 0;
+}
+

@@ -63,22 +63,6 @@
         WHERE wd.domain_key = #{domainKey} AND p.deleted IS NULL
     </select>
 	
-	<insert id="insertProject" parameterType="com.tk.app.domain.dto.ManageDto">
-	    <selectKey keyProperty="project_id" resultType="Long" order="BEFORE">
-	        SELECT seq_projects.NEXTVAL FROM dual
-	    </selectKey>
-	
-	    INSERT INTO projects(project_id, workspace_id, subject, content, start_at, "END", status, progress, archive, created)
-	        VALUES (#{project_id}, #{workspace_id}, #{subject}, #{content}, 
-	        TO_DATE(#{start_date}, 'YYYY-MM-DD'), TO_DATE(#{end_date}, 'YYYY-MM-DD'), #{status}, #{progress}, 'N', SYSDATE)
-	</insert>
-	
-	<update id="updateProject" parameterType="com.tk.app.domain.dto.ManageDto">
-		UPDATE projects SET subject = #{subject}, content = #{content}, start_at = TO_DATE(#{start_date}, 'YYYY-MM-DD'), 
-			"END" = TO_DATE(#{end_date}, 'YYYY-MM-DD'), status = #{status}, updated = SYSDATE
-		WHERE workspace_id = #{workspace_id}
-	</update>
-	
     <select id="getProjectCount" parameterType="Long" resultType="int">
         SELECT COUNT(*)
         FROM projects
@@ -87,12 +71,12 @@
     </select>
 
 	<select id="getProjectDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-	    SELECT p.project_id, p.subject, p.content, p.start_at AS start_date, p."END" AS end_date, p.status, p.progress,
-	        <include refid="projectPmName"></include>,
-	        <include refid="projectMemberCount"></include>
-	    FROM projects p
-	    WHERE p.project_id = #{projectId}
-	</select>
+        SELECT p.project_id, p.subject, p.content, p.start_at AS start_date, p."END" AS end_date, p.status, p.progress,
+			<include refid="projectPmName"></include>,
+			<include refid="projectMemberCount"></include>
+        FROM projects p
+        WHERE p.project_id = #{projectId}
+    </select>
 	
 	
 	<select id="findById" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">

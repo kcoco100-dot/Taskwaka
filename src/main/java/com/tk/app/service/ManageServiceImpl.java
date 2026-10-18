@@ -23,9 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ManageServiceImpl implements ManageService{
 	private final ManageMapper mapper;
 	private final MyUtil myUtil;
-	
-	@Autowired
-    private ProjectMemberRepository projectMemberRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 	
 	@Override
 	public Long findByDomainKey(String domainKey) throws Exception {
@@ -37,34 +35,6 @@ public class ManageServiceImpl implements ManageService{
         }
 	}
 	
-	@Override
-	public void insertProject(ManageDto dto) throws SQLException {
-		try {
-			mapper.insertProject(dto);
-		} catch (Exception e) {
-			log.info("insertProject : ", e);
-			
-			throw e;
-		}
-	}
-
-	@Override
-	public void updateProject(ManageDto dto) throws SQLException {
-		try {
-			mapper.updateProject(dto);
-		} catch (Exception e) {
-			log.info("updateProject : ", e);
-			
-			throw e;
-		}
-	}
-
-	@Override
-	public void deleteProject(ManageDto dto) throws SQLException {
-		// TODO Auto-generated method stub
-		
-	}
-
 	@Override
 	public List<ManageDto> listProject(Map<String, Object> map) throws SQLException {
 		List<ManageDto> list = null;
@@ -88,7 +58,6 @@ public class ManageServiceImpl implements ManageService{
 		
 		try {
 			list = mapper.listProjectManage(map);
-			
 		} catch (Exception e) {
 			log.info("listProject : ", e);
 			

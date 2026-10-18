@@ -37,9 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ManageController {
 
 	private final ProjectMemberRepository projectMemberRepository;
-	
-	@Autowired
-	private ManageService servive;
+	private final ManageService servive;
 	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(

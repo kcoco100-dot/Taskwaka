@@ -3,13 +3,11 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout3}">
 
-<!-- CSS 영역 (조회 페이지와 동일하게 설정) -->
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
     <style>
-        /* 등록 폼 전용 간단한 CSS 추가 */
         .project-form-group { margin-bottom: 20px; }
         .project-form-group label { display: block; font-weight: bold; margin-bottom: 8px; }
         .project-form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
@@ -21,10 +19,8 @@
 <th:block layout:fragment="content">
     <div class="home-layout manage-layout project-list-layout">
         
-        <!-- 사이드바 -->
         <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
         
-        <!-- 콘텐츠 영역 -->
         <section class="section project-list-page" aria-labelledby="project-article-heading">
             <div class="page-heading">
                 <div>
@@ -34,7 +30,12 @@
             </div>
 
             <div class="project-list-panel" style="padding: 30px;">
-				<form id="project-article-form" method="post" th:action="@{/{domainKey}/manage/write(domainKey=${domainKey})}" th:object="${dto}">
+				<form id="project-article-form" 
+      method="post" 
+      th:object="${dto}" 
+      th:action="${dto != null and dto.project_id != null} 
+                 ? @{/{domainKey}/manage/detail/{projectId}/update(domainKey=${domainKey}, projectId=${dto.project_id})} 
+                 : @{/{domainKey}/manage/write(domainKey=${domainKey})}">
                     
                     <div class="project-form-group">
                         <label for="subject">프로젝트명 <span style="color:red;">*</span></label>
@@ -42,7 +43,6 @@
                         <input type="text" id="subject" th:field="*{subject}" class="project-form-control" required placeholder="예: TASKWAKA 프론트엔드 리팩토링">
                     </div>
 
-                    <!-- 시작일과 종료일은 DTO의 변수명(start_date, end_date)과 동일하게 매핑 -->
                     <div style="display: flex; gap: 20px;">
                         <div class="project-form-group" style="flex: 1;">
                             <label for="start_date">시작일 <span style="color:red;">*</span></label>
@@ -60,6 +60,7 @@
                             <select id="status" th:field="*{status}" class="project-form-control">
                                 <option value="0">예정</option>
                                 <option value="1">진행 중</option>
+                                <option value="2">완료</option>
                             </select>
                         </div>
                         <div class="project-form-group" style="flex: 1;">
@@ -74,9 +75,7 @@
                     </div>
 
                     <div class="form-actions">
-                        <!-- 작성 성공 시 컨트롤러를 통해 리스트 화면으로 리다이렉트 됩니다. -->
                         <button type="submit" class="project-button project-button-primary" style="padding: 10px 40px; font-size: 16px;" th:text="${mode == 'write' ? '등록하기' : '수정하기'}">등록하기</button>
-                        <!-- 취소 시 목록 화면으로 돌아갑니다 -->
 						<button type="button" class="project-button" style="padding: 10px 40px; font-size: 16px;" th:onclick="|location.href='@{/{domainKey}/manage/view(domainKey=${domainKey})}'|">취소</button>
                     </div>
 
