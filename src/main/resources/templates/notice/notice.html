@@ -102,5 +102,19 @@
     </div>
 </th:block>
 
-<th:block layout:fragment="script"></th:block>
+<th:block layout:fragment="aside-container">
+	<th:block th:replace="~{common/util/confirm::confirm}"></th:block>
+</th:block>
+
+<th:block layout:fragment="script">
+<script th:inline="javascript">
+	document.addEventListener('DOMContentLoaded', () => {
+		const growthExpMessage = /*[[${growthExpMessage}]]*/ null;
+		
+		if(growthExpMessage != null) {
+			showToast(growthExpMessage);
+		}
+	});
+</script>
+</th:block>
 </html>

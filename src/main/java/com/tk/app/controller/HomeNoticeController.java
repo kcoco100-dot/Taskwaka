@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
 import com.tk.app.common.StorageService;
@@ -127,12 +128,14 @@ public class HomeNoticeController {
 		}
 
 		// 공지사항 등록 저장 및 파일첨부
+		// RedirectAttributes : 리다이렉트 시 데이터를 숨겨 넘기는 방법
 		@PostMapping("/noticeCreate")
 		public String noticeCreate(@PathVariable("domainKey") String domainKey,
 				@RequestAttribute("workspace") WorkspaceDto workspace, 
 				@RequestParam("title") String title,
 				@RequestParam("content") String content,
 				@RequestParam(value = "files", required = false) List<MultipartFile> files, // required = false 는 첨부파일이 선택사항이기 때문
+				RedirectAttributes redirectAttributes,
 				HttpServletResponse response, Model model) {
 
 			try {
@@ -172,7 +175,9 @@ public class HomeNoticeController {
 					return null;
 
 				}
-
+				// 경험치 등록 성공 후 목록 화면(모달창)에 전달할 메시지
+				redirectAttributes.addFlashAttribute("growthExpMessage", "🌱 워크 성장나무 경험치가 +10 올랐습니다.");
+				
 				return "redirect:/" + domainKey + "/home/notice";
 			} catch (DataAccessException e) {
 				
