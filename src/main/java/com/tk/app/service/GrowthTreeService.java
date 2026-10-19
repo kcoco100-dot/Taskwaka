@@ -274,10 +274,6 @@ public class GrowthTreeService {
 			throw new IllegalStateException("성장나무 경험치와 단계를 저장할 수 없습니다.");
 		}
 	}
-	
-	// 실제 회원 초대 참여 완료를 확인
-//	public int countAcceptedInviteMember() {
-//		
-//	}
+
 	
 }

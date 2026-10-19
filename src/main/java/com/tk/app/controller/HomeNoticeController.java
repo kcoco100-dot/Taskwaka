@@ -26,6 +26,7 @@ import com.tk.app.exception.StorageFileNotFoundException;
 import com.tk.app.service.NoticeService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,29 +63,54 @@ public class HomeNoticeController {
 		return "notice/notice";
 	}
 	
+	// 공지사항 상세조회
+	// HttpSession : 사용자의 요청 사이에 정보를 기억하는 곳
 	@GetMapping("/noticeDetail")
 	public String noticeDetail(
 			@RequestAttribute("workspace") WorkspaceDto workspace,
 			@RequestParam("noticeId") long noticeId, Model model,
+			HttpSession session,
 			HttpServletResponse response) {
 
 		try {
-			NoticeDto notice = noticeService.findWorkspaceDetailNotice(workspace.getWorkspaceId(), noticeId);
+			// 공지별 열람 기록을 구분할 문자열 변수 추가
+			String noticeViewKey = "workspaceNoticeViewed:" + workspace.getWorkspaceId() + ":" + noticeId;
+			// 상세 열람 조회에서 조회수 증가 여부
+			NoticeDto notice = new NoticeDto();
+			
+			// 같은 세션에서 동시에 들어온 요청의 중복 증가 방지
+			synchronized (session) {
 
+			if(Long.valueOf(noticeId).equals(model.getAttribute("editedNoticeId")) 
+					|| Boolean.TRUE.equals(session.getAttribute(noticeViewKey))) {
+				notice = noticeService.findWorkspaceDetailNotice(workspace.getWorkspaceId(), noticeId);
+			} else {
+				notice = noticeService.readWorkspaceNotice(workspace.getWorkspaceId(), noticeId);
+			}
+			
 			if (notice == null) {
 				response.setStatus(HttpStatus.NOT_FOUND.value());
 				model.addAttribute("title", "자료를 찾을 수 없습니다.");
 				model.addAttribute("message", "공지를 찾을 수 없습니다.");
 				return "error/error2";
 			}
-
+			
+			// 조회에 성공한 공지를 세션에 기록
+			session.setAttribute(noticeViewKey, Boolean.TRUE);
+		}
 			// 등록된 공지사항의 첨부파일 조회
 			List<NoticeFileDto> noticeFile = 
 					noticeService.findWorkspaceFiles(workspace.getWorkspaceId(), noticeId);
 
+			// 이전글 다음글
+			NoticeDto prevNotice = noticeService.findByPrevNotice(workspace.getWorkspaceId(), noticeId);
+			NoticeDto nextNotice = noticeService.findByNextNotice(workspace.getWorkspaceId(), noticeId);
+			
 			model.addAttribute("notice", notice);
 			model.addAttribute("noticeFile", noticeFile);
-
+			model.addAttribute("prevNotice", prevNotice);
+			model.addAttribute("nextNotice", nextNotice);
+			
 			return "notice/noticeDetail";
 			
 		} catch (DataAccessException e) {
@@ -311,6 +337,7 @@ public class HomeNoticeController {
 		}
 		
 		// 공지사항 수정 저장
+		// RedirectAttributes : 리다이렉트 시 데이터를 숨겨 넘기는 방법을 제공
 		@PostMapping("/noticeEdit")
 		public String saveNotice(
 				@PathVariable("domainKey") String domainKey,
@@ -320,6 +347,7 @@ public class HomeNoticeController {
 				@RequestParam("content") String content,
 				@RequestParam(required = false, name = "files") List<MultipartFile> files,
 				@RequestParam(required = false, name = "deleteFileIds") List<Long> deleteFileIds,
+				RedirectAttributes redirectAttributes,
 				Model model,
 				HttpServletResponse response) {
 
@@ -352,6 +380,10 @@ public class HomeNoticeController {
 					return null;
 				}
 
+				// 수정 성공 후 이동할 때 공지번호 임시로 전달
+				// editedNoticeId : 수정한 공지 번호를 담는다.
+				redirectAttributes.addFlashAttribute("editedNoticeId", noticeId);
+				
 				return "redirect:/" + domainKey + "/home/noticeDetail?noticeId=" + noticeId;
 			} catch (DataAccessException e) {
 				log.error("saveNotice - DataAccessException", e);

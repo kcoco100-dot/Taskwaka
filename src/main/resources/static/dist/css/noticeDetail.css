@@ -139,4 +139,13 @@
 
 .notice-detail-layout .shell-content > .notice-attachments {
     grid-column: 1 / -1;
+    overflow-wrap: anywhere;
+}
+
+.notice-detail-layout .shell-content > .notice-navigation > span {
+    display: inline;
+    margin-top: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
 }

@@ -46,6 +46,19 @@
 				       noticeId=${notice.noticeId}, noticeFileId=${file.noticeFileId})}">파일이름</a>
 				</p>
 				
+				<p class="notice-navigation">이전글:
+					<a th:if="${prevNotice != null}"
+					   th:href="@{/{domainKey}/home/noticeDetail(domainKey=${domainKey}, noticeId=${prevNotice.noticeId})}"
+					   th:text="${prevNotice.title}">이전글 제목</a>
+					<span th:if="${prevNotice == null}">이전글이 없습니다.</span>
+				</p>
+				
+				<p class="notice-navigation">다음글:
+					<a th:if="${nextNotice != null}"
+					   th:href="@{/{domainKey}/home/noticeDetail(domainKey=${domainKey}, noticeId=${nextNotice.noticeId})}"
+					   th:text="${nextNotice.title}">다음글 제목</a>
+					<span th:if="${nextNotice == null}">다음글이 없습니다.</span>
+				</p>
             </div>
 
 			<div class="shell-actions">

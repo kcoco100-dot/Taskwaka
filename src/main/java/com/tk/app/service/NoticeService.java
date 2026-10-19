@@ -115,6 +115,32 @@ public class NoticeService {
 		return noticeMapper.findWorkspaceDetailNotice(workspaceId, noticeId);
 	}
 	
+	// 이전글 조회
+	public NoticeDto findByPrevNotice(long workspaceId, long noticeId) {
+		
+		return noticeMapper.findByPrevNotice(workspaceId, noticeId);
+	}
+	
+	// 다음글 조회
+	public NoticeDto findByNextNotice(long workspaceId, long noticeId) {
+		
+		return noticeMapper.findByNextNotice(workspaceId, noticeId);
+	}
+	
+	// 공지 조회시 조회수 증가
+	@Transactional(rollbackFor = Exception.class)
+	public NoticeDto readWorkspaceNotice(long workspaceId, long noticeId) throws Exception {
+		
+		int updatedCount = noticeMapper.incrementWorkspaceNoticeViewCount(workspaceId, noticeId);
+		if(updatedCount == 0) {
+			return null;
+		} else if(updatedCount != 1) {
+			throw new IllegalStateException("공지 조회수를 정상적으로 증가시킬 수 없습니다.");
+		}
+		
+		return noticeMapper.findWorkspaceDetailNotice(workspaceId, noticeId);
+	}
+	
 	// 공지 상세조회에서 첨부된 파일 조회
 	public List<NoticeFileDto> findWorkspaceFiles(
 			long workspaceId, long noticeId) {

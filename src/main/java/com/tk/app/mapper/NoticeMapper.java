@@ -51,9 +51,23 @@ public interface NoticeMapper {
 	public List<NoticeDto> findWorkspaceNotice(
 			@Param("workspaceId") long workspaceId);
 	
+	// 공지사항 조회수 증가
+	public int incrementWorkspaceNoticeViewCount(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId);
+	
 	// 워크에 공개된 공지 상세조회
 	public NoticeDto findWorkspaceDetailNotice(
 			@Param("workspaceId") long workspaceId,
 			@Param("noticeId") long noticeId);
-
+	
+	// 이전글
+	public NoticeDto findByPrevNotice(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId);
+	
+	// 다음글
+	public NoticeDto findByNextNotice(
+			@Param("workspaceId") long workspaceId,
+			@Param("noticeId") long noticeId);
 }
