@@ -16,10 +16,7 @@ import com.tk.app.service.TaskService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping({
-    "/{domainKey}/project/{projectId}/api/tasks",
-    "/api/projects/{projectId}/tasks"
-})
+@RequestMapping("/{domainKey}/project/{projectId}/api/tasks")
 @RequiredArgsConstructor
 public class TaskApiController {
 
@@ -177,7 +174,7 @@ public class TaskApiController {
         return ResponseEntity.ok(res);
     }
     
- // ================= 12. 업무공지 (notice) CRUD API (팀 리더 전용 작성/수정/삭제) =================
+ // 12. 업무공지 (notice) CRUD API (팀 리더 전용 작성/수정/삭제)
     @GetMapping("/notices/{noticeId}")
     public ResponseEntity<Map<String, Object>> getTaskNoticeDetail(
             @PathVariable("noticeId") Long noticeId,

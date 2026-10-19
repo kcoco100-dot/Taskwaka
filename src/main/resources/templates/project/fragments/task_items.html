@@ -23,7 +23,7 @@
 
 				<!-- 권한 제어(th:if): 메인 업무 담당자에게만 하위업무 추가 버튼 표시 -->
 				<span class="inline-action-bundle"
-				      th:if="${currentProjectMemberId == null or task.projectMemberId == currentProjectMemberId}"
+				      th:if="${task.projectMemberId == currentProjectMemberId}"
 				      onclick="event.stopPropagation();">
 					<button type="button" class="btn-action-tool btn-action-add"
 					        th:onclick="|requestCreateSubTask(${task.taskId})|"
@@ -72,7 +72,7 @@
 			<span class="task-title-text" th:text="${subTask.title}">하위업무명</span>
 
 			<span class="my-subtask-tag"
-			      th:if="${currentProjectMemberId != null and subTask.projectMemberId == currentProjectMemberId}"
+			      th:if="${subTask.projectMemberId == currentProjectMemberId}"
 			      title="내 담당 하위업무">📝 내 담당</span>
 
 			<span class="inline-action-bundle" onclick="event.stopPropagation();">

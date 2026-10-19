@@ -2,8 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
 	<div th:fragment="content">
-		<link rel="stylesheet" th:href="@{/dist/css/project/task.css}">
-
+	<link rel="stylesheet" type="text/css" href="/dist/css/project/task.css">
 		<div class="task-split-view-wrapper" id="taskSplitViewWrapper">
 			<div class="task-tree-page" id="taskTreeMainPage">
 				<div class="task-scroll-wrapper">
@@ -107,7 +106,6 @@
 				</div>
 			</div>
 		</div>
-
 		<script th:inline="javascript">
 			/*<![CDATA[*/
 			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';

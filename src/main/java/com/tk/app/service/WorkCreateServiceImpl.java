@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkCreateServiceImpl implements WorkCreateService {
 	private final WorkCreateMapper mapper;
-	
+	private final GrowthTreeService growthTreeService;
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public Long insertWork(WorkCreateDto dto, String loginId) throws Exception {
@@ -80,7 +80,7 @@ public class WorkCreateServiceImpl implements WorkCreateService {
         	mapper.insertWorkPM(dto);
 
         	mapper.insertDomainKey(dto);
-        	
+        	growthTreeService.growthTreeCreate(dto.getWorkId());
 
         	
         	return dto.getWorkId();

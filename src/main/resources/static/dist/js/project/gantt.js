@@ -48,7 +48,8 @@ async function loadTasksFromApiOrFallback() {
   let tasks = [];
 
   try {
-    const res = await fetch(`/api/projects/${currentProjectId}/tasks`);
+    const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks`);
+	
     if (res.ok) {
       tasks = await res.json();
     }
