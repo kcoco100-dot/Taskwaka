@@ -15,139 +15,108 @@
 
         <section class="section approval-page" aria-labelledby="approval-heading">
             <div class="page-heading">
-                <h1 id="approval-heading" class="page-title">보고서 공지</h1>
-                <p class="page-description">프로젝트·업무·일일 보고서를 한곳에서 확인하세요.</p>
+                <h1 id="approval-heading" class="page-title">보고서 결재</h1>
+                <p class="page-description">프로젝트 보고서와 업무 보고서의 결재 현황을 확인하세요.</p>
             </div>
 
             <div class="approval-panel">
-                <!-- JSP에서 요청하신 JavaScript 검색 처리를 위해 form에 name 부여 및 action/method 제거 (JS에서 제어) -->
-                <form name="searchForm" id="approval-search-form" class="approval-filters">
+                <p class="approval-notice approval-notice-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+                <p class="approval-notice" th:if="${message}" th:text="${message}"></p>
+
+                <form name="searchForm" id="approval-search-form" class="approval-filters"
+                      method="get" th:action="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">
                     <div class="approval-field">
                         <label for="approval-type">보고서 유형</label>
                         <select id="approval-type" name="reportCategory">
-                            <option value="0" th:selected="${reportCategory == null or reportCategory == 0}">전체 유형</option>
+                            <option value="0" th:selected="${reportCategory == 0}">전체</option>
                             <option value="1" th:selected="${reportCategory == 1}">프로젝트 보고서</option>
                             <option value="2" th:selected="${reportCategory == 2}">업무 보고서</option>
-                            <option value="3" th:selected="${reportCategory == 3}">일일 보고서</option>
                         </select>
                     </div>
                     <div class="approval-field">
-                        <label for="approval-status">검토 상태</label>
+                        <label for="approval-status">처리 상태</label>
                         <select id="approval-status" name="reviewStatus">
-                            <option value="-1" th:selected="${reviewStatus == null or reviewStatus == -1}">전체 상태</option>
-                            <option value="0" th:selected="${reviewStatus == 0}">검토 대기</option>
-                            <option value="1" th:selected="${reviewStatus == 1}">검토 완료</option>
+                            <option value="-2" th:selected="${reviewStatus == -2}">전체 상태</option>
+                            <option value="-1" th:selected="${reviewStatus == -1}">미확인</option>
+                            <option value="0" th:selected="${reviewStatus == 0}">대기</option>
+                            <option value="1" th:selected="${reviewStatus == 1}">승인</option>
                             <option value="2" th:selected="${reviewStatus == 2}">반려</option>
                         </select>
                     </div>
                     <div class="approval-field approval-keyword-field">
                         <label for="approval-keyword">검색어</label>
-                        <input id="approval-keyword" name="keyword" type="search" th:value="${keyword}"
-                               placeholder="제목, 프로젝트, 작성자 검색" maxlength="100">
+                        <input id="approval-keyword" name="keyword" type="search"
+                               th:value="${keyword}" placeholder="제목, 프로젝트, 업무, 작성자 검색" maxlength="100">
                     </div>
                     <div class="approval-actions">
-                        <button type="button" class="approval-button approval-button-primary" onclick="searchList()">조회</button>
-                        <button type="button" id="approval-reset" class="approval-button" th:onclick="|location.href='@{/{domainKey}/manage/report/list(domainKey=${domainKey})}'|">초기화</button>
+                        <button type="submit" class="approval-button approval-button-primary">조회</button>
+                        <a class="approval-button" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">초기화</a>
                     </div>
                 </form>
 
                 <div class="approval-list-heading">
                     <h2>보고서 목록</h2>
-                    <p class="approval-count" role="status" aria-live="polite">
-                        총 <strong id="approval-count" th:text="${dataCount ?: 0}">0</strong>건
-                        <span th:if="${dataCount > 0}" style="font-size: 14px; color: #666;">
-                            (<span th:text="${page}">1</span>/<span th:text="${totalPage}">1</span> 페이지)
-                        </span>
+                    <p class="approval-count">총 <strong th:text="${dataCount}">0</strong>건
+                        <span th:if="${totalPage > 0}" th:text="|(${page}/${totalPage} 페이지)|"></span>
                     </p>
                 </div>
 
-                <div class="approval-table-wrap" tabindex="0" role="region" aria-label="보고서 목록 표">
+                <div class="approval-table-wrap" tabindex="0" role="region" aria-label="보고서 목록">
                     <table class="approval-table">
-                        <caption class="approval-sr-only">보고서 유형, 제목, 프로젝트, 작성자, 보고일과 검토 상태</caption>
+                        <caption class="approval-sr-only">보고서 유형, 프로젝트, 업무, 제목, 작성자, 작성일, 단계, 진행률, 처리 상태</caption>
                         <thead>
                             <tr>
                                 <th scope="col" class="approval-number">번호</th>
                                 <th scope="col">유형</th>
-                                <th scope="col" class="approval-title-column">보고서 제목</th>
-                                <th scope="col">프로젝트</th>
+                                <th scope="col">프로젝트명</th>
+                                <th scope="col">업무명</th>
+                                <th scope="col" class="approval-title-column">보고서명</th>
                                 <th scope="col">작성자</th>
-                                <th scope="col">보고일</th>
-                                <th scope="col">검토 상태</th>
+                                <th scope="col">작성일</th>
+                                <th scope="col">단계</th>
+                                <th scope="col">진행률</th>
+                                <th scope="col">처리 상태</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="approval-report-row" th:each="dto, status : ${list}">
-                                <td class="approval-number" th:text="${dataCount - (page - 1) * size - status.index}"></td>
-                                
+                            <tr class="approval-report-row" th:each="dto, stat : ${list}">
+                                <td class="approval-number" th:text="${dataCount - (page - 1) * size - stat.index}">1</td>
                                 <td><span class="approval-kind" th:text="${dto.reportTypeName}">유형</span></td>
-                                
-                                <td>
-                                    <a th:href="@{/{domainKey}/manage/report/detail(domainKey=${domainKey}, reviewId=${dto.reviewId}, projectId=${dto.projectId})}" 
-                                       class="approval-title" th:text="${dto.reportTitle}" style="text-decoration: none; color: #0d6efd; font-weight: bold;">
-                                        제목
-                                    </a>
-                                </td>
-                                
                                 <td class="approval-project" th:text="${dto.projectName}">프로젝트</td>
+                                <td th:text="${dto.taskName}">업무</td>
+                                <td><a class="approval-title"
+                                       th:href="@{/{domainKey}/manage/approval/detail(domainKey=${domainKey},reportCategory=${dto.reportCategory},reportId=${dto.reportId})}"
+                                       th:text="${dto.reportTitle}">보고서 제목</a></td>
                                 <td class="approval-author" th:text="${dto.authorName}">작성자</td>
-                                <td><time th:text="${dto.createdDate}">2026.10.07</time></td>
-                                
+                                <td th:text="${dto.createdDate}">작성일</td>
+                                <td th:text="${dto.stageName}">단계</td>
+                                <td th:text="|${dto.progress}%|">0%</td>
                                 <td>
-                                    <span class="approval-status approval-status-pending" th:if="${dto.reviewStatus == 0}">검토 대기</span>
-                                    <span class="approval-status approval-status-reviewed" th:if="${dto.reviewStatus == 1}">검토 완료</span>
-                                    <span class="approval-status approval-status-rejected" th:if="${dto.reviewStatus == 2}">반려</span>
+                                    <span th:if="${dto.reviewStatus == -1}" class="approval-status approval-status-unread">미확인</span>
+                                    <span th:if="${dto.reviewStatus == 0}" class="approval-status approval-status-pending">대기</span>
+                                    <span th:if="${dto.reviewStatus == 1}" class="approval-status approval-status-reviewed">승인</span>
+                                    <span th:if="${dto.reviewStatus == 2}" class="approval-status approval-status-rejected">반려</span>
                                 </td>
                             </tr>
-                            
-                            <tr id="approval-empty" th:if="${#lists.isEmpty(list)}">
-                                <td colspan="7" class="approval-empty" style="text-align: center; padding: 20px;">검색 조건에 맞는 보고서가 없습니다.</td>
+                            <tr th:if="${#lists.isEmpty(list)}">
+                                <td colspan="10" class="approval-empty">검색 조건에 맞는 보고서가 없습니다.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="approval-list-footer" style="display: flex; justify-content: center; margin-top: 20px;">
-                    <nav class="approval-pagination" aria-label="보고서 목록 페이지" th:if="${totalPage > 0}">
-                        <th:block th:each="i : ${#numbers.sequence(1, totalPage)}">
-                            <a class="approval-page-button" 
-                               th:href="@{/{domainKey}/manage/report/list(domainKey=${domainKey}, page=${i}, reportCategory=${reportCategory}, reviewStatus=${reviewStatus}, keyword=${keyword})}"
-                               th:text="${i}"
-                               th:style="${page == i ? 'background: #0d6efd; color: white; border-color: #0d6efd;' : ''}">1</a>
-                        </th:block>
+                <div class="approval-list-footer">
+                    <nav class="approval-pagination" aria-label="보고서 목록 페이지" th:if="${totalPage > 1}">
+                        <a class="approval-page-button"
+                           th:each="i : ${#numbers.sequence(1, totalPage)}"
+                           th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},page=${i},reportCategory=${reportCategory},reviewStatus=${reviewStatus},keyword=${keyword})}"
+                           th:classappend="${page == i} ? 'approval-current-page' : ''"
+                           th:attr="aria-current=${page == i ? 'page' : null}"
+                           th:text="${i}">1</a>
                     </nav>
                 </div>
             </div>
         </section>
     </div>
 </th:block>
-
-<th:block layout:fragment="script">
-    <script type="text/javascript" th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', () => {
-            const inputEL = document.querySelector('form[name=searchForm] input[name=keyword]');
-            
-            if(inputEL) {
-                inputEL.addEventListener('keydown', ev => {
-                    if(ev.key === 'Enter') {
-                        ev.preventDefault();
-                        searchList();
-                    }
-                });
-            }
-        });
-
-        function searchList() {
-            const f = document.searchForm;
-            
-            const formData = new FormData(f);
-            let params = new URLSearchParams(formData).toString();
-            
-            let domainKey = 'defaultDomain';
-            let url = '/' + domainKey + '/manage/report/list';
-            
-            location.href = url + '?' + params;
-        }
-    </script>
-</th:block>
-
 </html>

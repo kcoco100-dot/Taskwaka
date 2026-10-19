@@ -8,18 +8,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ManageReportDto {
-	private Long reviewId;
-
-    private Long projectReportId;
-    private Long teamReportId;
-    private Long dailyReportId;
-
+	private Long reportId;
+    private Long reviewId;
     private Long projectId;
     private Long taskId;
-    private Long subTaskId;
     private Long projectMemberId;
 
-    private Integer reportCategory;
+    private int reportCategory;
+    private String reportTypeName;
 
     private String projectName;
     private String taskName;
@@ -27,13 +23,15 @@ public class ManageReportDto {
     private String content;
     private String authorName;
     private String createdDate;
-    private Double progress;
 
-    private Integer reviewStatus;
+    private String stageName;
+
+    private Double progress;
+    private int reviewStatus;
+
     private String reviewComment;
     private String rejectReason;
     private String reviewedDate;
 
-    private Integer role;
-    private String reportTypeName;
+    private int canReview;
 }

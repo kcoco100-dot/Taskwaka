@@ -215,12 +215,7 @@ public class ManageController {
 	public String calender() {
 		return "manage/manageCalender";
 	}
-	
-	// 보고서 페이지
-	@GetMapping("/approval")
-	public String approvalForm() {
-		return "manage/approval";
-	}
+
 	
 	// 회의록 페이지
 	@GetMapping("/meetings")
