@@ -3,7 +3,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.WorkChatMemberMapper">
 	<select id="findMemberByWorkId" parameterType="Long" resultType="WorkChatMemberDto">
-		SELECT wm.member_id, md.name, wm.role, md.profile
+		SELECT wm.member_id "memberId", md.name "name", wm.role "role", md.profile "profilePhoto"
 		FROM workspace_members wm
 		JOIN members m ON m.member_id = wm.member_id
 		JOIN member_details md ON m.member_id = md.member_id

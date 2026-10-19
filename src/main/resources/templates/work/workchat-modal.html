@@ -1,116 +1,86 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-<!-- 워크챗 전용 Thymeleaf fragment (UI 샘플 데이터) -->
-<div class="workchat-overlay" id="workchatModal" hidden th:fragment="workchatModal">
+<div th:fragment="workchatModal" class="workchat-overlay" id="workchatModal" hidden>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    
+    
+
   <div class="workchat-dialog" role="dialog" aria-modal="true" aria-labelledby="workchatTitle" tabindex="-1">
     <button type="button" class="workchat-close workchat-dialog-close" id="workchatClose" aria-label="워크챗 닫기"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     <aside class="workchat-sidebar">
       <div class="workchat-sidebar-header">
         <span class="workchat-eyebrow">TASKWAKA MESSENGER</span>
-        <div class="workchat-title-line"><h2 id="workchatTitle">워크챗</h2><span class="workchat-beta">UI PREVIEW</span><button type="button" class="workchat-create-trigger" id="workchatCreateToggle" aria-label="새 채팅 또는 회의방 만들기" aria-expanded="false" aria-controls="workchatTypeMenu" title="새로 만들기"><svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 13a7.5 7.5 0 0 1-7.4 6.2 8 8 0 0 1-2.5-.4L3 20l1.1-3.4A7.5 7.5 0 1 1 17 13Z"/><path d="M19 14v7M15.5 17.5h7"/></svg></button></div>
+        <div class="workchat-title-line"><h2 id="workchatTitle">워크챗</h2><button type="button" class="workchat-create-trigger" id="workchatCreateToggle" aria-label="새 채팅 또는 회의방 만들기" aria-expanded="false" aria-controls="workchatTypeMenu" title="새로 만들기"><svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 13a7.5 7.5 0 0 1-7.4 6.2 8 8 0 0 1-2.5-.4L3 20l1.1-3.4A7.5 7.5 0 1 1 17 13Z"/><path d="M19 14v7M15.5 17.5h7"/></svg></button></div>
         <p class="workchat-subtitle">워크 멤버와 소통하고 회의를 준비하세요</p>
 
-      <!-- 하나의 만들기 버튼: 일반채팅 / 팀채팅 / 회의방 종류 선택 -->
-      <div class="workchat-type-popover" id="workchatTypeMenu" hidden aria-label="방 종류 선택">
-        <div class="workchat-type-popover-top"><strong>새로 만들기</strong><span>유형을 선택해 주세요</span></div>
-        <div class="workchat-type-options">
-          <button type="button" data-workchat-kind="general" class="workchat-type-option">
-            <span class="workchat-type-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 0 1-8 8 9 9 0 0 1-3.2-.5L4 20l1-4.2A8 8 0 1 1 20 11.5Z"/></svg></span>
-            <strong>일반채팅</strong><small>1:1 대화</small>
-          </button>
-          <button type="button" data-workchat-kind="team" class="workchat-type-option">
-            <span class="workchat-type-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18c-4.7 0-7.5-3.1-7.5-7s2.8-7 7.5-7S17 7.1 17 11s-2.8 7-7.5 7Z"/><path d="M6 17l-3 3 1-4M18 7c2.5.7 4 2.6 4 5.4 0 1.6-.6 2.9-1.6 3.9l.8 3.2-3.1-1.7"/></svg></span>
-            <strong>팀채팅</strong><small>여러 명 대화</small>
-          </button>
-          <button type="button" data-workchat-kind="meeting" class="workchat-type-option">
-            <span class="workchat-type-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></span>
-            <strong>회의방</strong><small>일정 · 안건</small>
-          </button>
+	      <!-- 하나의 만들기 버튼: 일반채팅 / 팀채팅 / 회의방 종류 선택 -->
+	      <div class="workchat-type-popover" id="workchatTypeMenu" hidden aria-label="방 종류 선택">
+	        <div class="workchat-type-popover-top"><strong>새로 만들기</strong><span>유형을 선택해 주세요</span></div>
+	        <div class="workchat-type-options">
+	          
+	          <button type="button" data-workchat-kind="general" class="workchat-type-option">
+	            <span class="workchat-type-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 0 1-8 8 9 9 0 0 1-3.2-.5L4 20l1-4.2A8 8 0 1 1 20 11.5Z"/></svg></span>
+	            <strong>일반채팅</strong><small>1:1 대화</small>
+	          </button>
+	          
+	          <button type="button" data-workchat-kind="team" class="workchat-type-option">
+	            <span class="workchat-type-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 18c-4.7 0-7.5-3.1-7.5-7s2.8-7 7.5-7S17 7.1 17 11s-2.8 7-7.5 7Z"/><path d="M6 17l-3 3 1-4M18 7c2.5.7 4 2.6 4 5.4 0 1.6-.6 2.9-1.6 3.9l.8 3.2-3.1-1.7"/></svg></span>
+	            <strong>팀채팅</strong><small>여러 명 대화</small>
+	          </button>
+	          
+	          <button type="button" data-workchat-kind="meeting" class="workchat-type-option">
+	            <span class="workchat-type-icon"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></span>
+	            <strong>회의방</strong><small>일정 · 안건</small>
+	          </button>
+	          
+	        </div>
+	      </div>
+      </div>
+     
+	  <div class="workchat-tab-bar" role="tablist" aria-label="워크챗 목록 전환">
+        <button type="button" class="workchat-tab" id="workchatTab-members" role="tab" aria-selected="false" aria-controls="workchatPanel-members" tabindex="-1" data-workchat-tab="members"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg><span>워크 멤버</span></button>
+		<button type="button" class="workchat-tab workchat-tab--active" id="workchatTab-chats" role="tab" aria-selected="true" aria-controls="workchatPanel-chats" tabindex="0" data-workchat-tab="chats"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11.5a8 8 0 0 1-8 8 9 9 0 0 1-3.2-.5L4 20l1-4.2A8 8 0 1 1 20 11.5Z"/></svg><span>채팅방</span></button>
+		<button type="button" class="workchat-tab" id="workchatTab-meetings" role="tab" aria-selected="false" aria-controls="workchatPanel-meetings" tabindex="-1" data-workchat-tab="meetings"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="12" height="14" rx="2"/><path d="m15 10 6-3v10l-6-3"/></svg><span>회의방</span></button>
+      </div>
+      <div class="workchat-search"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="10.5" cy="10.5" r="6.8"/><path d="m16 16 4 4"/></svg><input type="text" id="workchatSearch" placeholder="채팅방 검색" aria-label="목록 검색"></div>
+
+	  <div class="workchat-panel" id="workchatPanel-members" role="tabpanel"
+           aria-labelledby="workchatTab-members" data-workchat-panel="members" hidden>
+        <div class="workchat-section-caption">
+          <span>워크 전체 멤버</span><span class="workchat-room-count">조회 전</span>
+        </div>
+        <!-- 실제 워크 멤버 목록을 Vue.js로 출력할 영역 -->
+        <div class="workchat-list workchat-member-groups"></div>
+      </div>
+      
+      <div class="workchat-panel" id="workchatPanel-chats" role="tabpanel"
+           aria-labelledby="workchatTab-chats" data-workchat-panel="chats">
+        <div class="workchat-section-caption">
+          <span>내 채팅방</span><span class="workchat-room-count">0개</span>
+        </div>
+        <!-- 실제 채팅방 목록 연동 예정 -->
+        <div class="workchat-list" id="workchatRoomList">
+          <p class="workchat-list-sub">참여 중인 채팅방이 없습니다.</p>
         </div>
       </div>
+      
+      <div class="workchat-panel" id="workchatPanel-meetings" role="tabpanel"
+           aria-labelledby="workchatTab-meetings" data-workchat-panel="meetings" hidden>
+        <div class="workchat-section-caption">
+          <span>워크 회의방</span><span class="workchat-room-count">0개</span>
+        </div>
+        <!-- 실제 회의방 목록 연동 예정 -->
+        <div class="workchat-list" id="workchatMeetingList">
+          <p class="workchat-list-sub">참여 중인 회의방이 없습니다.</p>
+        </div>
       </div>
-      <div class="workchat-tab-bar" role="tablist" aria-label="워크챗 목록 전환">
-        <button type="button" class="workchat-tab" id="workchatTab-members" role="tab" aria-selected="false" aria-controls="workchatPanel-members" tabindex="-1" data-workchat-tab="members"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg><span>워크 멤버</span></button>
-<button type="button" class="workchat-tab workchat-tab--active" id="workchatTab-chats" role="tab" aria-selected="true" aria-controls="workchatPanel-chats" tabindex="0" data-workchat-tab="chats"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11.5a8 8 0 0 1-8 8 9 9 0 0 1-3.2-.5L4 20l1-4.2A8 8 0 1 1 20 11.5Z"/></svg><span>채팅방</span></button>
-<button type="button" class="workchat-tab" id="workchatTab-meetings" role="tab" aria-selected="false" aria-controls="workchatPanel-meetings" tabindex="-1" data-workchat-tab="meetings"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="12" height="14" rx="2"/><path d="m15 10 6-3v10l-6-3"/></svg><span>회의방</span></button>
-      </div>
-      <div class="workchat-search"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="10.5" cy="10.5" r="6.8"/><path d="m16 16 4 4"/></svg><input type="text" id="workchatSearch" placeholder="채팅방 검색 (디자인 미리보기)" aria-label="목록 검색 미리보기" disabled></div>
-      <div class="workchat-panel" id="workchatPanel-members" role="tabpanel" aria-labelledby="workchatTab-members" data-workchat-panel="members" hidden>
-        <div class="workchat-section-caption"><span>워크 전체 멤버</span><span class="workchat-room-count">8명 · 샘플</span></div>
-        <div class="workchat-list workchat-member-groups">
-<div class="workchat-role-group" aria-label="PM 멤버">
-      <div class="workchat-role-heading"><span class="workchat-role-heading-title"><span class="workchat-role-dot workchat-role-dot--pm"></span><strong>PM</strong><small>직급별 멤버</small></span><span class="workchat-role-qty">1명</span></div>
-      <div class="workchat-list-item workchat-list-item--selected">
-      <div class="workchat-avatar workchat-avatar--green">지민</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">김지민</span><span class="workchat-list-sub">프로젝트 관리</span></div>
-      <span class="workchat-role-pill workchat-role-pill--pm">PM</span>
-    </div>
-    </div>
-<div class="workchat-role-group" aria-label="DL 멤버">
-      <div class="workchat-role-heading"><span class="workchat-role-heading-title"><span class="workchat-role-dot workchat-role-dot--dl"></span><strong>DL</strong><small>직급별 멤버</small></span><span class="workchat-role-qty">2명</span></div>
-      <div class="workchat-list-item">
-      <div class="workchat-avatar workchat-avatar--lilac">민수</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">박민수</span><span class="workchat-list-sub">백엔드 개발</span></div>
-      <span class="workchat-role-pill workchat-role-pill--dl">DL</span>
-    </div>
-<div class="workchat-list-item">
-      <div class="workchat-avatar workchat-avatar--sand">서연</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">이서연</span><span class="workchat-list-sub">프론트엔드 개발</span></div>
-      <span class="workchat-role-pill workchat-role-pill--dl">DL</span>
-    </div>
-    </div>
-<div class="workchat-role-group" aria-label="TL 멤버">
-      <div class="workchat-role-heading"><span class="workchat-role-heading-title"><span class="workchat-role-dot workchat-role-dot--tl"></span><strong>TL</strong><small>직급별 멤버</small></span><span class="workchat-role-qty">2명</span></div>
-      <div class="workchat-list-item">
-      <div class="workchat-avatar workchat-avatar--peach">하늘</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">정하늘</span><span class="workchat-list-sub">UI/UX 디자인</span></div>
-      <span class="workchat-role-pill workchat-role-pill--tl">TL</span>
-    </div>
-<div class="workchat-list-item">
-      <div class="workchat-avatar workchat-avatar--green">유진</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">최유진</span><span class="workchat-list-sub">프론트엔드 개발</span></div>
-      <span class="workchat-role-pill workchat-role-pill--tl">TL</span>
-    </div>
-    </div>
-<div class="workchat-role-group" aria-label="AA 멤버">
-      <div class="workchat-role-heading"><span class="workchat-role-heading-title"><span class="workchat-role-dot workchat-role-dot--aa"></span><strong>AA</strong><small>직급별 멤버</small></span><span class="workchat-role-qty">3명</span></div>
-      <div class="workchat-list-item">
-      <div class="workchat-avatar workchat-avatar--slate">도현</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">한도현</span><span class="workchat-list-sub">백엔드 개발</span></div>
-      <span class="workchat-role-pill workchat-role-pill--aa">AA</span>
-    </div>
-<div class="workchat-list-item">
-      <div class="workchat-avatar workchat-avatar--lilac">지수</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">오지수</span><span class="workchat-list-sub">기획 · 문서</span></div>
-      <span class="workchat-role-pill workchat-role-pill--aa">AA</span>
-    </div>
-<div class="workchat-list-item">
-      <div class="workchat-avatar workchat-avatar--sand">서준</div>
-      <div class="workchat-list-content"><span class="workchat-list-name">윤서준</span><span class="workchat-list-sub">QA · 테스트</span></div>
-      <span class="workchat-role-pill workchat-role-pill--aa">AA</span>
-    </div>
-    </div>
-</div>
-      </div>
-      <div class="workchat-panel" id="workchatPanel-chats" role="tabpanel" aria-labelledby="workchatTab-chats" data-workchat-panel="chats">
-        <div class="workchat-section-caption"><span>내 채팅방</span><span class="workchat-room-count">3개 · 샘플</span></div>
-
-<div class="workchat-list">
-<div class="workchat-list-item" role="button" tabindex="0" aria-pressed="false" data-workchat-room="development" data-room-name="프로젝트 개발팀" data-room-description="참여자 6명 · 그룹 채팅 샘플"><div class="workchat-avatar workchat-avatar--green">개발</div><div class="workchat-list-content"><div class="workchat-list-top"><span class="workchat-list-name">프로젝트 개발팀</span><small>14:31</small></div><div class="workchat-list-bottom"><span>오늘 화면 작업 확인 부탁드려요!</span><span class="workchat-unread">2</span></div></div></div>
-<div class="workchat-list-item" role="button" tabindex="0" aria-pressed="false" data-workchat-room="design" data-room-name="디자인팀" data-room-description="참여자 4명 · 그룹 채팅 샘플"><div class="workchat-avatar workchat-avatar--sand">디자인</div><div class="workchat-list-content"><div class="workchat-list-top"><span class="workchat-list-name">디자인팀</span><small>어제</small></div><div class="workchat-list-bottom"><span>컬러 팔레트 공유했습니다.</span></div></div></div>
-<div class="workchat-list-item" role="button" tabindex="0" aria-pressed="false" data-workchat-room="notice" data-room-name="전체 공지방" data-room-description="참여자 8명 · 그룹 채팅 샘플"><div class="workchat-avatar workchat-avatar--lilac">전체</div><div class="workchat-list-content"><div class="workchat-list-top"><span class="workchat-list-name">전체 공지방</span><small>월요일</small></div><div class="workchat-list-bottom"><span>이번 주 회의 일정 안내</span></div></div></div></div>
-      </div>
-      <div class="workchat-panel" id="workchatPanel-meetings" role="tabpanel" aria-labelledby="workchatTab-meetings" data-workchat-panel="meetings" hidden>
-        <div class="workchat-section-caption"><span>워크 회의방</span><span class="workchat-room-count">3개 · 샘플</span></div>
-
-<div class="workchat-list">
-<div class="workchat-list-item workchat-list-item--selected"><div class="workchat-avatar workchat-avatar--green">회의</div><div class="workchat-list-content"><div class="workchat-list-top"><span class="workchat-list-name">주간 스프린트 회의</span><span class="workchat-status-pill">예정</span></div><div class="workchat-list-bottom"><span>월요일 10:00 · 참여 예정 6명</span></div></div></div>
-<div class="workchat-list-item"><div class="workchat-avatar workchat-avatar--sand">리뷰</div><div class="workchat-list-content"><div class="workchat-list-top"><span class="workchat-list-name">UI/UX 리뷰</span><span class="workchat-status-pill workchat-status-pill--neutral">예정</span></div><div class="workchat-list-bottom"><span>수요일 14:00 · 참여 예정 4명</span></div></div></div>
-<div class="workchat-list-item"><div class="workchat-avatar workchat-avatar--lilac">데일리</div><div class="workchat-list-content"><div class="workchat-list-top"><span class="workchat-list-name">데일리 스탠드업</span><span class="workchat-status-pill workchat-status-pill--neutral">반복</span></div><div class="workchat-list-bottom"><span>평일 09:30 · 참여 예정 8명</span></div></div></div></div>
-      </div>
-      <div class="workchat-sidebar-footer"><div class="workchat-avatar workchat-avatar--green workchat-avatar--mini">나</div><div><strong>내 워크</strong>워크챗 디자인 미리보기</div></div>
+      <div class="workchat-sidebar-footer"><div class="workchat-avatar workchat-avatar--green workchat-avatar--mini">나</div><div><strong>내 워크</strong>워크챗</div></div>
     </aside>
+    
     <div class="workchat-main">
       <!-- 채팅방 탭 첫 진입: 방을 선택하지 않은 상태 -->
       <div class="workchat-view workchat-view--empty" data-workchat-view="chats-empty" aria-label="채팅방 선택 안내">
@@ -131,71 +101,69 @@
               <strong>팀채팅 시작</strong><small>여러 멤버와 대화</small>
             </button>
           </div>
-          <span class="workchat-empty-footnote">화면 미리보기 · 실제 채팅방 생성은 연결되지 않았어요.</span>
+          <span class="workchat-empty-footnote">채팅방 생성 기능은 준비 중입니다.</span>
         </div>
       </div>
 
-      <!-- 멤버 목록 탭의 우측 샘플 정보 -->
-      <div class="workchat-view workchat-view--members" data-workchat-view="members" aria-label="멤버 정보 미리보기" hidden>
-        <div class="workchat-chat-header"><div class="workchat-avatar workchat-avatar--green workchat-avatar--mini">멤버</div><div class="workchat-chat-heading"><strong>워크 멤버</strong><small>현재 워크에 속한 팀원 목록 · 샘플 데이터</small></div></div>
-        <div class="workchat-overview"><span class="workchat-overview-kicker">WORKSPACE PEOPLE</span><h3>함께 일하는 멤버</h3><p>워크에 참여한 모든 멤버를 확인하는 화면이에요. 나중에 실제 멤버 정보와 권한을 연결할 수 있어요.</p>
-          <div class="workchat-summary-grid"><div><strong>08</strong><small>전체 멤버 (예시)</small></div><div><strong>01</strong><small>워크 관리자 (예시)</small></div></div>
-          <div class="workchat-profile-preview"><div class="workchat-avatar workchat-avatar--green workchat-avatar--large">지민</div><div><span class="workchat-info-label">멤버 프로필 시안</span><h4>김지민 <span class="workchat-role-pill">PM</span></h4><p>프로젝트 관리 · 일정 조율</p><div class="workchat-profile-tags"><span>워크 관리자</span><span>개발팀</span></div></div></div>
-          <button type="button" class="workchat-outline-button" disabled>1:1 대화 시작 · 추후 구현</button>
+      <!-- 멤버 상세 정보 영역: 회원 선택 기능 연동 예정 -->
+      <div class="workchat-view workchat-view--members" data-workchat-view="members"
+           aria-label="워크 멤버 정보" hidden>
+        <div class="workchat-chat-header">
+          <div class="workchat-avatar workchat-avatar--green workchat-avatar--mini">멤버</div>
+          <div class="workchat-chat-heading"><strong>워크 멤버</strong><small>현재 워크에 소속된 회원</small></div>
+        </div>
+        <div class="workchat-overview">
+          <span class="workchat-overview-kicker">WORKSPACE PEOPLE</span>
+          <h3>함께 일하는 멤버</h3>
+          <p>왼쪽에서 워크 멤버를 선택하면 상세 정보를 확인할 수 있습니다.</p>
+          
+          <button type="button" id="workchatStartDirectChat"
+            class="workchat-outline-button" disabled>
+        	1:1 채팅 시작
+    	 </button>
+
         </div>
       </div>
-      <!-- 기존 채팅 대화 시안 -->
-      <div class="workchat-view workchat-view--chats" data-workchat-view="chats" aria-label="채팅방 미리보기" hidden>
-        <div class="workchat-chat-header"><div class="workchat-avatar workchat-avatar--green workchat-avatar--mini" id="workchatActiveRoomAvatar">개발</div><div class="workchat-chat-heading"><strong id="workchatActiveRoomTitle">프로젝트 개발팀</strong><small id="workchatActiveRoomSubtitle">참여자 6명 · 그룹 채팅 샘플</small></div></div>
-        				<div class="workchat-messages">
-					<span class="workchat-day">오늘</span>
-					<div class="workchat-message">
-						<div class="workchat-avatar workchat-avatar--sand workchat-avatar--mini">지민</div>
-						<div class="workchat-message-content">
-							<span class="workchat-sender">지민</span>
-							<div class="workchat-bubble-row"><div class="workchat-bubble">안녕하세요! 워크챗 화면 시안 확인 부탁드려요 😊</div><span class="workchat-message-time">14:25</span></div>
-						</div>
-					</div>
-					<div class="workchat-message">
-						<div class="workchat-avatar workchat-avatar--lilac workchat-avatar--mini">민수</div>
-						<div class="workchat-message-content">
-							<span class="workchat-sender">민수</span>
-							<div class="workchat-bubble-row"><div class="workchat-bubble">왼쪽에서 대화방을 보고, 오른쪽에서 메시지를 확인하는 구조네요!</div><span class="workchat-message-time">14:27</span></div>
-						</div>
-					</div>
-					<div class="workchat-message workchat-message--mine">
-						<div class="workchat-message-content">
-							<div class="workchat-bubble-row"><div class="workchat-bubble">네! 일단 디자인만 완성하고 실제 채팅 기능은 나중에 연결할게요.</div><span class="workchat-message-time">14:29</span></div>
-						</div>
-					</div>
-					<div class="workchat-message">
-						<div class="workchat-avatar workchat-avatar--sand workchat-avatar--mini">지민</div>
-						<div class="workchat-message-content">
-							<span class="workchat-sender">지민</span>
-							<div class="workchat-bubble-row"><div class="workchat-bubble">좋아요! 오늘 화면 작업 확인 부탁드려요!</div><span class="workchat-message-time">14:31</span></div>
-						</div>
-					</div>
-				</div>
-        				<div class="workchat-composer">
-					<div class="workchat-composer-row">
-						<button class="workchat-attach" type="button" disabled aria-label="파일 첨부 준비 중">+</button>
-						<input class="workchat-input" type="text" placeholder="메시지를 입력하세요" disabled aria-label="메시지 입력 준비 중">
-						<button class="workchat-send" type="button" disabled>전송</button>
-					</div>
-					<p class="workchat-composer-note">디자인 미리보기 · 메시지 전송 및 파일 첨부는 아직 연결되지 않았습니다.</p>
-				</div>
-      </div>
-      <!-- 회의방 목록 탭의 우측 샘플 정보 -->
-      <div class="workchat-view workchat-view--meetings" data-workchat-view="meetings" aria-label="회의방 정보 미리보기" hidden>
-        <div class="workchat-chat-header"><div class="workchat-avatar workchat-avatar--green workchat-avatar--mini">회의</div><div class="workchat-chat-heading"><strong>주간 스프린트 회의</strong><small>회의방 상세 시안 · 샘플 일정</small></div></div>
-        <div class="workchat-overview workchat-overview--meeting"><span class="workchat-overview-kicker">MEETING SPACE</span><h3>주간 스프린트 회의</h3><p>프로젝트 진행 상황과 다음 주 작업 계획을 함께 공유하는 회의방입니다.</p>
-          <div class="workchat-meeting-summary"><div><span><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 일정</span><strong>월요일 · 10:00 ~ 11:00</strong></div><div><span><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2"/><path d="M16 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5"/></svg> 참석 예정</span><strong>6명 (예시)</strong></div></div>
-          <div class="workchat-agenda"><h4>회의 안건</h4><div><span>01</span> 이번 주 작업 진행 상황 공유</div><div><span>02</span> 이슈 및 우선순위 정리</div><div><span>03</span> 다음 스프린트 업무 분배</div></div>
-          <button type="button" class="workchat-outline-button" disabled>회의방 입장 · 추후 구현</button>
+      
+      <!-- 채팅 대화 화면: 메시지 목록 연동 예정 -->
+      <div class="workchat-view workchat-view--chats" data-workchat-view="chats"
+           aria-label="채팅방 대화" hidden>
+        <div class="workchat-chat-header">
+          <div class="workchat-avatar workchat-avatar--green workchat-avatar--mini" id="workchatActiveRoomAvatar">채팅</div>
+          <div class="workchat-chat-heading">
+            <strong id="workchatActiveRoomTitle">채팅방</strong>
+            <small id="workchatActiveRoomSubtitle">채팅방을 선택해 주세요.</small>
+          </div>
+        </div>
+        
+        <!-- 서버에서 조회한 메시지가 들어올 영역 -->
+        <div class="workchat-messages"></div>
+        <div class="workchat-composer">
+          <div class="workchat-composer-row">
+            <button class="workchat-attach" type="button" disabled aria-label="파일 첨부 준비 중">+</button>
+            <input class="workchat-input" type="text" placeholder="메시지를 입력하세요" disabled aria-label="메시지 입력 준비 중">
+            <button class="workchat-send" type="button" disabled>전송</button>
+          </div>
+          <p class="workchat-composer-note">채팅방 및 메시지 저장 기능은 연결 예정입니다.</p>
         </div>
       </div>
-      <!-- Step 3: 일반채팅/팀채팅 대화상대 선택 — 화면 전환 시안 -->
-      <div class="workchat-view workchat-create-view workchat-picker-view" data-workchat-create-view="chats" hidden aria-label="대화상대 선택 디자인 미리보기">
+      
+      <!-- 회의방 상세 정보 영역: 실제 일정 연동 예정 -->
+      <div class="workchat-view workchat-view--meetings" data-workchat-view="meetings"
+           aria-label="회의방 정보" hidden>
+        <div class="workchat-chat-header">
+          <div class="workchat-avatar workchat-avatar--green workchat-avatar--mini">회의</div>
+          <div class="workchat-chat-heading"><strong>워크 회의방</strong><small>회의방을 선택해 주세요.</small></div>
+        </div>
+        <div class="workchat-overview workchat-overview--meeting">
+          <span class="workchat-overview-kicker">MEETING SPACE</span>
+          <h3>워크 회의방</h3>
+          <p>회의방을 만들거나 선택하면 회의 일정과 안건이 표시됩니다.</p>
+        </div>
+      </div>
+      
+      <!-- 일반채팅/팀채팅 대화상대 선택 -->
+      <div class="workchat-view workchat-create-view workchat-picker-view" data-workchat-create-view="chats" hidden aria-label="대화상대 선택">
         <div class="workchat-chat-header workchat-create-header">
           <div class="workchat-avatar workchat-avatar--green workchat-avatar--mini">+ </div>
           <div class="workchat-chat-heading"><strong id="workchatPickerTitle">대화상대 선택</strong><small id="workchatPickerSubtitle">워크 멤버를 선택하세요</small></div>
@@ -209,124 +177,38 @@
           <div class="workchat-picker-selection"><span class="workchat-picker-selection-title">선택한 멤버</span><strong id="workchatPersonCounter">0명</strong></div>
           <div class="workchat-picker-chips" id="workchatPersonChips"><span class="workchat-picker-empty">멤버를 선택하면 여기에 표시돼요.</span></div>
           <div class="workchat-picker-list" id="workchatPersonList">
-        <div class="workchat-picker-group"><div class="workchat-picker-heading"><span class="workchat-role-dot workchat-role-dot--pm"></span><strong>PM</strong><small>1명</small></div>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="김지민" data-role="PM">
-            <span class="workchat-avatar workchat-avatar--green workchat-avatar--mini">지민</span>
-            <span class="workchat-picker-person-label"><strong>김지민</strong><small>PM</small></span>
-            <input type="checkbox" data-workchat-participant value="김지민" aria-label="김지민 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-        </div>
-        <div class="workchat-picker-group"><div class="workchat-picker-heading"><span class="workchat-role-dot workchat-role-dot--dl"></span><strong>DL</strong><small>2명</small></div>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="박민수" data-role="DL">
-            <span class="workchat-avatar workchat-avatar--lilac workchat-avatar--mini">민수</span>
-            <span class="workchat-picker-person-label"><strong>박민수</strong><small>DL</small></span>
-            <input type="checkbox" data-workchat-participant value="박민수" aria-label="박민수 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="이서연" data-role="DL">
-            <span class="workchat-avatar workchat-avatar--sand workchat-avatar--mini">서연</span>
-            <span class="workchat-picker-person-label"><strong>이서연</strong><small>DL</small></span>
-            <input type="checkbox" data-workchat-participant value="이서연" aria-label="이서연 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-        </div>
-        <div class="workchat-picker-group"><div class="workchat-picker-heading"><span class="workchat-role-dot workchat-role-dot--tl"></span><strong>TL</strong><small>2명</small></div>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="정하늘" data-role="TL">
-            <span class="workchat-avatar workchat-avatar--peach workchat-avatar--mini">하늘</span>
-            <span class="workchat-picker-person-label"><strong>정하늘</strong><small>TL</small></span>
-            <input type="checkbox" data-workchat-participant value="정하늘" aria-label="정하늘 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="최유진" data-role="TL">
-            <span class="workchat-avatar workchat-avatar--green workchat-avatar--mini">유진</span>
-            <span class="workchat-picker-person-label"><strong>최유진</strong><small>TL</small></span>
-            <input type="checkbox" data-workchat-participant value="최유진" aria-label="최유진 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-        </div>
-        <div class="workchat-picker-group"><div class="workchat-picker-heading"><span class="workchat-role-dot workchat-role-dot--aa"></span><strong>AA</strong><small>3명</small></div>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="한도현" data-role="AA">
-            <span class="workchat-avatar workchat-avatar--slate workchat-avatar--mini">도현</span>
-            <span class="workchat-picker-person-label"><strong>한도현</strong><small>AA</small></span>
-            <input type="checkbox" data-workchat-participant value="한도현" aria-label="한도현 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="오지수" data-role="AA">
-            <span class="workchat-avatar workchat-avatar--lilac workchat-avatar--mini">지수</span>
-            <span class="workchat-picker-person-label"><strong>오지수</strong><small>AA</small></span>
-            <input type="checkbox" data-workchat-participant value="오지수" aria-label="오지수 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-          <label class="workchat-picker-person" data-workchat-person-row data-name="윤서준" data-role="AA">
-            <span class="workchat-avatar workchat-avatar--sand workchat-avatar--mini">서준</span>
-            <span class="workchat-picker-person-label"><strong>윤서준</strong><small>AA</small></span>
-            <input type="checkbox" data-workchat-participant value="윤서준" aria-label="윤서준 선택">
-            <span class="workchat-picker-check" aria-hidden="true">✓</span>
-          </label>
-        </div>
+            <!-- 워크 멤버 API 연동 후 선택할 회원 목록이 표시됩니다. -->
           </div>
-          <div class="workchat-picker-footer"><span id="workchatPickerFooterHint">디자인 미리보기 · 실제 초대는 연결되지 않았어요.</span><button type="button" disabled>다음 <span>기능 연결 예정</span></button></div>
+          <div class="workchat-picker-footer"><span id="workchatPickerFooterHint">채팅 참여자 선택은 DB 연동 후 사용할 수 있습니다.</span><button type="button" disabled>다음 <span>준비 중</span></button></div>
         </div>
       </div>
-      <!-- 새로운 회의방 생성 디자인 시안 (저장/초대 없음) -->
-<div class="workchat-view workchat-create-view" data-workchat-create-view="meetings" hidden aria-label="새 회의방 디자인 미리보기">
-  <div class="workchat-chat-header workchat-create-header"><div class="workchat-avatar workchat-avatar--sand workchat-avatar--mini"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></div><div class="workchat-chat-heading"><strong>회의방 설정</strong><small>회의 탭에서만 관리하는 세부 설정</small></div><button type="button" class="workchat-back-button" data-workchat-return-types="true"><svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m14 18-6-6 6-6"/></svg> 종류 선택</button></div>
-  <div class="workchat-create-body">
-    <div class="workchat-create-kicker">MEETING TAB · SPECIAL SETTINGS</div>
-    <h3>회의방 세부 설정</h3>
-    <p class="workchat-create-description">일반 채팅과 달리 회의 탭에서 일정, 안건, 참석자를 설정하는 시안이에요.</p>
-    <div class="workchat-create-card">
-      <label class="workchat-form-label" for="workchatMeetingName">회의방 이름</label>
-      <input class="workchat-form-input" id="workchatMeetingName" type="text" placeholder="예: 주간 프로젝트 회의" autocomplete="off">
-      <div class="workchat-form-dual">
-        <label class="workchat-form-label" for="workchatMeetingDate">회의 날짜<input class="workchat-form-input" id="workchatMeetingDate" type="date"></label>
-        <label class="workchat-form-label" for="workchatMeetingTime">시작 시간<input class="workchat-form-input" id="workchatMeetingTime" type="time" value="10:00"></label>
-      </div>
-      <label class="workchat-form-label workchat-agenda-label" for="workchatMeetingAgenda">회의 안건</label>
-      <textarea class="workchat-form-input workchat-agenda-input" id="workchatMeetingAgenda" rows="3" placeholder="예: 이번 주 진행 상황 공유, 다음 일정 논의"></textarea>
-      <div class="workchat-invite-caption"><strong>참석할 멤버</strong><span data-workchat-selected-count="meetings">0명 선택</span></div>
-      <div class="workchat-invite-grid"><label class="workchat-invite-person">
-          <input type="checkbox" data-workchat-invite="meetings" aria-label="박민수 초대 선택">
-          <span class="workchat-avatar workchat-avatar--lilac workchat-avatar--mini">민수</span>
-          <span class="workchat-invite-text"><strong>박민수</strong><small>DL</small></span>
-          <span class="workchat-invite-check" aria-hidden="true">✓</span>
-        </label>
-<label class="workchat-invite-person">
-          <input type="checkbox" data-workchat-invite="meetings" aria-label="이서연 초대 선택">
-          <span class="workchat-avatar workchat-avatar--sand workchat-avatar--mini">서연</span>
-          <span class="workchat-invite-text"><strong>이서연</strong><small>DL</small></span>
-          <span class="workchat-invite-check" aria-hidden="true">✓</span>
-        </label>
-<label class="workchat-invite-person">
-          <input type="checkbox" data-workchat-invite="meetings" aria-label="정하늘 초대 선택">
-          <span class="workchat-avatar workchat-avatar--peach workchat-avatar--mini">하늘</span>
-          <span class="workchat-invite-text"><strong>정하늘</strong><small>TL</small></span>
-          <span class="workchat-invite-check" aria-hidden="true">✓</span>
-        </label>
-<label class="workchat-invite-person">
-          <input type="checkbox" data-workchat-invite="meetings" aria-label="최유진 초대 선택">
-          <span class="workchat-avatar workchat-avatar--green workchat-avatar--mini">유진</span>
-          <span class="workchat-invite-text"><strong>최유진</strong><small>TL</small></span>
-          <span class="workchat-invite-check" aria-hidden="true">✓</span>
-        </label>
-<label class="workchat-invite-person">
-          <input type="checkbox" data-workchat-invite="meetings" aria-label="한도현 초대 선택">
-          <span class="workchat-avatar workchat-avatar--slate workchat-avatar--mini">도현</span>
-          <span class="workchat-invite-text"><strong>한도현</strong><small>AA</small></span>
-          <span class="workchat-invite-check" aria-hidden="true">✓</span>
-        </label>
-<label class="workchat-invite-person">
-          <input type="checkbox" data-workchat-invite="meetings" aria-label="오지수 초대 선택">
-          <span class="workchat-avatar workchat-avatar--lilac workchat-avatar--mini">지수</span>
-          <span class="workchat-invite-text"><strong>오지수</strong><small>AA</small></span>
-          <span class="workchat-invite-check" aria-hidden="true">✓</span>
-        </label></div>
-      <p class="workchat-create-note">이 화면은 디자인 예시이며, 회의 일정과 초대는 저장되지 않습니다.</p>
-      <button type="button" class="workchat-confirm-button" disabled>회의방 만들기 <span>기능 연결 예정</span></button>
-    </div>
-  </div>
-</div>
+      
+      <!-- 새로운 회의방 생성 (서버 저장 기능 연결 예정) -->
+		<div class="workchat-view workchat-create-view" data-workchat-create-view="meetings" hidden aria-label="새 회의방 생성">
+		  <div class="workchat-chat-header workchat-create-header"><div class="workchat-avatar workchat-avatar--sand workchat-avatar--mini"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg></div><div class="workchat-chat-heading"><strong>회의방 설정</strong><small>회의 탭에서만 관리하는 세부 설정</small></div><button type="button" class="workchat-back-button" data-workchat-return-types="true"><svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m14 18-6-6 6-6"/></svg> 종류 선택</button></div>
+		  <div class="workchat-create-body">
+		    <div class="workchat-create-kicker">MEETING TAB · SPECIAL SETTINGS</div>
+		    <h3>회의방 세부 설정</h3>
+		    <p class="workchat-create-description">회의방에서 사용할 일정, 안건, 참석자를 설정합니다.</p>
+		    <div class="workchat-create-card">
+		      <label class="workchat-form-label" for="workchatMeetingName">회의방 이름</label>
+		      <input class="workchat-form-input" id="workchatMeetingName" type="text" placeholder="예: 주간 프로젝트 회의" autocomplete="off">
+		      <div class="workchat-form-dual">
+		        <label class="workchat-form-label" for="workchatMeetingDate">회의 날짜<input class="workchat-form-input" id="workchatMeetingDate" type="date"></label>
+		        <label class="workchat-form-label" for="workchatMeetingTime">시작 시간<input class="workchat-form-input" id="workchatMeetingTime" type="time"></label>
+		      </div>
+		      <label class="workchat-form-label workchat-agenda-label" for="workchatMeetingAgenda">회의 안건</label>
+		      <textarea class="workchat-form-input workchat-agenda-input" id="workchatMeetingAgenda" rows="3" placeholder="예: 이번 주 진행 상황 공유, 다음 일정 논의"></textarea>
+		      <div class="workchat-invite-caption"><strong>참석할 멤버</strong><span data-workchat-selected-count="meetings">0명 선택</span></div>
+		      <div class="workchat-invite-grid" id="workchatMeetingInviteList">
+		          <!-- 워크 멤버 API 연동 후 회의 참석자 선택 목록을 표시합니다. -->
+		        </div>
+		      <p class="workchat-create-note">회의방 생성 및 초대 기능은 준비 중입니다.</p>
+		      <button type="button" class="workchat-confirm-button" disabled>회의방 만들기 <span>준비 중</span></button>
+		    </div>
+		  </div>
+		</div>
+		
     </div>
   </div>
 </div>
