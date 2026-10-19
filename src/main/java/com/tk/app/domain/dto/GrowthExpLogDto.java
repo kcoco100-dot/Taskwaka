@@ -16,4 +16,5 @@ public class GrowthExpLogDto {
 	private String actionType; // 지급 사유
 	
 	private String inviteKey; // DB에 저장할 초대 식별값
+	private Long subTaskId; // 하위업무 번호를 담을 변수
 }

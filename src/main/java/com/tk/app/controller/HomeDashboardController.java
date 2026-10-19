@@ -2,6 +2,7 @@ package com.tk.app.controller;
 
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,9 +12,12 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
+import com.tk.app.domain.dto.GrowthLevelDto;
+import com.tk.app.domain.dto.GrowthTreeDto;
 import com.tk.app.domain.dto.HomeDashboardDataDto;
 import com.tk.app.domain.dto.MyTaskDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
+import com.tk.app.service.GrowthTreeService;
 import com.tk.app.service.MyTaskService;
 import com.tk.app.service.ParticipatingProjectService;
 
@@ -28,7 +32,8 @@ public class HomeDashboardController {
 	
 	private final ParticipatingProjectService participatingProjectService;
 	private final MyTaskService myTaskService;
-
+	private final GrowthTreeService growthTreeService;
+	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(@PathVariable("domainKey") String domainKey) {
 
@@ -72,6 +77,38 @@ public class HomeDashboardController {
 
 			model.addAttribute("participatingProjects", participatingProjects);
 
+			GrowthTreeDto growthTree = growthTreeService.findGrowthTree(worksapce.getWorkspaceId());
+			
+			// 목표 경험치를 찾기 위해 성장단계 목록 조회
+			List<GrowthLevelDto> growthLevels = growthTreeService.findGrowthLevels();
+			GrowthLevelDto nextGrowthLevel = null;
+			for(GrowthLevelDto level : growthLevels) {
+				if(level.getLevelNo() > growthTree.getLevelNo()) {
+					nextGrowthLevel = level;
+					break;
+				}
+			}
+			
+			// 진행률 = 누적 경험치 / 목표 경험치 * 100
+			int growthPercent = 0;
+			// 다음 단계가 없을 경우
+			if(nextGrowthLevel == null) {
+				growthPercent = 100;
+				// 다음 단계가 있을때 진행률 계산 후 growthPercent 에 저장
+			} else if(nextGrowthLevel.getMinExp() > 0){
+				// 누적 경험치 / 목표 경험치 * 100
+				// Math.max : 결과는 0보다 작아지지 않게 함
+				// Math.min : 계산값은 100을 초과하지 않는다.
+				growthPercent = (int) Math.max(0, Math.min(100, 
+						growthTree.getTotalExp() * 100.0 / nextGrowthLevel.getMinExp()));
+			} else {
+				growthPercent = 0;
+			}
+			
+			model.addAttribute("growthTree", growthTree);
+			model.addAttribute("nextGrowthLevel", nextGrowthLevel);
+			model.addAttribute("growthPercent", growthPercent);
+			
 			return "main/dashboard";
 		}
 }

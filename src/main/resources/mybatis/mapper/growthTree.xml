@@ -44,7 +44,7 @@
 		)
 	</insert>
 	
-	<!-- 경험치 지급 이력 -->
+	<!-- 경험치 지급 이력: 공지사항 -->
 	<insert id="insertGrowthExpLog" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
 		<selectKey keyProperty="expLogId" resultType="long" order="BEFORE">
 			SELECT SEQ_GROWTH_EXP_LOGS.NEXTVAL
@@ -52,10 +52,11 @@
 		</selectKey>
 		INSERT INTO growth_exp_logs(
 			exp_log_id, workspace_id, member_id, notice_id, 
-			exp, action_type, earned_at, invite_key)
+			exp, action_type, earned_at, invite_key, sub_task_id)
 		VALUES(#{expLogId}, #{workspaceId}, #{memberId},
 			#{noticeId, jdbcType=NUMERIC}, #{exp}, 
-			#{actionType}, SYSDATE, #{inviteKey, jdbcType=VARCHAR})
+			#{actionType}, SYSDATE, #{inviteKey, jdbcType=VARCHAR},
+			#{subTaskId, jdbcType=NUMERIC})
 	</insert>
 
 	<!-- 같은 공지의 등록 보상을 이미 지급했는지 확인 -->
@@ -130,6 +131,29 @@
 					AND wm.status = 0
 					AND wm.left IS NULL
 			)
+	</select>
+	
+	<!-- 경험치 지급 이력 조회: 하위업무 -->
+	<select id="countSubTaskCreateExpLog" resultType="int">
+		SELECT COUNT(*)
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND sub_task_id = #{subTaskId}
+			AND action_type = #{actionType}
+	</select>
+	
+	<!-- 하위 업무 조회 -->
+	<select id="countSubTaskInWorkspace" resultType="int">
+		SELECT COUNT(*)
+		FROM sub_tasks st
+		JOIN tasks t ON t.project_id = st.project_id
+			AND t.task_id = st.task_id
+		JOIN projects p ON p.project_id = t.project_id
+		WHERE st.sub_task_id = #{subTaskId}
+			AND p.workspace_id = #{workspaceId}
+			AND st.deleted IS NULL
+			AND t.deleted IS NULL
+			AND p.deleted IS NULL
 	</select>
 	
 </mapper>

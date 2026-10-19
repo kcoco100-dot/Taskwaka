@@ -43,4 +43,10 @@ public interface GrowthTreeMapper {
 	
 	// 실제 회원 초대 참여 완료를 확인
 	public int countAcceptedInviteMember(GrowthExpLogDto dto);
+	
+	// 하위업무 등록 시 경험치 +10 / 지급 여부 확인
+	public int countSubTaskCreateExpLog(GrowthExpLogDto dto);
+
+	// 하위업무 조회
+	public int countSubTaskInWorkspace(GrowthExpLogDto dto);
 }
