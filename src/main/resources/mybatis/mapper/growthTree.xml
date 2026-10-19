@@ -52,10 +52,10 @@
 		</selectKey>
 		INSERT INTO growth_exp_logs(
 			exp_log_id, workspace_id, member_id, notice_id, 
-			exp, action_type, earned_at)
+			exp, action_type, earned_at, invite_key)
 		VALUES(#{expLogId}, #{workspaceId}, #{memberId},
 			#{noticeId, jdbcType=NUMERIC}, #{exp}, 
-			#{actionType}, SYSDATE)
+			#{actionType}, SYSDATE, #{inviteKey, jdbcType=VARCHAR})
 	</insert>
 
 	<!-- 같은 공지의 등록 보상을 이미 지급했는지 확인 -->
@@ -102,5 +102,34 @@
 		WHERE exp_log_id = #{expLogId} 
 			AND deleted_at IS NULL
 	</update>
+	
+	<!-- 회원 초대 시 이미 지급된 경험치 이력조회 -->
+	<select id="countInviteAcceptExpLog" resultType="int">
+		SELECT COUNT(*)
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND invite_key = #{inviteKey}
+			AND action_type = #{actionType}
+	</select>
+	
+	<!-- 실제 회원 초대 참여 완료를 확인 -->
+	<select id="countAcceptedInviteMember" resultType="int">
+		SELECT COUNT(*)
+		FROM workspace_invites
+		WHERE accepted_member_id = #{memberId}
+			AND workspace_id = #{workspaceId}
+			AND invite_key = #{inviteKey}
+			AND status = 0
+			AND invite_status = 1
+			AND accepted IS NOT NULL
+			AND EXISTS (
+				SELECT 1
+				FROM workspace_members wm
+				WHERE wm.workspace_id = #{workspaceId}
+					AND wm.member_id = #{memberId}
+					AND wm.status = 0
+					AND wm.left IS NULL
+			)
+	</select>
 	
 </mapper>

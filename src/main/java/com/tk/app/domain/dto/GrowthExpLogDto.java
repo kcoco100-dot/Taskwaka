@@ -14,4 +14,6 @@ public class GrowthExpLogDto {
 	private Long noticeId; // 지급 공지번호
 	private long exp; // 지급 경험치
 	private String actionType; // 지급 사유
+	
+	private String inviteKey; // DB에 저장할 초대 식별값
 }

@@ -37,4 +37,10 @@ public interface GrowthTreeMapper {
 
 	// 회수 시간 기록
 	public int markNoticeCreateExpLogRevoked(GrowthExpLogDto dto);
+
+	// 회원 초대 시 경험치 +5 / 지급 여부 확인
+	public int countInviteAcceptExpLog(GrowthExpLogDto dto);
+	
+	// 실제 회원 초대 참여 완료를 확인
+	public int countAcceptedInviteMember(GrowthExpLogDto dto);
 }
