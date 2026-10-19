@@ -140,10 +140,10 @@ public class AdminController {
         return adminPage("domain", model);
     }
 
-    @GetMapping("/notice")
-    public String notice(Model model) {
-        return adminPage("notice", model);
-    }
+//    @GetMapping("/notice")
+//    public String notice(Model model) {
+//        return adminPage("notice", model);
+//    }
 
     @GetMapping("/inquiry")
     public String inquiry(Model model) {

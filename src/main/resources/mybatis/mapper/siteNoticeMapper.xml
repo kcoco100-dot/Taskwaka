@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.admin.mapper.SiteNoticeMapper">
+	<select id="selectNoticeList" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+		SELECT notice_id, member_id, title, content, status, created, updated
+		FROM site_notice
+		ORDER BY notice_id DESC
+	</select>
+	
+	<insert id="insertNotice" parameterType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+		INSERT INTO site_notice(notice_id, member_id, title, content, status)
+		VALUES (seq_site_notice.NEXTVAL, #{member_id}, #{title}, #{content}, #{status})
+	</insert>
+	
+	<select id="selectNoticeDetail" parameterType="long" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+		SELECT notice_id, member_id, title, content, status, created, updated
+		FROM site_notice
+		WHERE notice_id =  #{notice_id}
+	</select>
+	
+	<update id="updateNotice" parameterType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+		UPDATE site_notice
+		SET title = #{title}, content = #{content}, status = #{status}, updated = SYSDATE
+		WHERE notice_id = #{notice_id}
+	</update>
+	
+</mapper>

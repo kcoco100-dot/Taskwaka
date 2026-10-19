@@ -18,4 +18,9 @@ public interface ManageReportMapper {
     public int insertReview(Map<String, Object> map);
     public int updateViewed(Map<String, Object> map);
     public int updateReview(Map<String, Object> map);
+    
+    public Long lockProjectProgress(Map<String, Object> map);
+    public int updateTaskProgress(Map<String, Object> map);
+    public int updateProjectProgress(Map<String, Object> map);
+    
 }

@@ -249,9 +249,7 @@
     <update id="updateViewed" parameterType="map">
         UPDATE report_reviews
         SET viewed = SYSDATE
-        WHERE report_id = #{reviewId}
-          AND status = 0
-          AND viewed IS NULL
+        WHERE report_id = #{reviewId} AND status = 0 AND viewed IS NULL
     </update>
 
     <!-- 승인 및 반려 처리 -->
@@ -279,5 +277,39 @@
                 AND (pm.role = 70 OR (#{reportCategory} = 2 AND pm.role = 50))
           )
     </update>
+    
+    <!-- 프로젝트 진행률 변경 시 잠금 -->
+	<select id="lockProjectProgress" parameterType="map" resultType="long">
+	    SELECT project_id
+	    FROM projects
+	    WHERE project_id = #{projectId} AND workspace_id = #{workspaceId} AND deleted IS NULL
+	    FOR UPDATE
+	</select>
+    
+    <!-- 승인된 업무 보고서의 진행률 합계 -->
+	<update id="updateTaskProgress" parameterType="map">
+	    UPDATE tasks t SET progress = (SELECT LEAST(100, NVL(SUM(tr.progress), 0))
+	    FROM team_reports tr
+	    WHERE tr.task_id = t.task_id AND tr.project_id = t.project_id AND tr.deleted IS NULL
+			AND EXISTS (
+	          SELECT 1
+	          FROM report_reviews rr
+	          WHERE rr.team_report_id = tr.team_report_id
+	            AND rr.category = 2
+	            AND rr.status = 1)
+			),
+	    updated = SYSDATE
+	    WHERE t.task_id = #{taskId} AND t.project_id = #{projectId} AND t.deleted IS NULL
+	</update>
+    
+    <!-- 업무 진행률 평균으로 프로젝트 진행률 갱신 -->
+	<update id="updateProjectProgress" parameterType="map">
+	    UPDATE projects p SET progress = (SELECT ROUND(NVL(AVG(t.progress), 0), 2)
+	        FROM tasks t
+	        WHERE t.project_id = p.project_id AND t.deleted IS NULL
+	    ),
+	    updated = SYSDATE
+	    WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
+	</update>
     
 </mapper>

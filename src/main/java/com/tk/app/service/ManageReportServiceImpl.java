@@ -130,9 +130,38 @@ public class ManageReportServiceImpl implements ManageReportService {
                 map.put("rejectReason", null);
             }
 
+            if (status == 1 && dto.getReportCategory() == 2) {
+
+                Long projectId = mapper.lockProjectProgress(map);
+
+                if (projectId == null) {
+                    throw new IllegalStateException("프로젝트를 찾을 수 없습니다.");
+                }
+            }
+
             int result = mapper.updateReview(map);
+
             if (result != 1) {
-                throw new IllegalStateException("이미 처리되었거나 결재할 수 없는 보고서입니다.");
+                throw new IllegalStateException(
+                        "이미 처리되었거나 결재할 수 없는 보고서입니다."
+                );
+            }
+
+            if (status == 1 && dto.getReportCategory() == 2) {
+
+                map.put("taskId", dto.getTaskId());
+
+                int taskResult = mapper.updateTaskProgress(map);
+
+                if (taskResult != 1) {
+                    throw new IllegalStateException("업무 진행률 갱신에 실패했습니다.");
+                }
+
+                int projectResult = mapper.updateProjectProgress(map);
+
+                if (projectResult != 1) {
+                    throw new IllegalStateException("프로젝트 진행률 갱신에 실패했습니다.");
+                }
             }
 
         } catch (Exception e) {

@@ -8,7 +8,8 @@
 <th:block>
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-common.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user.css}">
-	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user-detail.css}">
+	<link rel="stylesheet"
+		th:href="@{/dist/css/admin/admin-user-detail.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-domain.css}">
 </th:block>
 </head>
@@ -61,7 +62,7 @@
 					<span>운영 및 고객 지원</span> <span style="font-size: 10px;">▼</span>
 				</div>
 				<ul class="submenu">
-					<li><a th:href="@{/admin(section='notice')}"
+					<li><a th:href="@{/admin/notice}"
 						th:classappend="${activeSection == 'notice'} ? 'active'">📣 전체
 							공지사항 관리</a></li>
 					<li><a th:href="@{/admin(section='inquiry')}"
@@ -89,19 +90,12 @@
 				</h2>
 
 				<nav class="tab-bar">
-					<a th:href="@{/admin(section='user')}" class="tab-btn"
-						th:classappend="${activeSection == 'user'} ? 'active'">회원 관리</a> <a
-						th:href="@{/admin/domain}" class="tab-btn"
-						th:classappend="${activeSection == 'domain'} ? 'active'">도메인
-						관리</a> <a th:href="@{/admin(section='notice')}" class="tab-btn"
-						th:classappend="${activeSection == 'notice'} ? 'active'">전체
-						공지사항</a> <a th:href="@{/admin(section='inquiry')}" class="tab-btn"
-						th:classappend="${activeSection == 'inquiry'} ? 'active'">1:1
-						문의 답변</a> <a th:href="@{/admin(section='stats')}" class="tab-btn"
-						th:classappend="${activeSection == 'stats'} ? 'active'">통계 관리</a>
-					<a th:href="@{/admin(section='security')}" class="tab-btn"
-						th:classappend="${activeSection == 'security'} ? 'active'">보안
-						및 공개설정</a>
+					<a th:href="@{/admin(section='user')}" class="tab-btn" th:classappend="${activeSection == 'user'} ? 'active'">회원 관리</a> 
+					<a th:href="@{/admin/domain}" class="tab-btn" th:classappend="${activeSection == 'domain'} ? 'active'">도메인 관리</a> 
+					<a th:href="@{/admin/notice}" class="tab-btn" th:classappend="${activeSection == 'notice'} ? 'active'">전체 공지사항</a>
+					<a th:href="@{/admin(section='inquiry')}" class="tab-btn" th:classappend="${activeSection == 'inquiry'} ? 'active'">1:1 문의 답변</a> 
+					<a th:href="@{/admin(section='stats')}" class="tab-btn" th:classappend="${activeSection == 'stats'} ? 'active'">통계 관리</a>
+					<a th:href="@{/admin(section='security')}" class="tab-btn" th:classappend="${activeSection == 'security'} ? 'active'">보안 및 공개설정</a>
 				</nav>
 			</div>
 
@@ -118,6 +112,9 @@
 					</div>
 					<div th:case="'notice'">
 						<div th:replace="~{admin/fragments/notice :: content}"></div>
+					</div>
+					<div th:case="'noticeDetail'">
+					    <div th:replace="~{admin/fragments/notice-detail :: content}"></div>
 					</div>
 					<div th:case="'inquiry'">
 						<div th:replace="~{admin/fragments/inquiry :: content}"></div>
