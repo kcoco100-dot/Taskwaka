@@ -27,6 +27,18 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		}
 		
 	}
+	
+	@Override
+	public List<SiteNoticeDto> searchNotice(String keyword) {
+		try {
+			return siteNoticeMapper.searchNotice(keyword);
+		} catch (Exception e) {
+			log.error("searchNotice 오류 : ", e);
+			
+			throw e;
+		}
+		
+	}
 
 	@Override
 	public int insertNotice(SiteNoticeDto dto) {
@@ -61,5 +73,40 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		}
 		
 	}
+
+	@Override
+	public int deleteNotice(long notice_id) {
+		try {
+			return siteNoticeMapper.deleteNotice(notice_id);
+		} catch (Exception e) {
+			log.error("deleteNotice 오류 : ", e);
+			
+			throw e;
+		}
+	}
+
+	@Override
+	public int dataCountNotice(String keyword) {
+		try {
+			return siteNoticeMapper.dataCountNotice(keyword);
+		} catch (Exception e) {
+			log.error("dataCountNotice 오류 : ", e);
+			
+			throw e;
+		}
+	}
+
+	@Override
+	public List<SiteNoticeDto> selectNoticePage(String keyword, int offset, int size) {
+		try {
+			return siteNoticeMapper.selectNoticePage(keyword, offset, size);
+		} catch (Exception e) {
+			log.error("selectNoticePage 오류 : ", e);
+			
+			throw e;
+		}
+	}
+
+
 	
 }

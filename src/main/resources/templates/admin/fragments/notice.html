@@ -26,6 +26,12 @@
           <button type="submit" class="btn-sage">공지사항 등록</button>
         </div>
       </form>
+      
+      <form th:action="@{/admin/notice}" method="get" >
+      	<input name="keyword" th:value="${keyword}">
+      	<button type="submit">검색</button>
+      </form>
+      
     </div>
 
     <div class="panel-card">
@@ -37,7 +43,6 @@
             <th style="width:120px;">작성자</th>
             <th style="width:120px;">작성일</th>
             <th style="width:120px;">공개 상태</th>
-            <th style="width:140px; text-align:right;">상태 변경</th>
           </tr>
         </thead>
         <tbody>
@@ -52,6 +57,7 @@
           </tr>
         </tbody>
       </table>
+      <div th:utext="${paging}"></div>
     </div>
   </div>
 </body>

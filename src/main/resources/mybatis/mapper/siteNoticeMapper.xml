@@ -8,6 +8,18 @@
 		ORDER BY notice_id DESC
 	</select>
 	
+	<select id="searchNotice" parameterType="String" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+		SELECT notice_id, member_id, title, content, status, created, updated
+		FROM site_notice
+		<where>
+			<if test="keyword != null and keyword != ''">
+				title LIKE '%' || #{keyword} || '%'
+			</if>
+		</where>
+		ORDER BY notice_id DESC
+	</select>
+	
+	
 	<insert id="insertNotice" parameterType="com.tk.app.admin.domain.dto.SiteNoticeDto">
 		INSERT INTO site_notice(notice_id, member_id, title, content, status)
 		VALUES (seq_site_notice.NEXTVAL, #{member_id}, #{title}, #{content}, #{status})
@@ -25,4 +37,33 @@
 		WHERE notice_id = #{notice_id}
 	</update>
 	
+	<delete id="deleteNotice" parameterType="long">
+		DELETE FROM site_notice
+		WHERE notice_id = #{notice_id}
+	</delete>
+	
+	<select id="dataCountNotice" parameterType="String" resultType="int">
+		SELECT COUNT(*)
+		FROM site_notice
+		<where>
+			<if test="keyword != null and keyword != ''">
+				title LIKE '%' || #{keyword} || '%'
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectNoticePage" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto" >
+		SELECT notice_id, member_id, title, content, status, created, updated
+		FROM site_notice
+		<where>
+			<if test="keyword != null and keyword != ''">
+				title LIKE '%' || #{keyword} || '%'
+			</if>
+		</where>
+		ORDER BY notice_id DESC
+		OFFSET #{offset} ROWS
+		FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+
 </mapper>

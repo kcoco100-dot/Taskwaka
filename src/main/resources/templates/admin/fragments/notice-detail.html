@@ -23,6 +23,12 @@
 		</label>
 		<button type="submit">수정하기</button>
 	</form>
+	<form th:action="@{/admin/notice/delete}" method="post">
+	    <input type="hidden" name="notice_id" th:value="${detail.notice_id}">
+	    <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?');">
+	        삭제하기
+	    </button>
+	</form>
 	</div>
 
 </body>
