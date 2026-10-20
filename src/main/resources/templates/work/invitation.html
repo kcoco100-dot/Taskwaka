@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/invitation.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="invitation-layout">
+        <div class="team-invitation">
+            <div class="invitation-heading">
+                <h1>팀원 초대하기</h1>
+                <p>함께할 팀원의 정보를 입력해주세요.</p>
+            </div>
+
+            <form class="invitation-form">
+                <div class="invitation-field">
+                    <label for="invite-name">이름</label>
+                    <input type="text" id="invite-name" name="name"
+                           placeholder="이름을 입력하세요">
+                </div>
+
+                <div class="invitation-field">
+                    <label for="invite-email">이메일</label>
+                    <input type="email" id="invite-email" name="email"
+                           placeholder="이메일을 입력하세요">
+                </div>
+
+                <div class="invitation-actions">
+                    <button type="button" class="invitation-submit">
+                        초대하기
+                    </button>
+                    <a th:href="@{/manage}" class="invitation-cancel">취소</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+</th:block>
+
+</html>

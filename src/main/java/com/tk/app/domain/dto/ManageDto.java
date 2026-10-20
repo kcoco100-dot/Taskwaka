@@ -11,7 +11,7 @@ public class ManageDto {
 	private Long project_id;
 	private Long workspace_id;
 	private Long member_id;
-	
+
 	private String subject;
 	private String content;
 	private String start_date;
@@ -20,21 +20,21 @@ public class ManageDto {
 	private String created;
 	private String updated;
 	private String deleted;
-	
+
 	private int status;
 	private int progress;
-	
-	
+
+
 	private Long project_member_id;
 	private Long workspace_member_id;
-	
+
 	private int role;
-	
+
 	private String joined;
 	private String left;
 	private String update;
-	
+
 	private String pm_name;
-    private Integer member_count;
-	
+	private Integer member_count;
+
 }

@@ -520,3 +520,16 @@
 }
 
 
+
+/* 보고서 유형 선택: 전체 / 프로젝트 보고서 / 업무 보고서 */
+.approval-page .approval-category-tabs {display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 18px;}
+.approval-page .approval-category-tabs a {display:inline-flex;align-items:center;padding:9px 17px;border:1px solid #e8e2d9;border-radius:8px;background:#fff;color:#594331;text-decoration:none;font-size:14px;}
+.approval-page .approval-category-tabs a.is-active {background:#eef3e8;border-color:#dbe5d3;font-weight:700;}
+.approval-page .approval-category-tabs a:hover {border-color:#8da479;}
+.approval-page .approval-pagination .paginate {display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;}
+.approval-page .approval-pagination .paginate a,.approval-page .approval-pagination .paginate span {display:inline-flex;min-width:32px;min-height:32px;align-items:center;justify-content:center;padding:3px 8px;border:1px solid #e8e2d9;border-radius:6px;text-decoration:none;color:#594331;}
+.approval-page .approval-pagination .paginate .active {background:#eef3e8;font-weight:700;}
+
+.approval-pagination {display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
+.approval-pagination .manage-page-arrow {display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:5px 12px;border:1px solid #e8e2d9;border-radius:6px;color:#594331;text-decoration:none;background:#fff;}
+.approval-pagination .manage-page-arrow.disabled {opacity:.4;pointer-events:none;}

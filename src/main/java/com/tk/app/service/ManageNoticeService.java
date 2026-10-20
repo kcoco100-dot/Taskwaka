@@ -17,7 +17,7 @@ public interface ManageNoticeService {
     public void updateNotice(ManageNoticeDto dto) throws SQLException;
     public void deleteNoticeFile(long notice_id) throws SQLException;
     
-    public List<ManageNoticeDto> deleteNotice(Map<String, Object> map) throws SQLException;
+    public int deleteNotice(Map<String, Object> map) throws SQLException;
     
     public int dataCount(Map<String, Object> map) throws SQLException;
 }

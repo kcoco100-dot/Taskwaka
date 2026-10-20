@@ -9,13 +9,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ManageMeetingsDto {
 	private Long meetingMinuteId;
-    private Long projectId;
-    private Long subTaskId;
-    private Long memberId;
-    private String title;
-    private String content;
-    private String meetingDate;
-    private String createdDate;
-    private String authorName;
-    private String summary;
+	private Long projectId;
+	private Long subTaskId;
+	private Long memberId;
+	private String title;
+	private String content;
+	private String meetingDate;
+	private String createdDate;
+	private String authorName;
+	private String summary;
+	private boolean canDelete;
 }

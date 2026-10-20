@@ -2,8 +2,15 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.ManageReportMapper">
-	
+
 	<!-- 프로젝트 보고서와 업무 보고서 공통 목록 -->
+    <sql id="reportProjectAccess">
+        AND EXISTS (SELECT 1 FROM workspace_members actor
+            WHERE actor.workspace_id = p.workspace_id AND actor.member_id = #{memberId} AND actor.status = 0
+              AND (actor.role = 70 OR EXISTS (SELECT 1 FROM project_members mine
+                  WHERE mine.project_id = p.project_id AND mine.workspace_member_id = actor.workspace_member_id
+                    AND mine.role = 50 AND mine.status = 0)))
+    </sql>
     <sql id="reportListSource">
         SELECT 1 AS "reportCategory", pr.project_report_id AS "reportId", pr.project_id AS "projectId",
             '프로젝트 보고서' AS "reportTypeName", p.subject AS "projectName", '-' AS "taskName",
@@ -34,12 +41,7 @@
             )
         WHERE p.workspace_id = #{workspaceId}
           AND p.deleted IS NULL
-          AND EXISTS (
-              SELECT 1
-              FROM project_members mine
-              JOIN workspace_members mywm ON mine.workspace_member_id = mywm.workspace_member_id
-              WHERE mine.project_id = p.project_id AND mine.status = 0 AND mywm.status = 0 AND mywm.member_id = #{memberId}
-          )
+          <include refid="reportProjectAccess"/>
 
         UNION ALL
 
@@ -69,12 +71,7 @@
           AND p.deleted IS NULL
           AND t.deleted IS NULL
           AND tr.deleted IS NULL
-          AND EXISTS (
-              SELECT 1
-              FROM project_members mine
-              JOIN workspace_members mywm ON mine.workspace_member_id = mywm.workspace_member_id
-              WHERE mine.project_id = p.project_id AND mine.status = 0 AND mywm.status = 0 AND mywm.member_id = #{memberId}
-          )
+          <include refid="reportProjectAccess"/>
     </sql>
 
     <!-- 목록 검색 조건 -->
@@ -154,11 +151,7 @@
                 WHERE pr.project_report_id = #{reportId}
                   AND p.workspace_id = #{workspaceId}
                   AND p.deleted IS NULL
-                  AND EXISTS (
-                      SELECT 1 FROM project_members mine
-                      JOIN workspace_members mywm ON mine.workspace_member_id = mywm.workspace_member_id
-                      WHERE mine.project_id = p.project_id AND mine.status = 0 AND mywm.status = 0 AND mywm.member_id = #{memberId}
-                  )
+          <include refid="reportProjectAccess"/>
             </when>
             <otherwise>
                 SELECT tr.team_report_id AS "reportId", rr.report_id AS "reviewId", 2 AS "reportCategory", tr.project_id AS "projectId",
@@ -184,14 +177,23 @@
                     WHERE r2.team_report_id = tr.team_report_id AND r2.category = 2
                 )
                 WHERE tr.team_report_id = #{reportId} AND tr.deleted IS NULL AND t.deleted IS NULL AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
-                  AND EXISTS (
-                      SELECT 1 FROM project_members mine
-                      JOIN workspace_members mywm ON mine.workspace_member_id = mywm.workspace_member_id
-                      WHERE mine.project_id = p.project_id AND mine.status = 0 AND mywm.status = 0 AND mywm.member_id = #{memberId}
-                  )
+          <include refid="reportProjectAccess"/>
             </otherwise>
         </choose>
     </select>
+
+    <!-- 외래키 기록 -->
+    <update id="ensureWorkspacePmReviewer" parameterType="map">
+        MERGE INTO project_members pm USING (
+            SELECT p.project_id, wm.workspace_member_id FROM projects p
+            JOIN workspace_members wm ON wm.workspace_id = p.workspace_id AND wm.member_id = #{memberId}
+            WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
+              AND wm.role = 70 AND wm.status = 0
+        ) src ON (pm.project_id = src.project_id AND pm.workspace_member_id = src.workspace_member_id)
+        WHEN MATCHED THEN UPDATE SET pm.status = 0, pm.role = 70, pm."LEFT" = NULL, pm.updated = SYSDATE
+        WHEN NOT MATCHED THEN INSERT (project_member_id, project_id, workspace_member_id, role, status, joined)
+            VALUES (seq_project_members.NEXTVAL, src.project_id, src.workspace_member_id, 70, 0, SYSDATE)
+    </update>
 
     <!-- 결재 권한을 가진 프로젝트 참여자 조회 -->
     <select id="findReviewerProjectMemberId" parameterType="map" resultType="long">
@@ -205,8 +207,10 @@
           AND pm.status = 0
           AND wm.status = 0
           AND wm.member_id = #{memberId}
-          AND pm.project_member_id != #{authorProjectMemberId}
-          AND (pm.role = 70 OR (#{reportCategory} = 2 AND pm.role = 50))
+          AND NOT EXISTS (SELECT 1 FROM project_members authorPm
+              JOIN workspace_members authorWm ON authorPm.workspace_member_id = authorWm.workspace_member_id
+              WHERE authorPm.project_member_id = #{authorProjectMemberId} AND authorWm.member_id = #{memberId})
+          AND (wm.role = 70 OR pm.role = 50)
         ORDER BY pm.role DESC
         FETCH FIRST 1 ROW ONLY
     </select>
@@ -273,11 +277,13 @@
                 AND pm.status = 0
                 AND wm.status = 0
                 AND wm.member_id = #{memberId}
-                AND pm.project_member_id != #{authorProjectMemberId}
-                AND (pm.role = 70 OR (#{reportCategory} = 2 AND pm.role = 50))
+                AND NOT EXISTS (SELECT 1 FROM project_members authorPm
+              JOIN workspace_members authorWm ON authorPm.workspace_member_id = authorWm.workspace_member_id
+              WHERE authorPm.project_member_id = #{authorProjectMemberId} AND authorWm.member_id = #{memberId})
+                AND (wm.role = 70 OR pm.role = 50)
           )
     </update>
-    
+
     <!-- 프로젝트 진행률 변경 시 잠금 -->
 	<select id="lockProjectProgress" parameterType="map" resultType="long">
 	    SELECT project_id
@@ -285,7 +291,7 @@
 	    WHERE project_id = #{projectId} AND workspace_id = #{workspaceId} AND deleted IS NULL
 	    FOR UPDATE
 	</select>
-    
+
     <!-- 승인된 업무 보고서의 진행률 합계 -->
 	<update id="updateTaskProgress" parameterType="map">
 	    UPDATE tasks t SET progress = (SELECT LEAST(100, NVL(SUM(tr.progress), 0))
@@ -301,7 +307,7 @@
 	    updated = SYSDATE
 	    WHERE t.task_id = #{taskId} AND t.project_id = #{projectId} AND t.deleted IS NULL
 	</update>
-    
+
     <!-- 업무 진행률 평균으로 프로젝트 진행률 갱신 -->
 	<update id="updateProjectProgress" parameterType="map">
 	    UPDATE projects p SET progress = (SELECT ROUND(NVL(AVG(t.progress), 0), 2)
@@ -311,8 +317,8 @@
 	    updated = SYSDATE
 	    WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
 	</update>
-    
-    
+
+
 	<!-- 보고서 결재 상태별 개수 조회 -->
 	<select id="countReportStatuses" parameterType="map" resultType="map">
 	    SELECT COUNT(CASE WHEN R."reviewStatus" = -1 THEN 1 END) AS "uncheckedCount",
@@ -321,6 +327,6 @@
 	        COUNT(CASE WHEN R."reviewStatus" = 2 THEN 1 END) AS "rejectedCount"
 	    FROM (<include refid="reportListSource"/>) R
 	</select>
-    
-    
+
+
 </mapper>

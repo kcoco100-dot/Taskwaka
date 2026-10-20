@@ -16,9 +16,9 @@
 
         <div class="section manage-content">
             <div class="page-heading">
-                <h1 class="page-title">PM 캘린더</h1>
+                <h1 class="page-title">프로젝트 캘린더</h1>
                 <p class="page-description">
-                    팀과 프로젝트의 일정을 확인하고 관리하세요.
+                    PM은 워크스페이스 전체, 그 외 직위는 참여 중인 프로젝트의 일정을 확인하세요.
                 </p>
             </div>
 
@@ -42,7 +42,7 @@
                 return;
             }
 
-            const tasks = [];
+            const tasks = /*[[${myTasks}]]*/ [];
 
             function nextDate(dateString) {
                 const [year, month, day] = dateString.split('-').map(Number);
@@ -59,7 +59,7 @@
                 .map(function(task) {
                     return {
                         id: String(task.taskId),
-                        title: `${task.title} (${task.progress ?? 0}%)`,
+                        title: `${task.projectName} · ${task.title} (${task.progress ?? 0}%)`,
                         start: task.startAt,
                         end: nextDate(task.endAt),
                         allDay: true

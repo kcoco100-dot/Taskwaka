@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="content">
+    <style>
+      .feed-container { display: flex; gap: 24px; max-width: 1040px; }
+      .feed-main { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+      .panel-card { background: #FFFFFF; border: 1px solid var(--border-main); border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03); }
+      .post-form-header { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border-main); padding-bottom: 8px; }
+      .post-type-btn { padding: 6px 12px; border: none; border-radius: 6px; background: transparent; color: var(--text-sub); font-size: 13px; font-weight: 600; cursor: pointer; }
+      .post-type-btn.active { background: var(--primary-green-light); color: var(--primary-green); }
+      .post-textarea { width: 100%; height: 60px; border: none; outline: none; resize: none; font-size: 13.5px; color: var(--text-main); }
+      .btn-submit { padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary-green); color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+      .btn-submit:hover { background: var(--primary-green-dark); }
+      .pinned-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; background: var(--primary-green-light); color: var(--primary-green); font-size: 11px; font-weight: 700; margin-right: 6px; }
+      .feed-side { width: 260px; height: fit-content; }
+    </style>
+
+    <div class="feed-container">
+      <div class="feed-main">
+        <div class="panel-card">
+          <div class="post-form-header">
+            <button class="post-type-btn active">📝 글 작성</button>
+            <button class="post-type-btn">📋 업무 등록</button>
+            <button class="post-type-btn">📅 일정 등록</button>
+          </div>
+          <textarea class="post-textarea" placeholder="팀원들에게 공유할 내용을 작성해 주세요..."></textarea>
+          <div style="text-align: right; margin-top: 8px;">
+            <button class="btn-submit">등록하기</button>
+          </div>
+        </div>
+
+        <div class="panel-card" style="padding: 14px 18px; background: var(--bg-card-sub);">
+          <span class="pinned-badge">📌 공지</span>
+          <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">
+            Taskwaka가 처음이라면 이것부터 따라 해 보세요 🤗
+          </span>
+        </div>
+
+        <div class="panel-card">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <strong style="color: var(--text-main); font-size: 14px;">Taskwaka 운영자</strong>
+            <span style="color: var(--text-muted); font-size: 12px;">2026-10-01 17:30</span>
+          </div>
+          <p style="font-size: 13.5px; line-height: 1.6; color: var(--text-sub);">
+            만나서 반가워요 👋 이 공간은 Taskwaka 이용을 돕기 위한 프로젝트입니다. 캘린더, 업무, 파일 기능을 자유롭게 테스트해 보세요.
+          </p>
+        </div>
+      </div>
+
+      <aside class="feed-side panel-card">
+        <div style="font-weight: 700; font-size: 14px; margin-bottom: 12px; color: var(--text-main);">참여자 (1)</div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary-green-light); color: var(--primary-green); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">
+            혜림
+          </div>
+          <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">박혜림 (나)</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

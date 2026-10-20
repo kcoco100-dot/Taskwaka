@@ -60,6 +60,13 @@ public class ManageInviteServiceImpl implements ManageInviteService {
             String domainKey = (String) map.get("domainKey");
             Long workspaceId = (Long) map.get("workspaceId");
             Long inviterId = (Long) map.get("inviterId");
+            Map<String, Object> permissionMap = new java.util.HashMap<>();
+            permissionMap.put("domainKey", domainKey);
+            permissionMap.put("workspaceId", workspaceId);
+            permissionMap.put("memberId", inviterId);
+            if (mapper.countActiveWorkspacePm(permissionMap) != 1) {
+                throw new SecurityException("현재 워크스페이스 PM만 팀원을 초대할 수 있습니다.");
+            }
             
             @SuppressWarnings("unchecked")
             List<Integer> targetMemberIds = (List<Integer>) map.get("targetMemberIds");
@@ -131,8 +138,10 @@ public class ManageInviteServiceImpl implements ManageInviteService {
 
             ManageInviteDto inviteDto = mapper.selectManageInviteByKey(inviteKey);
 
-            if (inviteDto == null) {
-                throw new IllegalArgumentException("존재하지 않거나 유효하지 않은 초대 링크입니다.");
+            String domainKey = (String) map.get("domainKey");
+            Long domainWorkspaceId = mapper.selectWorkspaceIdByDomainKey(domainKey);
+            if (inviteDto == null || domainWorkspaceId == null || !domainWorkspaceId.equals(inviteDto.getWorkspaceId())) {
+                throw new IllegalArgumentException("현재 도메인에서 유효하지 않은 초대 링크입니다.");
             }
             
             SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
@@ -148,7 +157,9 @@ public class ManageInviteServiceImpl implements ManageInviteService {
 
             inviteDto.setAcceptedMemberId(memberId);
             inviteDto.setInviteStatus(1);
-            mapper.updateManageInviteAccept(inviteDto);
+            if (mapper.updateManageInviteAccept(inviteDto) != 1) {
+                throw new IllegalArgumentException("이미 수락되었거나 만료된 초대 링크입니다.");
+            }
 
             inviteDto.setMemberId(memberId);
             inviteDto.setRole(21);

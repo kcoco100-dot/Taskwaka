@@ -18,17 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 public class ManageMeetingsServiceImpl implements ManageMeetingsService {
 
 	private final ManageMeetingsMapper mapper;
-	
+
 	@Override
 	public List<ManageMeetingsDto> findMeetingList(Map<String, Object> map) {
 		List<ManageMeetingsDto> list = null;
-		
+
 		try {
 			list = mapper.findMeetingList(map);
 		} catch (Exception e) {
 			log.info("findMeetingList : ", e);
 		}
-		
+
 		return list;
 	}
 
@@ -46,7 +46,7 @@ public class ManageMeetingsServiceImpl implements ManageMeetingsService {
 	@Override
 	public List<ManageMeetingsDto> findMeetingsById(Map<String, Object> map) {
 		List<ManageMeetingsDto> list = null;
-		
+
 		try {
 			list = mapper.findMeetingsById(map);
 		} catch (Exception e) {
@@ -56,27 +56,22 @@ public class ManageMeetingsServiceImpl implements ManageMeetingsService {
 	}
 
 	@Override
-	public List<ManageMeetingsDto> updateMeetings(Map<String, Object> map) {
-		List<ManageMeetingsDto> list = null;
-		
+	public int updateMeetings(Map<String, Object> map) {
 		try {
-			list = mapper.updateMeetings(map);
+			return mapper.updateMeetings(map);
 		} catch (Exception e) {
 			log.info("updateMeetings : ", e);
+			throw e;
 		}
-		return list;
 	}
 
 	@Override
-	public List<ManageMeetingsDto> deleteMeetings(Map<String, Object> map) {
-		List<ManageMeetingsDto> list = null;
-		
+	public int deleteMeetings(Map<String, Object> map) {
 		try {
-			list = mapper.deleteMeetings(map);
+			return mapper.deleteMeetings(map);
 		} catch (Exception e) {
 			log.info("deleteMeetings : ", e);
+			throw e;
 		}
-		return list;
 	}
-
 }

@@ -11,7 +11,7 @@
 </th:block>
 
 <th:block layout:fragment="content">
-    <div class="home-layout manage-layout">
+    <div class="home-layout manage-layout manage-member-page">
         <nav th:replace="~{layout/pmSidebar::manageSidebar('members')}"></nav>
 
         <div class="section manage-content">
@@ -21,7 +21,8 @@
 			</div>
         
             <div class="member-content">
-                <table class="project-list-table" style="width: 100%;">
+                <div class="member-table-wrap">
+                <table class="project-list-table">
                     <thead>
                         <tr>
                             <th style="text-align: center;">이름</th>
@@ -41,11 +42,10 @@
                             <td>
                                 <div th:if="${#lists.isEmpty(member.projects)}">미배정</div>
                                 
-                                <div th:unless="${#lists.isEmpty(member.projects)}" 
-                                     style="max-height: 100px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px;">
+                                <div th:unless="${#lists.isEmpty(member.projects)}" class="member-project-list">
                                      
                                     <div th:each="p : ${member.projects}" 
-                                         style="min-height: 24px; display: flex; align-items: center;"
+                                         class="member-project-item"
                                          th:text="${p.projectName}">프로젝트명</div>
                                 </div>
                             </td>
@@ -55,18 +55,17 @@
                                     <span class="project-status">미정</span>
                                 </div>
                                 
-                                <div th:unless="${#lists.isEmpty(member.projects)}"
-                                     style="max-height: 100px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px;">
+                                <div th:unless="${#lists.isEmpty(member.projects)}" class="member-project-list">
                                      
                                     <div th:each="p : ${member.projects}" 
-                                         style="min-height: 24px; display: flex; align-items: center; gap: 10px;">
+                                         class="member-project-item member-role-item">
                                          
                                         <span th:if="${p.role == 70}" class="project-status project-status-progress">PM</span>
                                         <span th:if="${p.role == 50}" class="project-status project-status-planned">DT</span>
                                         <span th:if="${p.role == 30}" class="project-status project-status-completed">TL</span>
                                         <span th:if="${p.role == 10}" class="project-status project-status-paused">AA</span>
                                         
-                                        <button type="button" class="btn-exclude-project" th:data-id="${p.projectMemberId}"
+                                        <button th:if="${currentRole == 70 or (currentRole == 50 and p.role == 30)}" type="button" class="btn-exclude-project" th:data-id="${p.projectMemberId}"
                                                 style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px;">제외</button>
                                     </div>
                                 </div>
@@ -92,10 +91,10 @@
                                     <select class="role-select" th:id="'roleSelect_' + ${member.workspaceMemberId}" 
                                             style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; position: relative; z-index: 10;">
                                         <option value="" disabled selected>-- 직위 --</option>
-                                        <option th:if="${currentRole >= 70}" value="70">PM</option>
-                                        <option value="50">DT</option>
+                                        <option th:if="${currentRole == 70 and ownWorkspaceMemberId != null and member.workspaceMemberId == ownWorkspaceMemberId}" value="70">PM</option>
+                                        <option th:if="${currentRole == 70}" value="50">DT</option>
                                         <option value="30">TL</option>
-                                        <option value="10">AA</option>
+                                        <option th:if="${currentRole == 70}" value="10">AA</option>
                                     </select>
                                     
                                     <button type="button" 
@@ -103,7 +102,7 @@
                                             th:data-workspace-member-id="${member.workspaceMemberId}"
                                             style="background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; position: relative; z-index: 10;">배정</button>
 
-                                    <button type="button" class="btn-exclude-workspace" th:data-id="${member.workspaceMemberId}"
+                                    <button th:if="${currentRole == 70}" type="button" class="btn-exclude-workspace" th:data-id="${member.workspaceMemberId}"
                                             style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px;">워크 제외</button>
                                 </div>
                             </td>
@@ -116,6 +115,17 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
+                <div class="project-list-footer manage-member-footer">
+                    <p th:text="|총 ${dataCount}명|">총 0명</p>
+                    <nav class="project-pagination" aria-label="팀원 목록 페이지" th:if="${totalPage > 0}">
+                        <a class="manage-page-arrow" th:if="${page > 1}" th:href="${pageBaseUrl + (page - 1)}">이전</a>
+                        <span class="manage-page-arrow disabled" th:unless="${page > 1}">이전</span>
+                        <div th:utext="${paging}"></div>
+                        <a class="manage-page-arrow" th:if="${page < totalPage}" th:href="${pageBaseUrl + (page + 1)}">다음</a>
+                        <span class="manage-page-arrow disabled" th:unless="${page < totalPage}">다음</span>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>

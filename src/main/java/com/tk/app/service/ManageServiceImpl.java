@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tk.app.domain.dto.ManageDto;
 import com.tk.app.mapper.ManageMapper;
 import com.tk.app.repository.ProjectMemberRepository;
-import com.tk.app.repository.ProjectTeamView;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,323 +19,282 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ManageServiceImpl implements ManageService{
 	private final ManageMapper mapper;
-    private final ProjectMemberRepository projectMemberRepository;
-	
-    // Map 필수 번호값 확인
-    private Long requiredLong(Map<String, Object> map, String key) {
-        if (map == null || !(map.get(key) instanceof Number)) {
-            throw new IllegalArgumentException(key + " 값이 올바르지 않습니다.");
-        }
+	private final ProjectMemberRepository projectMemberRepository;
 
-        return ((Number) map.get(key)).longValue();
-    }
+	// Map 필수 번호값 확인
+	private Long requiredLong(Map<String, Object> map, String key) {
+		if (map == null || !(map.get(key) instanceof Number)) {
+			throw new IllegalArgumentException(key + " 값이 올바르지 않습니다.");
+		}
 
-    // 워크스페이스 팀원 관리 권한 확인
-    private Long requireManagePermission(Map<String, Object> map)
-            throws Exception {
+		return ((Number) map.get(key)).longValue();
+	}
 
-        if (map == null
-                || !(map.get("domainKey") instanceof String)
-                || ((String) map.get("domainKey")).isBlank()) {
-            throw new IllegalArgumentException("워크스페이스 정보가 없습니다.");
-        }
+	// 워크스페이스 팀원 관리 권한 확인
+	private Long requireManagePermission(Map<String, Object> map)
+			throws Exception {
 
-        String domainKey = (String) map.get("domainKey");
-        Long actorId = requiredLong(map, "actorId");
+		if (map == null
+				|| !(map.get("domainKey") instanceof String)
+				|| ((String) map.get("domainKey")).isBlank()) {
+			throw new IllegalArgumentException("워크스페이스 정보가 없습니다.");
+		}
 
-        Long workspaceId = mapper.findByDomainKey(domainKey);
+		String domainKey = (String) map.get("domainKey");
+		Long actorId = requiredLong(map, "actorId");
 
-        if (workspaceId == null) {
-            throw new IllegalArgumentException("워크스페이스를 찾을 수 없습니다.");
-        }
+		Long workspaceId = mapper.findByDomainKey(domainKey);
 
-        Integer actorRole = projectMemberRepository
-                .findRoleByWorkspaceIdAndMemberId(workspaceId, actorId);
+		if (workspaceId == null) {
+			throw new IllegalArgumentException("워크스페이스를 찾을 수 없습니다.");
+		}
 
-        if (actorRole == null || actorRole < 50) {
-            throw new SecurityException("팀원 관리 권한이 없습니다.");
-        }
+		Integer actorRole = projectMemberRepository
+				.findRoleByWorkspaceIdAndMemberId(workspaceId, actorId);
 
-        return workspaceId;
-    }
+		if (actorRole == null || actorRole < 50) {
+			throw new SecurityException("팀원 관리 권한이 없습니다.");
+		}
 
-    // TL 업무 참여 관계 정리
-    private void clearTaskAssignments(Long projectMemberId) {
-        projectMemberRepository.deleteUnlinkedTaskMembers(projectMemberId);
-    }
+		map.put("workspaceId", workspaceId); // 프로젝트/워크스페이스 제외 SQL에 전달
+		return workspaceId;
+	}
 
-    
+	// 프로젝트별 관리 권한: 워크 PM 또는 해당 프로젝트 DT
+	private int requireProjectPermission(Map<String, Object> map, Long workspaceId) {
+		map.put("workspaceId", workspaceId);
+		Integer role = mapper.getManageRoleForProject(map);
+		if (role == null || role < 50) {
+			throw new SecurityException("해당 프로젝트 관리 권한이 없습니다.");
+		}
+		return role;
+	}
+
+	// TL 업무 참여 관계 정리
+	private void clearTaskAssignments(Long projectMemberId) {
+		projectMemberRepository.deleteUnlinkedTaskMembers(projectMemberId);
+	}
+
 	@Override
 	public Long findByDomainKey(String domainKey) throws Exception {
 		try {
-            return mapper.findByDomainKey(domainKey);
-        } catch (Exception e) {
-            log.info("findByDomainKey : ", e);
-            throw e;
-        }
-	}
-	
-	@Override
-	public List<ManageDto> listProject(Map<String, Object> map) throws SQLException {
-		List<ManageDto> list = null;
-		
-		try {
-			list = mapper.listProject(map);
-			
+			return mapper.findByDomainKey(domainKey);
 		} catch (Exception e) {
-			log.info("listProject : ", e);
-			
+			log.info("findByDomainKey : ", e);
 			throw e;
 		}
-		
-		return list;
 	}
-	
 
 	@Override
 	public List<ManageDto> listProjectManage(Map<String, Object> map) throws SQLException {
 		List<ManageDto> list = null;
-		
+
 		try {
 			list = mapper.listProjectManage(map);
 		} catch (Exception e) {
-			log.info("listProject : ", e);
-			
+			log.info("listProjectManage : ", e);
+
 			throw e;
 		}
-		
+
 		return list;
 	}
-	
 
 	@Override
-	public int dataCount(Map<String, Object> map) throws Exception {
+	public List<Map<String, Object>> listManageCalendarTasks(Map<String, Object> map) throws SQLException {
 		try {
-			return mapper.dataCount(map);
-        } catch (Exception e) {
-        	log.info("dataCount : ", e);
-
-        	throw e;
-        }
-	}
-
-	@Override
-	public List<ProjectTeamView> listWorkspaceMembers(Long workspaceId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getProjectCount(Long workspaceId) throws Exception {
-		
-		return mapper.getProjectCount(workspaceId);
-	}
-
-	@Override
-	public List<ManageDto> getProjectDetail(Map<String, Object> map) throws Exception {
-		List<ManageDto> list = null;
-		try {
-			list = mapper.getProjectDetail(map);
+			return mapper.listManageCalendarTasks(map);
 		} catch (Exception e) {
-			log.info("getProjectDetail : ", e);
+			log.info("listManageCalendarTasks : ", e);
+			throw e;
 		}
-		
-		return list;
 	}
 
 	@Override
-	public List<ManageDto> findById(Map<String, Object> map) {
-		List<ManageDto> list = null;
-		try {
-			list = mapper.findById(map);
-		} catch (Exception e) {
-			log.info("findById : ", e);
-		}
-		
-		return list;
+	public Long getOwnWorkspaceMemberId(Map<String, Object> map) {
+		return mapper.getOwnWorkspaceMemberId(map);
 	}
 
-	@Override
-	public List<ManageDto> findPrevPost(Map<String, Object> map) {
-		List<ManageDto> list = null;
-		try {
-			list = mapper.findPrevPost(map);
-		} catch (Exception e) {
-			log.info("findPrevPost : ", e);
-		}
-		return list;
-	}
-
-	@Override
-	public List<ManageDto> findNextPost(Map<String, Object> map) {
-		List<ManageDto> list = null;
-		try {
-			list = mapper.findNextPost(map);
-		} catch (Exception e) {
-			log.info("findNextPost : ", e);
-		}
-		return list;
-	}
 	// 프로젝트 팀원 등록 및 직위 변경
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void assignOrUpdateProjectMember(Map<String, Object> map) throws Exception {
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void assignOrUpdateProjectMember(Map<String, Object> map) throws Exception {
 
-        try {
-            Long workspaceId = requireManagePermission(map);
+		try {
+			Long workspaceId = requireManagePermission(map);
 
-            Long actorId = requiredLong(map, "actorId");
-            Long workspaceMemberId = requiredLong(map, "workspaceMemberId");
-            Long projectId = requiredLong(map, "projectId");
-            int role = requiredLong(map, "role").intValue();
+			Long workspaceMemberId = requiredLong(map, "workspaceMemberId");
+			Long projectId = requiredLong(map, "projectId");
+			int role = requiredLong(map, "role").intValue();
 
-            if (role != 10 && role != 30 && role != 50 && role != 70) {
-                throw new IllegalArgumentException("올바르지 않은 직위입니다.");
-            }
+			int actorRole = requireProjectPermission(map, workspaceId);
+			Long ownWorkspaceMemberId = mapper.getOwnWorkspaceMemberId(map);
+			boolean ownPm = actorRole == 70 && role == 70 && workspaceMemberId.equals(ownWorkspaceMemberId);
+			if (role != 10 && role != 30 && role != 50 && !ownPm) {
+				throw new IllegalArgumentException("PM 직위는 본인에게만 배정할 수 있습니다.");
+			}
+			if (actorRole == 50 && role != 30) {
+				throw new SecurityException("DT는 본인 프로젝트에서 TL만 지정할 수 있습니다.");
+			}
+			Integer targetWorkspaceRole = mapper.getTargetWorkspaceRole(map);
+			if (targetWorkspaceRole != null && targetWorkspaceRole == 70 && !ownPm) {
+				throw new SecurityException("워크스페이스 PM은 본인 PM 직위만 배정할 수 있습니다.");
+			}
 
-            Integer actorRole = projectMemberRepository
-                    .findRoleByWorkspaceIdAndMemberId(workspaceId, actorId);
+			int count = projectMemberRepository.countValidAssignmentTarget(
+					workspaceId, workspaceMemberId, projectId
+			);
 
-            if (actorRole == 50 && role == 70) {
-                throw new SecurityException("PM 직위는 배정할 수 없습니다.");
-            }
+			if (count != 1) {
+				throw new IllegalArgumentException("해당 워크스페이스의 프로젝트 또는 팀원이 아닙니다.");
+			}
 
-            int count = projectMemberRepository.countValidAssignmentTarget(
-                    workspaceId, workspaceMemberId, projectId
-            );
+			Long projectMemberId = projectMemberRepository
+					.findAssignedProjectMemberId(projectId, workspaceMemberId);
 
-            if (count != 1) {
-                throw new IllegalArgumentException("해당 워크스페이스의 프로젝트 또는 팀원이 아닙니다.");
-            }
+			if (projectMemberId != null) {
+				Integer oldRole = projectMemberRepository
+						.findAssignedProjectRole(projectMemberId);
 
-            Long projectMemberId = projectMemberRepository
-                    .findAssignedProjectMemberId(projectId, workspaceMemberId);
+				if (actorRole == 50 && oldRole != null && oldRole != 30) {
+					throw new SecurityException("DT는 TL 직위만 변경할 수 있습니다.");
+				}
+				if (oldRole != null && oldRole == 70 && !ownPm) {
+					throw new SecurityException("다른 PM의 직위는 변경할 수 없습니다.");
+				}
+				if (oldRole != null && oldRole == 30 && role != 30) {
+					clearTaskAssignments(projectMemberId);
+				}
+			}
 
-            if (projectMemberId != null) {
-                Integer oldRole = projectMemberRepository
-                        .findAssignedProjectRole(projectMemberId);
+			projectMemberRepository.upsertProjectMember(
+					workspaceMemberId, projectId, role
+			);
 
-                if (oldRole != null && oldRole == 30 && role != 30) {
-                    clearTaskAssignments(projectMemberId);
-                }
-            }
+		} catch (Exception e) {
+			log.error("assignOrUpdateProjectMember 오류: ", e);
+			throw e;
+		}
+	}
 
-            projectMemberRepository.upsertProjectMember(
-                    workspaceMemberId, projectId, role
-            );
+	// 프로젝트에서 팀원 제외
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void excludeProjectMember(Map<String, Object> map) throws Exception {
 
-        } catch (Exception e) {
-            log.error("assignOrUpdateProjectMember 오류: ", e);
-            throw e;
-        }
-    }
+		try {
+			Long workspaceId = requireManagePermission(map);
 
-    // 프로젝트에서 팀원 제외
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void excludeProjectMember(Map<String, Object> map) throws Exception {
+			Long projectMemberId = requiredLong(map, "projectMemberId");
 
-        try {
-            Long workspaceId = requireManagePermission(map);
+			int count = projectMemberRepository.countActiveProjectMember(
+					workspaceId, projectMemberId
+			);
 
-            Long actorId = requiredLong(map, "actorId");
-            Long projectMemberId = requiredLong(map, "projectMemberId");
+			if (count != 1) {
+				throw new IllegalArgumentException("프로젝트 참여자를 찾을 수 없습니다.");
+			}
 
-            int count = projectMemberRepository.countActiveProjectMember(
-                    workspaceId, projectMemberId
-            );
+			Long projectId = mapper.getProjectIdForProjectMember(map);
+			if (projectId == null) {
+				throw new IllegalArgumentException("현재 워크스페이스 프로젝트 참여자가 아닙니다.");
+			}
+			map.put("projectId", projectId);
+			int actorRole = requireProjectPermission(map, workspaceId);
+			Integer targetRole = projectMemberRepository.findAssignedProjectRole(projectMemberId);
+			if (targetRole == null) {
+				throw new IllegalArgumentException("프로젝트 참여자의 직위를 찾을 수 없습니다.");
+			}
+			if (targetRole == 70) {
+				// PM은 자신의 프로젝트 소속만 직접 제외할 수 있음 (워크스페이스 PM 권한은 유지)
+				if (actorRole != 70 || mapper.countOwnPmProjectMember(map) != 1) {
+					throw new SecurityException("다른 PM을 프로젝트에서 제외할 수 없습니다.");
+				}
+			} else if (actorRole == 50 && targetRole != 30) {
+				throw new SecurityException("DT는 TL만 프로젝트에서 제외할 수 있습니다.");
+			}
 
-            if (count != 1) {
-                throw new IllegalArgumentException("프로젝트 참여자를 찾을 수 없습니다.");
-            }
+			if (targetRole == 30) {
+				clearTaskAssignments(projectMemberId);
+			}
 
-            Integer actorRole = projectMemberRepository
-                    .findRoleByWorkspaceIdAndMemberId(workspaceId, actorId);
+			int result = projectMemberRepository
+					.excludeFromProject(projectMemberId);
 
-            Integer targetRole = projectMemberRepository
-                    .findAssignedProjectRole(projectMemberId);
+			if (result != 1) {
+				throw new IllegalStateException("프로젝트 제외에 실패했습니다.");
+			}
 
-            if (actorRole == 50 && targetRole != null && targetRole == 70) {
-                throw new SecurityException("PM을 제외할 수 없습니다.");
-            }
+		} catch (Exception e) {
+			log.error("excludeProjectMember 오류: ", e);
+			throw e;
+		}
+	}
 
-            if (targetRole != null && targetRole == 30) {
-                clearTaskAssignments(projectMemberId);
-            }
+	// 워크스페이스에서 팀원 제외
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void excludeWorkspaceMember(Map<String, Object> map)
+			throws Exception {
 
-            int result = projectMemberRepository
-                    .excludeFromProject(projectMemberId);
+		try {
+			Long workspaceId = requireManagePermission(map);
 
-            if (result != 1) {
-                throw new IllegalStateException("프로젝트 제외에 실패했습니다.");
-            }
+			Long actorId = requiredLong(map, "actorId");
+			Long workspaceMemberId = requiredLong(map, "workspaceMemberId");
 
-        } catch (Exception e) {
-            log.error("excludeProjectMember 오류: ", e);
-            throw e;
-        }
-    }
+			int count = projectMemberRepository.countActiveWorkspaceMember(
+					workspaceId, workspaceMemberId
+			);
 
-    // 워크스페이스에서 팀원 제외
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void excludeWorkspaceMember(Map<String, Object> map)
-            throws Exception {
+			if (count != 1) {
+				throw new IllegalArgumentException(
+						"워크스페이스 참여자를 찾을 수 없습니다."
+				);
+			}
 
-        try {
-            Long workspaceId = requireManagePermission(map);
+			Integer actorRole = projectMemberRepository
+					.findRoleByWorkspaceIdAndMemberId(workspaceId, actorId);
 
-            Long actorId = requiredLong(map, "actorId");
-            Long workspaceMemberId = requiredLong(map, "workspaceMemberId");
+			if (actorRole != 70) {
+				throw new SecurityException("워크스페이스 제외는 PM만 가능합니다.");
+			}
+			Integer targetWorkspaceRole = mapper.getTargetWorkspaceRole(map);
+			if (targetWorkspaceRole != null && targetWorkspaceRole == 70) {
+				throw new SecurityException("PM을 워크스페이스에서 제외할 수 없습니다.");
+			}
+			List<Long> projectMemberIds = projectMemberRepository
+					.findActiveProjectMemberIds(workspaceId, workspaceMemberId);
 
-            int count = projectMemberRepository.countActiveWorkspaceMember(
-                    workspaceId, workspaceMemberId
-            );
+			for (Long projectMemberId : projectMemberIds) {
+				Integer targetRole = projectMemberRepository
+						.findAssignedProjectRole(projectMemberId);
 
-            if (count != 1) {
-                throw new IllegalArgumentException(
-                        "워크스페이스 참여자를 찾을 수 없습니다."
-                );
-            }
 
-            Integer actorRole = projectMemberRepository
-                    .findRoleByWorkspaceIdAndMemberId(workspaceId, actorId);
+				if (targetRole != null && targetRole == 30) {
+					clearTaskAssignments(projectMemberId);
+				}
 
-            List<Long> projectMemberIds = projectMemberRepository
-                    .findActiveProjectMemberIds(workspaceId, workspaceMemberId);
+				int result = projectMemberRepository
+						.excludeFromProject(projectMemberId);
 
-            for (Long projectMemberId : projectMemberIds) {
-                Integer targetRole = projectMemberRepository
-                        .findAssignedProjectRole(projectMemberId);
+				if (result != 1) {
+					throw new IllegalStateException("프로젝트 참여자 제외에 실패했습니다.");
+				}
+			}
 
-                if (actorRole == 50 && targetRole != null && targetRole == 70) {
-                    throw new SecurityException("PM은 워크스페이스에서 제외할 수 없습니다.");
-                }
+			int result = projectMemberRepository
+					.excludeFromWorkspace(workspaceMemberId);
 
-                if (targetRole != null && targetRole == 30) {
-                    clearTaskAssignments(projectMemberId);
-                }
+			if (result != 1) {
+				throw new IllegalStateException("워크스페이스 제외에 실패했습니다.");
+			}
 
-                int result = projectMemberRepository
-                        .excludeFromProject(projectMemberId);
-
-                if (result != 1) {
-                    throw new IllegalStateException("프로젝트 참여자 제외에 실패했습니다.");
-                }
-            }
-
-            int result = projectMemberRepository
-                    .excludeFromWorkspace(workspaceMemberId);
-
-            if (result != 1) {
-                throw new IllegalStateException("워크스페이스 제외에 실패했습니다.");
-            }
-
-        } catch (Exception e) {
-            log.error("excludeWorkspaceMember 오류: ", e);
-            throw e;
-        }
-    }
+		} catch (Exception e) {
+			log.error("excludeWorkspaceMember 오류: ", e);
+			throw e;
+		}
+	}
 
 
 }

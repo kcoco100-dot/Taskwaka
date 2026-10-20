@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+	 <link rel="stylesheet" th:href="@{/dist/css/team-create.css}">
+</th:block>
+  	  
+<th:block layout:fragment="content">
+	<div class="team-create-page">
+			<div class="team-create-card">
+				<div class="team-create-heading">
+					<h1>새 워크 생성하기</h1>
+					<p>팀을 만들고 함께 협업을 시작해보세요.</p>	
+				</div>	
+				
+				<form class="team-create-form">
+					<div class="form-field">
+						<label for="team-name">팀 이름</label>
+						<input type="text"
+							   id="team-name"
+							   name="teamName"
+							   placeholder="팀 이름을 입력하세요"
+							   required="required">
+					
+						<div class="team-create-actions">
+							<a th:href="@{/home}" class="team-submit">
+								팀 만들기
+							</a>
+							<a th:href="@{/main}" class="team-cancel">취소</a>
+						</div>
+					</div>
+				</form>
+			</div>
+
+	</div>
+
+	
+</th:block>
+
+<th:block layout:fragment="script">
+
+</th:block> 
+
+</html>

@@ -10,6 +10,8 @@ import com.tk.app.common.MyUtil;
 import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.ManageNoticeDto;
 import com.tk.app.mapper.ManageNoticeMapper;
+import com.tk.app.domain.dto.SessionInfo;
+import com.tk.app.security.LoginMemberUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ public class ManageNoticeServiceImpl implements ManageNoticeService {
 			result = mapper.dataCount(map);
 		} catch (Exception e) {
 			log.info("dataCount : ", e);
+			throw e;
 		}
 		return result;
 	}
@@ -102,11 +105,16 @@ public class ManageNoticeServiceImpl implements ManageNoticeService {
 	@Override
 	public void updateNotice(ManageNoticeDto dto) throws SQLException {
 		try {
-			
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			if (info == null || dto == null) throw new SecurityException("로그인 또는 공지 정보가 없습니다.");
+			if (dto.getTitle() == null || dto.getTitle().isBlank()) throw new IllegalArgumentException("공지 제목을 입력하세요.");
+			if (dto.getStatus() != 0 && dto.getStatus() != 1) throw new IllegalArgumentException("공지 상태가 올바르지 않습니다.");
+			dto.setMember_id(info.getMember_id());
+			if (mapper.updateNotice(dto) != 1) throw new SecurityException("작성자 본인만 해당 공지를 수정할 수 있습니다.");
 		} catch (Exception e) {
-			// TODO: handle exception
+			log.info("updateNotice : ", e);
+			throw e;
 		}
-		
 	}
 
 	@Override
@@ -116,9 +124,16 @@ public class ManageNoticeServiceImpl implements ManageNoticeService {
 	}
 
 	@Override
-	public List<ManageNoticeDto> deleteNotice(Map<String, Object> map) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+	public int deleteNotice(Map<String, Object> map) throws SQLException {
+		try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			if (info == null || map == null) throw new SecurityException("로그인이 필요합니다.");
+			map.put("requester_member_id", info.getMember_id());
+			return mapper.deleteNotice(map);
+		} catch (Exception e) {
+			log.info("deleteNotice : ", e);
+			throw e;
+		}
 	}
 
 

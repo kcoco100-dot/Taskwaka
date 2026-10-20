@@ -19,6 +19,16 @@
                 <p class="page-description">프로젝트 보고서와 업무 보고서의 결재 현황을 확인하세요.</p>
             </div>
 
+            <!-- 공지사항과 같은 유형별 보고서 탭 -->
+            <nav class="approval-category-tabs" aria-label="보고서 유형 선택">
+                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=0,reviewStatus=${reviewStatus},keyword=${keyword})}"
+                   th:classappend="${reportCategory == 0} ? ' is-active' : ''">전체 프로젝트</a>
+                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=1,reviewStatus=${reviewStatus},keyword=${keyword})}"
+                   th:classappend="${reportCategory == 1} ? ' is-active' : ''">프로젝트 보고서</a>
+                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=2,reviewStatus=${reviewStatus},keyword=${keyword})}"
+                   th:classappend="${reportCategory == 2} ? ' is-active' : ''">업무 보고서</a>
+            </nav>
+
 <div class="approval-summary-grid">
     <div class="approval-summary-card">
         <span class="approval-summary-label">미확인 보고서</span>
@@ -48,14 +58,7 @@
 
                 <form name="searchForm" id="approval-search-form" class="approval-filters"
                       method="get" th:action="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">
-                    <div class="approval-field">
-                        <label for="approval-type">보고서 유형</label>
-                        <select id="approval-type" name="reportCategory">
-                            <option value="0" th:selected="${reportCategory == 0}">전체</option>
-                            <option value="1" th:selected="${reportCategory == 1}">프로젝트 보고서</option>
-                            <option value="2" th:selected="${reportCategory == 2}">업무 보고서</option>
-                        </select>
-                    </div>
+                    <input type="hidden" name="reportCategory" th:value="${reportCategory}">
                     <div class="approval-field">
                         <label for="approval-status">처리 상태</label>
                         <select id="approval-status" name="reviewStatus">
@@ -129,8 +132,12 @@
                 </div>
 
                 <div class="approval-list-footer">
-                    <nav class="approval-pagination" aria-label="보고서 목록 페이지" th:if="${totalPage > 1}">
-                        <a class="approval-page-button" th:each="i : ${#numbers.sequence(1, totalPage)}" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},page=${i},reportCategory=${reportCategory},reviewStatus=${reviewStatus},keyword=${keyword})}"  th:classappend="${page == i} ? 'approval-current-page' : ''" th:attr="aria-current=${page == i ? 'page' : null}" th:text="${i}">1</a>
+                    <nav class="approval-pagination" aria-label="목록 페이지" th:if="${totalPage > 0}">
+                        <a class="manage-page-arrow" th:if="${page > 1}" th:href="${pageBaseUrl + (page - 1)}">이전</a>
+                        <span class="manage-page-arrow disabled" th:unless="${page > 1}">이전</span>
+                        <div th:utext="${paging}"></div>
+                        <a class="manage-page-arrow" th:if="${page < totalPage}" th:href="${pageBaseUrl + (page + 1)}">다음</a>
+                        <span class="manage-page-arrow disabled" th:unless="${page < totalPage}">다음</span>
                     </nav>
                 </div>
             </div>

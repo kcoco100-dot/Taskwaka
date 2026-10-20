@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -139,12 +139,16 @@
                     data.forEach(member => {
                         const item = document.createElement('div');
                         item.className = 'checkbox-item';
-                        item.innerHTML = `
-                            <input type="checkbox" id="member_${member.memberId}" name="memberIds" value="${member.memberId}">
-                            <label for="member_${member.memberId}">
-                                ${member.name} (${member.email})
-                            </label>
-                        `;
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `member_${member.memberId}`;
+                        checkbox.name = 'memberIds';
+                        checkbox.value = member.memberId;
+                        const label = document.createElement('label');
+                        label.htmlFor = checkbox.id;
+                        label.textContent = `${member.name} (${member.email})`;
+                        item.appendChild(checkbox);
+                        item.appendChild(label);
                         listContainer.appendChild(item);
                     });
                 })

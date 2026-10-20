@@ -37,6 +37,14 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
         String domainKey = (String) map.get("domainKey");
         Long workspaceId = (Long) map.get("workspaceId");
         Long inviterId = (Long) map.get("inviterId");
+        if (workspaceId == null || inviterId == null) throw new SecurityException("초대자 정보가 없습니다.");
+        Map<String, Object> permissionMap = new java.util.HashMap<>();
+        permissionMap.put("domainKey", domainKey);
+        permissionMap.put("workspaceId", workspaceId);
+        permissionMap.put("memberId", inviterId);
+        if (mapper.countActiveWorkspacePm(permissionMap) != 1) {
+            throw new SecurityException("현재 워크스페이스 PM만 팀원을 초대할 수 있습니다.");
+        }
         
         @SuppressWarnings("unchecked")
         List<Integer> targetMemberIds = (List<Integer>) map.get("targetMemberIds");
@@ -101,7 +109,7 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
             return mapper.selectSearchEligibleMembers(map);
         } catch (Exception e) {
             log.info("getSearchEligibleMembers 오류 : ", e);
-            return null;
+            throw new IllegalStateException("초대 대상 조회 중 오류가 발생했습니다.", e);
         }
     }
     
@@ -112,18 +120,28 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
         Long memberId = (Long) map.get("memberId");
 
         ManageInviteDto inviteDto = mapper.selectManageInviteByKey(inviteKey);
-
-        if (inviteDto == null) {
-            throw new IllegalArgumentException("존재하지 않거나 유효하지 않은 초대 링크입니다.");
+        String domainKey = (String) map.get("domainKey");
+        Long domainWorkspaceId = mapper.selectWorkspaceIdByDomainKey(domainKey);
+        if (inviteDto == null || domainWorkspaceId == null || !domainWorkspaceId.equals(inviteDto.getWorkspaceId())) {
+            throw new IllegalArgumentException("현재 도메인에서 유효하지 않은 초대 링크입니다.");
         }
-        
+        try {
+            java.util.Date expiry = new SimpleDateFormat(DATE_FORMAT).parse(inviteDto.getExpires());
+            if (inviteDto.getStatus() == null || inviteDto.getStatus() != 0 || !expiry.after(new java.util.Date())) {
+                throw new IllegalArgumentException("기간이 만료된 초대 링크입니다.");
+            }
+        } catch (java.text.ParseException e) {
+            throw new IllegalArgumentException("초대 만료일이 올바르지 않습니다.", e);
+        }
         if (inviteDto.getInviteStatus() != null && inviteDto.getInviteStatus() == 1) {
             throw new IllegalArgumentException("이미 사용이 완료된 초대 링크입니다.");
         }
 
         inviteDto.setAcceptedMemberId(memberId);
         inviteDto.setInviteStatus(1);
-        mapper.updateManageInviteAccept(inviteDto);
+        if (mapper.updateManageInviteAccept(inviteDto) != 1) {
+            throw new IllegalArgumentException("이미 사용되었거나 만료된 초대 링크입니다.");
+        }
 
         inviteDto.setMemberId(memberId);
         inviteDto.setRole(10);

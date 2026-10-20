@@ -4,23 +4,23 @@
 <mapper namespace="com.tk.app.mapper.ManageMapper">
 
 	<select id="findByDomainKey" parameterType="string" resultType="Long">
-        SELECT w.workspace_id 
+        SELECT w.workspace_id
         FROM workspaces w
         JOIN workspace_domains d ON w.workspace_id = d.workspace_id
         WHERE d.domain_key = #{domainKey}
           AND d.active = 'Y'
     </select>
-    
+
 	<sql id="projectPmName">
-		(SELECT md.name 
+		(SELECT md.name
 		FROM project_members pm
 		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
 		JOIN member_details md ON wm.member_id = md.member_id
-		WHERE pm.project_id = p.project_id 
+		WHERE pm.project_id = p.project_id
 			AND pm.status = 0
 			AND pm.role = (
-				SELECT MAX(role) 
-				FROM project_members 
+				SELECT MAX(role)
+				FROM project_members
 				WHERE project_id = p.project_id AND status = 0
 			)
 			AND ROWNUM = 1
@@ -28,83 +28,89 @@
 	</sql>
 
 	<sql id="projectMemberCount">
-		(SELECT COUNT(*) 
-		FROM project_members 
+		(SELECT COUNT(*)
+		FROM project_members
 		WHERE project_id = p.project_id AND status = 0
 		) AS member_count
 	</sql>
 
 	<select id="listProjectManage" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date, 
+		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date,
 			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
 			<include refid="projectPmName"></include>,
 			<include refid="projectMemberCount"></include>
 		FROM projects p
-		ORDER BY project_id DESC
-	</select>
-
-
-	<select id="listProject" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date, 
-			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
-			<include refid="projectPmName"></include>,
-			<include refid="projectMemberCount"></include>
-		FROM projects p
-		JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
-		WHERE wd.domain_key = #{domainKey} AND p.deleted IS NULL
-		ORDER BY p.project_id DESC
-		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-	</select>
-	
-	<select id="dataCount" parameterType="map" resultType="int">
-        SELECT NVL(COUNT(*), 0)
-        FROM projects p
-		JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
-        WHERE wd.domain_key = #{domainKey} AND p.deleted IS NULL
-    </select>
-	
-    <select id="getProjectCount" parameterType="Long" resultType="int">
-        SELECT COUNT(*)
-        FROM projects
-        WHERE workspace_id = #{workspaceId}
-          AND archive = 'N'
-    </select>
-
-	<select id="getProjectDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-        SELECT p.project_id, p.subject, p.content, p.start_at AS start_date, p."END" AS end_date, p.status, p.progress,
-			<include refid="projectPmName"></include>,
-			<include refid="projectMemberCount"></include>
-        FROM projects p
-        WHERE p.project_id = #{projectId}
-    </select>
-	
-	
-	<select id="findById" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-		SELECT p.project_id AS id, p.subject, p.content,  p.created
-        FROM projects p
-        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
-        WHERE wd.domain_key = #{domainKey} 
-          AND p.project_id = #{id}
-          AND p.deleted IS NULL
-	</select>
-	
-	<select id="findByPrev" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-        SELECT p.project_id AS id, p.subject AS title
-        FROM projects p
-        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
-        WHERE wd.domain_key = #{domainKey} AND (p.project_id &gt; #{id}) AND p.deleted IS NULL
-        ORDER BY p.project_id ASC
-        FETCH FIRST 1 ROWS ONLY
-    </select>
-
-    <select id="findByNext" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
-        SELECT p.project_id , p.subject
-        FROM projects p
-        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
-        WHERE wd.domain_key = #{domainKey} AND (p.project_id &lt; #{id}) AND p.deleted IS NULL
+        WHERE p.workspace_id = #{workspace_id} AND p.deleted IS NULL
+        AND EXISTS (SELECT 1 FROM workspace_members actor
+            WHERE actor.workspace_id = p.workspace_id AND actor.member_id = #{actorId} AND actor.status = 0
+            AND (actor.role = 70 OR EXISTS (
+                SELECT 1 FROM project_members own
+                WHERE own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
+                  AND own.role = 50 AND own.status = 0)))
         ORDER BY p.project_id DESC
-        FETCH FIRST 1 ROWS ONLY
+	</select>
+
+    <!-- PM: 70, 해당 프로젝트 DT: 50, 나머지: 0 -->
+    <select id="getManageRoleForProject" parameterType="map" resultType="int">
+        SELECT NVL(MAX(CASE WHEN actor.role = 70 THEN 70 WHEN own.role = 50 AND own.status = 0 THEN 50 ELSE 0 END), 0)
+        FROM projects p
+        JOIN workspace_members actor ON actor.workspace_id = p.workspace_id AND actor.member_id = #{actorId} AND actor.status = 0
+        LEFT JOIN project_members own ON own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
+        WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
     </select>
-	
-	
+    <select id="getProjectIdForProjectMember" parameterType="map" resultType="long">
+        SELECT p.project_id FROM project_members pm JOIN projects p ON pm.project_id = p.project_id
+        WHERE pm.project_member_id = #{projectMemberId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL AND pm.status = 0
+    </select>
+    <!-- 현재 로그인한 워크스페이스 PM 본인의 프로젝트 PM 소속인지 확인 -->
+    <select id="countOwnPmProjectMember" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM project_members pm
+        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+        JOIN projects p ON pm.project_id = p.project_id
+        WHERE pm.project_member_id = #{projectMemberId}
+          AND p.workspace_id = #{workspaceId}
+          AND wm.member_id = #{actorId}
+          AND wm.workspace_id = p.workspace_id
+          AND wm.role = 70 AND wm.status = 0
+          AND pm.role = 70 AND pm.status = 0
+          AND p.deleted IS NULL
+    </select>
+    <select id="getTargetWorkspaceRole" parameterType="map" resultType="int">
+        SELECT role FROM workspace_members WHERE workspace_member_id = #{workspaceMemberId} AND workspace_id = #{workspaceId} AND status = 0
+    </select>
+    <!-- 현재 도메인의 활성 워크스페이스 PM 본인 번호 -->
+    <select id="getOwnWorkspaceMemberId" parameterType="map" resultType="long">
+        SELECT MAX(workspace_member_id)
+        FROM workspace_members
+        WHERE workspace_id = #{workspaceId} AND member_id = #{actorId}
+          AND status = 0 AND role = 70
+    </select>
+
+    <!-- PM은 워크스페이스 전체, DT/TL/AA는 본인 참여 프로젝트 업무 -->
+    <select id="listManageCalendarTasks" parameterType="map" resultType="map">
+        SELECT t.task_id AS "taskId", t.title AS "title", p.subject AS "projectName",
+            TO_CHAR(t.start_at, 'YYYY-MM-DD') AS "startAt",
+            TO_CHAR(t."END", 'YYYY-MM-DD') AS "endAt", t.progress AS "progress"
+        FROM tasks t
+        JOIN projects p ON t.project_id = p.project_id
+        WHERE p.workspace_id = #{workspaceId}
+          AND p.deleted IS NULL
+          AND t.deleted IS NULL
+          AND EXISTS (
+              SELECT 1
+              FROM workspace_members actor
+              WHERE actor.workspace_id = p.workspace_id
+                AND actor.member_id = #{memberId}
+                AND actor.status = 0
+                AND (actor.role = 70 OR EXISTS (
+                    SELECT 1
+                    FROM project_members own
+                    WHERE own.project_id = p.project_id
+                      AND own.workspace_member_id = actor.workspace_member_id
+                      AND own.status = 0
+                ))
+          )
+        ORDER BY t.start_at, t.task_id
+    </select>
 </mapper>

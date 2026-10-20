@@ -1,4 +1,3 @@
-
 package com.tk.app.mapper;
 
 import java.sql.SQLException;
@@ -19,13 +18,11 @@ public interface ManageProjectMapper {
 	public int dataCount(Map<String, Object> map) throws SQLException;
 	public ManageDto getProjectDetail(Map<String, Object> map) throws SQLException;
 	public int countProjectAccess(Map<String, Object> map) throws SQLException;
-	
+	public int countWorkspacePm(Map<String, Object> map) throws SQLException;
+
 	public int updateProject(Map<String, Object> map) throws SQLException;
 	public int deleteProject(Map<String, Object> map) throws SQLException;
-	
-	public int countProjectInWorkspace(Map<String, Object> map) throws SQLException;
-	public int countTargetInWorkspace( Map<String, Object> map) throws SQLException;
-	public int countProjectMemberInWorkspace(Map<String, Object> map) throws SQLException;
+
 	public List<ManageTaskDto> listManageTasks(Map<String, Object> map) throws SQLException;
 	public List<Map<String, Object>> listManageTaskTL(Map<String, Object> map) throws SQLException;
 	public ManageTaskDto getManageTask(Map<String, Object> map) throws SQLException;
@@ -35,9 +32,8 @@ public interface ManageProjectMapper {
 	public int countValidTaskTL(Map<String, Object> map) throws SQLException;
 	public int countManageTaskReports(Map<String, Object> map) throws SQLException;
 	public Long lockManageProject(Map<String, Object> map) throws SQLException;
-    public Integer getProjectMemberRole(Map<String, Object> map) throws SQLException;
-    
-    public int insertManageTaskMember(Map<String, Object> map) throws SQLException;
-    public int deleteManageTaskMember(Map<String, Object> map) throws SQLException;
-    public int updateManageTaskTL(Map<String, Object> map) throws SQLException;
+
+	public int insertManageTaskMember(Map<String, Object> map) throws SQLException;
+	public int deleteManageTaskMember(Map<String, Object> map) throws SQLException;
+	public int updateManageTaskTL(Map<String, Object> map) throws SQLException;
 }

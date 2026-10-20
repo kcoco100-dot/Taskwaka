@@ -2,13 +2,21 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.ManageMeetingsMapper">
+    <sql id="meetingAccess">
+        AND p.deleted IS NULL AND EXISTS (SELECT 1 FROM workspace_members actor
+            WHERE actor.workspace_id = p.workspace_id AND actor.member_id = #{memberId} AND actor.status = 0
+              AND (actor.role = 70 OR EXISTS (SELECT 1 FROM project_members own
+                  WHERE own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
+                    AND own.role = 50 AND own.status = 0)))
+    </sql>
 
 	<select id="findMeetingList" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
-		SELECT 
+		SELECT
             m.meeting_minute_id AS meetingMinuteId,
             m.title,
             m.content,
             TO_CHAR(m.meeting, 'YYYY.MM.DD') AS meetingDate,
+            TO_CHAR(m.created, 'YYYY.MM.DD') AS createdDate,
             md.name AS authorName,
             m.member_id AS memberId
         FROM meeting_minutes m
@@ -16,6 +24,7 @@
         LEFT JOIN member_details md ON m.member_id = md.member_id
         WHERE p.workspace_id = #{workspaceId}
           AND m.deleted IS NULL
+        <include refid="meetingAccess"/>
         <if test="kwd != null and kwd != ''">
             AND m.title LIKE '%' || #{kwd} || '%'
         </if>
@@ -29,25 +38,28 @@
         JOIN projects p ON p.project_id = m.project_id
         WHERE p.workspace_id = #{workspaceId}
           AND m.deleted IS NULL
+        <include refid="meetingAccess"/>
         <if test="kwd != null and kwd != ''">
             AND m.title LIKE '%' || #{kwd} || '%'
         </if>
     </select>
 
     <select id="findMeetingsById" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
-       SELECT 
+       SELECT
             m.meeting_minute_id AS meetingMinuteId,
             m.title,
             m.content,
             TO_CHAR(m.meeting, 'YYYY.MM.DD') AS meetingDate,
+            TO_CHAR(m.created, 'YYYY.MM.DD') AS createdDate,
             md.name AS authorName,
             m.member_id AS memberId
         FROM meeting_minutes m
         JOIN projects p ON p.project_id = m.project_id
         LEFT JOIN member_details md ON m.member_id = md.member_id
         WHERE p.workspace_id = #{workspaceId}
-          AND m.meeting_minute_id = #{meetingMinuteId} 
+          AND m.meeting_minute_id = #{meetingMinuteId}
           AND m.deleted IS NULL
+        <include refid="meetingAccess"/>
     </select>
 
     <update id="updateMeetings" parameterType="map">
@@ -57,14 +69,25 @@
             updated = SYSDATE
         WHERE meeting_minute_id = #{meetingMinuteId}
           AND deleted IS NULL
-          AND project_id IN (SELECT project_id FROM projects WHERE workspace_id = #{workspaceId})
+          AND member_id = #{memberId}
+          AND project_id IN (SELECT p.project_id FROM projects p WHERE p.workspace_id = #{workspaceId}
+              AND p.deleted IS NULL AND EXISTS (SELECT 1 FROM workspace_members wm
+                  WHERE wm.workspace_id = p.workspace_id AND wm.member_id = #{memberId} AND wm.status = 0
+                    AND (wm.role = 70 OR EXISTS (SELECT 1 FROM project_members own
+                        WHERE own.project_id = p.project_id AND own.workspace_member_id = wm.workspace_member_id
+                          AND own.role = 50 AND own.status = 0))))
     </update>
 
     <update id="deleteMeetings" parameterType="map">
         UPDATE meeting_minutes
         SET deleted = SYSDATE
         WHERE meeting_minute_id = #{meetingMinuteId}
-          AND project_id IN (SELECT project_id FROM projects WHERE workspace_id = #{workspaceId})
+          AND project_id IN (SELECT p.project_id FROM projects p WHERE p.workspace_id = #{workspaceId}
+              AND p.deleted IS NULL AND EXISTS (SELECT 1 FROM workspace_members wm
+                  WHERE wm.workspace_id = p.workspace_id AND wm.member_id = #{memberId} AND wm.status = 0
+                    AND (wm.role = 70 OR EXISTS (SELECT 1 FROM project_members own
+                        WHERE own.project_id = p.project_id AND own.workspace_member_id = wm.workspace_member_id
+                          AND own.role = 50 AND own.status = 0))))
     </update>
 
 </mapper>

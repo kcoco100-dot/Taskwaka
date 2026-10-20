@@ -10,19 +10,19 @@
         WHERE domain_key = #{domainKey} AND active = 'Y'
     </select>
 
-    <!-- 프로젝트 대표 담당자 -->
+    <!-- 프로젝트에서 PM/DT로 실제 배정된 사람 중 직위가 가장 높은 한 명 -->
+    <sql id="projectManagerNameValue">
+        (SELECT CASE WHEN pm.role = 70 THEN '[PM] ' ELSE '[DT] ' END || md.name
+         FROM project_members pm
+         JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+         JOIN member_details md ON wm.member_id = md.member_id
+         WHERE pm.project_id = p.project_id AND pm.status = 0
+           AND pm.role IN (70, 50) AND wm.workspace_id = p.workspace_id AND wm.status = 0
+         ORDER BY pm.role DESC, md.name, wm.member_id
+         FETCH FIRST 1 ROW ONLY)
+    </sql>
     <sql id="projectPmName">
-        (SELECT md.name
-            FROM project_members pm
-            JOIN workspace_members wm
-                ON pm.workspace_member_id = wm.workspace_member_id
-            JOIN member_details md
-                ON wm.member_id = md.member_id
-            WHERE pm.project_id = p.project_id
-              AND pm.status = 0
-              AND pm.role = 70
-              AND ROWNUM = 1
-        ) AS pm_name
+        <include refid="projectManagerNameValue"/> AS pm_name
     </sql>
 
     <!-- 참여 인원 -->
@@ -32,6 +32,11 @@
             WHERE pm.project_id = p.project_id
               AND pm.status = 0
         ) AS member_count
+    </sql>
+
+    <!-- 목록에 표시된 최상위 담당자 기준 검색 -->
+    <sql id="projectManagerSearch">
+        LOWER(<include refid="projectManagerNameValue"/>) LIKE '%' || LOWER(#{keyword}) || '%'
     </sql>
 
     <!-- 프로젝트 검색 공통 조건 -->
@@ -48,29 +53,24 @@
                     AND LOWER(p.content) LIKE '%' || LOWER(#{keyword}) || '%'
                 </when>
                 <when test='searchType == "manager"'>
-                    AND EXISTS (
-                        SELECT 1
-                        FROM project_members pm
-                        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-                        JOIN member_details md ON wm.member_id = md.member_id
-                        WHERE pm.project_id = p.project_id AND pm.status = 0 AND pm.role = 70
-                          AND LOWER(md.name) LIKE '%' || LOWER(#{keyword}) || '%')
+                    AND <include refid="projectManagerSearch"/>
                 </when>
                 <otherwise>
                     AND (LOWER(p.subject) LIKE '%' || LOWER(#{keyword}) || '%'
                         OR LOWER(p.content) LIKE '%' || LOWER(#{keyword}) || '%'
-                        OR EXISTS (
-                            SELECT 1
-                            FROM project_members pm
-                            JOIN workspace_members wm
-                                ON pm.workspace_member_id = wm.workspace_member_id
-                            JOIN member_details md ON wm.member_id = md.member_id
-                            WHERE pm.project_id = p.project_id AND pm.status = 0 AND pm.role = 70
-                              AND LOWER(md.name) LIKE '%' || LOWER(#{keyword}) || '%')
-                    )
+                        OR <include refid="projectManagerSearch"/>)
                 </otherwise>
             </choose>
         </if>
+    </sql>
+
+    <!-- 같은 도메인의 워크 PM은 전체, DT는 본인 참여 프로젝트만 -->
+    <sql id="projectVisibleForMember">
+        AND EXISTS (SELECT 1 FROM workspace_members actor
+            WHERE actor.workspace_id = p.workspace_id AND actor.member_id = #{memberId} AND actor.status = 0
+              AND (actor.role = 70 OR (actor.role = 50 AND EXISTS (SELECT 1 FROM project_members mine
+                  WHERE mine.project_id = p.project_id AND mine.workspace_member_id = actor.workspace_member_id
+                    AND mine.role = 50 AND mine.status = 0))))
     </sql>
 
     <!-- 프로젝트 목록 -->
@@ -84,6 +84,7 @@
         FROM projects p
         JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
         WHERE wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+        <include refid="projectVisibleForMember"/>
         <include refid="projectSearchCondition"/>
         ORDER BY p.project_id DESC
         OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
@@ -95,6 +96,7 @@
         FROM projects p
         JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
         WHERE wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+        <include refid="projectVisibleForMember"/>
         <include refid="projectSearchCondition"/>
     </select>
 
@@ -117,19 +119,19 @@
         FROM projects p
         JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
         WHERE p.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+        <include refid="projectVisibleForMember"/>
     </select>
 
-    <!-- 프로젝트 관리 권한 -->
+    <!-- PM 전체 관리 / DT 본인 프로젝트 관리 -->
     <select id="countProjectAccess" parameterType="map" resultType="int">
-        SELECT COUNT(*)
-        FROM projects p
-        JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
-        JOIN project_members pm ON p.project_id = pm.project_id
-        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-        WHERE p.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y'
-          AND p.deleted IS NULL AND wm.member_id = #{memberId} AND pm.status = 0 AND pm.role = 70
+        SELECT COUNT(*) FROM projects p JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
+        WHERE p.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
+        <include refid="projectVisibleForMember"/>
     </select>
-
+    <select id="countWorkspacePm" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM workspace_members wm
+        WHERE wm.workspace_id = #{workspaceId} AND wm.member_id = #{memberId} AND wm.status = 0 AND wm.role = 70
+    </select>
     <!-- 프로젝트 수정 -->
     <update id="updateProject" parameterType="map">
         UPDATE projects SET subject = #{subject}, content = #{content}, start_at = TO_DATE(#{start_date}, 'YYYY-MM-DD'),
@@ -159,7 +161,7 @@
 
     <!-- 프로젝트 업무 목록 -->
    <select id="listManageTasks" parameterType="map" resultType="com.tk.app.domain.dto.ManageTaskDto">
-	    SELECT t.task_id, t.project_id, t.project_member_id, t.title, t.content, t.task_level, TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_date, 
+	    SELECT t.task_id, t.project_id, t.project_member_id, t.title, t.content, t.task_level, TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_date,
 	        TO_CHAR(t."END", 'YYYY-MM-DD') AS end_date, t.status, t.progress, md.name AS tl_name
 	    FROM tasks t
 	    JOIN projects p ON t.project_id = p.project_id
@@ -169,6 +171,7 @@
 	    JOIN member_details md ON wm.member_id = md.member_id
 	    WHERE t.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y'
 	      AND p.deleted IS NULL AND t.deleted IS NULL
+        <include refid="projectVisibleForMember"/>
 	    ORDER BY t.task_id
 	</select>
 
@@ -182,6 +185,7 @@
         JOIN member_details md ON wm.member_id = md.member_id
         WHERE pm.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
           AND pm.role = 30 AND pm.status = 0 AND wm.status = 0
+        <include refid="projectVisibleForMember"/>
         ORDER BY md.name
     </select>
 
@@ -248,19 +252,8 @@
         FOR UPDATE OF p.project_id
     </select>
 
-	<!-- 프로젝트 멤버의 관리 직위 조회 -->
-	<select id="getProjectMemberRole" parameterType="map" resultType="int">
-        SELECT pm.role
-        FROM project_members pm
-        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-		JOIN projects p ON pm.project_id = p.project_id
-		JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id   
-		WHERE pm.project_id = #{projectId} AND wm.member_id = #{memberId} AND wd.domain_key = #{domainKey}
-		      AND wd.active = 'Y' AND p.deleted IS NULL
-		      AND pm.status = 0 AND wm.status = 0
-    </select>
+    <!-- 프로젝트 기준 워크 PM 또는 활성 DT 권한 -->
 
-	
 	<!-- 업무 TL 참여 등록 -->
 	<insert id="insertManageTaskMember" parameterType="map">
 	    MERGE INTO task_members tm
@@ -270,21 +263,19 @@
 	        INSERT (task_id, project_member_id, created)
 	        VALUES (#{taskId}, #{projectMemberId},SYSDATE)
 	</insert>
-	
-	
-	
+
 	<!-- 업무 TL 참여 관계 삭제 -->
 	<delete id="deleteManageTaskMember" parameterType="map">
 	    DELETE FROM task_members tm
-	    WHERE tm.task_id = #{taskId} AND tm.project_member_id = #{projectMemberId} 
+	    WHERE tm.task_id = #{taskId} AND tm.project_member_id = #{projectMemberId}
 	    	AND NOT EXISTS (
 	          SELECT 1
 	          FROM sub_task_members stm
 	          WHERE stm.task_id = tm.task_id AND stm.project_member_id = tm.project_member_id
 			)
 	</delete>
-		
-	
+
+
 	<!-- 업무 담당 TL 변경 -->
 	<update id="updateManageTaskTL" parameterType="map">
 	    UPDATE tasks

@@ -7,22 +7,34 @@
         <if test="kwd != null and kwd != ''">
             <choose>
                 <when test="schType == 'all'">
-                    AND (INSTR(title, #{kwd}) &gt; 0 OR INSTR(content, #{kwd}) &gt; 0)
+                    AND (INSTR(n.title, #{kwd}) &gt; 0 OR INSTR(n.content, #{kwd}) &gt; 0)
                 </when>
                 <when test="schType == 'title'">
-                    AND INSTR(title, #{kwd}) &gt; 0
+                    AND INSTR(n.title, #{kwd}) &gt; 0
                 </when>
                 <when test="schType == 'content'">
-                    AND INSTR(content, #{kwd}) &gt; 0
+                    AND INSTR(n.content, #{kwd}) &gt; 0
                 </when>
             </choose>
         </if>
     </sql>
 
-	<select id="dataCount" parameterType="map" resultType="Integer">
+    <sql id="noticeAccess">
+        AND EXISTS (SELECT 1 FROM workspace_domains wd JOIN workspace_members actor ON actor.workspace_id = wd.workspace_id
+            WHERE wd.domain_key = #{domainKey} AND wd.active = 'Y'
+              AND actor.member_id = #{memberId} AND actor.status = 0
+              AND ((actor.role = 70 AND (n.workspace_id = wd.workspace_id OR EXISTS (
+                  SELECT 1 FROM projects p WHERE p.project_id = n.project_id AND p.workspace_id = wd.workspace_id AND p.deleted IS NULL)))
+                OR (n.notice_type = 'WORKSPACE' AND n.workspace_id = wd.workspace_id)
+                OR EXISTS (SELECT 1 FROM projects p JOIN project_members own ON own.project_id = p.project_id
+                    WHERE p.project_id = n.project_id AND p.workspace_id = wd.workspace_id AND p.deleted IS NULL
+                      AND own.workspace_member_id = actor.workspace_member_id AND own.role = 50 AND own.status = 0)))
+    </sql>
+    <select id="dataCount" parameterType="map" resultType="Integer">
         SELECT NVL(COUNT(*), 0)
-        FROM notice
-        WHERE deleted IS NULL
+        FROM notice n
+        WHERE n.deleted IS NULL
+        <include refid="noticeAccess"/>
         <include refid="where-list"/>
     </select>
 
@@ -30,11 +42,12 @@
 	<select id="selectNoticeList" parameterType="map" resultType="com.tk.app.domain.dto.ManageNoticeDto">
         SELECT n.notice_id, n.workspace_id, n.project_id, md.name AS member_name, n.task_id, n.member_id, n.notice_type, n.title, n.status, n.view_count, n.created,
             (SELECT COUNT(notice_file_id)
-             FROM notice_files f 
+             FROM notice_files f
              WHERE f.notice_id = n.notice_id) AS file_count
         FROM notice n
         LEFT JOIN member_details md ON n.member_id = md.member_id
         WHERE n.deleted IS NULL
+        <include refid="noticeAccess"/>
         <include refid="where-list"/>
         ORDER BY n.notice_id DESC
         OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
@@ -42,14 +55,14 @@
 
     <!-- 공지사항 상세 조회 -->
     <select id="selectNoticeDetail" parameterType="long" resultType="com.tk.app.domain.dto.ManageNoticeDto">
-        SELECT n.notice_id, n.workspace_id, n.project_id, n.task_id, n.member_id, 
+        SELECT n.notice_id, n.workspace_id, n.project_id, n.task_id, n.member_id,
             n.notice_type, n.title, n.content, n.created, n.updated, n.status, n.view_count,
             f.notice_file_id, f.file_size, f.original_name, f.stored_name, f.file_path, f.uploaded
         FROM notice n
         LEFT JOIN notice_files f ON n.notice_id = f.notice_id
         WHERE n.notice_id = #{notice_id} AND n.deleted IS NULL
     </select>
-    
+
     <!-- 조회수 증가 -->
     <update id="updateViewCount" parameterType="long">
         UPDATE notice
@@ -62,7 +75,7 @@
         <selectKey keyProperty="notice_id" resultType="long" order="BEFORE">
             SELECT seq_notice.NEXTVAL FROM DUAL
         </selectKey>
-        INSERT INTO notice (notice_id, notice_type, workspace_id, project_id, task_id, member_id, 
+        INSERT INTO notice (notice_id, notice_type, workspace_id, project_id, task_id, member_id,
             title, content, status, view_count, created)
         VALUES (#{notice_id}, #{notice_type}, #{workspace_id}, #{project_id}, #{task_id}, #{member_id},
             #{title}, #{content}, #{status}, 0, SYSDATE)
@@ -75,10 +88,18 @@
     </insert>
 
     <!-- 공지사항 게시글 수정 -->
+    <!-- 작성자 본인이고 현재 워크 또는 담당 프로젝트 권한이 있는 경우만 수정 -->
     <update id="updateNotice" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
-        UPDATE notice
-        SET title = #{title}, content = #{content}, status = #{status}, updated = SYSDATE
-        WHERE notice_id = #{notice_id}
+        UPDATE notice n SET title = #{title}, content = #{content}, status = #{status}, updated = SYSDATE
+        WHERE n.notice_id = #{notice_id} AND n.member_id = #{member_id} AND n.deleted IS NULL
+          AND EXISTS (SELECT 1 FROM workspace_members actor
+              WHERE actor.member_id = #{member_id} AND actor.status = 0
+                AND ((n.notice_type = 'WORKSPACE' AND n.workspace_id = actor.workspace_id AND actor.role = 70)
+                OR EXISTS (SELECT 1 FROM projects p WHERE p.project_id = n.project_id
+                    AND p.workspace_id = actor.workspace_id AND p.deleted IS NULL
+                    AND (actor.role = 70 OR EXISTS (SELECT 1 FROM project_members own
+                        WHERE own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
+                          AND own.status = 0 AND own.role = 50)))))
     </update>
 
     <!-- 공지사항 첨부파일 삭제 -->
@@ -87,31 +108,18 @@
         WHERE notice_id = #{notice_id}
     </delete>
 
-    <!-- 공지사항 삭제  -->
+    <!-- 삭제: 워크 PM 또는 담당 프로젝트 DT, 동일 워크스페이스 한정 -->
     <update id="deleteNotice" parameterType="map">
-        UPDATE notice
-        SET deleted = SYSDATE
-        WHERE notice_id = #{notice_id}
-          AND (
-              member_id = #{requester_member_id}
-              <!-- 조건: 요청자가 해당 워크스페이스의 PM(role=70)인 경우 -->
-              OR EXISTS (
-                  SELECT 1 
-                  FROM workspace_members wm 
-                  WHERE wm.workspace_id = notice.workspace_id 
-                    AND wm.member_id = #{requester_member_id} 
-                    AND wm.role = 70
-              )
-              
-              <!-- 조건: 요청자가 해당 프로젝트의 PM(role=70)인 경우 -->
-              OR EXISTS (
-                  SELECT 1 
-                  FROM project_members pm 
-                  WHERE pm.project_id = notice.project_id 
-                    AND pm.member_id = #{requester_member_id} 
-                    AND pm.role = 70
-              )
-          )
-	</update>
-	
+        UPDATE notice n SET deleted = SYSDATE
+        WHERE n.notice_id = #{notice_id} AND n.deleted IS NULL
+          AND EXISTS (SELECT 1 FROM workspace_members actor
+              WHERE actor.member_id = #{requester_member_id} AND actor.status = 0
+                AND ((n.notice_type = 'WORKSPACE' AND n.workspace_id = actor.workspace_id AND actor.role = 70)
+                OR EXISTS (SELECT 1 FROM projects p WHERE p.project_id = n.project_id
+                    AND p.workspace_id = actor.workspace_id AND p.deleted IS NULL
+                    AND (actor.role = 70 OR EXISTS (SELECT 1 FROM project_members own
+                        WHERE own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
+                          AND own.status = 0 AND own.role = 50)))))
+    </update>
+
 </mapper>

@@ -58,7 +58,7 @@
                                 <td class="meeting-writer">{{ meeting.authorName }}</td>
                             </tr>
                             <tr v-if="meetingList.length === 0">
-                                <td colspan="3" style="text-align:center; padding: 40px;">등록된 회의록이 없습니다.</td>
+                                <td colspan="4" style="text-align:center; padding: 40px;">등록된 회의록이 없습니다.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -69,7 +69,7 @@
 				        <span v-if="num === searchParams.page" class="project-current-page" aria-current="page">{{ num }}</span>
 				        <button v-else type="button" class="project-button" @click="fetchMeetingList(num)">{{ num }}</button>
 				    </template>
-				    <button type="button" class="project-button" :disabled="searchParams.page >= pageInfo.totalPage"@click="fetchMeetingList(searchParams.page + 1)">다음</button>
+				    <button type="button" class="project-button" :disabled="searchParams.page >= pageInfo.totalPage" @click="fetchMeetingList(searchParams.page + 1)">다음</button>
 				</nav>
             </div>
         </div>
@@ -90,9 +90,9 @@
                 </article>
                 <div class="shell-actions" style="margin-top:30px;">
                     <a href="#" class="shell-action" @click.prevent="viewMode = 'LIST'">← 목록으로</a>
-                    <div class="meeting-detail-buttons" v-if="currentMeeting.memberId === currentUser.id">
-                        <button type="button" class="shell-action shell-action-primary" @click="openMeetingEdit">수정</button>
-                        <button type="button" class="shell-action meeting-delete-button" @click="deleteMeetingAction">삭제</button>
+                    <div class="meeting-detail-buttons">
+                        <button v-if="currentMeeting.memberId === currentUser.id" type="button" class="shell-action shell-action-primary" @click="openMeetingEdit">수정</button>
+                        <button v-if="currentMeeting.canDelete" type="button" class="shell-action meeting-delete-button" @click="deleteMeetingAction">삭제</button>
                     </div>
                 </div>
             </div>
@@ -129,8 +129,8 @@
 <th:block layout:fragment="script">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="text/javascript">
-        const domainKey = '[[${domainKey}]]';
+    <script th:inline="javascript">
+        const domainKey = /*[[${domainKey}]]*/ "";
         const baseUrl = `/${domainKey}/manage/api/meetings`;
 
         const { createApp, ref, reactive, onMounted, computed } = Vue;

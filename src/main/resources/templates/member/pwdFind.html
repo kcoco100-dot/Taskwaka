@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+  	  
+<th:block layout:fragment="content">
+	<div class="section bg-light">
+		<div class="container">
+
+			<div class="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
+				<div class="col-md-5">
+					<div class="bg-white box-shadow my-5 p-5">
+						<h3 class="text-center pt-3">패스워드 찾기</h3>
+	                    
+						<form name="pwdForm" action="" method="post" class="row g-3 mb-2">
+							<div class="col-12">
+								<p class="form-control-plaintext text-center">
+									회원 아이디와 이름을 입력 하세요.
+								</p>
+							</div>
+							<div class="col-12">
+								<input type="text" name="login_id" class="form-control form-control-lg" placeholder="아이디">
+							</div>
+							<div class="col-12">
+								<input type="text" name="name" class="form-control form-control-lg" placeholder="이름">
+							</div>
+							<div class="col-12 text-center">
+								<button type="button" class="btn-accent btn-lg w-100" onclick="sendOk()">확인 <i class="bi bi-check2"></i></button>
+							</div>
+						</form>
+	                    
+						<div>
+							<p class="form-control-plaintext text-center text-danger" th:utext="${message}">메시지 입니다.</p>
+						</div>
+
+					</div>
+	
+				</div>
+			</div>
+
+		</div>
+	</div>
+</th:block>
+ 
+<th:block layout:fragment="script">
+	<script type="text/javascript">
+		function sendOk() {
+			const f = document.pwdForm;
+	
+			if(! f.login_id.value.trim()) {
+				alert('아이디를 입력하세요. ');
+				f.login_id.focus();
+				return;
+			}
+	
+			if(! f.name.value.trim()) {
+				alert('이름을 입력하세요. ');
+				f.name.focus();
+				return;
+			}
+
+			f.action = '[(@{/})]';
+			f.submit();
+		}
+	</script>
+</th:block>
+
+</html>

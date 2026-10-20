@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+<th:block layout:fragment="content">
+    <div class="section">
+        <div class="page-heading">
+            <h1 class="page-title">팀원 초대를 처리할 수 없습니다.</h1>
+            <p class="page-description" th:text="${message != null ? message : '초대 링크를 확인해주세요.'}">초대 링크를 확인해주세요.</p>
+        </div>
+        <a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}">홈으로 돌아가기</a>
+    </div>
+</th:block>
+</html>

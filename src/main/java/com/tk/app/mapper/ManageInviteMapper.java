@@ -10,12 +10,13 @@ import com.tk.app.domain.dto.ManageInviteDto;
 @Mapper
 public interface ManageInviteMapper {
     
-	public Long selectWorkspaceIdByDomainKey(String domainKey);
+    public Long selectWorkspaceIdByDomainKey(String domainKey);
+    public int countActiveWorkspacePm(Map<String, Object> map);
 	public List<ManageInviteDto> selectEligibleMembers(Map<String, Object> map);
 	public ManageInviteDto selectMemberInfoForInvite(Long memberId);
 	public void insertManageInvite(ManageInviteDto dto);
 	public ManageInviteDto selectManageInviteByKey(String inviteKey);
-	public void updateManageInviteAccept(ManageInviteDto dto);
+	public int updateManageInviteAccept(ManageInviteDto dto);
 	public void insertManageInviteMember(ManageInviteDto dto);
 	public List<ManageInviteDto> selectSearchEligibleMembers(Map<String, Object> map);
 }

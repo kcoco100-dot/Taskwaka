@@ -56,7 +56,7 @@
                 </div>
 
                 <div class="pd-summary-card">
-                    <span>프로젝트 책임자</span>
+                    <span>프로젝트 담당자 (PM · DT)</span>
                     <strong th:text="${project.pm_name != null ? project.pm_name : '미정'}">담당 PM</strong>
                     <small th:text="|참여 인원 ${project.member_count}명|">참여 인원</small>
                 </div>
@@ -104,8 +104,8 @@
 
                         <div style="display: flex; gap: 15px; justify-content: flex-end; align-items: center; margin-top: 10px;">
                             
-                            <button type="button" style="color: #007bff; background: none; border: none; font-weight: 500; font-size: 13px; cursor: pointer; padding: 0;" th:onclick="|toggleEditBox(${task.task_id})|">수정</button>
-                            <form method="post" class="pd-task-delete-form" style="margin: 0;" th:action="@{/{domainKey}/manage/detail/{projectId}/tasks/{taskId}/delete(domainKey=${domainKey}, projectId=${project.project_id}, taskId=${task.task_id})}" onsubmit="return handleTaskDelete(event, this);">
+                            <button th:if="${canEditProject}" type="button" style="color: #007bff; background: none; border: none; font-weight: 500; font-size: 13px; cursor: pointer; padding: 0;" th:onclick="|toggleEditBox(${task.task_id})|">수정</button>
+                            <form th:if="${canEditProject}" method="post" class="pd-task-delete-form" style="margin: 0;" th:action="@{/{domainKey}/manage/detail/{projectId}/tasks/{taskId}/delete(domainKey=${domainKey}, projectId=${project.project_id}, taskId=${task.task_id})}" onsubmit="return handleTaskDelete(event, this);">
                                 <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                                 <button type="submit" class="pd-delete-link" style="background: none; border: none; font-size: 13px; padding: 0; cursor: pointer; color: #dc3545;">삭제</button>
                             </form>
@@ -173,7 +173,7 @@
                     </div>
                 </div>
 
-                <details class="pd-task-create-box">
+                <details th:if="${canEditProject}" class="pd-task-create-box">
 
                     <summary class="pd-task-add-trigger">
                         <span class="pd-add-title">⊕ 새 업무 등록</span>
@@ -242,9 +242,9 @@
         </div>
 
         <div class="pd-bottom-actions">
-            <a class="project-button project-edit" th:href="@{/{domainKey}/manage/detail/{projectId}/update(domainKey=${domainKey}, projectId=${project.project_id})}">프로젝트 수정</a>
+            <a th:if="${canEditProject}" class="project-button project-edit" th:href="@{/{domainKey}/manage/detail/{projectId}/update(domainKey=${domainKey}, projectId=${project.project_id})}">프로젝트 수정</a>
 
-            <form method="post" th:action="@{/{domainKey}/manage/detail/{projectId}/delete(domainKey=${domainKey}, projectId=${project.project_id})}" onsubmit="return confirm('프로젝트를 삭제하시겠습니까?');">
+            <form th:if="${canEditProject}" method="post" th:action="@{/{domainKey}/manage/detail/{projectId}/delete(domainKey=${domainKey}, projectId=${project.project_id})}" onsubmit="return confirm('프로젝트를 삭제하시겠습니까?');">
                 <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button type="submit" class="project-button project-delete">프로젝트 삭제</button>
             </form>

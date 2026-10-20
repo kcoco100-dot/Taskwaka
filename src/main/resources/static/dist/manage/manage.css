@@ -1,4 +1,4 @@
-﻿@charset "UTF-8";
+@charset "UTF-8";
 
 /* 왼쪽 메뉴 전체 스크롤 */
 .manage-layout .sidemenu {
@@ -96,8 +96,10 @@
 
 /* 제목 아래 남은 공간을 채우는 박스 */
 .manage-content .member-content {
-    flex: 1;
+    flex: 0 0 auto;
     min-height: 200px;
+    height: auto;
+    overflow: visible;
     padding: 24px;
     border: 1px solid #E8E2D9;
     border-radius: 14px;
@@ -139,4 +141,49 @@
 .manage-layout .sidemenu .submenu .manage-menu-button:focus-visible {
     outline: 2px solid #71865B;
     outline-offset: -2px;
+}
+/* 팀원 명단은 프로젝트 수에 따라 늘어나며, 본문 영역에서만 세로 스크롤 */
+.manage-member-page > .manage-content {
+    overflow-y: auto;
+    min-height: 0;
+}
+.manage-member-page .member-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+.manage-member-page .member-table-wrap .project-list-table {
+    min-width: 1100px;
+    width: 100%;
+    margin-bottom: 0;
+}
+.manage-member-page .member-project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.manage-member-page .member-project-item {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+    white-space: normal;
+}
+.manage-member-page .member-role-item {
+    gap: 10px;
+    white-space: nowrap;
+}
+.manage-member-page .manage-member-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding-bottom: 4px;
+}
+.manage-member-page .manage-member-footer .project-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
