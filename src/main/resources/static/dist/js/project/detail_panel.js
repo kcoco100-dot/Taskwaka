@@ -42,7 +42,7 @@ function getTaskApiBaseUrl() {
 
 function getCurrentProjectMemberId() {
 	const panel = document.getElementById('taskDetailSidePanel');
-		return Number(panel.dataset.currentPmId);
+		return Number(panel.dataset.currentProjectMemberId);
 }
 
 /* ==========================================================================
@@ -158,7 +158,7 @@ async function openDetailPanel(taskId, rowElem) {
 
    		// [핵심] 로그인한 사용자가 해당 하위업무 담당자일 때만 수정 버튼 및 일일보고서 작성 폼 노출
    		const loginPmId = getCurrentProjectMemberId();
-   		const isSubTaskAssignee = Number(subTask.projectMemberId) === Number(loginPmId);
+   		const isSubTaskAssignee = Number(subTask.assigneeMemberId) === Number(loginPmId);
    		canEditCurrentSubTask = isSubTaskAssignee;
 
    		// 담당자 본인이면 조회 전용 해제(수정 버튼 노출), 아니면 조회 전용 배지 노출
@@ -336,8 +336,6 @@ async function saveDetailEditMode() {
 	}
 
 	const baseUrl = getTaskApiBaseUrl();
-	const fieldsToCheck = ['title', 'status', 'projectMemberId', 'startAt', 'endAt', 'progress', 'content'];
-
 	try {
 		for (const field of fieldsToCheck) {
 			if (!originalDetailSnapshot || String(originalDetailSnapshot[field]) !== String(newValues[field])) {
@@ -349,6 +347,7 @@ async function saveDetailEditMode() {
 						value: String(newValues[field])
 					})
 				});
+				console.log(res);
 				if (!res.ok) {
 					throw new Error(`${field} 업데이트 실패`);
 				}
@@ -369,7 +368,7 @@ async function saveDetailEditMode() {
 		}
 
 		const loginPmId = getCurrentProjectMemberId();
-		const isSubTaskAssignee = Number(newValues.projectMemberId) === Number(loginPmId);
+		const isSubTaskAssignee = Number(newValues.assigneeMemberId) === Number(loginPmId);
 		canEditCurrentSubTask = isSubTaskAssignee; // [추가] 담당자가 다른 사람으로 바뀌었으면 수정 권한도 즉시 회수
 		const reportWriteBox = document.getElementById('dailyReportWriteFormBox');
 		if (reportWriteBox) {

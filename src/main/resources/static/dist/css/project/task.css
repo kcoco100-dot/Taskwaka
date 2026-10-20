@@ -328,6 +328,12 @@
 	overflow: hidden;
 }
 
+.detail-top-nav{
+	padding : 20px 26px 5px;
+	display: flex;
+	gap: 10px;
+}
+
 .create-modal-body {
 	padding: 22px 26px;
 	overflow-y: auto;
@@ -460,4 +466,245 @@
 	justify-content: flex-end;
 	gap: 8px;
 	margin-top: 6px;
+}
+
+/* ==========================================================================
+   [Taskwaka] 하위업무 등록 모달 전용 스타일 (독립 클래스)
+   ========================================================================== */
+
+/* 모달 백드롭 배경 */
+.custom-modal-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(43, 36, 29, 0.45);
+	backdrop-filter: blur(2px);
+	display: none; /* 기본 숨김, JS 오픈 시 flex로 변경 */
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+}
+
+/* 모달 카드 컨테이너 */
+.task-create-modal-card {
+	width: 520px;
+	max-width: 92vw;
+	background: #FCFBF8;
+	border-radius: 12px;
+	border: 1px solid #E6E0D6;
+	box-shadow: 0 16px 40px rgba(59, 45, 31, 0.22);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	animation: modalSlideUp 0.2s ease-out;
+}
+
+@keyframes modalSlideUp {
+	from { opacity: 0; transform: translateY(12px) scale(0.98); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 모달 상단 헤더 */
+.modal-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 20px;
+	border-bottom: 1px solid #EFEAE1;
+	background: #FAF7F2;
+}
+
+.modal-header-title-box {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #4F6242;
+}
+
+.modal-close-btn {
+	background: transparent;
+	border: none;
+	color: #9E9284;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px 6px;
+	border-radius: 4px;
+	line-height: 1;
+}
+.modal-close-btn:hover {
+	background: #EAE3D6;
+	color: #2B241D;
+}
+
+/* 모달 본문 */
+.create-modal-body {
+	padding: 20px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+/* 제목 입력 */
+.modal-title-row {
+	width: 100%;
+}
+
+.modal-title-input {
+	width: 100%;
+	font-size: 16px;
+	font-weight: 700;
+	color: #2B241D;
+	background: #FFFFFF;
+	border: 1px solid #DCD3C6;
+	border-radius: 8px;
+	padding: 10px 14px;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+.modal-title-input:focus {
+	border-color: #71865B;
+	box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.15);
+}
+
+/* 속성 카드 영역 */
+.modal-props-card {
+	background: #F7F4EE;
+	border-radius: 10px;
+	border: 1px solid #E6E0D6;
+	padding: 14px 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.modal-prop-row {
+	display: grid;
+	grid-template-columns: 85px 1fr;
+	align-items: center;
+	font-size: 13px;
+}
+
+.modal-prop-label {
+	color: #786B5E;
+	font-weight: 600;
+	font-size: 12.5px;
+}
+
+.modal-prop-control {
+	display: flex;
+	align-items: center;
+}
+
+.req-star {
+	color: #B84A39;
+	margin-left: 2px;
+}
+
+/* 입력 필드 공통 (담당자, 시작일, 마감일) */
+.modal-form-select,
+.modal-form-date {
+	font-family: inherit;
+	font-size: 13px;
+	color: #2B241D;
+	background: #FFFFFF;
+	border: 1px solid #DCD3C6;
+	border-radius: 6px;
+	padding: 6px 10px;
+	outline: none;
+	cursor: pointer;
+	transition: border-color 0.15s;
+}
+
+.modal-form-select {
+	width: 200px;
+}
+
+.modal-form-date {
+	width: 160px;
+}
+
+.modal-form-select:focus,
+.modal-form-date:focus {
+	border-color: #71865B;
+}
+
+/* 상세 내용 입력 */
+.modal-section-block {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.modal-section-label {
+	font-size: 13px;
+	font-weight: 700;
+	color: #594331;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.modal-form-textarea {
+	width: 100%;
+	min-height: 110px;
+	background: #FFFFFF;
+	border: 1px solid #DCD3C6;
+	border-radius: 8px;
+	padding: 10px 12px;
+	color: #2B241D;
+	font-size: 13px;
+	line-height: 1.5;
+	resize: vertical;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.15s;
+}
+.modal-form-textarea:focus {
+	border-color: #71865B;
+	box-shadow: 0 0 0 2px rgba(113, 134, 91, 0.12);
+}
+
+/* 모달 하단 푸터 */
+.create-modal-footer {
+	padding: 14px 24px;
+	border-top: 1px solid #EFEAE1;
+	background: #FAF7F2;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.btn-modal-cancel {
+	padding: 7px 14px;
+	border-radius: 6px;
+	border: 1px solid #DCD3C6;
+	background: #FFFFFF;
+	color: #786B5E;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.btn-modal-cancel:hover {
+	background: #F3EFE8;
+}
+
+.btn-modal-submit {
+	padding: 7px 16px;
+	border-radius: 6px;
+	border: none;
+	background: #4F6242;
+	color: #FFFFFF;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+.btn-modal-submit:hover {
+	background: #3E4E33;
 }

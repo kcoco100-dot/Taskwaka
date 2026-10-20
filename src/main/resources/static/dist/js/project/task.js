@@ -40,6 +40,7 @@ async function requestCreateSubTask(taskId) {
   assigneeSelect.innerHTML = '<option value="">불러오는 중...</option>';
   try {
     const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${taskId}/members`);
+	console.log(res);
     if (res.ok) {
       const members = await res.json();
       assigneeSelect.innerHTML = '';
@@ -79,7 +80,7 @@ function cycleCreateModalStatus() {
   const next = panelStatusMap[createSubModalContext.statusCode];
   document.getElementById('createStatusBadge').className = 'badge-status ' + next.class;
   document.getElementById('createStatusText').textContent = next.text;
-}
+}//panelStatusMap 정의 필요 ... 
 
 async function submitCreateSubTaskModal() {
   const taskId = createSubModalContext.parentTaskId;
@@ -106,7 +107,6 @@ async function submitCreateSubTaskModal() {
   formData.append('content', content);
   formData.append('projectMemberId', projectMemberId);
   formData.append('status', createSubModalContext.statusCode);
-  formData.append('currentProjectMemberId', currentProjectMemberId);
   if (startAt) formData.append('startAt', startAt);
   if (endAt) formData.append('endAt', endAt);
 
@@ -137,11 +137,6 @@ async function submitCreateSubTaskModal() {
         }
       }
     }
-
-    if (activePanelContext.type === 'task' && Number(activePanelContext.id) === Number(taskId)) {
-      await openDetailPanel(taskId, activePanelContext.rowElem);
-    }
-
     closeCreateTaskModal();
   } catch (err) {
     console.error('하위업무 등록 오류:', err);
@@ -192,9 +187,7 @@ async function executeConfirmedDelete() {
       }
     }
 
-    if (activePanelContext.type === 'subtask' && Number(activePanelContext.id) === Number(targetId)) {
       closeDetailPanel();
-    }
 
     closeDeleteModal();
   } catch (err) {

@@ -7,6 +7,7 @@
         <id property="taskId" column="task_id"/>
         <result property="projectId" column="project_id"/>
         <result property="projectMemberId" column="project_member_id"/>
+        <result property="assigneeMemberId" column="member_id"/>
         <result property="assigneeName" column="assignee_name"/>
         <result property="title" column="title"/>
         <result property="content" column="content" jdbcType="CLOB" javaType="java.lang.String"/>
@@ -27,6 +28,7 @@
             t.task_id,
             t.project_id,
             t.project_member_id,
+            wm.member_id,
             NVL(md.name, '담당자#' || t.project_member_id) AS assignee_name,
             t.title,
             t.content,
@@ -77,6 +79,7 @@
             st.task_id AS taskId,
             st.project_id AS projectId,
             st.project_member_id AS projectMemberId,
+            wm.member_id AS assigneeMemberId,
             NVL(md.name, '담당자#' || st.project_member_id) AS assigneeName,
             st.title,
             st.content,
@@ -102,6 +105,7 @@
             st.task_id AS taskId,
             st.project_id AS projectId,
             st.project_member_id AS projectMemberId,
+            wm.member_id AS assigneeMemberId,
             NVL(md.name, '담당자#' || st.project_member_id) AS assigneeName,
             st.title,
             st.content,

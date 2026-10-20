@@ -5,7 +5,7 @@
 	     [공통 프래그먼트] 우측 오버레이 상세 패널 (업무 탭 / 간트차트 탭 / 캘린더 탭 공용)
 	     사용법: <aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
 	     ========================================================================== -->
-	<aside th:fragment="detailPanel" class="common-detail-panel" id="taskDetailSidePanel">
+	<aside th:fragment="detailPanel" class="common-detail-panel" id="taskDetailSidePanel" th:attr="data-current-project-member-id =${currentProjectMemberId}">
 		<link rel="stylesheet" th:href="@{/dist/css/project/detail_panel.css}">
 
 		<div class="pane-resizer-bar" id="paneResizerBar" title="좌우로 드래그하여 패널 너비 조절"></div>
@@ -27,8 +27,6 @@
 
 				<!-- 우측 상단 컨트롤 버튼 영역 -->
 				<div class="detail-header-tools">
-					<span class="readonly-notice-badge" id="detailReadonlyBadge" style="display:none;">조회 전용</span>
-
 					<!-- [조회 모드] 하위업무일 때 노출되는 수정/삭제 버튼 -->
 					<button type="button" class="btn-detail-action-edit" id="btnDetailEditMode" style="display:none;" onclick="enterDetailEditMode()" title="내용 수정">수정</button>
 					<button type="button" class="btn-detail-top-del" id="btnDetailDeleteSubtask" style="display:none;" onclick="requestDeleteCurrentSubTask()" title="하위업무 삭제">삭제</button>

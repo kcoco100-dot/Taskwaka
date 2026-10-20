@@ -32,63 +32,8 @@
 			<!-- 공통 우측 상세 패널 Include -->
 			<aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
 		</div>
-
-		<!-- 하위업무 등록 모달 -->
-		<div class="custom-modal-backdrop" id="taskCreateModal" onclick="handleCreateBackdropClick(event)">
-			<div class="task-create-modal-card">
-				<div class="detail-top-nav">
-					<div style="display:flex; align-items:center; gap:6px;">
-						<span>🌿</span>
-						<span id="createModalHeaderTitle">새 하위업무 등록</span>
-					</div>
-					<button type="button" class="detail-close-btn" onclick="closeCreateTaskModal()" title="닫기 (ESC)">✕</button>
-				</div>
-
-				<div class="create-modal-body">
-					<div class="detail-title-row">
-						<input type="text" class="create-title-input" id="createTaskTitleInput" placeholder="하위업무 제목을 입력하세요 *">
-					</div>
-
-					<div class="create-props-card">
-						<div class="detail-prop-row">
-							<span class="prop-label">상태</span>
-							<div>
-								<span class="badge-status badge-req" id="createStatusBadge" onclick="cycleCreateModalStatus()">
-									<span id="createStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
-								</span>
-							</div>
-						</div>
-
-						<div class="detail-prop-row">
-							<span class="prop-label">담당자<span class="req-star">*</span></span>
-							<select class="inline-edit-select" id="createAssigneeSelect" style="width: 180px; padding: 5px 8px;"></select>
-						</div>
-
-						<div class="detail-prop-row">
-							<span class="prop-label">시작일</span>
-							<input type="date" class="inline-edit-date" id="createStartDateInput" style="width: 150px; padding: 4px 8px;">
-						</div>
-
-						<div class="detail-prop-row">
-							<span class="prop-label">마감일</span>
-							<input type="date" class="inline-edit-date" id="createEndDateInput" style="width: 150px; padding: 4px 8px;">
-						</div>
-					</div>
-
-					<div class="detail-section-block">
-						<label class="detail-block-title" for="createTaskContentInput">
-							<span>📄 상세 내용<span class="req-star">*</span></span>
-						</label>
-						<textarea class="detail-desc-textarea" id="createTaskContentInput" style="min-height: 120px;" placeholder="하위업무에 대한 상세 설명을 입력해 주세요..."></textarea>
-					</div>
-				</div>
-
-				<div class="create-modal-footer">
-					<button type="button" class="btn-modal-cancel" onclick="closeCreateTaskModal()">취소</button>
-					<button type="button" class="btn-modal-submit" onclick="submitCreateSubTaskModal()">하위업무 등록</button>
-				</div>
-			</div>
-		</div>
+		
+		<div th:replace="~{project/fragments/task_items :: taskCreateModal}"></div>
 
 		<!-- 삭제 확인 모달 -->
 		<div class="custom-modal-backdrop" id="deleteConfirmModal" onclick="handleBackdropClick(event)">

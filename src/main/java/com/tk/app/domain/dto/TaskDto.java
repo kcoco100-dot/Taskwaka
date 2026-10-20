@@ -8,6 +8,7 @@ public class TaskDto {
     private Long taskId;
     private Long projectId;
     private Long projectMemberId; // 지명된 메인 업무 담당자 번호
+    private Long assigneeMemberId; // 지명된 메인 업무 담당자 멤버 아이디
     private String assigneeName;  // 담당자 실명 (member_details.name 조인)
     private String title;
     private String content;

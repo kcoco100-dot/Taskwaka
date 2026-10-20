@@ -36,7 +36,7 @@ public class ProjectController {
     	log.info("currentProjectMemberId: " + currentProjectMemberId);
     	
      // 탭 정규식 허용 범위에 notice 추가
-        if (!tab.matches("notice|dashboard|task|gantt|calendar|file|document")) {
+        if (!tab.matches("notice|dashboard|task|gantt|calendar|document")) {
             tab = "dashboard";
         }
 

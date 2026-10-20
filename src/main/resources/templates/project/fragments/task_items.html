@@ -3,56 +3,67 @@
 <body>
 
 	<!-- 메인 업무 행 (조회 전용 + 상위 업무 담당자에게만 '+ 하위업무 추가' 버튼 노출) -->
-	<li th:fragment="mainTaskItem" class="task-branch" th:attr="data-task-id=${task.taskId}">
+	<li th:fragment="mainTaskItem" class="task-branch"
+		th:attr="data-task-id=${task.taskId}">
 		<div class="task-item-row main-task task-grid-columns"
-		     th:onclick="|openDetailPanel(${task.taskId}, this)|">
+			th:onclick="|openDetailPanel(${task.taskId}, this)|">
 
 			<div class="col-task-name">
 				<span class="btn-toggle-box task-toggle"
-				      th:if="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}"
-				      onclick="event.stopPropagation(); toggleSubTasks(this)">－</span>
-				<span style="width:20px; display:inline-block; flex-shrink:0;"
-				      th:unless="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}"></span>
+					th:if="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}"
+					onclick="event.stopPropagation(); toggleSubTasks(this)">－</span> <span
+					style="width: 20px; display: inline-block; flex-shrink: 0;"
+					th:unless="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}"></span>
 
 				<span class="task-title-text" th:text="${task.title}">메인 업무명</span>
 
-				<span style="font-size:12px; color:var(--text-muted);"
-				      th:if="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}">
+				<span style="font-size: 12px; color: var(--text-muted);"
+					th:if="${task.subTasks != null and !#lists.isEmpty(task.subTasks)}">
 					(<span class="sub-count" th:text="${#lists.size(task.subTasks)}">0</span>)
 				</span>
 
 				<!-- 권한 제어(th:if): 메인 업무 담당자에게만 하위업무 추가 버튼 표시 -->
 				<span class="inline-action-bundle"
-				      th:if="${task.projectMemberId == currentProjectMemberId}"
-				      onclick="event.stopPropagation();">
+					th:if="${task.assigneeMemberId == currentProjectMemberId}"
+					onclick="event.stopPropagation();">
 					<button type="button" class="btn-action-tool btn-action-add"
-					        th:onclick="|requestCreateSubTask(${task.taskId})|"
-					        title="하위업무 추가">＋</button>
+						th:onclick="|requestCreateSubTask(${task.taskId})|"
+						title="하위업무 추가">＋</button>
 				</span>
 			</div>
 
 			<div>
 				<span class="badge-status"
-				      th:classappend="${task.status == 1 or task.status == 3} ? 'badge-done' : (${task.status == 2} ? 'badge-feedback' : (${task.status == 4} ? 'badge-hold' : 'badge-req'))"
-				      th:text="${task.status == 1 ? '● 진행' : (task.status == 2 ? '● 피드백' : (task.status == 3 ? '● 완료' : (task.status == 4 ? '● 보류' : '● 요청')))}">● 요청</span>
+					th:classappend="${task.status == 1 or task.status == 3} ? 'badge-done' : (${task.status == 2} ? 'badge-feedback' : (${task.status == 4} ? 'badge-hold' : 'badge-req'))"
+					th:text="${task.status == 1 ? '● 진행' : (task.status == 2 ? '● 피드백' : (task.status == 3 ? '● 완료' : (task.status == 4 ? '● 보류' : '● 요청')))}">●
+					요청</span>
 			</div>
 
-			<div class="col-assignee" th:text="${task.assigneeName != null ? task.assigneeName : ('담당자#' + task.projectMemberId)}">담당자</div>
-			<div class="date-cell" th:text="${task.startAt != null ? task.startAt : '-'}">-</div>
-			<div class="date-cell" th:classappend="${task.endAt != null} ? 'text-danger'" th:text="${task.endAt != null ? task.endAt : '-'}">-</div>
+			<div class="col-assignee"
+				th:text="${task.assigneeName != null ? task.assigneeName : ('담당자#' + task.projectMemberId)}">담당자</div>
+			<div class="date-cell"
+				th:text="${task.startAt != null ? task.startAt : '-'}">-</div>
+			<div class="date-cell"
+				th:classappend="${task.endAt != null} ? 'text-danger'"
+				th:text="${task.endAt != null ? task.endAt : '-'}">-</div>
 			<div>
 				<div class="progress-cell">
 					<div class="progress-bar-bg">
-						<div class="progress-bar-fill" th:style="|width: ${task.progress != null ? task.progress : 0}%;|"></div>
+						<div class="progress-bar-fill"
+							th:style="|width: ${task.progress != null ? task.progress : 0}%;|"></div>
 					</div>
-					<span class="progress-text" style="font-size:11.5px;" th:text="|${task.progress != null ? #numbers.formatInteger(task.progress, 1) : 0}%|">0%</span>
+					<span class="progress-text" style="font-size: 11.5px;"
+						th:text="|${task.progress != null ? #numbers.formatInteger(task.progress, 1) : 0}%|">0%</span>
 				</div>
 			</div>
-			<div style="font-size:11.5px; color:var(--text-muted);" th:text="${task.created != null ? task.created : '-'}">-</div>
-			<div style="font-size:11.5px; color:var(--text-muted);" th:text="${task.updated != null ? task.updated : '-'}">-</div>
+			<div style="font-size: 11.5px; color: var(--text-muted);"
+				th:text="${task.created != null ? task.created : '-'}">-</div>
+			<div style="font-size: 11.5px; color: var(--text-muted);"
+				th:text="${task.updated != null ? task.updated : '-'}">-</div>
 		</div>
 
-		<ul class="sub-task-list" style="list-style:none; margin:0; padding:0;">
+		<ul class="sub-task-list"
+			style="list-style: none; margin: 0; padding: 0;">
 			<th:block th:if="${task.subTasks != null}">
 				<th:block th:each="subTask : ${task.subTasks}">
 					<li th:replace="~{project/fragments/task_items :: subTaskItem}"></li>
@@ -63,47 +74,130 @@
 
 	<!-- 하위 업무 행 (클릭 시 우측 상세 패널 오픈) -->
 	<li th:fragment="subTaskItem"
-	    class="task-item-row sub-task task-grid-columns"
-	    th:attr="data-subtask-id=${subTask.subTaskId}, data-parent-task-id=${subTask.taskId}"
-	    th:onclick="|openSubTaskDetailPanel(${subTask.subTaskId}, this)|">
+		class="task-item-row sub-task task-grid-columns"
+		th:attr="data-subtask-id=${subTask.subTaskId}, data-parent-task-id=${subTask.taskId}"
+		th:onclick="|openSubTaskDetailPanel(${subTask.subTaskId}, this)|">
 
 		<div class="col-task-name indent-sub">
-			<span style="color:var(--text-muted); font-size:12px;">ㄴ</span>
-			<span class="task-title-text" th:text="${subTask.title}">하위업무명</span>
-
-			<span class="my-subtask-tag"
-			      th:if="${subTask.projectMemberId == currentProjectMemberId}"
-			      title="내 담당 하위업무">📝 내 담당</span>
-
-			<span class="inline-action-bundle" onclick="event.stopPropagation();">
+			<span style="color: var(--text-muted); font-size: 12px;">ㄴ</span> 
+			<span class="task-title-text" th:text="${subTask.title}">하위업무명</span> 
+			<div th:if="${subTask.assigneeMemberId == currentProjectMemberId}">
+			<span class="inline-action-bundle"
+				onclick="event.stopPropagation();">
 				<button type="button" class="btn-action-tool btn-action-del"
-				        th:onclick="|openDeleteModal('subtask', ${subTask.subTaskId}, this)|"
-				        title="하위업무 삭제">
-					<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+					th:onclick="|openDeleteModal('subtask', ${subTask.subTaskId}, this)|"
+					title="하위업무 삭제">
+					<svg viewBox="0 0 24 24">
+						<polyline points="3 6 5 6 21 6"></polyline>
+						<path
+							d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
 				</button>
-			</span>
+			</span>			
+			</div>
 		</div>
 
 		<div>
 			<span class="badge-status"
-			      th:classappend="${subTask.status == 1 or subTask.status == 3} ? 'badge-done' : (${subTask.status == 2} ? 'badge-feedback' : (${subTask.status == 4} ? 'badge-hold' : 'badge-req'))"
-			      th:text="${subTask.status == 1 ? '● 진행' : (subTask.status == 2 ? '● 피드백' : (subTask.status == 3 ? '● 완료' : (subTask.status == 4 ? '● 보류' : '● 요청')))}">● 요청</span>
+				th:classappend="${subTask.status == 1 or subTask.status == 3} ? 'badge-done' : (${subTask.status == 2} ? 'badge-feedback' : (${subTask.status == 4} ? 'badge-hold' : 'badge-req'))"
+				th:text="${subTask.status == 1 ? '● 진행' : (subTask.status == 2 ? '● 피드백' : (subTask.status == 3 ? '● 완료' : (subTask.status == 4 ? '● 보류' : '● 요청')))}">●
+				요청</span>
 		</div>
 
-		<div class="col-assignee" th:text="${subTask.assigneeName != null ? subTask.assigneeName : ('담당자#' + subTask.projectMemberId)}">담당자</div>
-		<div class="date-cell" th:text="${subTask.startAt != null ? subTask.startAt : '-'}">-</div>
-		<div class="date-cell" th:classappend="${subTask.endAt != null} ? 'text-danger'" th:text="${subTask.endAt != null ? subTask.endAt : '-'}">-</div>
+		<div class="col-assignee"
+			th:text="${subTask.assigneeName != null ? subTask.assigneeName : ('담당자#' + subTask.projectMemberId)}">담당자</div>
+		<div class="date-cell"
+			th:text="${subTask.startAt != null ? subTask.startAt : '-'}">-</div>
+		<div class="date-cell"
+			th:classappend="${subTask.endAt != null} ? 'text-danger'"
+			th:text="${subTask.endAt != null ? subTask.endAt : '-'}">-</div>
 		<div>
 			<div class="progress-cell">
 				<div class="progress-bar-bg">
-					<div class="progress-bar-fill" th:style="|width: ${subTask.progress != null ? subTask.progress : 0}%;|"></div>
+					<div class="progress-bar-fill"
+						th:style="|width: ${subTask.progress != null ? subTask.progress : 0}%;|"></div>
 				</div>
-				<span class="progress-text" style="font-size:11.5px;" th:text="|${subTask.progress != null ? #numbers.formatInteger(subTask.progress, 1) : 0}%|">0%</span>
+				<span class="progress-text" style="font-size: 11.5px;"
+					th:text="|${subTask.progress != null ? #numbers.formatInteger(subTask.progress, 1) : 0}%|">0%</span>
 			</div>
 		</div>
-		<div style="font-size:11.5px; color:var(--text-muted);" th:text="${subTask.created != null ? subTask.created : '-'}">-</div>
-		<div style="font-size:11.5px; color:var(--text-muted);" th:text="${subTask.updated != null ? subTask.updated : '-'}">-</div>
+		<div style="font-size: 11.5px; color: var(--text-muted);"
+			th:text="${subTask.created != null ? subTask.created : '-'}">-</div>
+		<div style="font-size: 11.5px; color: var(--text-muted);"
+			th:text="${subTask.updated != null ? subTask.updated : '-'}">-</div>
 	</li>
+	
+<!-- 하위업무 등록 모달 -->
+<div 
+	th:fragment="taskCreateModal"
+	class="custom-modal-backdrop" 
+	id="taskCreateModal" 
+	onclick="handleCreateBackdropClick(event)">
+	<div class="task-create-modal-card">
+		<!-- 모달 헤더 -->
+		<div class="modal-card-header">
+			<div class="modal-header-title-box">
+				<span>🌿</span>
+				<span id="createModalHeaderTitle">새 하위업무 등록</span>
+			</div>
+			<button type="button" class="modal-close-btn" onclick="closeCreateTaskModal()" title="닫기 (ESC)">✕</button>
+		</div>
+
+		<!-- 모달 본문 -->
+		<div class="create-modal-body">
+			<!-- 제목 입력 영역 -->
+			<div class="modal-title-row">
+				<input type="text" class="modal-title-input" id="createTaskTitleInput" placeholder="하위업무 제목을 입력하세요 *">
+			</div>
+
+			<!-- 속성 카드 (상태, 담당자, 시작일, 마감일) -->
+			<div class="modal-props-card">
+				<div class="modal-prop-row">
+					<span class="modal-prop-label">상태</span>
+					<div class="modal-prop-control">
+						<span class="badge-status badge-req" id="createStatusBadge" onclick="cycleCreateModalStatus()">
+							<span id="createStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
+						</span>
+					</div>
+				</div>
+
+				<div class="modal-prop-row">
+					<span class="modal-prop-label">담당자<span class="req-star">*</span></span>
+					<div class="modal-prop-control">
+						<select class="modal-form-select" id="createAssigneeSelect"></select>
+					</div>
+				</div>
+
+				<div class="modal-prop-row">
+					<span class="modal-prop-label">시작일</span>
+					<div class="modal-prop-control">
+						<input type="date" class="modal-form-date" id="createStartDateInput">
+					</div>
+				</div>
+
+				<div class="modal-prop-row">
+					<span class="modal-prop-label">마감일</span>
+					<div class="modal-prop-control">
+						<input type="date" class="modal-form-date" id="createEndDateInput">
+					</div>
+				</div>
+			</div>
+
+			<!-- 상세 내용 입력 영역 -->
+			<div class="modal-section-block">
+				<label class="modal-section-label" for="createTaskContentInput">
+					<span>📄 상세 내용<span class="req-star">*</span></span>
+				</label>
+				<textarea class="modal-form-textarea" id="createTaskContentInput" placeholder="하위업무에 대한 상세 설명을 입력해 주세요..."></textarea>
+			</div>
+		</div>
+
+		<!-- 모달 푸터 (버튼) -->
+		<div class="create-modal-footer">
+			<button type="button" class="btn-modal-cancel" onclick="closeCreateTaskModal()">취소</button>
+			<button type="button" class="btn-modal-submit" onclick="submitCreateSubTaskModal()">하위업무 등록</button>
+		</div>
+	</div>
+</div>
 
 </body>
 </html>

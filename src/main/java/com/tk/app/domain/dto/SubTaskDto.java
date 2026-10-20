@@ -9,6 +9,7 @@ public class SubTaskDto {
     private Long taskId;
     private Long projectId;
     private Long projectMemberId; // 지명된 하위업무 담당자 번호
+    private Long assigneeMemberId; // 지명된 하위업무 담당자 번호
     private String assigneeName;  // 하위업무 담당자 실명
     private String title;
     private String content;
