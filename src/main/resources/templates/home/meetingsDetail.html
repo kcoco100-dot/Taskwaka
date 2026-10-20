@@ -36,7 +36,25 @@
 
                 <div class="meeting-detail-body"
                      th:text="${meeting.content}"></div>
+                  <div class="meeting-navigation">
+		            		<p class="notice-navigation">이전글:
+							<a th:if="${prevMeeting != null}"
+							   th:href="@{/{domainKey}/home/meetingsDetail(domainKey=${domainKey}, 
+							   	meetingMinuteId=${prevMeeting.meetingMinuteId})}"
+							   th:text="${prevMeeting.title}">이전글 제목</a>
+							<span th:if="${prevMeeting == null}">이전글이 없습니다.</span>
+						</p>
+						
+						<p class="notice-navigation">다음글:
+							<a th:if="${nextMeeting != null}"
+							   th:href="@{/{domainKey}/home/meetingsDetail(domainKey=${domainKey}, 
+							   	meetingMinuteId=${nextMeeting.meetingMinuteId})}"
+							   th:text="${nextMeeting.title}">다음글 제목</a>
+							<span th:if="${nextMeeting == null}">다음글이 없습니다.</span>
+						</p>
+				 </div>
             </article>
+            
 
 			<div class="shell-actions">
 			    <a class="shell-action"

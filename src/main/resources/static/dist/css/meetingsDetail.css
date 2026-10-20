@@ -60,3 +60,72 @@
     background: #FBE5E1;
     color: #89382F;
 }
+
+.meeting-detail-page .meeting-navigation {
+    margin-top: 28px;
+    border-top: 1px solid #E8E2D9;
+}
+
+.meeting-detail-page .meeting-navigation > .notice-navigation {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    min-height: 56px;
+    margin: 0;
+    padding: 16px 4px;
+    border: 0;
+    border-bottom: 1px solid #EEE8E0;
+    border-radius: 0;
+    background: transparent;
+    color: #8B7E71;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.meeting-detail-page .meeting-navigation > .notice-navigation::before {
+    content: "↑";
+    flex: 0 0 18px;
+    color: #9A8D80;
+    font-size: 16px;
+    text-align: center;
+}
+
+.meeting-detail-page .meeting-navigation > .notice-navigation + .notice-navigation::before {
+    content: "↓";
+}
+
+.meeting-detail-page .meeting-navigation a,
+.meeting-detail-page .meeting-navigation span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meeting-detail-page .meeting-navigation a {
+    color: #493B2F;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.meeting-detail-page .meeting-navigation a:hover {
+    color: #4F6242;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.meeting-detail-page .meeting-navigation a:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+.meeting-detail-page .meeting-navigation span {
+    color: #A69B8F;
+    font-weight: 400;
+}

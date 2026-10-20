@@ -33,6 +33,18 @@ public interface MeetingMinutesMapper {
 			@Param("memberId") long memberId,
 			@Param("meetingMinuteId") long meetingMinuteId);
 	
+	// 회의록 이전글
+	public MeetingMinutesDto findByPrevMeeting(
+			@Param("workspaceId") long workspaceId,
+			@Param("memberId") long memberId,
+			@Param("meetingMinuteId") long meetingMinuteId);
+	
+	// 회의록 다음글
+	public MeetingMinutesDto findByNextMeeting(
+			@Param("workspaceId") long workspaceId,
+			@Param("memberId") long memberId,
+			@Param("meetingMinuteId") long meetingMinuteId);
+	
 	// 회의록 제목 및 내용 수정
 	public int meetingsEdit(
 			@Param("workspaceId") long workspaceId,

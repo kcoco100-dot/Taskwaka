@@ -67,4 +67,18 @@ public class MeetingMinutesService {
 		
 		return meetingMinutesMapper.meetingsDelete(workspaceId, memberId, meetingMinuteId);
 	}
+	
+	// 이전글
+	public MeetingMinutesDto findByPrevMeeting(
+			long workspaceId, long memberId, long meetingMinuteId) {
+		
+		return meetingMinutesMapper.findByPrevMeeting(workspaceId, memberId, meetingMinuteId);
+	}
+	
+	// 다음글
+	public MeetingMinutesDto findByNextMeeting(
+			long workspaceId, long memberId, long meetingMinuteId) {
+		
+		return meetingMinutesMapper.findByNextMeeting(workspaceId, memberId, meetingMinuteId);
+	}
 }

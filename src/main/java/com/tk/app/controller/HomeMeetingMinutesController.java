@@ -127,8 +127,13 @@ public class HomeMeetingMinutesController {
 					model.addAttribute("message", "회의록을 찾을 수 없습니다.");
 					return "error/error2";
 				}
+				
+				MeetingMinutesDto prevMeeting = meetingMinutesService.findByPrevMeeting(workspace.getWorkspaceId(), workspace.getMemberId(), meetingMinuteId);
+				MeetingMinutesDto nextMeeting = meetingMinutesService.findByNextMeeting(workspace.getWorkspaceId(), workspace.getMemberId(), meetingMinuteId);
 
 				model.addAttribute("meeting", meeting);
+				model.addAttribute("prevMeeting", prevMeeting);
+				model.addAttribute("nextMeeting", nextMeeting);
 
 				return "home/meetingsDetail";
 				
