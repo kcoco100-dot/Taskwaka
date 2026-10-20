@@ -88,6 +88,12 @@ public interface GrowthTreeMapper {
 	// 회수 시간을 기록할 메서드
 	public int markTeamReportCreateExpLogRevoked(GrowthExpLogDto dto);
 
-	// 삭제 전에 보고서의 실제 소속 조회
+	// 업무 보고서 삭제 전에 보고서의 실제 소속 조회
 	public Map<String, Object> selectTeamReportDeleteContext(Map<String, Object> params);
+
+	// 업무 보고서 삭제 전 보고서 잠금
+	public Long lockTeamReportForDelete(Map<String, Object> params);
+
+	// 업무 보고서 등록 시 보상에 사용할 실제 워크번호 조회
+	public Map<String, Object> selectTeamReportCreateContext(Map<String, Object> params);
 }

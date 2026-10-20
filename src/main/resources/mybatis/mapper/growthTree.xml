@@ -319,6 +319,7 @@
 	 			WHERE pm.project_id = p.project_id
 	 				AND wm.workspace_id = p.workspace_id
 	 				AND wm.member_id = #{memberId}
+	 				AND pm.project_member_id = tr.project_member_id
 	 				AND pm.status = 0
 	 				AND pm.left IS NULL
 	 				AND wm.status = 0
@@ -344,6 +345,7 @@
 	</update>
 	
 	<!-- 삭제 전 대상 보고서의 기본 소속 조회 -->
+	<!-- 1. 요청 도메인 확인 2. 해당 워크 확인 3. 검토 이력 -->
 	 <select id="selectTeamReportDeleteContext" resultType="map" parameterType="map">
 	 	SELECT tr.team_report_id AS "teamReportId",
 	 		p.workspace_id AS "workspaceId",
@@ -375,16 +377,60 @@
 		 				AND pm.left IS NULL
 		 				AND wm.status = 0
 		 				AND wm.left IS NULL 
-			 		) AND EXISTS (
+			 		) AND NOT EXISTS (
 			 			SELECT 1
-		 				FROM report_reviews rr
-		 				JOIN team_report_id tr ON tr.team_report_id = rr.team_report_id
-		 				WHERE rr.category = 2
-		 					AND rr.viewed IS NULL
-		 					AND rr.reviewed IS NULL
-		 					AND rr.status IN (1, 2)
+			 			FROM report_reviews rr
+						WHERE rr.team_report_id = tr.team_report_id
+		 				AND rr.category = 2
+		 				AND(rr.viewed IS NOT NULL
+		 					OR rr.reviewed IS NOT NULL
+		 					OR rr.status IN (1, 2))
 			 		)
 	 </select>
 
+	<!-- 업무 보고서 삭제 전 보고서 잠금 -->
+	<select id="lockTeamReportForDelete" parameterType="map" resultType="long">
+		SELECT team_report_id AS "teamReportId"
+		FROM team_reports
+		WHERE team_report_id = #{teamReportId}
+			AND project_id = #{projectId}
+			AND deleted IS NULL
+			FOR UPDATE
+	</select>
+	
+	<!-- 업무 보고서 등록 소속 조회 -->
+	<select id="selectTeamReportCreateContext" resultType="map" parameterType="map">
+	 	SELECT tr.team_report_id AS "teamReportId",
+	 		p.workspace_id AS "workspaceId",
+	 		tr.project_member_id AS "authorProjectMemberId"
+	 	FROM team_reports tr
+	 	JOIN tasks t ON t.project_id = tr.project_id
+	 		AND t.task_id = tr.task_id
+	 	JOIN projects p ON p.project_id = tr.project_id
+	 	WHERE tr.team_report_id = #{teamReportId}
+	 	    AND p.project_id = #{projectId}
+	 		AND tr.deleted IS NULL
+	 		AND t.deleted IS NULL
+	 		AND p.deleted IS NULL
+	 		AND EXISTS (
+	 			SELECT 1
+	 			FROM workspace_domains wd
+	 			WHERE wd.workspace_id = p.workspace_id
+	 				AND wd.domain_key = #{domainKey}
+	 				AND wd.active = 'Y'
+	 			) AND EXISTS (
+		 			SELECT 1
+		 			FROM project_members pm 
+		 			JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+		 			WHERE pm.project_id = p.project_id
+		 				AND wm.workspace_id = p.workspace_id
+		 				AND wm.member_id = #{memberId}
+		 				AND pm.project_member_id = tr.project_member_id
+		 				AND pm.status = 0
+		 				AND pm.left IS NULL
+		 				AND wm.status = 0
+		 				AND wm.left IS NULL 
+		 		)
+	</select>
 	
 </mapper>
