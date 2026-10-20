@@ -1,6 +1,7 @@
 package com.tk.app.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -49,4 +50,28 @@ public interface GrowthTreeMapper {
 
 	// 하위업무 조회
 	public int countSubTaskInWorkspace(GrowthExpLogDto dto);
+	
+	// 하위업무 삭제 시 미회수 이력 조회
+	public List<GrowthExpLogDto> findUnrevokedSubTaskCreateExpLogs(GrowthExpLogDto dto);
+
+	// 회수 시간 기록
+	public int markSubTaskCreateExpLogRevoked(GrowthExpLogDto dto);
+
+	// 일일보고서 보상 중복 확인용
+	public int countDailyReportCreateExpLog(GrowthExpLogDto dto);
+
+	// 일일보고서가 해당 워크에 속하는지 확인
+	public int countDailyReportInWorkspace(GrowthExpLogDto dto);
+
+	// 일일보고서 삭제 시 아직 회수하지 않은 지급 이력 조회
+	public List<GrowthExpLogDto> findUnrevokedDailyReportCreateExpLogs(GrowthExpLogDto dto);
+
+	// 회수 시간 기록
+	public int markDailyReportCreateExpLogRevoked(GrowthExpLogDto dto);
+
+	// 일일보고서 등록 검증 메서드
+	public Map<String, Object> selectDailyReportCreateContext(Map<String, Object> params);
+
+	// 삭제 전에 일일보고서의 실제 소속과 삭제 권한 확인
+	public Map<String, Object> selectDailyReportDeleteContext(Map<String, Object> params);
 }
