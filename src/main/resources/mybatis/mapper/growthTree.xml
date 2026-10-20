@@ -433,4 +433,39 @@
 		 		)
 	</select>
 	
+	<!-- PM 이 보고서 승인 시 보상 이력 카운트 -->
+	<select id="countTeamReportApproveExpLog" resultType="int">
+		SELECT COUNT(*)
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND team_report_id = #{teamReportId}
+			AND action_type = #{actionType}
+	</select>
+	
+	<!-- 승인 정보 조회 -->
+	<select id="selectTeamReportApproveContext" parameterType="map" resultType="map">
+		SELECT p.workspace_id AS "workspaceId"
+			   pm.role AS "reviewerRole"
+		FROM team_reports tr
+		JOIN tasks t ON t.project_id = tr.project_id
+	 		AND t.task_id = tr.task_id
+	 	JOIN projects p ON p.project_id = tr.project_id
+	 	JOIN report_reviews rr ON rr.team_report_id = tr.team_report_id
+	 	JOIN project_members pm ON pm.project_member_id = rr.project_member_id
+	 		AND pm.project_id = p.project_id
+	 	JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+	 		AND wm.workspace_id = p.workspace_id
+	 	WHERE tr.team_report_id = #{teamReportId}
+	 		AND review_id = #{reviewId}
+	 		AND rr.category = 2
+	 		AND rr.status = 1
+	 		AND wm.member_id = #{memberId}
+	 		AND pm.project_member_id != tr.project_member_id
+	 		AND pm.role IN (70, 50)
+	 		AND pm.status = 0
+	 		AND wm.status = 0
+	 		AND tr.deleted IS NULL
+	 		AND t.deleted IS NULL
+	 		AND p.deleted IS NULL
+	</select>
 </mapper>

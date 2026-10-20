@@ -96,4 +96,11 @@ public interface GrowthTreeMapper {
 
 	// 업무 보고서 등록 시 보상에 사용할 실제 워크번호 조회
 	public Map<String, Object> selectTeamReportCreateContext(Map<String, Object> params);
+
+	// PM 보고서 승인 시 경험치 부여 ( 승인 보상 이력 카운트 )
+	public int countTeamReportApproveExpLog(GrowthExpLogDto dto);
+
+	// 승인 정보 조회
+	public Map<String, Object> selectTeamReportApproveContext(Map<String, Object> params);
+
 }
