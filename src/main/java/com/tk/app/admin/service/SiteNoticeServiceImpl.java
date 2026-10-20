@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.tk.app.admin.domain.dto.SiteNoticeDto;
+import com.tk.app.admin.domain.dto.SiteNoticeFileDto;
 import com.tk.app.admin.mapper.SiteNoticeMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -103,6 +104,39 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		} catch (Exception e) {
 			log.error("selectNoticePage 오류 : ", e);
 			
+			throw e;
+		}
+	}
+
+	@Override
+	public int insertNoticeFile(SiteNoticeFileDto dto) {
+		try {
+			return siteNoticeMapper.insertNoticeFile(dto);
+		} catch (Exception e) {
+			log.error("insertNoticeFile 오류 : ", e);
+			
+			throw e;
+		}
+		
+	}
+
+	@Override
+	public List<SiteNoticeFileDto> selectNoticeFiles(long notice_id) {
+		try {
+			return siteNoticeMapper.selectNoticeFiles(notice_id);
+		} catch (Exception e) {
+			log.error("siteNoticeMapper. 오류 : ", e);
+			
+			throw e;
+		}
+	}
+
+	@Override
+	public SiteNoticeFileDto selectNoticeFile(long notice_file_id) {
+		try {
+			return siteNoticeMapper.selectNoticeFile(notice_file_id);
+		} catch (Exception e) {
+			log.error("selectNoticeFile 오류 : ", e);
 			throw e;
 		}
 	}

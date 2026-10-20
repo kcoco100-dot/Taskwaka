@@ -21,14 +21,20 @@
 	
 	
 	<insert id="insertNotice" parameterType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+		<selectKey keyProperty="notice_id" resultType="long" order="BEFORE">
+			SELECT seq_site_notice.NEXTVAL
+			FROM dual
+		</selectKey>
 		INSERT INTO site_notice(notice_id, member_id, title, content, status)
-		VALUES (seq_site_notice.NEXTVAL, #{member_id}, #{title}, #{content}, #{status})
+		VALUES (#{notice_id}, #{member_id}, #{title}, #{content}, #{status})
 	</insert>
 	
 	<select id="selectNoticeDetail" parameterType="long" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
-		SELECT notice_id, member_id, title, content, status, created, updated
-		FROM site_notice
-		WHERE notice_id =  #{notice_id}
+		SELECT n.notice_id, n.member_id, n.title, n.content, n.status, n.created, n.updated, d.name AS member_name
+		FROM site_notice n
+		LEFT JOIN member_details d
+		ON n.member_id =  d.member_id
+		WHERE n.notice_id =  #{notice_id}
 	</select>
 	
 	<update id="updateNotice" parameterType="com.tk.app.admin.domain.dto.SiteNoticeDto">
@@ -53,8 +59,11 @@
 	</select>
 	
 	<select id="selectNoticePage" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto" >
-		SELECT notice_id, member_id, title, content, status, created, updated
-		FROM site_notice
+		SELECT notice_id, member_id, title, content, status, created, updated,
+			(SELECT COUNT(*)
+			 FROM site_notice_file f
+			 WHERE f.notice_id = n.notice_id) AS file_count
+		FROM site_notice n
 		<where>
 			<if test="keyword != null and keyword != ''">
 				title LIKE '%' || #{keyword} || '%'
@@ -63,6 +72,24 @@
 		ORDER BY notice_id DESC
 		OFFSET #{offset} ROWS
 		FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<insert id="insertNoticeFile" parameterType="com.tk.app.admin.domain.dto.SiteNoticeFileDto">
+		INSERT INTO site_notice_file
+		(notice_file_id, notice_id, original_name, stored_name, file_path, file_size, uploaded)
+		VALUES (seq_site_notice_files.NEXTVAL, #{notice_id}, #{original_name}, #{stored_name}, #{file_path}, #{file_size}, SYSDATE)
+	</insert>
+	
+	<select id="selectNoticeFiles" parameterType="long" resultType="com.tk.app.admin.domain.dto.SiteNoticeFileDto">
+		SELECT notice_file_id, notice_id, original_name, stored_name, file_path, file_size, uploaded
+		FROM site_notice_file
+		WHERE notice_id = #{notice_id}
+	</select>
+	
+	<select id="selectNoticeFile" parameterType="long" resultType="com.tk.app.admin.domain.dto.SiteNoticeFileDto">
+		SELECT notice_file_id, notice_id, original_name, stored_name, file_path, file_size, uploaded
+		FROM site_notice_file
+		WHERE notice_file_id = #{notice_file_id}
 	</select>
 	
 

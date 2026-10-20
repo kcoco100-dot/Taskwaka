@@ -1,64 +1,43 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-  <div th:fragment="content">
-    <div class="panel-card">
-      <div class="panel-card-title">전체 공지사항 작성 및 공개 상태 설정</div>
-      <form th:action="@{/admin/notice}" method="post">
-        <div style="display:grid; grid-template-columns: 3fr 1fr; gap:12px; margin-bottom:12px;">
-          <div>
-            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">공지 제목 *</label>
-            <input type="text" name="title" class="warm-input" placeholder="전체 공지사항 제목을 입력하세요" style="width:100%;" required>
-          </div>
-          <div>
-            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">공개 여부 *</label>
-            <select class="warm-select" name="status" style="width:100%;">
-              <option value="1">공개 (전체 노출)</option>
-              <option value="0">비공개 (관리자만 조회)</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-bottom:12px;">
-          <label style="display:block; font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:4px;">공지 내용 *</label>
-          <textarea class="warm-textarea"  name="content" rows="3" placeholder="공지 상세 내용을 입력하세요" style="width:100%;" required></textarea>
-        </div>
-        <div style="text-align:right;">
-          <button type="submit" class="btn-sage">공지사항 등록</button>
-        </div>
-      </form>
-      
-      <form th:action="@{/admin/notice}" method="get" >
-      	<input name="keyword" th:value="${keyword}">
-      	<button type="submit">검색</button>
-      </form>
-      
-    </div>
+	<div th:fragment="content" class="notice-page">
+		<div class="panel-card">
+			<div class="notice-header">
+				<div class="panel-card-title">등록된 전체 공지사항 목록</div>
+				<a th:href="@{/admin/notice/write}" class="btn-sage"> 공지사항 등록 </a>
+			</div>
 
-    <div class="panel-card">
-      <div class="panel-card-title">등록된 전체 공지사항 목록</div>
-      <table class="warm-table">
-        <thead>
-          <tr>
-            <th>공지 제목</th>
-            <th style="width:120px;">작성자</th>
-            <th style="width:120px;">작성일</th>
-            <th style="width:120px;">공개 상태</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="notice : ${noticeList}">
-          	<td>
-          		<a th:href="@{/admin/notice/{id}(id=${notice.notice_id})}"
-          		th:text="${notice.title}"></a>
-          	</td>
-          	<td th:text="${notice.member_id}"></td>
-          	<td th:text="${#dates.format(notice.created, 'yyyy-MM-dd')}"></td>
-          	<td th:text="${notice.status == 1 ? '공개' : '비공개'}"></td>
-          </tr>
-        </tbody>
-      </table>
-      <div th:utext="${paging}"></div>
-    </div>
-  </div>
+			<form class="notice-search" th:action="@{/admin/notice}" method="get">
+				<input name="keyword" th:value="${keyword}" class="warm-input"
+					placeholder="제목으로 검색">
+				<button type="submit" class="btn-sage">검색</button>
+			</form>
+			<table class="warm-table notice-table">
+				<thead>
+					<tr>
+						<th>공지 제목</th>
+						<th style="width: 120px;">작성자</th>
+						<th style="width: 120px;">작성일</th>
+						<th style="width: 120px;">첨부파일</th>
+						<th style="width: 120px;">공개 상태</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="notice : ${noticeList}">
+						<td><a th:href="@{/admin/notice/{id}(id=${notice.notice_id})}" th:text="${notice.title}"></a></td>
+						<td th:text="${notice.member_id}"></td>
+						<td th:text="${#dates.format(notice.created, 'yyyy-MM-dd')}"></td>
+						<td>
+							<span th:if="${notice.file_count > 0}" th:text="${notice.file_count + '개'}"></span>
+							<span th:if="${notice.file_count == 0}">-</span>
+						</td>
+						<td th:text="${notice.status == 1 ? '공개' : '비공개'}"></td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="notice-pagination" th:utext="${paging}"></div>
+		</div>
+	</div>
 </body>
 </html>

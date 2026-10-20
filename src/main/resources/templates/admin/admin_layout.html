@@ -8,9 +8,14 @@
 <th:block>
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-common.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user.css}">
-	<link rel="stylesheet"
-		th:href="@{/dist/css/admin/admin-user-detail.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user-detail.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-domain.css}">
+	<!-- Quill editor -->
+	<link rel="stylesheet" th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeDetail' or activeSection == 'noticeEdit'}"
+	 	th:href="@{/dist/vendor/quill/css/quill.snow.css}">
+	<link rel="stylesheet" th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeDetail' or activeSection == 'noticeEdit'}"
+	 	th:href="@{/dist/vendor/quill/css/resize.css}">
+	 <link rel="stylesheet" th:href="@{/dist/css/admin/admin-notice.css}">	
 </th:block>
 </head>
 <body>
@@ -113,8 +118,14 @@
 					<div th:case="'notice'">
 						<div th:replace="~{admin/fragments/notice :: content}"></div>
 					</div>
+					<div th:case="'noticeWrite'">
+					     <div th:replace="~{admin/fragments/notice-write :: content}"></div>
+					</div>
 					<div th:case="'noticeDetail'">
 					    <div th:replace="~{admin/fragments/notice-detail :: content}"></div>
+					</div>
+					<div th:case="'noticeEdit'">
+					    <div th:replace="~{admin/fragments/notice-edit :: content}"></div>
 					</div>
 					<div th:case="'inquiry'">
 						<div th:replace="~{admin/fragments/inquiry :: content}"></div>
@@ -363,7 +374,30 @@
     }).mount('#workspace-app');
 </script>
 
+<!-- Quill editor -->
+<script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/quill.js}"></script>
+<script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/resize.js}"></script>
+<script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/posts/qeditor.js}"></script>
+<script th:if="${activeSection == 'noticeWrite'}">
+	document.getElementById('noticeWriteForm')
+		.addEventListener('submit', function() {
+			
+			document.getElementById('content').value = document.querySelector('#editor .ql-editor').innerHTML;
+		});
+</script>
 
+	<script th:if="${activeSection == 'noticeEdit'}">
+
+    const originalContent = document.getElementById('originalContent').value;
+
+    quill.clipboard.dangerouslyPasteHTML(originalContent);
+
+    document.getElementById('noticeEditForm').addEventListener('submit', function() {
+
+            document.getElementById('content').value = quill.root.innerHTML;
+        });
+
+</script>
 
 </body>
 </html>

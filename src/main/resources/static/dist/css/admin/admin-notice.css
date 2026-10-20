@@ -1,0 +1,236 @@
+@charset "UTF-8";
+
+/* 공지사항 목록 */
+.notice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.notice-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.notice-search input {
+    width: 300px;
+}
+
+.notice-page .notice-table a {
+    color: #526447;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.notice-page .notice-table a:hover {
+    color: #526447;
+    text-decoration: underline;
+}
+
+.notice-pagination {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.notice-pagination a {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 4px;
+    border: 1px solid #e3ddd4;
+    border-radius: 6px;
+    color: #526447;
+    text-decoration: none;
+}
+
+.notice-pagination a:hover {
+    background-color: #f4f1ec;
+}
+
+/* 공지사항 상세 */
+.notice-detail h2 {
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.notice-detail .notice-body {
+    min-height: 180px;
+    padding: 24px 10px;
+    border-top: 1px solid #e3ddd4;
+    border-bottom: 1px solid #e3ddd4;
+    margin: 20px 0;
+}
+
+.notice-detail .notice-meta {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 15px 0 20px;
+}
+
+.notice-meta-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 13px;
+    color: #8a8074;
+}
+
+.notice-meta-info b {
+    color: #594f45;
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+.notice-status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.notice-status.is-public {
+    background: #edf3e8;
+    color: #526447;
+}
+
+.notice-status.is-private {
+    background: #f1eeea;
+    color: #85776a;
+}
+
+/* 하단 버튼 */
+.notice-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.notice-actions form {
+    margin: 0;
+}
+
+.notice-actions a.btn-sage,
+.notice-actions a.btn-sage:hover {
+    text-decoration: none;
+}
+
+.notice-delete-btn {
+    padding: 10px 18px;
+    background-color: white;
+    color: #a64444;
+    border: 1px solid #d8b4b4;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notice-delete-btn:hover {
+    background-color: #fff1f1;
+}
+
+.notice-action-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notice-list-btn {
+    padding: 10px 18px;
+    border: 1px solid #e3ddd4;
+    border-radius: 8px;
+    color: #594f45;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notice-list-btn:hover {
+    background-color: #f4f1ec;
+    text-decoration: none;
+}
+
+
+/* 공지사항 등록 및 수정 */
+.notice-form-page .panel-card-title {
+    font-size: 20px;
+    margin-bottom: 24px;
+}
+
+.notice-form-row {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.notice-field {
+    margin-bottom: 20px;
+}
+
+.notice-field > label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #594f45;
+}
+
+.notice-field .warm-input,
+.notice-field .warm-select {
+    width: 100%;
+}
+
+.notice-checkbox {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+}
+
+.notice-form-page .ql-toolbar {
+    border-radius: 8px 8px 0 0;
+}
+
+.notice-form-page .ql-container {
+    border-radius: 0 0 8px 8px;
+}
+
+.notice-form-page .ql-editor {
+    min-height: 260px;
+}
+
+.notice-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.notice-form-actions .btn-sage {
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .notice-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.notice-file-name {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
