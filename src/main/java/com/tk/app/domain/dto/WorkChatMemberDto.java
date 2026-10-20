@@ -16,4 +16,14 @@ public class WorkChatMemberDto {
 	private Integer role;
 	private String roleName;
 	private String profilePhoto;
+	private Long workId;
+	private String domainKey;
+	
+	private Long workMemberId;
+	private Long loginMemberId;
+	private Long chatRoomId;
+	private Long myWorkId;
+	private Long targetWorkId;
+	private Long targetMemberId;
+	private String targetName;
 }

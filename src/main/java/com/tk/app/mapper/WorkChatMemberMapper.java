@@ -9,5 +9,7 @@ import com.tk.app.domain.dto.WorkChatMemberDto;
 @Mapper
 public interface WorkChatMemberMapper {
 
-	List<WorkChatMemberDto> findMemberByWorkId(Long workId);
+	public List<WorkChatMemberDto> findMemberByWorkId(Long workId);
+	
+	
 }

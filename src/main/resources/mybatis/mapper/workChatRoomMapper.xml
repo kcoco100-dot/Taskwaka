@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.WorkChatRoomMapper">
+
+	<select id="findWorkMemberId" parameterType="WorkChatMemberDto" resultType="Long">
+		SELECT workspace_member_id
+		FROM workspace_members
+		WHERE workspace_id = #{workId}
+			AND member_id = #{memberId}
+			AND status = 0
+	</select>
+	
+	<select id="findDirectRoom" parameterType="WorkChatMemberDto" resultType="Long">
+		SELECT cr.chat_room_id
+		FROM chat_rooms cr
+		JOIN workspace_members wm ON cr.workspace_member_id = wm.workspace_member_id
+		JOIN chat_room_members me ON cr.chat_room_id = me.chat_room_id
+		JOIN chat_room_members target ON cr.chat_room_id = target.chat_room_id
+		WHERE wm.workspace_id = #{workId} 
+		  AND cr.chat = 'PERSONAL'
+		  
+		  AND me.workspace_member_id = #{myWorkId}
+          AND me.status = 0
+          
+          AND target.workspace_member_id = #{targetWorkId}
+          AND target.status = 0
+          
+          AND (SELECT COUNT(*)
+          	   FROM chat_room_members crm
+          	   WHERE crm.chat_room_id = cr.chat_room_id
+          ) = 2
+          
+          FETCH FIRST 1 ROW ONLY
+	</select>
+	
+	<select id="nextRoomId" resultType="Long">
+        SELECT seq_chat_rooms.NEXTVAL
+        FROM dual
+	</select>
+	
+	<insert id="insertDirectRoom" parameterType="WorkChatMemberDto">
+        INSERT INTO chat_rooms (chat_room_id, workspace_member_id, chat, room_name, created)
+        VALUES (#{chatRoomId}, #{myWorkId}, 'PERSONAL', NULL, SYSDATE)
+    </insert>
+
+    <insert id="insertRoomMember" parameterType="WorkChatMemberDto">
+        INSERT INTO chat_room_members (chat_room_member_id, chat_room_id, workspace_member_id, status,
+            joined)
+        VALUES (seq_chat_room_members.NEXTVAL, #{chatRoomId}, #{workMemberId}, 0, SYSDATE)
+    </insert>
+    
+    <select id="matchDomain" parameterType="WorkChatMemberDto" resultType="int">
+		SELECT COUNT(*)
+	    FROM workspace_domains
+	    WHERE domain_key = #{domainKey}
+	      AND workspace_id = #{workId}
+	      AND active = 'Y'
+	</select>
+	
+	
+	<select id="findMyDirectRooms" parameterType="WorkChatMemberDto" resultType="WorkChatMemberDto">
+	
+	    SELECT cr.chat_room_id "chatRoomId", t_wm.member_id "targetMemberId", md.name "targetName"
+	    FROM chat_rooms cr
+	    JOIN workspace_members wm ON cr.workspace_member_id = wm.workspace_member_id
+	    
+	    JOIN chat_room_members crm ON cr.chat_room_id = crm.chat_room_id
+	    	AND crm.status = 0
+	    	
+	    JOIN workspace_members my_wm ON crm.workspace_member_id = my_wm.workspace_member_id
+	     AND my_wm.status = 0
+	     
+	    JOIN workspace_domains wd ON my_wm.workspace_id = wd.workspace_id
+	     AND wd.domain_key = #{domainKey}
+	     AND wd.active = 'Y'
+	     
+		JOIN chat_room_members t_crm ON cr.chat_room_id = t_crm.chat_room_id
+	     AND t_crm.workspace_member_id != crm.workspace_member_id
+	     AND t_crm.status = 0
+	
+	    JOIN workspace_members t_wm ON t_crm.workspace_member_id = t_wm.workspace_member_id
+	     AND t_wm.workspace_id = my_wm.workspace_id
+	     AND t_wm.status = 0
+	
+	    JOIN member_details md ON t_wm.member_id = md.member_id
+	
+	    WHERE cr.chat = 'PERSONAL'
+	      AND my_wm.member_id = #{loginMemberId}
+	      AND wm.workspace_id = my_wm.workspace_id
+	      AND (
+	          SELECT COUNT(*)
+	          FROM chat_room_members crms
+	          WHERE crms.chat_room_id = cr.chat_room_id
+	      ) = 2
+	
+	    ORDER BY cr.created DESC, cr.chat_room_id DESC
+	
+	</select>
+			
+	<select id="countReadableRoom" parameterType="WorkChatMessageDto" resultType="int">
+	
+		    SELECT COUNT(*)
+		    FROM chat_rooms cr
+		
+		    JOIN workspace_members wm ON cr.workspace_member_id = wm.workspace_member_id
+		
+		    JOIN workspace_domains wd ON wm.workspace_id = wd.workspace_id
+		     AND wd.domain_key = #{domainKey}
+		     AND wd.active = 'Y'
+		
+		    JOIN chat_room_members crm ON cr.chat_room_id = crm.chat_room_id
+		     AND crm.status = 0
+		
+		    JOIN workspace_members wms ON crm.workspace_member_id = wms.workspace_member_id
+		     AND wms.workspace_id = wm.workspace_id
+		     AND wms.status = 0
+		
+		    WHERE cr.chat_room_id = #{chatRoomId}
+		      AND cr.chat = 'PERSONAL'
+		      AND wms.member_id = #{loginMemberId}
+	</select>
+	
+	
+	<select id="findRoomMessages" parameterType="WorkChatMessageDto" resultType="WorkChatMessageDto">
+	
+	    SELECT m.message_id "messageId", m.chat_room_id "chatRoomId", wm.member_id "senderMemberId",
+	        md.name "senderName", m.content "content",
+	        TO_CHAR(m.sent, 'YYYY-MM-DD HH24:MI:SS') "sent",
+	        CASE
+	            WHEN wm.member_id = #{loginMemberId}
+	            THEN 1
+	            ELSE 0
+	        END "mine"
+	    FROM chat_messages m
+	
+	    JOIN chat_room_members crm ON m.chat_room_member_id = crm.chat_room_member_id
+	     AND m.chat_room_id = crm.chat_room_id
+	
+	    JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
+	
+	    JOIN member_details md ON wm.member_id = md.member_id
+	
+	    WHERE m.chat_room_id = #{chatRoomId} AND m.deleted IS NULL
+	
+	    ORDER BY m.sent ASC, m.message_id ASC
+	
+	</select>
+
+	
+
+</mapper>
