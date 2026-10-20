@@ -19,6 +19,29 @@
                 <p class="page-description">프로젝트 보고서와 업무 보고서의 결재 현황을 확인하세요.</p>
             </div>
 
+<div class="approval-summary-grid">
+    <div class="approval-summary-card">
+        <span class="approval-summary-label">미확인 보고서</span>
+        <strong class="approval-summary-count" th:text="${uncheckedCount != null ? uncheckedCount : 0}">0</strong>
+        <span class="approval-summary-description"></span>
+    </div>
+    <div class="approval-summary-card">
+        <span class="approval-summary-label">대기 중 보고서</span>
+        <strong class="approval-summary-count" th:text="${pendingCount != null ? pendingCount : 0}">0</strong>
+        <span class="approval-summary-description"></span>
+    </div>
+    <div class="approval-summary-card">
+        <span class="approval-summary-label">승인 된 보고서</span>
+        <strong class="approval-summary-count" th:text="${approvedCount != null ? approvedCount : 0}">0</strong>
+        <span class="approval-summary-description"></span>
+    </div>
+    <div class="approval-summary-card">
+        <span class="approval-summary-label">반려 된 보고서</span>
+        <strong class="approval-summary-count" th:text="${rejectedCount != null ? rejectedCount : 0}">0</strong>
+        <span class="approval-summary-description"></span>
+    </div>
+</div>
+
             <div class="approval-panel">
                 <p class="approval-notice approval-notice-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
                 <p class="approval-notice" th:if="${message}" th:text="${message}"></p>
@@ -107,12 +130,7 @@
 
                 <div class="approval-list-footer">
                     <nav class="approval-pagination" aria-label="보고서 목록 페이지" th:if="${totalPage > 1}">
-                        <a class="approval-page-button"
-                           th:each="i : ${#numbers.sequence(1, totalPage)}"
-                           th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},page=${i},reportCategory=${reportCategory},reviewStatus=${reviewStatus},keyword=${keyword})}"
-                           th:classappend="${page == i} ? 'approval-current-page' : ''"
-                           th:attr="aria-current=${page == i ? 'page' : null}"
-                           th:text="${i}">1</a>
+                        <a class="approval-page-button" th:each="i : ${#numbers.sequence(1, totalPage)}" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},page=${i},reportCategory=${reportCategory},reviewStatus=${reviewStatus},keyword=${keyword})}"  th:classappend="${page == i} ? 'approval-current-page' : ''" th:attr="aria-current=${page == i ? 'page' : null}" th:text="${i}">1</a>
                     </nav>
                 </div>
             </div>

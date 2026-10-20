@@ -6,9 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -119,88 +117,113 @@ public class ManageController {
         return "manage/manage";
     }
 	
-	// 인원 프로젝트 배정
-	@PostMapping("/assignProject")
+	 // 프로젝트 인원 등록 및 직위 변경
+    @PostMapping("/assignProject")
     @ResponseBody
     public Map<String, Object> assignProject(
             @PathVariable("domainKey") String domainKey,
             @RequestParam("workspaceMemberId") Long workspaceMemberId,
             @RequestParam("projectId") Long projectId,
             @RequestParam("role") int role) {
-            
-        Map<String, Object> resultMap = new HashMap<>();
-        
-        try {
-			SessionInfo info = LoginMemberUtil.getSessionInfo();
-			if (info == null) {
-			    resultMap.put("status", "fail");
-			resultMap.put("message", "로그인이 만료되었거나 정보가 없습니다.");
-			    return resultMap;
-			}
-			
-			Long workspaceId = servive.findByDomainKey(domainKey);
-			if (workspaceId == null) {
-			    resultMap.put("status", "fail");
-			resultMap.put("message", "유효하지 않은 워크스페이스입니다.");
-			    return resultMap;
-			}
-			
-			Integer currentRole = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
-			if (currentRole == null) {
-			    currentRole = 0; // 권한이 아예 없으면 0으로 처리
-			}
-			
-			if (currentRole < 50) {
-			    resultMap.put("status", "fail");
-			resultMap.put("message", "프로젝트 배정 권한이 없습니다.");
-			    return resultMap;
-			}
-			
-			if (currentRole == 50 && role == 70) {
-			    resultMap.put("status", "fail");
-			resultMap.put("message", "자신보다 높은 권한(PM)을 부여할 수 없습니다.");
-			    return resultMap;
-			}
 
-            servive.assignOrUpdateProjectMember(workspaceMemberId, projectId, role);
-        	
+        Map<String, Object> resultMap = new HashMap<>();
+
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+            if (info == null) {
+                throw new SecurityException("로그인 정보가 없습니다.");
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("domainKey", domainKey);
+            map.put("actorId", info.getMember_id());
+            map.put("workspaceMemberId", workspaceMemberId);
+            map.put("projectId", projectId);
+            map.put("role", role);
+
+            servive.assignOrUpdateProjectMember(map);
+
             resultMap.put("status", "success");
-            
+            resultMap.put("message", "프로젝트 팀원 배정이 완료되었습니다.");
+
         } catch (Exception e) {
-            log.info("assignProject: ", e);
+            log.error("assignProject 오류: ", e);
+            resultMap.put("status", "fail");
+            resultMap.put("message", e.getMessage());
         }
-        
+
         return resultMap;
     }
 	
-	// 프로젝트에서 제외
-	@PostMapping("/excludeProject")
+    // 프로젝트에서 제외
+    @PostMapping("/excludeProject")
     @ResponseBody
-    @Transactional
-    public Map<String, Object> excludeProject(@RequestParam("projectMemberId") Long projectMemberId) {
+    public Map<String, Object> excludeProject(
+            @PathVariable("domainKey") String domainKey,
+            @RequestParam("projectMemberId") Long projectMemberId) {
+
         Map<String, Object> resultMap = new HashMap<>();
+
         try {
-            projectMemberRepository.excludeFromProject(projectMemberId);
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+            if (info == null) {
+                throw new SecurityException("로그인 정보가 없습니다.");
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("domainKey", domainKey);
+            map.put("actorId", info.getMember_id());
+            map.put("projectMemberId", projectMemberId);
+
+            servive.excludeProjectMember(map);
+
             resultMap.put("status", "success");
+            resultMap.put("message", "프로젝트에서 제외되었습니다.");
+
         } catch (Exception e) {
-            log.error("excludeProject : ", e);
+            log.error("excludeProject 오류: ", e);
+            resultMap.put("status", "fail");
+            resultMap.put("message", e.getMessage());
         }
+
         return resultMap;
     }
+
 	
-	// 워크에서 제외
-	@PostMapping("/excludeWorkspace")
+    // 워크에서 제외
+    @PostMapping("/excludeWorkspace")
     @ResponseBody
-    @Transactional
-    public Map<String, Object> excludeWorkspace(@RequestParam("workspaceMemberId") Long workspaceMemberId) {
+    public Map<String, Object> excludeWorkspace(
+            @PathVariable("domainKey") String domainKey,
+            @RequestParam("workspaceMemberId") Long workspaceMemberId) {
+
         Map<String, Object> resultMap = new HashMap<>();
+
         try {
-            projectMemberRepository.excludeFromWorkspace(workspaceMemberId);
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+            if (info == null) {
+                throw new SecurityException("로그인 정보가 없습니다.");
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("domainKey", domainKey);
+            map.put("actorId", info.getMember_id());
+            map.put("workspaceMemberId", workspaceMemberId);
+
+            servive.excludeWorkspaceMember(map);
+
             resultMap.put("status", "success");
+            resultMap.put("message", "워크스페이스에서 제외되었습니다.");
+
         } catch (Exception e) {
-            log.error("excludeWorkspace : ", e);
-            resultMap.put("status", "error");
+            log.error("excludeWorkspace 오류: ", e);
+            resultMap.put("status", "fail");
+            resultMap.put("message", e.getMessage());
         }
+
         return resultMap;
     }
 	

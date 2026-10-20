@@ -312,4 +312,15 @@
 	    WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
 	</update>
     
+    
+	<!-- 보고서 결재 상태별 개수 조회 -->
+	<select id="countReportStatuses" parameterType="map" resultType="map">
+	    SELECT COUNT(CASE WHEN R."reviewStatus" = -1 THEN 1 END) AS "uncheckedCount",
+	        COUNT(CASE WHEN R."reviewStatus" = 0 THEN 1 END) AS "pendingCount",
+	        COUNT(CASE WHEN R."reviewStatus" = 1 THEN 1 END) AS "approvedCount",
+	        COUNT(CASE WHEN R."reviewStatus" = 2 THEN 1 END) AS "rejectedCount"
+	    FROM (<include refid="reportListSource"/>) R
+	</select>
+    
+    
 </mapper>

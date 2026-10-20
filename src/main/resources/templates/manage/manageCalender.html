@@ -23,13 +23,66 @@
             </div>
 
             <div class="calendar-content">
-                <div id="calendar"></div>
+                <div id="myTaskCalendar"></div>
             </div>
         </div>
     </div>
 </th:block>
 
 <th:block layout:fragment="script">
+    <script th:src="@{/dist/vendor/fullcalendar6/dist/index.global.min.js}"></script>
+    <script th:src="@{/dist/vendor/fullcalendar6/dist/locales/ko.global.min.js}"></script>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const calendarEl = document.getElementById('myTaskCalendar');
+
+            if (!calendarEl) {
+                return;
+            }
+
+            const tasks = [];
+
+            function nextDate(dateString) {
+                const [year, month, day] = dateString.split('-').map(Number);
+
+                return new Date(
+                    Date.UTC(year, month - 1, day + 1)
+                ).toISOString().slice(0, 10);
+            }
+
+            const taskEvents = (Array.isArray(tasks) ? tasks : [])
+                .filter(function(task) {
+                    return task.startAt && task.endAt;
+                })
+                .map(function(task) {
+                    return {
+                        id: String(task.taskId),
+                        title: `${task.title} (${task.progress ?? 0}%)`,
+                        start: task.startAt,
+                        end: nextDate(task.endAt),
+                        allDay: true
+                    };
+                });
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                height: 'auto',
+
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+
+                events: taskEvents
+            });
+
+            calendar.render();
+        });
+    </script>
 </th:block>
 
 </html>

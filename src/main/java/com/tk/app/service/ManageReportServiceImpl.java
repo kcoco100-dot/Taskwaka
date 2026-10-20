@@ -25,7 +25,7 @@ public class ManageReportServiceImpl implements ManageReportService {
         try {
             return mapper.listReport(map);
         } catch (Exception e) {
-            log.error("listReport 오류: ", e);
+            log.error("listReport : ", e);
             throw new IllegalStateException("보고서 목록을 조회할 수 없습니다.", e);
         }
     }
@@ -36,7 +36,7 @@ public class ManageReportServiceImpl implements ManageReportService {
         try {
             return mapper.countReport(map);
         } catch (Exception e) {
-            log.error("countReport 오류: ", e);
+            log.error("countReport : ", e);
             throw new IllegalStateException("보고서 수를 조회할 수 없습니다.", e);
         }
     }
@@ -81,7 +81,7 @@ public class ManageReportServiceImpl implements ManageReportService {
             return dto;
 
         } catch (Exception e) {
-            log.error("openReport 오류: ", e);
+            log.error("openReport : ", e);
             throw new IllegalStateException("보고서 상세 조회에 실패했습니다: " + e.getMessage(), e);
         }
     }
@@ -165,8 +165,18 @@ public class ManageReportServiceImpl implements ManageReportService {
             }
 
         } catch (Exception e) {
-            log.error("updateReview 오류: ", e);
+            log.error("updateReview : ", e);
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
+
+	@Override
+	public Map<String, Object> countReportStatuses(Map<String, Object> map) {
+		try {
+			return mapper.countReportStatuses(map);
+		} catch (Exception e) {
+			log.info("countReportStatuses : ", e);
+			throw new IllegalStateException("보고서 결재 상태 조회 실패", e);
+		}
+	}
 }

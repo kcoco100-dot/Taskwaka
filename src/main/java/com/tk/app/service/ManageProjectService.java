@@ -18,8 +18,6 @@ public interface ManageProjectService {
     
     public List<ManageDto> listProject(Map<String, Object> map) throws SQLException;
     public int dataCount(Map<String, Object> map) throws SQLException;
-    public void assignProject(String domainKey, Long memberId, Long workspaceMemberId, Long projectId, int role) throws Exception;
-    public void excludeProject(String domainKey, Long memberId, Long projectMemberId) throws Exception;
     public ManageDto getProjectDetail(Map<String, Object> map) throws SQLException;
 
 

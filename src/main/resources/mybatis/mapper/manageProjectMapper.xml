@@ -181,7 +181,7 @@
         JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
         JOIN member_details md ON wm.member_id = md.member_id
         WHERE pm.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y' AND p.deleted IS NULL
-          AND pm.role = 30 AND pm.status = 0
+          AND pm.role = 30 AND pm.status = 0 AND wm.status = 0
         ORDER BY md.name
     </select>
 
@@ -196,8 +196,9 @@
     <!-- 프로젝트 업무 담당자 검증 -->
     <select id="countValidTaskTL" parameterType="map" resultType="int">
         SELECT COUNT(*)
-        FROM project_members pm
-        WHERE pm.project_id = #{projectId} AND pm.project_member_id = #{projectMemberId} AND pm.role = 30 AND pm.status = 0
+	    FROM project_members pm
+	    JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+	    WHERE pm.project_id = #{projectId} AND pm.project_member_id = #{projectMemberId} AND pm.role = 30 AND pm.status = 0 AND wm.status = 0
     </select>
 
     <!-- 업무 등록 -->
@@ -247,12 +248,49 @@
         FOR UPDATE OF p.project_id
     </select>
 
-	<select id="getProjectMemberRole" parameterType="map" resultType="Integer">
+	<!-- 프로젝트 멤버의 관리 직위 조회 -->
+	<select id="getProjectMemberRole" parameterType="map" resultType="int">
         SELECT pm.role
         FROM project_members pm
         JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-        WHERE pm.project_id = #{projectId}
-          AND wm.member_id = #{memberId}
+		JOIN projects p ON pm.project_id = p.project_id
+		JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id   
+		WHERE pm.project_id = #{projectId} AND wm.member_id = #{memberId} AND wd.domain_key = #{domainKey}
+		      AND wd.active = 'Y' AND p.deleted IS NULL
+		      AND pm.status = 0 AND wm.status = 0
     </select>
+
+	
+	<!-- 업무 TL 참여 등록 -->
+	<insert id="insertManageTaskMember" parameterType="map">
+	    MERGE INTO task_members tm
+	    USING dual
+	    ON (tm.task_id = #{taskId} AND tm.project_member_id = #{projectMemberId})
+	    WHEN NOT MATCHED THEN
+	        INSERT (task_id, project_member_id, created)
+	        VALUES (#{taskId}, #{projectMemberId},SYSDATE)
+	</insert>
+	
+	
+	
+	<!-- 업무 TL 참여 관계 삭제 -->
+	<delete id="deleteManageTaskMember" parameterType="map">
+	    DELETE FROM task_members tm
+	    WHERE tm.task_id = #{taskId} AND tm.project_member_id = #{projectMemberId} 
+	    	AND NOT EXISTS (
+	          SELECT 1
+	          FROM sub_task_members stm
+	          WHERE stm.task_id = tm.task_id AND stm.project_member_id = tm.project_member_id
+			)
+	</delete>
+		
+	
+	<!-- 업무 담당 TL 변경 -->
+	<update id="updateManageTaskTL" parameterType="map">
+	    UPDATE tasks
+	    SET project_member_id = #{projectMemberId},  updated = SYSDATE
+	    WHERE task_id = #{taskId} AND project_id = #{projectId} AND deleted IS NULL
+	</update>
+
 
 </mapper>

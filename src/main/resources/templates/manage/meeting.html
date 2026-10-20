@@ -63,7 +63,7 @@
                         </tbody>
                     </table>
                 </div>
-				<nav class="project-pagination" aria-label="회의록 목록 페이지" v-if="pageInfo.totalPage > 0" style="justify-content: center;">
+				<nav class="project-pagination" aria-label="회의록 목록 페이지" v-if="pageInfo.totalPage > 0" style="justify-content: center; padding-top: 5px;">
 				    <button type="button" class="project-button" :disabled="searchParams.page <= 1" @click="fetchMeetingList(searchParams.page - 1)">이전</button>
 				    <template v-for="num in pageNumbers" :key="num">
 				        <span v-if="num === searchParams.page" class="project-current-page" aria-current="page">{{ num }}</span>

@@ -374,3 +374,149 @@
     justify-content: center;
     text-decoration: none;
 }
+
+
+.approval-page .page-heading,
+.approval-page .page-title {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.approval-page .page-heading {
+    padding: 0 !important;
+}
+
+.approval-page .approval-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 220px));
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.approval-page .approval-summary-grid .approval-summary-card {
+    box-sizing: border-box;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+
+    background: #FFFFFF;
+    border: 1px solid #E8E2D9;
+    border-radius: 12px;
+
+    box-shadow: none;
+    transition: none;
+    transform: none;
+}
+
+.approval-page .approval-summary-grid .approval-summary-card {
+    border-top: 1px solid #E8E2D9;
+}
+
+.approval-page .approval-summary-grid .approval-summary-card:hover {
+    background: #FFFFFF;
+    border-color: #E8E2D9;
+    box-shadow: none;
+    transform: none;
+}
+
+.approval-page .approval-summary-label {
+    color: #594331;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.approval-page .approval-summary-count {
+    display: block;
+    margin: 0;
+    color: #594331;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.approval-page .approval-summary-description {
+    color: #8B7D6E;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+    .approval-page .approval-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 220px));
+    }
+}
+
+@media (max-width: 520px) {
+    .approval-page .approval-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .approval-page .approval-summary-grid .approval-summary-card {
+        padding: 12px;
+    }
+
+    .approval-page .approval-summary-count {
+        font-size: 28px;
+    }
+}
+
+.approval-page .approval-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: none;
+    margin: 28px auto 32px;
+}
+
+/* [수정] 큰 화면에서는 가로로 긴 직사각형 */
+@media (min-width: 1101px) {
+    .approval-page .approval-summary-grid .approval-summary-card {
+        width: 100%;
+        height: 170px;
+        min-height: 0;
+        aspect-ratio: auto;
+        padding: 24px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .approval-page .approval-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 400px;
+        gap: 16px;
+    }
+
+    .approval-page .approval-summary-grid .approval-summary-card {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .approval-page .approval-summary-grid {
+        gap: 12px;
+    }
+
+    .approval-page .approval-summary-grid .approval-summary-card {
+        padding: 12px;
+    }
+}
+
+

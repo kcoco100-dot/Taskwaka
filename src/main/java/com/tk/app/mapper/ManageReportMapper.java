@@ -23,4 +23,5 @@ public interface ManageReportMapper {
     public int updateTaskProgress(Map<String, Object> map);
     public int updateProjectProgress(Map<String, Object> map);
     
+    public Map<String, Object> countReportStatuses(Map<String, Object> map);
 }

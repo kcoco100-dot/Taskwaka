@@ -19,7 +19,10 @@ public interface ManageService {
 	public int dataCount(Map<String, Object> map) throws Exception;
 	
 	public List<ProjectTeamView> listWorkspaceMembers(Long workspaceId) throws Exception;
-	public void assignOrUpdateProjectMember(Long workspaceMemberId, Long projectId, int role) throws Exception;
+	public void assignOrUpdateProjectMember(Map<String, Object> map) throws Exception;
+	public void excludeProjectMember(Map<String, Object> map) throws Exception;
+    public void excludeWorkspaceMember(Map<String, Object> map) throws Exception;
+	
 	
 	int getProjectCount(Long workspaceId) throws Exception;
 	public List<ManageDto> getProjectDetail(Map<String, Object> map) throws Exception;

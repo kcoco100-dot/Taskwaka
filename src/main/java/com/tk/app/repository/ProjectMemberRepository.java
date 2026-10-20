@@ -29,41 +29,155 @@ public interface ProjectMemberRepository extends JpaRepository<ManageProjectMemb
 	        nativeQuery = true)
 	    List<ProjectTeamView> findWorkspaceMembersWithProject(@Param("workspaceId") Long workspaceId);
 
-	@Modifying
-	@Query(value =
-	    "MERGE INTO project_members pm " +
-	    "USING dual " +
-	    "ON (pm.project_id = :projectId " +
-	    "AND pm.workspace_member_id = :workspaceMemberId) " +
-
-		"WHEN MATCHED THEN " +
-		"UPDATE SET " +
-		"    pm.role = :role, " +
-		"    pm.status = 0, " +
-		"    pm.LEFT = NULL, " +
-		"    pm.updated = SYSDATE " +
-
-	    "WHEN NOT MATCHED THEN " +
-	    "INSERT (project_member_id, project_id, workspace_member_id, " +
-	    "role, status, joined) " +
-	    "VALUES (seq_project_members.NEXTVAL, :projectId, " +
-	    ":workspaceMemberId, :role, 0, SYSDATE)",
-	    nativeQuery = true)
-	void upsertProjectMember(
-	    @Param("workspaceMemberId") Long workspaceMemberId,
-	    @Param("projectId") Long projectId,
-	    @Param("role") int role
-	);
-	
-	@Query(value = "SELECT role FROM workspace_members WHERE workspace_id = :workspaceId AND member_id = :memberId", nativeQuery = true)
-    Integer findRoleByWorkspaceIdAndMemberId(@Param("workspaceId") Long workspaceId, @Param("memberId") Long memberId);
-	
-	@Modifying
-    @Query(value = "UPDATE project_members SET status = 1, left = SYSDATE WHERE project_member_id = :projectMemberId", nativeQuery = true)
-    void excludeFromProject(@Param("projectMemberId") Long projectMemberId);
-
+    // 프로젝트 팀원 등록 및 직위 변경
     @Modifying
-    @Query(value = "UPDATE workspace_members SET status = 1, left = SYSDATE WHERE workspace_member_id = :workspaceMemberId", nativeQuery = true)
-    void excludeFromWorkspace(@Param("workspaceMemberId") Long workspaceMemberId);
+    @Query(value =
+        "MERGE INTO project_members pm " +
+        "USING dual " +
+        "ON (pm.project_id = :projectId " +
+        "AND pm.workspace_member_id = :workspaceMemberId) " +
+        "WHEN MATCHED THEN " +
+        "UPDATE SET pm.role = :role, " +
+        "pm.status = 0, " +
+        "pm.\"LEFT\" = NULL, " +
+        "pm.updated = SYSDATE " +
+        "WHEN NOT MATCHED THEN " +
+        "INSERT (project_member_id, project_id, workspace_member_id, " +
+        "role, status, joined) " +
+        "VALUES (seq_project_members.NEXTVAL, :projectId, " +
+        ":workspaceMemberId, :role, 0, SYSDATE)",
+        nativeQuery = true)
+    void upsertProjectMember(
+        @Param("workspaceMemberId") Long workspaceMemberId,
+        @Param("projectId") Long projectId,
+        @Param("role") int role
+    );
 	
+    // 활성 워크스페이스 직위 조회
+    @Query(value =
+        "SELECT role FROM workspace_members " +
+        "WHERE workspace_id = :workspaceId " +
+        "AND member_id = :memberId " +
+        "AND status = 0",
+        nativeQuery = true)
+    Integer findRoleByWorkspaceIdAndMemberId(
+        @Param("workspaceId") Long workspaceId,
+        @Param("memberId") Long memberId
+    );
+    
+    // 프로젝트 참여자 제외
+    @Modifying
+    @Query(value =
+        "UPDATE project_members " +
+        "SET status = 1, \"LEFT\" = SYSDATE, updated = SYSDATE " +
+        "WHERE project_member_id = :projectMemberId AND status = 0",
+        nativeQuery = true)
+    int excludeFromProject(
+        @Param("projectMemberId") Long projectMemberId
+    );
+
+    // 워크스페이스 참여자 제외
+    @Modifying
+    @Query(value =
+        "UPDATE workspace_members " +
+        "SET status = 1, \"LEFT\" = SYSDATE " +
+        "WHERE workspace_member_id = :workspaceMemberId AND status = 0",
+        nativeQuery = true)
+    int excludeFromWorkspace(
+        @Param("workspaceMemberId") Long workspaceMemberId
+    );
+    
+
+    // 프로젝트와 워크스페이스 팀원 일치 확인
+    @Query(value =
+        "SELECT COUNT(*) FROM projects p " +
+        "JOIN workspace_members wm " +
+        "ON p.workspace_id = wm.workspace_id " +
+        "WHERE p.project_id = :projectId " +
+        "AND p.workspace_id = :workspaceId " +
+        "AND p.deleted IS NULL " +
+        "AND wm.workspace_member_id = :workspaceMemberId " +
+        "AND wm.status = 0",
+        nativeQuery = true)
+    int countValidAssignmentTarget(
+        @Param("workspaceId") Long workspaceId,
+        @Param("workspaceMemberId") Long workspaceMemberId,
+        @Param("projectId") Long projectId
+    );
+
+    // 기존 프로젝트 참여자 번호 조회
+    @Query(
+        "SELECT pm.projectMemberId " +
+        "FROM ManageProjectMember pm " +
+        "WHERE pm.projectId = :projectId " +
+        "AND pm.workspaceMemberId = :workspaceMemberId"
+    )
+    Long findAssignedProjectMemberId(
+        @Param("projectId") Long projectId,
+        @Param("workspaceMemberId") Long workspaceMemberId
+    );
+
+    // 프로젝트 참여자의 직위 조회
+    @Query(
+        "SELECT pm.role FROM ManageProjectMember pm " +
+        "WHERE pm.projectMemberId = :projectMemberId"
+    )
+    Integer findAssignedProjectRole(
+        @Param("projectMemberId") Long projectMemberId
+    );
+
+    // 해당 워크스페이스의 활성 프로젝트 참여자인지 확인
+    @Query(value =
+        "SELECT COUNT(*) FROM project_members pm " +
+        "JOIN projects p ON pm.project_id = p.project_id " +
+        "WHERE pm.project_member_id = :projectMemberId " +
+        "AND p.workspace_id = :workspaceId " +
+        "AND p.deleted IS NULL " +
+        "AND pm.status = 0",
+        nativeQuery = true)
+    int countActiveProjectMember(
+        @Param("workspaceId") Long workspaceId,
+        @Param("projectMemberId") Long projectMemberId
+    );
+
+    // 워크스페이스 참여자 확인
+    @Query(value =
+        "SELECT COUNT(*) FROM workspace_members " +
+        "WHERE workspace_member_id = :workspaceMemberId " +
+        "AND workspace_id = :workspaceId " +
+        "AND status = 0",
+        nativeQuery = true)
+    int countActiveWorkspaceMember(
+        @Param("workspaceId") Long workspaceId,
+        @Param("workspaceMemberId") Long workspaceMemberId
+    );
+
+    // 워크스페이스 팀원이 참여한 프로젝트 번호 조회
+    @Query(value =
+        "SELECT pm.project_member_id " +
+        "FROM project_members pm " +
+        "JOIN projects p ON pm.project_id = p.project_id " +
+        "WHERE pm.workspace_member_id = :workspaceMemberId " +
+        "AND p.workspace_id = :workspaceId " +
+        "AND pm.status = 0",
+        nativeQuery = true)
+    List<Long> findActiveProjectMemberIds(
+        @Param("workspaceId") Long workspaceId,
+        @Param("workspaceMemberId") Long workspaceMemberId
+    );
+
+    // 하위업무 연결이 없는 TL 업무 참여 관계 삭제
+    @Modifying
+    @Query(value =
+        "DELETE FROM task_members tm " +
+        "WHERE tm.project_member_id = :projectMemberId " +
+        "AND NOT EXISTS ( " +
+        "SELECT 1 FROM sub_task_members stm " +
+        "WHERE stm.task_id = tm.task_id " +
+        "AND stm.project_member_id = tm.project_member_id)",
+        nativeQuery = true)
+    int deleteUnlinkedTaskMembers(
+        @Param("projectMemberId") Long projectMemberId
+    );
+    
 }

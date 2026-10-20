@@ -32,76 +32,81 @@ public class ManageReportController {
 	private final ManageReportService service;
 	private final ManageService manageService;
 
-//	@ModelAttribute("domainKey")
-//	public String setDomainKey(@PathVariable("domainKey") String domainKey) {
-//		return domainKey;
-//	}
-
 	// 보고서 목록 및 검색
-	 @GetMapping({"", "/"})
-	    public String listReport(
-	            @PathVariable("domainKey") String domainKey,
-	            @RequestParam(value = "page", defaultValue = "1") int page,
-	            @RequestParam(value = "reportCategory", defaultValue = "0") int reportCategory,
-	            @RequestParam(value = "reviewStatus", defaultValue = "-2") int reviewStatus,
-	            @RequestParam(value = "keyword", defaultValue = "") String keyword,
-	            Model model) {
-
-	        int size = 10;
+	@GetMapping({"", "/"})
+	public String listReport(
+			@PathVariable("domainKey") String domainKey,
+			@RequestParam(value = "page", defaultValue = "1") int page,
+			@RequestParam(value = "reportCategory", defaultValue = "0") int reportCategory,
+			@RequestParam(value = "reviewStatus", defaultValue = "-2") int reviewStatus,
+			@RequestParam(value = "keyword", defaultValue = "") String keyword,
+			Model model) {
+		
+		try {
+			int size = 10;
 	        int dataCount = 0;
 	        int totalPage = 0;
-
+		
 	        page = Math.max(1, page);
-
+	
 	        List<ManageReportDto> list = Collections.emptyList();
-	        String errorMessage = null;
+	        Map<String, Object> statusCounts = Collections.emptyMap();
 
-	        try {
-	            if (reportCategory < 0 || reportCategory > 2 || reviewStatus < -2 || reviewStatus > 2) {
-	                throw new IllegalArgumentException("검색 조건이 올바르지 않습니다.");
-	            }
+            if (reportCategory < 0 || reportCategory > 2 || reviewStatus < -2 || reviewStatus > 2) {
+                throw new IllegalArgumentException("검색 조건이 올바르지 않습니다.");
+        }
+	
+		Map<String, Object> map = requestMap(domainKey);
+		
+		map.put("reportCategory", 0);
+        map.put("reviewStatus", -2);
+        map.put("keyword", "");
+		
+		Map<String, Object> counts = service.countReportStatuses(map);
 
-	            Map<String, Object> map = requestMap(domainKey);
-
-	            map.put("reportCategory", reportCategory);
-	            map.put("reviewStatus", reviewStatus);
-	            map.put("keyword", keyword.trim());
-
-	            int count = service.countReport(map);
-	            int pages = (int) Math.ceil((double) count / size);
-
-	            if (pages > 0 && page > pages) {
-	                page = pages;
-	            }
-
-	            map.put("offset", (page - 1) * size);
-	            map.put("size", size);
-
-	            List<ManageReportDto> result = service.listReport(map);
-
-	            dataCount = count;
-	            totalPage = pages;
-	            list = result;
-
-	        } catch (Exception e) {
-	            log.error("보고서 목록 조회 오류: ", e);
-	            errorMessage = "보고서를 조회하는 중 오류가 발생했습니다.";
-	        }
-
-	        model.addAttribute("domainKey", domainKey);
-	        model.addAttribute("reportCategory", reportCategory);
-	        model.addAttribute("reviewStatus", reviewStatus);
-	        model.addAttribute("keyword", keyword);
-
-	        model.addAttribute("list", list);
-	        model.addAttribute("dataCount", dataCount);
-	        model.addAttribute("page", page);
-	        model.addAttribute("size", size);
-	        model.addAttribute("totalPage", totalPage);
-	        model.addAttribute("errorMessage", errorMessage);
-
-	        return "manage/approval";
-	    }
+        if (counts != null) {
+            statusCounts = counts;
+        }
+        
+        map.put("reportCategory", reportCategory);
+        map.put("reviewStatus", reviewStatus);
+        map.put("keyword", keyword.trim());
+	
+		int count = service.countReport(map);
+		int pages = (int) Math.ceil((double) count / size);
+		
+		if (pages > 0 && page > pages) {
+		    page = pages;
+		}
+	
+		map.put("offset", (page - 1) * size);
+		map.put("size", size);
+	
+	    list = service.listReport(map);
+        dataCount = count;
+        totalPage = pages;
+	
+        model.addAttribute("domainKey", domainKey);
+        model.addAttribute("reportCategory", reportCategory);
+        model.addAttribute("reviewStatus", reviewStatus);
+        model.addAttribute("keyword", keyword);
+        
+        model.addAttribute("list", list);
+        model.addAttribute("dataCount", dataCount);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("totalPage", totalPage);
+        
+        model.addAttribute("uncheckedCount", statusCounts.getOrDefault("uncheckedCount", 0));
+        model.addAttribute("pendingCount", statusCounts.getOrDefault("pendingCount", 0));
+        model.addAttribute("approvedCount", statusCounts.getOrDefault("approvedCount", 0));
+        model.addAttribute("rejectedCount", statusCounts.getOrDefault("rejectedCount", 0));
+		} catch (Exception e) {
+		    log.info("listReport : ", e);
+		}
+		
+		return "manage/approval";
+		}
 
 	// 보고서 상세 조회 및 최초 열람
     @GetMapping("/detail")
@@ -178,6 +183,7 @@ public class ManageReportController {
         }
 
         Map<String, Object> map = new HashMap<>();
+        map.put("domainKey", domainKey);
         map.put("workspaceId", workspaceId);
         map.put("memberId", info.getMember_id());
         return map;

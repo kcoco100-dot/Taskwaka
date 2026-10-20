@@ -19,8 +19,10 @@ public interface ManageProjectMapper {
 	public int dataCount(Map<String, Object> map) throws SQLException;
 	public ManageDto getProjectDetail(Map<String, Object> map) throws SQLException;
 	public int countProjectAccess(Map<String, Object> map) throws SQLException;
+	
 	public int updateProject(Map<String, Object> map) throws SQLException;
 	public int deleteProject(Map<String, Object> map) throws SQLException;
+	
 	public int countProjectInWorkspace(Map<String, Object> map) throws SQLException;
 	public int countTargetInWorkspace( Map<String, Object> map) throws SQLException;
 	public int countProjectMemberInWorkspace(Map<String, Object> map) throws SQLException;
@@ -34,4 +36,8 @@ public interface ManageProjectMapper {
 	public int countManageTaskReports(Map<String, Object> map) throws SQLException;
 	public Long lockManageProject(Map<String, Object> map) throws SQLException;
     public Integer getProjectMemberRole(Map<String, Object> map) throws SQLException;
+    
+    public int insertManageTaskMember(Map<String, Object> map) throws SQLException;
+    public int deleteManageTaskMember(Map<String, Object> map) throws SQLException;
+    public int updateManageTaskTL(Map<String, Object> map) throws SQLException;
 }

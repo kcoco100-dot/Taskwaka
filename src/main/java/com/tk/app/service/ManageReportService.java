@@ -10,4 +10,5 @@ public interface ManageReportService {
     public int countReport(Map<String, Object> map);
     public ManageReportDto openReport(Map<String, Object> map);
     public void updateReview(Map<String, Object> map);
+    public Map<String, Object> countReportStatuses(Map<String, Object> map);
 }
