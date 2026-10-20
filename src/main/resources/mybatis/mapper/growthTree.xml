@@ -52,12 +52,14 @@
 		</selectKey>
 		INSERT INTO growth_exp_logs(
 			exp_log_id, workspace_id, member_id, notice_id, 
-			exp, action_type, earned_at, invite_key, sub_task_id, daily_report_id)
+			exp, action_type, earned_at, invite_key, sub_task_id, 
+			daily_report_id, team_report_id)
 		VALUES(#{expLogId}, #{workspaceId}, #{memberId},
 			#{noticeId, jdbcType=NUMERIC}, #{exp}, 
 			#{actionType}, SYSDATE, #{inviteKey, jdbcType=VARCHAR},
 			#{subTaskId, jdbcType=NUMERIC},
-			#{dailyReportId, jdbcType=NUMERIC})
+			#{dailyReportId, jdbcType=NUMERIC},
+			#{teamReportId, jdbcType=NUMERIC})
 	</insert>
 
 	<!-- 같은 공지의 등록 보상을 이미 지급했는지 확인 -->
@@ -288,5 +290,101 @@
 		        )
 		    </if>
 	 </select>
+	 
+	 <!-- 업무 보고서 경험치 중복 지급 확인 -->
+	 <select id="countTeamReportCreateExpLog" resultType="int">
+	 	SELECT COUNT(*)
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND team_report_id = #{teamReportId}
+			AND action_type = #{actionType}
+	 </select>
+	 
+	 <!-- 업무 보고서 워크 소속 확인 -->
+	 <select id="countTeamReportInWorkspace" resultType="int">
+	 	SELECT COUNT(*)
+	 	FROM team_reports tr
+	 	JOIN tasks t ON t.project_id = tr.project_id
+	 		AND t.task_id = tr.task_id
+	 	JOIN projects p ON p.project_id = t.project_id
+	 	WHERE tr.team_report_id = #{teamReportId}
+	 	    AND p.workspace_id = #{workspaceId}
+	 		AND tr.deleted IS NULL
+	 		AND t.deleted IS NULL
+	 		AND p.deleted IS NULL
+	 		AND EXISTS (
+	 			SELECT 1
+	 			FROM project_members pm 
+	 			JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+	 			WHERE pm.project_id = p.project_id
+	 				AND wm.workspace_id = p.workspace_id
+	 				AND wm.member_id = #{memberId}
+	 				AND pm.status = 0
+	 				AND pm.left IS NULL
+	 				AND wm.status = 0
+	 				AND wm.left IS NULL 
+	 		)
+	 </select>
+	 
+	 <!-- 업무 보고서의 미회수 지급 이력 조회 -->
+ 	<select id="findUnrevokedTeamReportCreateExpLogs" resultType="com.tk.app.domain.dto.GrowthExpLogDto">
+		SELECT exp_log_id AS "expLogId", exp
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND team_report_id = #{teamReportId}
+			AND action_type = #{actionType}
+			AND deleted_at IS NULL
+	</select>
+	
+	<!-- 회수 시간을 기록할 메서드 -->
+	<update id="markTeamReportCreateExpLogRevoked" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
+		UPDATE growth_exp_logs SET deleted_at = SYSDATE
+		WHERE exp_log_id = #{expLogId} 
+			AND deleted_at IS NULL
+	</update>
+	
+	<!-- 삭제 전 대상 보고서의 기본 소속 조회 -->
+	 <select id="selectTeamReportDeleteContext" resultType="map" parameterType="map">
+	 	SELECT tr.team_report_id AS "teamReportId",
+	 		p.workspace_id AS "workspaceId",
+	 		tr.project_member_id AS "authorProjectMemberId"
+	 	FROM team_reports tr
+	 	JOIN tasks t ON t.project_id = tr.project_id
+	 		AND t.task_id = tr.task_id
+	 	JOIN projects p ON p.project_id = tr.project_id
+	 	WHERE tr.team_report_id = #{teamReportId}
+	 	    AND p.project_id = #{projectId}
+	 		AND tr.deleted IS NULL
+	 		AND t.deleted IS NULL
+	 		AND p.deleted IS NULL
+	 		AND EXISTS (
+	 			SELECT 1
+	 			FROM workspace_domains wd
+	 			WHERE wd.workspace_id = p.workspace_id
+	 				AND wd.domain_key = #{domainKey}
+	 				AND wd.active = 'Y'
+	 			) AND EXISTS (
+		 			SELECT 1
+		 			FROM project_members pm 
+		 			JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+		 			WHERE pm.project_id = p.project_id
+		 				AND wm.workspace_id = p.workspace_id
+		 				AND wm.member_id = #{memberId}
+		 				AND pm.project_member_id = tr.project_member_id
+		 				AND pm.status = 0
+		 				AND pm.left IS NULL
+		 				AND wm.status = 0
+		 				AND wm.left IS NULL 
+			 		) AND EXISTS (
+			 			SELECT 1
+		 				FROM report_reviews rr
+		 				JOIN team_report_id tr ON tr.team_report_id = rr.team_report_id
+		 				WHERE rr.category = 2
+		 					AND rr.viewed IS NULL
+		 					AND rr.reviewed IS NULL
+		 					AND rr.status IN (1, 2)
+			 		)
+	 </select>
+
 	
 </mapper>

@@ -42,22 +42,26 @@
 					        상태:
 					        <a th:case="0"
 					        	   class="btn btn-outline-success"
-					        	   th:href="@{/project(tab='feed')}">
+					        	   th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, 
+					        	   		projectId=${project.projectId})}">
 					        	   예정
 					        	</a>
 					        <a th:case="1"
 					           class="btn btn-outline-success"
-					        	   th:href="@{/project(tab='feed')}">
+					        	   th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, 
+					        	   		projectId=${project.projectId})}"> 
 					        	   진행중...
 					        	</a>
 					        <a th:case="2"
 					           class="btn btn-outline-success"
-					        	   th:href="@{/project(tab='feed')}">
+					        	   th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, 
+					        	   		projectId=${project.projectId})}">
 					        	   완료
 					        	</a>
 					        <a th:case="*"
 					           class="btn btn-outline-success"
-					        	   th:href="@{/project(tab='feed')}">
+					        	   th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, 
+					        	   		projectId=${project.projectId})}">
 					        	   확인필요
 					        	</a>
 					    </div>

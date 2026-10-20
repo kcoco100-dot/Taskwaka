@@ -74,4 +74,20 @@ public interface GrowthTreeMapper {
 
 	// 삭제 전에 일일보고서의 실제 소속과 삭제 권한 확인
 	public Map<String, Object> selectDailyReportDeleteContext(Map<String, Object> params);
+
+	// 업무 보고서 중복 확인
+	public int countTeamReportCreateExpLog(GrowthExpLogDto dto);
+
+	// 업무 보고서 실제 워크 소속 확인
+	public int countTeamReportInWorkspace(GrowthExpLogDto dto);
+
+	// 업무 보고서의 미회수 지급 이력을 조회할 메서드
+	// 삭제 시 고정된 10이 아닌 실제로 지급한 경험치를 회수함
+	public List<GrowthExpLogDto> findUnrevokedTeamReportCreateExpLogs(GrowthExpLogDto dto);
+
+	// 회수 시간을 기록할 메서드
+	public int markTeamReportCreateExpLogRevoked(GrowthExpLogDto dto);
+
+	// 삭제 전에 보고서의 실제 소속 조회
+	public Map<String, Object> selectTeamReportDeleteContext(Map<String, Object> params);
 }
