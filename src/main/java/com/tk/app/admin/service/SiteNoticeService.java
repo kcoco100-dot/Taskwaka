@@ -20,4 +20,7 @@ public interface SiteNoticeService {
 	public SiteNoticeFileDto selectNoticeFile(long notice_file_id);
 	public int deleteNoticeFile(long notice_file_id);
 
+	
+	public int dataCountPublicNotice(String keyword);
+	public List<SiteNoticeDto> selectPublicNoticePage(String keyword, int offset, int size);
 }

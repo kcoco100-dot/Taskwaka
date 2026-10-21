@@ -98,3 +98,37 @@
 .warm-table td:last-child {
     text-align: center;
 }
+
+/* 페이징 디자인 통일 */
+.paginate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    margin-top: 24px;
+}
+
+.paginate a,
+.paginate span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 39px;
+    padding: 8px 13px;
+    border: 1px solid #e9e1d9;
+    border-radius: 7px;
+    background: white;
+    color: #654b37;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.paginate a:hover {
+    background: #f7f2ed;
+}
+
+.paginate .active {
+    background: #654b37;
+    color: white;
+    border-color: #654b37;
+}

@@ -42,7 +42,7 @@
 		LEFT JOIN MEMBER_DETAILS d
 		ON m.member_id = d.member_id
 		WHERE d.name LIKE '%' || #{keyword} || '%'
-		OR d.email LIKE '%' || #{keyword} || '%'
+		OR m.login_id LIKE '%' || #{keyword} || '%'
 		ORDER BY m.joined DESC
 	</select>
 	
@@ -93,7 +93,7 @@
 	        <if test="keyword != null and keyword != ''">
 	            AND (
 	                d.name LIKE '%' || #{keyword} || '%'
-	                OR d.email LIKE '%' || #{keyword} || '%'
+	                OR m.login_id LIKE '%' || #{keyword} || '%'
 	            )
 	        </if>
 	        <if test="status != null">
@@ -118,7 +118,7 @@
 	        <if test="keyword != null and keyword != ''">
 	            AND (
 	                d.name LIKE '%' || #{keyword} || '%'
-	                OR d.email LIKE '%' || #{keyword} || '%'
+	                OR m.login_id LIKE '%' || #{keyword} || '%'
 	            )
 	        </if>
 	        <if test="status != null">

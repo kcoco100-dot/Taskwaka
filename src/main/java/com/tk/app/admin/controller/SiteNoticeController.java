@@ -1,5 +1,7 @@
 package com.tk.app.admin.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class SiteNoticeController {
 			@RequestParam (defaultValue = "") String keyword,
 			@RequestParam(name = "page", defaultValue = "1") int current_page) {
 		try {
-			int size = 10;
+			int size = 5;
 			
 			int dataCount = siteNoticeService.dataCountNotice(keyword);
 			int totalPage = paginateUtil.pageCount(dataCount, size);
@@ -47,7 +49,8 @@ public class SiteNoticeController {
 			
 			List<SiteNoticeDto> noticeList = siteNoticeService.selectNoticePage(keyword, offset, size);
 			
-			String listUrl = "/admin/notice?keyword=" + keyword; 
+			String encodeKeyword = URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+			String listUrl = "/admin/notice?keyword=" + encodeKeyword;
 			
 			String paging = paginateUtil.paging(current_page, totalPage, listUrl);
 

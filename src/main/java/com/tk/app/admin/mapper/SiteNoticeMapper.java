@@ -35,8 +35,16 @@ public interface SiteNoticeMapper {
 	public List<SiteNoticeFileDto> selectNoticeFiles(long notice_id);
 	// 파일 하나 조회
 	public SiteNoticeFileDto selectNoticeFile(long notice_file_id);
-	// 파일 삭
+	// 파일 삭제
 	public int deleteNoticeFile(long notice_file_id);
 	
+	
+	// 공개글 페이지 전체 개수
+	public int dataCountPublicNotice(String keyword);
+	// 공개글 페이징 개수
+	public List<SiteNoticeDto> selectPublicNoticePage(
+			@Param("keyword") String keyword, 
+			@Param("offset") int offset, 
+			@Param("size") int size);
 	
 }

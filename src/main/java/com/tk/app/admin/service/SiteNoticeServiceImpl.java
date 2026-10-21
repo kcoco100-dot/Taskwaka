@@ -151,6 +151,28 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		}
 	}
 
+	@Override
+	public int dataCountPublicNotice(String keyword) {
+		try {
+		    return siteNoticeMapper.dataCountPublicNotice(keyword);
+
+		} catch (Exception e) {
+			log.error("dataCountPublicNotice : ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public List<SiteNoticeDto> selectPublicNoticePage(String keyword, int offset, int size) {
+		try {
+		    return siteNoticeMapper.selectPublicNoticePage(keyword, offset, size);
+
+		} catch (Exception e) {
+			log.error("selectPublicNoticePage : ", e);
+			throw e;
+		}
+	}
+
 
 	
 }

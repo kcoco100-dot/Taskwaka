@@ -23,7 +23,7 @@
 					<span>전체 회원 목록 조회 및 상태 관리</span>
 					<div style="display: flex; gap: 8px;">
 						<input type="text" class="warm-input" name="keyword" th:value="${keyword}"
-							placeholder="이름 또는 이메일 검색..." style="width: 240px;"> 
+							placeholder="이름 또는 로그인 ID 검색..." style="width: 240px;"> 
 							<select class="warm-select" name="status">
 							    <option value="" th:selected="${status == null}">전체 상태</option>
 							    <option value="0" th:selected="${status != null and status == 0}">활성</option>

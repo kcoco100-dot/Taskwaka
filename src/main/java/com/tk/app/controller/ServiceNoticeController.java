@@ -1,5 +1,7 @@
 package com.tk.app.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +12,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.tk.app.admin.domain.dto.SiteNoticeDto;
 import com.tk.app.admin.domain.dto.SiteNoticeFileDto;
 import com.tk.app.admin.service.SiteNoticeService;
+import com.tk.app.common.PaginateUtil;
 import com.tk.app.common.StorageService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,23 +31,35 @@ import lombok.extern.slf4j.Slf4j;
 public class ServiceNoticeController {
 	private final SiteNoticeService siteNoticeService;
 	private final StorageService storageService;
+	private final PaginateUtil paginateUtil;
 
 	@GetMapping("/notice")
-	public String noticeList(Model model) {
+	public String noticeList(Model model,
+			@RequestParam(defaultValue = "") String keyword,
+			@RequestParam(name = "page", defaultValue = "1") int current_page) {
 		try {
+			int size = 2;
+			
+			int dataCount = siteNoticeService.dataCountPublicNotice(keyword);
+			
+			int totalPage = paginateUtil.pageCount(dataCount, size);
+			
+			int offset = (current_page - 1) * size;
 
-			List<SiteNoticeDto> noticeList = siteNoticeService.selectNoticeList();
+			List<SiteNoticeDto> noticeList = siteNoticeService.selectPublicNoticePage(keyword, offset, size);
 
-			List<SiteNoticeDto> publicList = new ArrayList<>();
+			String encodeKeyword = URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+			
+			String listUrl = "/service/notice?keyword=" + encodeKeyword;
+			
+			String paging = paginateUtil.paging(current_page, totalPage, listUrl);
+					
 
-			for (SiteNoticeDto dto : noticeList) {
-				if (dto.getStatus() == 1) {
-					publicList.add(dto);
-				}
-			}
-
-			model.addAttribute("noticeList", publicList);
-
+			model.addAttribute("noticeList", noticeList);
+			model.addAttribute("paging", paging);
+			model.addAttribute("keyword", keyword);
+			model.addAttribute("dataCount", dataCount);
+			
 			return "service/notice-list";
 		} catch (Exception e) {
 			log.error("noticeList : ", e);

@@ -44,7 +44,7 @@ public class AdminController {
     	
     	keyword = keyword.trim();
     	
-    	int size = 10;
+    	int size = 7;
     	
     	Map<String, Object> map = new HashMap<>();
     	map.put("keyword", keyword);

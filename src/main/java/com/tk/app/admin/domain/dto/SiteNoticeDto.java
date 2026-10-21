@@ -17,4 +17,5 @@ public class SiteNoticeDto {
 	private Date updated;
 	private String member_name;
 	private int file_count;
+	private String name;
 }

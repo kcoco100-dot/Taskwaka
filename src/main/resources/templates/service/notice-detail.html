@@ -14,7 +14,11 @@
         <article class="site-notice-board" th:if="${detail != null}">
             <div class="site-notice-detail-head">
                 <h2 th:text="${detail.title}">공지사항 제목</h2>
-                <time th:datetime="${#dates.format(detail.created, 'yyyy-MM-dd')}" th:text="${#dates.format(detail.created, 'yyyy.MM.dd HH:mm')}">2026.10.21</time>
+                <div class="site-notice-detail-info">
+				    <span>작성자 <strong th:text="${detail.name}">ADMIN</strong></span>
+				    <span>작성일 <strong th:text="${#dates.format(detail.created, 'yyyy-MM-dd HH:mm')}"></strong></span>
+				    <span>수정일 <strong th:text="${detail.updated != null ? #dates.format(detail.updated, 'yyyy-MM-dd HH:mm') : '-'}"></strong></span>
+				</div>
             </div>
             <div class="site-notice-body ql-editor" th:utext="${detail.content}">공지사항 내용</div>
             <div class="site-notice-attachments" th:if="${fileList != null and !#lists.isEmpty(fileList)}">

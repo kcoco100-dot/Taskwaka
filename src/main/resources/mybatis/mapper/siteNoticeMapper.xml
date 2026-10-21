@@ -3,9 +3,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.admin.mapper.SiteNoticeMapper">
 	<select id="selectNoticeList" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
-		SELECT notice_id, member_id, title, content, status, created, updated
-		FROM site_notice
-		ORDER BY notice_id DESC
+		SELECT n.notice_id, n.member_id, n.title, n.content, n.status, n.created, n.updated, d.name
+		FROM site_notice n
+		JOIN member_details d
+		ON n.member_id = d.member_id
+		ORDER BY n.notice_id DESC
 	</select>
 	
 	<select id="searchNotice" parameterType="String" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
@@ -30,7 +32,7 @@
 	</insert>
 	
 	<select id="selectNoticeDetail" parameterType="long" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
-		SELECT n.notice_id, n.member_id, n.title, n.content, n.status, n.created, n.updated, d.name AS member_name
+		SELECT n.notice_id, n.member_id, n.title, n.content, n.status, n.created, n.updated, d.name
 		FROM site_notice n
 		LEFT JOIN member_details d
 		ON n.member_id =  d.member_id
@@ -58,20 +60,50 @@
 		</where>
 	</select>
 	
-	<select id="selectNoticePage" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto" >
-		SELECT notice_id, member_id, title, content, status, created, updated,
-			(SELECT COUNT(*)
-			 FROM site_notice_file f
-			 WHERE f.notice_id = n.notice_id) AS file_count
-		FROM site_notice n
-		<where>
-			<if test="keyword != null and keyword != ''">
-				title LIKE '%' || #{keyword} || '%'
-			</if>
-		</where>
-		ORDER BY notice_id DESC
-		OFFSET #{offset} ROWS
-		FETCH NEXT #{size} ROWS ONLY
+	<select id="dataCountPublicNotice" parameterType="String" resultType="int">
+	    SELECT COUNT(*)
+	    FROM site_notice
+	    <where>
+	        status = 1
+	        <if test="keyword != null and keyword != ''">
+	            AND title LIKE '%' || #{keyword} || '%'
+	        </if>
+	    </where>
+	</select>
+	
+	<select id="selectNoticePage" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+	    SELECT n.notice_id, n.member_id, d.name, n.title, n.content, n.status, n.created, n.updated,
+	        (SELECT COUNT(*)
+	         FROM site_notice_file f
+	         WHERE f.notice_id = n.notice_id) AS file_count
+	    FROM site_notice n
+	    LEFT JOIN member_details d ON n.member_id = d.member_id
+	    <where>
+	        <if test="keyword != null and keyword != ''">
+	            n.title LIKE '%' || #{keyword} || '%'
+	        </if>
+	    </where>
+	    ORDER BY n.notice_id DESC
+	    OFFSET #{offset} ROWS
+	    FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	<select id="selectPublicNoticePage" resultType="com.tk.app.admin.domain.dto.SiteNoticeDto">
+	    SELECT n.notice_id, n.member_id, d.name, n.title, n.content, n.status, n.created, n.updated,
+	        (SELECT COUNT(*)
+	         FROM site_notice_file f
+	         WHERE f.notice_id = n.notice_id) AS file_count
+	    FROM site_notice n
+	    LEFT JOIN member_details d ON n.member_id = d.member_id
+	    <where>
+	        n.status = 1
+	        <if test="keyword != null and keyword != ''">
+	            AND n.title LIKE '%' || #{keyword} || '%'
+	        </if>
+	    </where>
+	    ORDER BY n.notice_id DESC
+	    OFFSET #{offset} ROWS
+	    FETCH NEXT #{size} ROWS ONLY
 	</select>
 	
 	<insert id="insertNoticeFile" parameterType="com.tk.app.admin.domain.dto.SiteNoticeFileDto">

@@ -26,7 +26,7 @@
 				<tbody>
 					<tr th:each="notice : ${noticeList}">
 						<td><a th:href="@{/admin/notice/{id}(id=${notice.notice_id})}" th:text="${notice.title}"></a></td>
-						<td th:text="${notice.member_id}"></td>
+						<td th:text="${notice.name}"></td>
 						<td th:text="${#dates.format(notice.created, 'yyyy-MM-dd')}"></td>
 						<td>
 							<span th:if="${notice.file_count > 0}" th:text="${notice.file_count + '개'}"></span>
