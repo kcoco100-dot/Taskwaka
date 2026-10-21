@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.tk.app.admin.domain.dto.SiteNoticeDto;
 import com.tk.app.admin.domain.dto.SiteNoticeFileDto;
@@ -57,7 +58,7 @@ public class SiteNoticeController {
 	        model.addAttribute("adminName", "관리자 (ADMIN)");
 	        
 		} catch (Exception e) {
-			log.error("notice 오류 : ", e);
+			log.error("notice : ", e);
 			throw e;
 		}
 		return "admin/admin_layout";
@@ -110,7 +111,7 @@ public class SiteNoticeController {
 			}
 			
 		} catch (Exception e) {
-			log.error("insertNotice 오류 : ", e);
+			log.error("insertNotice : ", e);
 			throw e;
 		}
 		return "redirect:/admin/notice";
@@ -130,7 +131,7 @@ public class SiteNoticeController {
 	        model.addAttribute("adminName", "관리자 (ADMIN)");
 			
 		} catch (Exception e) {
-			log.error("noticeDetail 오류 : ", e);
+			log.error("noticeDetail : ", e);
 			throw e;
 		}
 		return "admin/admin_layout";
@@ -138,14 +139,54 @@ public class SiteNoticeController {
 	
 	@PostMapping("/notice/update")
 	public String updateNotice(SiteNoticeDto dto,
-			@RequestParam(name = "hideNotice", defaultValue = "false") boolean hideNotice) {
+			@RequestParam(name = "hideNotice", defaultValue = "false") boolean hideNotice,
+			@RequestParam(name = "files", required = false) MultipartFile[] files,
+			@RequestParam (name = "deleteFileIds", required = false) Long[] deleteFileIds) {
 		
 		try {
 			dto.setStatus(hideNotice ? 0 : 1);
 			
 			siteNoticeService.updateNotice(dto);
+			
+			if(deleteFileIds != null) {
+				for(Long deleteFileId : deleteFileIds) {
+					SiteNoticeFileDto fileDto = siteNoticeService.selectNoticeFile(deleteFileId);
+					
+					if(fileDto != null && fileDto.getNotice_id() == dto.getNotice_id()) {
+						boolean deleted = storageService.deleteFile(fileDto.getFile_path(), fileDto.getStored_name());
+					
+						if(deleted) {
+							siteNoticeService.deleteNoticeFile(fileDto.getNotice_file_id());
+							
+						}
+						
+					}	
+				}
+			}
+			
+			if(files != null) {
+				String directoryPath = Paths.get(
+				        System.getProperty("user.home"),
+				        "taskwaka", "uploads", "admin", "notice").toString();
+				for(MultipartFile file : files) {
+					if(file.isEmpty()) {
+						continue;
+					}
+					String storName = storageService.uploadFileToServer(file, directoryPath);
+					
+					SiteNoticeFileDto fileDto = new SiteNoticeFileDto();
+					
+					fileDto.setNotice_id(dto.getNotice_id());
+					fileDto.setOriginal_name(file.getOriginalFilename());
+					fileDto.setStored_name(storName);
+					fileDto.setFile_path(directoryPath);
+					fileDto.setFile_size(file.getSize());
+					
+					siteNoticeService.insertNoticeFile(fileDto);
+				}
+			}
 		} catch (Exception e) {
-			log.error("updateNotice 오류 : ", e);
+			log.error("updateNotice : ", e);
 			throw e;
 		}
 		
@@ -155,9 +196,22 @@ public class SiteNoticeController {
 	@PostMapping("/notice/delete")
 	public String deleteNotice(@RequestParam long notice_id) {
 		try {
+			List<SiteNoticeFileDto> fileList = siteNoticeService.selectNoticeFiles(notice_id);
+			
+			for(SiteNoticeFileDto fileDto : fileList) {
+				if(fileDto != null) {
+					boolean deleted = storageService.deleteFile(fileDto.getFile_path(),fileDto.getStored_name());
+					
+					if(deleted) {
+						siteNoticeService.deleteNoticeFile(fileDto.getNotice_file_id());
+					} else {
+						throw new IllegalStateException("첨부파일 삭제 실패");
+					}
+				}
+			}
 			siteNoticeService.deleteNotice(notice_id);
 		} catch (Exception e) {
-			log.error("deleteNotice 오류 : ", e);
+			log.error("deleteNotice : ", e);
 			throw e;
 		}
 		return "redirect:/admin/notice";
@@ -169,7 +223,7 @@ public class SiteNoticeController {
 			model.addAttribute("activeSection", "noticeWrite");
 			model.addAttribute("adminName", "관리자 (ADMIN)");
 		} catch (Exception e) {
-			log.error("noticeWrite 오류 : ", e);
+			log.error("noticeWrite : ", e);
 			throw e;
 		}
 		return "admin/admin_layout";
@@ -180,12 +234,14 @@ public class SiteNoticeController {
 			Model model) {
 		try {
 			SiteNoticeDto detail = siteNoticeService.selectNoticeDetail(notice_id);
+			List<SiteNoticeFileDto> fileList = siteNoticeService.selectNoticeFiles(notice_id);
 			
+			model.addAttribute("fileList", fileList);
 			model.addAttribute("detail", detail);
 			model.addAttribute("activeSection", "noticeEdit");
 			model.addAttribute("adminName", "관리자 (ADMIN)");
 		} catch (Exception e) {
-			log.error("noticeEdit 오류 : ", e);
+			log.error("noticeEdit : ", e);
 			throw e;
 		}
 		return "admin/admin_layout";
@@ -205,7 +261,54 @@ public class SiteNoticeController {
 					fileDto.getOriginal_name()
 			);
 		} catch (Exception e) {
-			log.error("downloadNoticeFile 오류 : ", e);
+			log.error("downloadNoticeFile : ", e);
+			throw e;
+		}
+	}
+	
+	@GetMapping("/notice/{notice_id}/downloadAll")
+	public ResponseEntity<StreamingResponseBody> downloadNoticeFiles(@PathVariable (name = "notice_id") long notice_id) {
+		try {
+			List<SiteNoticeFileDto> fileList = siteNoticeService.selectNoticeFiles(notice_id);
+			
+			if(fileList == null || fileList.isEmpty()) {
+				return ResponseEntity.notFound().build();
+			}
+			String[] sources = new String[fileList.size()];
+			String[] originals = new String[fileList.size()];
+			
+			for(int i = 0; i < fileList.size(); i++) {
+				SiteNoticeFileDto fileDto = fileList.get(i);
+				
+				sources[i] = Paths.get(fileDto.getFile_path(), fileDto.getStored_name()).toString();
+				originals[i] = fileDto.getOriginal_name();
+			}
+			return storageService.downloadZipFile(sources, originals, "notice_" + notice_id + ".zip");
+		} catch (Exception e) {
+			log.error("downloadNoticeFiles: ", e);
+			throw e;
+		}
+	}
+	
+	@PostMapping("/notice/deleteFile")
+	public ResponseEntity<?> deleteNoticeFile(@RequestParam long notice_file_id) {
+		try {
+			SiteNoticeFileDto fileDto = siteNoticeService.selectNoticeFile(notice_file_id);
+			
+			if(fileDto == null) {
+				return ResponseEntity.notFound().build();
+			}
+			
+			boolean deleted  = storageService.deleteFile(fileDto.getFile_path(), fileDto.getStored_name());
+			
+			if (deleted) {
+				siteNoticeService.deleteNoticeFile(notice_file_id);
+			    return ResponseEntity.ok().build();
+			} else {
+			    return ResponseEntity.internalServerError().build();
+			}
+		} catch (Exception e) {
+			log.error("deleteNoticeFile : ", e);
 			throw e;
 		}
 	}

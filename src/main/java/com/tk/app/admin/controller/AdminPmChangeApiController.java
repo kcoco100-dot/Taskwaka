@@ -62,7 +62,7 @@ public class AdminPmChangeApiController {
 	        int result = service.processPmChange(dto);
 
 	        if (result == 1) {
-	            return ResponseEntity.ok("PM 변경 요청 처리 완료");
+	            return ResponseEntity.ok("사장 변경 요청이 처리되었습니다.");
 	        }
 
 	        return ResponseEntity.badRequest().body("처리 실패");

@@ -22,7 +22,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.selectNoticeList();
 		} catch (Exception e) {
-			log.error("selectNoticeList 오류 : ", e);
+			log.error("selectNoticeList : ", e);
 			
 			throw e;
 		}
@@ -34,7 +34,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.searchNotice(keyword);
 		} catch (Exception e) {
-			log.error("searchNotice 오류 : ", e);
+			log.error("searchNotice : ", e);
 			
 			throw e;
 		}
@@ -46,7 +46,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.insertNotice(dto);
 		} catch (Exception e) {
-			log.error("insertNotice 오류 : ", e);
+			log.error("insertNotice : ", e);
 			
 			throw e;
 		}
@@ -57,7 +57,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.selectNoticeDetail(notice_id);
 		} catch (Exception e) {
-			log.error("selectNoticeDetail 오류 : ", e);
+			log.error("selectNoticeDetail : ", e);
 			
 			throw e;
 		}
@@ -68,7 +68,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.updateNotice(dto);
 		} catch (Exception e) {
-			log.error("updateNotice 오류 : ", e);
+			log.error("updateNotice : ", e);
 			
 			throw e;
 		}
@@ -80,7 +80,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.deleteNotice(notice_id);
 		} catch (Exception e) {
-			log.error("deleteNotice 오류 : ", e);
+			log.error("deleteNotice : ", e);
 			
 			throw e;
 		}
@@ -91,7 +91,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.dataCountNotice(keyword);
 		} catch (Exception e) {
-			log.error("dataCountNotice 오류 : ", e);
+			log.error("dataCountNotice : ", e);
 			
 			throw e;
 		}
@@ -102,7 +102,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.selectNoticePage(keyword, offset, size);
 		} catch (Exception e) {
-			log.error("selectNoticePage 오류 : ", e);
+			log.error("selectNoticePage : ", e);
 			
 			throw e;
 		}
@@ -113,7 +113,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.insertNoticeFile(dto);
 		} catch (Exception e) {
-			log.error("insertNoticeFile 오류 : ", e);
+			log.error("insertNoticeFile : ", e);
 			
 			throw e;
 		}
@@ -125,7 +125,7 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.selectNoticeFiles(notice_id);
 		} catch (Exception e) {
-			log.error("siteNoticeMapper. 오류 : ", e);
+			log.error("siteNoticeMapper : ", e);
 			
 			throw e;
 		}
@@ -136,7 +136,17 @@ public class SiteNoticeServiceImpl implements SiteNoticeService {
 		try {
 			return siteNoticeMapper.selectNoticeFile(notice_file_id);
 		} catch (Exception e) {
-			log.error("selectNoticeFile 오류 : ", e);
+			log.error("selectNoticeFile : ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public int deleteNoticeFile(long notice_file_id) {
+		try {
+			return siteNoticeMapper.deleteNoticeFile(notice_file_id);
+		} catch (Exception e) {
+			log.error("deleteNoticeFile : ", e);
 			throw e;
 		}
 	}

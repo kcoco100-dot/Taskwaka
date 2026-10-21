@@ -18,4 +18,6 @@ public interface SiteNoticeService {
 	public int insertNoticeFile(SiteNoticeFileDto dto);
 	public List<SiteNoticeFileDto> selectNoticeFiles(long notice_id);
 	public SiteNoticeFileDto selectNoticeFile(long notice_file_id);
+	public int deleteNoticeFile(long notice_file_id);
+
 }

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout3}">
+<head><title>공지사항 | TASKWAKA</title></head>
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/site-notice.css}">
+</th:block>
+<th:block layout:fragment="content">
+    <div class="site-notice-wrap">
+        <div class="site-notice-intro">
+            <span class="site-notice-eyebrow">TASKWAKA SUPPORT</span>
+            <h1>공지사항</h1>
+            <p>TASKWAKA 서비스의 새로운 소식과 주요 안내를 확인하세요.</p>
+        </div>
+
+        <section class="site-notice-board" aria-label="공지사항 목록">
+            <div class="site-notice-board-head">
+                <h2>전체 공지</h2>
+                <span class="site-notice-count" th:if="${noticeList != null}" th:text="'총 ' + ${#lists.size(noticeList)} + '건'">총 0건</span>
+            </div>
+            <div class="site-notice-list-header" aria-hidden="true">
+                <span>제목</span><span>등록일</span>
+            </div>
+            <div class="site-notice-empty" th:if="${noticeList == null or #lists.isEmpty(noticeList)}">
+                <i class="bi bi-inbox" aria-hidden="true"></i>
+                <p>등록된 공지사항이 없습니다.</p>
+            </div>
+            <ul class="site-notice-list" th:if="${noticeList != null and !#lists.isEmpty(noticeList)}">
+                <li th:each="notice : ${noticeList}">
+                    <a class="site-notice-list-link" th:href="@{/service/notice/{id}(id=${notice.notice_id})}">
+                        <span class="site-notice-title" th:text="${notice.title}">공지사항 제목</span>
+                        <time class="site-notice-date" th:datetime="${#dates.format(notice.created, 'yyyy-MM-dd')}" th:text="${#dates.format(notice.created, 'yyyy.MM.dd')}">2026.10.21</time>
+                        <i class="bi bi-chevron-right site-notice-arrow" aria-hidden="true"></i>
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <p class="site-notice-help">서비스 이용 중 궁금한 점이 있다면 고객지원 메뉴를 이용해 주세요.</p>
+    </div>
+</th:block>
+</html>

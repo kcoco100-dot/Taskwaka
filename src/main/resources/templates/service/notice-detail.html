@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout3}">
+<head><title>공지사항 상세 | TASKWAKA</title></head>
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/site-notice.css}">
+</th:block>
+<th:block layout:fragment="content">
+    <div class="site-notice-wrap">
+        <div class="site-notice-intro site-notice-intro-detail">
+            <span class="site-notice-eyebrow">TASKWAKA SUPPORT</span>
+            <h1>공지사항</h1>
+            <p>TASKWAKA 서비스의 새로운 소식과 주요 안내를 확인하세요.</p>
+        </div>
+        <article class="site-notice-board" th:if="${detail != null}">
+            <div class="site-notice-detail-head">
+                <h2 th:text="${detail.title}">공지사항 제목</h2>
+                <time th:datetime="${#dates.format(detail.created, 'yyyy-MM-dd')}" th:text="${#dates.format(detail.created, 'yyyy.MM.dd HH:mm')}">2026.10.21</time>
+            </div>
+            <div class="site-notice-body ql-editor" th:utext="${detail.content}">공지사항 내용</div>
+            <div class="site-notice-attachments" th:if="${fileList != null and !#lists.isEmpty(fileList)}">
+                <div class="site-notice-attachments-head">
+				    <strong><i class="bi bi-paperclip" aria-hidden="true"></i> 첨부파일</strong>
+				    <span th:text="${#lists.size(fileList)} + '개'">0개</span>
+				    <a class="site-notice-download-all" th:href="@{/service/notice/{id}/downloadAll(id=${detail.notice_id})}">전체 다운로드</a>
+				</div>
+                <ul>
+                    <li th:each="file : ${fileList}">
+                        <a th:href="@{/service/notice/file/{id}/download(id=${file.notice_file_id})}">
+                            <i class="bi bi-download" aria-hidden="true"></i>
+                            <span th:text="${file.original_name}">첨부파일.pdf</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </article>
+        <div class="site-notice-bottom">
+            <a class="site-notice-back" th:href="@{/service/notice}"><i class="bi bi-list-ul" aria-hidden="true"></i> 목록으로</a>
+        </div>
+    </div>
+</th:block>
+</html>

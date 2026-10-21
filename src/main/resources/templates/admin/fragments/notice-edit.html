@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
@@ -10,34 +10,43 @@
 
 			<div class="panel-card-title">공지사항 수정</div>
 
-			<form id="noticeEditForm" th:action="@{/admin/notice/update}" method="post">
+			<form id="noticeEditForm" th:action="@{/admin/notice/update}" method="post" enctype="multipart/form-data">
 
 				<input type="hidden" name="notice_id" th:value="${detail.notice_id}">
 
-				<div class="notice-form-row">
-					<div class="notice-field">
-						<label>공지 제목 *</label> <input type="text" name="title" class="warm-input" th:value="${detail.title}" required>
-					</div>
-
-					<div class="notice-field">
-						<label>공개 여부</label> <label class="notice-checkbox"> <input
-							type="checkbox" name="hideNotice" value="true" th:checked="${detail.status == 0}"> 비공개
-						</label>
-					</div>
+				<div class="notice-field">
+					<label>공지 제목</label> <input type="text" name="title" th:value="${detail.title}" class="warm-input">
 				</div>
 
 				<div class="notice-field">
-					<label>공지 내용 *</label>
+					<label>공지 내용</label>
 					<div id="editor"></div>
 					<input type="hidden" name="content" id="content">
 					<textarea id="originalContent" hidden th:text="${detail.content}"></textarea>
 				</div>
 
-				<div class="notice-form-actions">
-					<a th:href="@{/admin/notice/{id}(id=${detail.notice_id})}" class="notice-list-btn">취소</a>
-					<button type="submit" class="btn-sage">수정 완료</button>
+				<div class="notice-field">
+					<label>기존 첨부파일</label>
+
+					<div class="notice-edit-files" th:if="${fileList != null and !fileList.isEmpty()}">
+					    <div class="notice-edit-file" th:each="file : ${fileList}">
+					        <span th:text="${file.original_name}"></span>
+					        <label class="delete-file" th:data-fileNum="${file.notice_file_id}">🗑</label>
+					    </div>
+					</div>
+
+					<div th:if="${fileList == null or fileList.isEmpty()}">첨부된 파일이 없습니다.</div>
 				</div>
 
+				<div class="notice-field">
+				    <label>파일 추가</label> <input type="file" id="noticeNewFiles" name="files" multiple>
+				    <div id="noticeNewFileList"></div>
+				</div>
+
+				<label> <input type="checkbox" name="hideNotice" value="true" th:checked="${detail.status == 0}"> 비공개 (체크하면 숨기기)
+				</label>
+
+				<button type="submit" class="btn-sage">수정하기</button>
 			</form>
 		</div>
 	</div>

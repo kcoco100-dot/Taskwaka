@@ -82,7 +82,7 @@ public class SpringSecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/", "/member/login", "/member/register", "/member/account", "/member/idFind", "/member/pwdFind", 
 								"/member/expired", "/member/check-id", "/member/email/send", "/member/email/verify", "/member/reset-password",
-								"/member/registerComplete", "/oauth/kakao", "/oauth/kakao/callback",
+								"/member/registerComplete", "/oauth/kakao", "/oauth/kakao/callback", "/service/notice", "/service/notice/**",
 								"/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
 								"/favicon.ico", "/error/**")
 						.permitAll()
@@ -92,6 +92,10 @@ public class SpringSecurityConfig {
 
 						// 그 외 주소는 로그인 필요
 						.anyRequest().authenticated())
+				
+						// 접근 권한이 없을 때 오류 페이지로 이동
+						.exceptionHandling(ex -> ex
+				        .accessDeniedPage("/error/noAuthorized"))
 
 				// 2. 기존 로그인 화면 연결
 				.formLogin(form -> form.loginPage("/member/login").loginProcessingUrl("/member/login")

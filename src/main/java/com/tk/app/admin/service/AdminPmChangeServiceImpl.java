@@ -60,22 +60,22 @@ public class AdminPmChangeServiceImpl implements AdminPmChangeService {
 	        if (savedDto.getStatus() == 1) {
 	        	
 		        	if (savedDto.getOld_member_id() == savedDto.getNew_member_id()) {
-		        	    throw new IllegalStateException("기존 PM과 새 PM은 같을 수 없습니다.");
+		        	    throw new IllegalStateException("기존 사장과 변경할 사장은 같을 수 없습니다.");
 		        	}
 	        	
 		        	if (mapper.countNewPmDt(savedDto) != 1) {
-		        	    throw new IllegalStateException("새 PM 후보는 DT여야 합니다.");
+		        	    throw new IllegalStateException("변경할 사장은 과장 직급이어야 합니다.");
 		        	}
 	        	
 		        	if (mapper.countNewPmMember(savedDto) != 1) {
-		        	    throw new IllegalStateException("새 PM이 해당 워크의 회원이 아닙니다.");
+		        	    throw new IllegalStateException("변경할 사장이 해당 워크의 회원이 아닙니다.");
 		        	}
 		        	
 		        	// 1. 기존 PM에게 새 PM 후보가 담당하던 프로젝트 인계
 		        	int projectCount = mapper.findDtProjectIds(savedDto).size();
 
 		        	if (projectCount == 0) {
-		        	    throw new IllegalStateException("인계할 DT 프로젝트가 없습니다.");
+		        	    throw new IllegalStateException("인계할 과장 담당 프로젝트가 없습니다.");
 		        	}
 
 		        	if (mapper.updateOldPmProjectRole(savedDto) != projectCount) {
@@ -98,19 +98,19 @@ public class AdminPmChangeServiceImpl implements AdminPmChangeService {
 		        	int newPmCount = mapper.countNewPmProjects(savedDto);
 
 		        	if (allCount != newPmCount) {
-		        	    throw new IllegalStateException("새 PM 프로젝트 등록 실패");
+		        	    throw new IllegalStateException("변경할 사장의 프로젝트 등록에 실패했습니다.");
 		        	}
 	        	
 	            if (mapper.updateWorkspacePm(savedDto) != 1) {
-	                throw new IllegalStateException("워크 PM 변경 실패");
+	                throw new IllegalStateException("워크 사장 변경에 실패했습니다.");
 	            }
 
 	            if (mapper.updateOldPmRole(savedDto) != 1) {
-	                throw new IllegalStateException("기존 PM 권한 변경 실패");
+	                throw new IllegalStateException("기존 사장의 권한 변경에 실패했습니다.");
 	            }
 
 	            if (mapper.updateNewPmRole(savedDto) != 1) {
-	                throw new IllegalStateException("새 PM 권한 변경 실패");
+	                throw new IllegalStateException("변경할 사장의 권한 변경에 실패했습니다.");
 	            }
 	        }
 

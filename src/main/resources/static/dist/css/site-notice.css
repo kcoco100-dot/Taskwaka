@@ -1,0 +1,55 @@
+@charset "UTF-8";
+
+.site-notice-wrap {max-width: 1080px; min-height: calc(100vh - 210px); margin: 0 auto; padding: 70px 24px 96px; color: #2e302e;}
+.site-notice-intro {margin-bottom: 35px;}
+.site-notice-eyebrow {display: inline-block; margin-bottom: 12px; color: #73845c; font-size: 12px; font-weight: 700; letter-spacing: .12em;}
+.site-notice-intro h1 {margin: 0 0 13px; font-size: 32px; font-weight: 750; letter-spacing: -.035em;}
+.site-notice-intro p {margin: 0; font-size: 15px; color: #858780;}
+.site-notice-board {background: #fff; border: 1px solid #e7e7e2; border-radius: 6px; overflow: hidden;}
+.site-notice-board-head {display: flex; justify-content: space-between; align-items: center; padding: 24px 27px;}
+.site-notice-board-head h2 {margin: 0; font-size: 18px; font-weight: 700;}
+.site-notice-count {font-size: 13px; color: #848782;}
+.site-notice-list-header {display: grid; grid-template-columns: 1fr 140px; padding: 14px 27px; background: #f9faf8; border-top: 1px solid #ebede9; border-bottom: 1px solid #ebede9; color: #747b73; font-size: 13px;}
+.site-notice-list-header span:last-child {text-align: center;}
+.site-notice-list {list-style: none; margin: 0; padding: 0;}
+.site-notice-list li + li {border-top: 1px solid #eff0ed;}
+.site-notice-list-link {display: grid; grid-template-columns: minmax(0, 1fr) 140px 18px; gap: 16px; align-items: center; padding: 22px 27px; text-decoration: none; color: inherit; transition: background .15s;}
+.site-notice-list-link:hover {background: #f9fbf7; color: #2f4635;}
+.site-notice-title {overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: 15px;}
+.site-notice-date {color: #898e87; font-size: 13px; text-align: center;}
+.site-notice-arrow {font-size: 14px; color: #9ba39b;}
+.site-notice-empty {text-align: center; padding: 78px 20px; color: #8e948e;}
+.site-notice-empty i {font-size: 31px;}
+.site-notice-empty p {margin: 13px 0 0;}
+.site-notice-help {margin-top: 22px; color: #979b94; font-size: 13px;}
+.site-notice-intro-detail {margin-bottom: 30px;}
+.site-notice-detail-head {padding: 34px 37px 29px; border-bottom: 1px solid #eceee9;}
+.site-notice-detail-head h2 {margin: 0 0 14px; font-weight: 700; font-size: 24px; line-height: 1.5; overflow-wrap: anywhere;}
+.site-notice-detail-head time {font-size: 13px; color: #8c918b;}
+.site-notice-body {padding: 42px 37px 60px; min-height: 240px; font-size: 15px; line-height: 1.85; overflow-wrap: anywhere;}
+.site-notice-body img {max-width: 100%; height: auto;}
+.site-notice-body a {overflow-wrap: anywhere;}
+.site-notice-attachments {margin: 0 37px 35px; border: 1px solid #ebede9; background: #fcfdfb; padding: 18px 20px; border-radius: 5px;}
+.site-notice-attachments-head {display: flex; align-items: center; gap: 12px; font-size: 14px; margin-bottom: 10px;}
+.site-notice-attachments-head span {font-size: 12px; color: #929891;}
+.site-notice-attachments ul {padding: 0; margin: 0; list-style: none;}
+.site-notice-attachments li {padding: 5px 0;}
+.site-notice-attachments a {display: inline-flex; align-items: center; gap: 9px; font-size: 13px; text-decoration: none; color: #536a51; overflow-wrap: anywhere;}
+.site-notice-attachments a:hover {text-decoration: underline;}
+.site-notice-bottom {display: flex; justify-content: flex-end; padding-top: 23px;}
+.site-notice-back {display: inline-flex; align-items: center; gap: 8px; padding: 12px 21px; border: 1px solid #d7ddd2; border-radius: 4px; background: #fff; color: #465b46; text-decoration: none; font-size: 14px; font-weight: 600;}
+.site-notice-back:hover {background: #f4f8f1; color: #344a37;}
+@media(max-width: 640px) {
+    .site-notice-wrap {padding: 42px 16px 70px;}
+    .site-notice-intro h1 {font-size: 27px;}
+    .site-notice-board-head {padding: 21px 18px;}
+    .site-notice-list-header {padding: 12px 17px; grid-template-columns: 1fr 85px;}
+    .site-notice-list-link {grid-template-columns: minmax(0, 1fr) 85px 12px; gap: 8px; padding: 19px 15px;}
+    .site-notice-title {font-size: 14px;}
+    .site-notice-date {font-size: 11px;}
+    .site-notice-detail-head {padding: 26px 20px;}
+    .site-notice-detail-head h2 {font-size: 20px;}
+    .site-notice-body {padding: 30px 20px 45px;}
+    .site-notice-attachments a {color: #333; text-decoration: none;
+}
+}

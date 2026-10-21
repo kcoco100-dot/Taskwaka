@@ -35,7 +35,8 @@ public interface SiteNoticeMapper {
 	public List<SiteNoticeFileDto> selectNoticeFiles(long notice_id);
 	// 파일 하나 조회
 	public SiteNoticeFileDto selectNoticeFile(long notice_file_id);
-	
+	// 파일 삭
+	public int deleteNoticeFile(long notice_file_id);
 	
 	
 }

@@ -14,10 +14,10 @@
 	<select id="findMemberWorkspaces" parameterType="Long" resultType="com.tk.app.admin.domain.dto.AdminWorkspaceMemberDto">
 		SELECT m.LOGIN_ID, w.SUBJECT, 
 		    CASE
-		        WHEN wm.role = 70 THEN 'PM'
-		        WHEN wm.role = 50 THEN 'DT'
-		        WHEN wm.role = 30 THEN 'TL'
-		        WHEN wm.role = 10 THEN 'AA'
+		        WHEN wm.role = 70 THEN '사장'
+		        WHEN wm.role = 50 THEN '과장'
+		        WHEN wm.role = 30 THEN '대리'
+		        WHEN wm.role = 10 THEN '사원'
 		        ELSE '기타'
 		    END AS role_name      
 		FROM WORKSPACE_MEMBERS wm

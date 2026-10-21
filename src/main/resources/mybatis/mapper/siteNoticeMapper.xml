@@ -92,5 +92,10 @@
 		WHERE notice_file_id = #{notice_file_id}
 	</select>
 	
+	<delete id="deleteNoticeFile" parameterType="long">
+		DELETE FROM site_notice_file
+		WHERE notice_file_id = #{notice_file_id}
+	</delete>
+	
 
 </mapper>

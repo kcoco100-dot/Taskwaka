@@ -48,6 +48,7 @@
     background-color: #f4f1ec;
 }
 
+
 /* 공지사항 상세 */
 .notice-detail h2 {
     font-size: 24px;
@@ -104,7 +105,65 @@
     color: #85776a;
 }
 
-/* 하단 버튼 */
+
+/* 첨부파일 */
+.notice-files {
+    margin-top: 24px;
+    padding-top: 20px;
+}
+
+.notice-file-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+}
+
+.notice-file-list li + li {
+    margin-top: 10px;
+}
+
+.notice-file-item {
+    margin-top: 12px;
+}
+
+.notice-file-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 520px;
+    color: #594f45;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-weight: 500;
+}
+
+.notice-file-link:hover {
+    color: #536348;
+    text-decoration: none;
+    background: transparent;
+}
+
+.notice-file-icon {
+    font-size: 15px;
+}
+
+.notice-file-name {
+    display: inline-block;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notice-download-icon {
+    font-size: 17px;
+    color: #8b9184;
+}
+
+
+/* 상세 화면 하단 버튼 */
 .notice-actions {
     display: flex;
     justify-content: space-between;
@@ -117,9 +176,10 @@
     margin: 0;
 }
 
-.notice-actions a.btn-sage,
-.notice-actions a.btn-sage:hover {
-    text-decoration: none;
+.notice-action-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .notice-delete-btn {
@@ -137,12 +197,6 @@
     background-color: #fff1f1;
 }
 
-.notice-action-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 .notice-list-btn {
     padding: 10px 18px;
     border: 1px solid #e3ddd4;
@@ -155,6 +209,12 @@
 
 .notice-list-btn:hover {
     background-color: #f4f1ec;
+}
+
+a.btn-sage,
+a.notice-list-btn,
+a.btn-sage:hover,
+a.notice-list-btn:hover {
     text-decoration: none;
 }
 
@@ -220,17 +280,36 @@
     cursor: pointer;
 }
 
+
+/* 수정 화면의 기존 첨부파일 */
+.notice-edit-files {
+    margin-top: 10px;
+}
+
+.notice-edit-file + .notice-edit-file {
+    margin-top: 8px;
+}
+
+.notice-file-remove {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid #e3ddd4;
+    border-radius: 10px;
+    background: #faf8f4;
+}
+
+.notice-file-remove em {
+    color: #a64444;
+    font-style: normal;
+    font-size: 13px;
+}
+
+
+/* 반응형 */
 @media (max-width: 768px) {
     .notice-form-row {
         grid-template-columns: 1fr;
     }
-}
-
-.notice-file-name {
-    display: inline-block;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    vertical-align: middle;
 }

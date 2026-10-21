@@ -22,4 +22,5 @@ public class ErrorPageController {
 		// 권한이 없는 경우(403)
 		return "error/noAuthorized";
 	}
+
 }
