@@ -3,17 +3,23 @@ package com.tk.app.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tk.app.domain.dto.MeetingMinutesDto;
 import com.tk.app.mapper.MeetingMinutesMapper;
+import com.tk.app.repository.MeetingMinuteRepository;
 
 @Service
 public class MeetingMinutesService {
 	
 	private final MeetingMinutesMapper meetingMinutesMapper;
+	private final MeetingMinuteRepository meetingMinuteRepository;
 	
-	public MeetingMinutesService(MeetingMinutesMapper meetingMinutesMapper) {
+	public MeetingMinutesService(
+			MeetingMinutesMapper meetingMinutesMapper, 
+			MeetingMinuteRepository meetingMinuteRepository) {
 		this.meetingMinutesMapper = meetingMinutesMapper;
+		this.meetingMinuteRepository = meetingMinuteRepository;
 	}
 	
 	// 워크 회의록 등록
@@ -54,11 +60,12 @@ public class MeetingMinutesService {
 	}
 	
 	// 워크 회의록 수정
+	@Transactional(rollbackFor = Exception.class)
 	public int meetingsEdit(
 			long workspaceId, long memberId, long meetingMinuteId,
 			String title, String content) {
 		
-		return meetingMinutesMapper.meetingsEdit(workspaceId, memberId, meetingMinuteId, title, content);
+		return meetingMinuteRepository.meetingsEdit(workspaceId, meetingMinuteId, memberId, title, content);
 	}
 	
 	// 워크 회의록 삭제

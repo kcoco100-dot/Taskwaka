@@ -436,7 +436,7 @@ public class GrowthTreeService {
 		expLog.setExp(10);
 		expLog.setActionType("TEAM_REPORT_CREATE");
 		
-		// 같은 일일 보고서에 이미 지급한 이력이 있으면 종료
+		// 같은 업무 보고서에 이미 지급한 이력이 있으면 종료
 		int existingCount = growthTreeMapper.countTeamReportCreateExpLog(expLog);
 		if(existingCount > 0) {
 			return;
@@ -484,33 +484,33 @@ public class GrowthTreeService {
 	@Transactional(rollbackFor = Exception.class)
 		public Map<String, Object> selectTeamReportDeleteContext(
 				Long teamReportId, Long projectId, String domainKey) {
-			
-			SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-			if(loginMember == null) {
-				throw new IllegalStateException("로그인이 필요합니다.");
-			}
-			
-			Map<String, Object> params = new HashMap<>();
-			params.put("teamReportId", teamReportId);
-			params.put("projectId", projectId);
-			params.put("domainKey", domainKey);
-			params.put("memberId", loginMember.getMember_id());
-			
-			Long lockedTeamReportId = growthTreeMapper.lockTeamReportForDelete(params);
-			if(lockedTeamReportId == null) {
-				throw new IllegalStateException("보고서가 없거나 이미 삭제되었습니다.");
-			}
-			
-			Map<String, Object> context;
-			context = growthTreeMapper.selectTeamReportDeleteContext(params);
-			// 작성 권한이 없거나 유효하지 않은 대상
-			if(context == null) {
-				throw new IllegalStateException("삭제 권한이 없거나 삭제할 수 없는 보고서입니다.");
-			}
-			
-			context.put("memberId", loginMember.getMember_id());
-			return context;
+		
+		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+		if(loginMember == null) {
+			throw new IllegalStateException("로그인이 필요합니다.");
 		}
+		
+		Map<String, Object> params = new HashMap<>();
+		params.put("teamReportId", teamReportId);
+		params.put("projectId", projectId);
+		params.put("domainKey", domainKey);
+		params.put("memberId", loginMember.getMember_id());
+		
+		Long lockedTeamReportId = growthTreeMapper.lockTeamReportForDelete(params);
+		if(lockedTeamReportId == null) {
+			throw new IllegalStateException("보고서가 없거나 이미 삭제되었습니다.");
+		}
+		
+		Map<String, Object> context;
+		context = growthTreeMapper.selectTeamReportDeleteContext(params);
+		// 작성 권한이 없거나 유효하지 않은 대상
+		if(context == null) {
+			throw new IllegalStateException("삭제 권한이 없거나 삭제할 수 없는 보고서입니다.");
+		}
+		
+		context.put("memberId", loginMember.getMember_id());
+		return context;
+	}
 	
 	// 업무 보고서 등록 소속 조회
 	public Map<String, Object> findTeamReportCreateContext(
@@ -537,6 +537,61 @@ public class GrowthTreeService {
 		context.put("memberId", loginMember.getMember_id());
 		return context;
 	}
-
+	
+	// 업무 보고서 승인 보상 +20
+	@Transactional(rollbackFor = Exception.class)
+	public void grantTeamReportApproveExp(
+			long teamReportId, long reviewId, long memberId) {
+		
+		// 로그인 회원 검증
+		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+		if(loginMember == null) {
+			throw new IllegalStateException("로그인이 필요합니다.");
+		}
+		
+		if(memberId != loginMember.getMember_id()) {
+			throw new IllegalStateException("활동 회원과 로그인 회원이 일치하지 않습니다.");
+		}
+		
+		// 승인 정보 조회와 조회 실패 처리
+		// params : 조회 조건
+		Map<String, Object> params = new HashMap<>();
+		params.put("teamReportId", teamReportId);
+		params.put("reviewId", reviewId);
+		params.put("memberId", memberId);
+		
+		// context : 실제 워크 번호와 검토자 역할
+		Map<String, Object> context = growthTreeMapper.selectTeamReportApproveContext(params);
+		if(context == null) {
+			throw new IllegalStateException("승인된 업무 보고서 정보를 확인할 수 없습니다.");
+		}
+		
+		// PM 역할 판별
+		// context 에서 역할 값을 꺼내 Number 로 형변환한 뒤, 
+		// intValue()로 int 값을 얻음.
+		int reviewerRole = ((Number) context.get("reviewerRole")).intValue();
+		// context.get("reviewerRole") : 권한 확인 (PM: 70, DT: 50)
+		// context 는 Map<String, Object>여서 꺼낸 값의 타입이 Object 라서 Number 로 형변환
+		// PM 이 아니면 종료
+		if(reviewerRole != 70) {
+			return;
+		}
+		long workspaceId = ((Number) context.get("workspaceId")).longValue();
+		// 잠금 처리
+		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
+		GrowthExpLogDto expLog = new GrowthExpLogDto();
+		expLog.setWorkspaceId(workspaceId);
+		expLog.setMemberId(memberId);
+		expLog.setTeamReportId(teamReportId);
+		expLog.setExp(20);
+		expLog.setActionType("TEAM_REPORT_APPROVE");
+		
+		// 같은 업무 보고서에 이미 지급한 이력이 있으면 종료
+		int existingCount = growthTreeMapper.countTeamReportApproveExpLog(expLog);
+		if(existingCount > 0) {
+			return;
+		}
+		grantGrowthExp(growthTree, expLog);
+	}
 }
 

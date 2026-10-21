@@ -444,7 +444,7 @@
 	
 	<!-- 승인 정보 조회 -->
 	<select id="selectTeamReportApproveContext" parameterType="map" resultType="map">
-		SELECT p.workspace_id AS "workspaceId"
+		SELECT p.workspace_id AS "workspaceId",
 			   pm.role AS "reviewerRole"
 		FROM team_reports tr
 		JOIN tasks t ON t.project_id = tr.project_id
@@ -456,7 +456,7 @@
 	 	JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
 	 		AND wm.workspace_id = p.workspace_id
 	 	WHERE tr.team_report_id = #{teamReportId}
-	 		AND review_id = #{reviewId}
+	 		AND rr.report_id = #{reviewId}
 	 		AND rr.category = 2
 	 		AND rr.status = 1
 	 		AND wm.member_id = #{memberId}
