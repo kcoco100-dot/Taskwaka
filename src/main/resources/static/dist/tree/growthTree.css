@@ -310,6 +310,45 @@
 .tree-shop-icon-pet { background: #F4EDE1; }
 .tree-shop-icon-quokka { background: #F1E4CE; }
 
+.tree-shop-icon-pet > img {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    width: 76%;
+    height: auto;
+    transform: translateX(-50%);
+}
+
+.tree-shop-icon-pet > img[src$="/turtle.png"] {
+    top: 50%;
+    width: 88%;
+    height: 90%;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+}
+
+.tree-shop-icon-fruit > img,
+.tree-shop-icon-accessory > img,
+.tree-shop-icon-gold > img,
+.tree-shop-icon-silver > img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 84%;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+}
+
+.tree-shop-icon-quokka > img {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    width: 76%;
+    height: auto;
+    transform: translateX(-50%);
+}
+
 .tree-shop-footer {
     display: flex;
     flex-direction: column;

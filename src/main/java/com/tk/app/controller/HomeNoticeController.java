@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
 import com.tk.app.common.StorageService;
+import com.tk.app.domain.dto.NoticeCreateResultDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.NoticeFileDto;
 import com.tk.app.exception.StorageException;
@@ -191,18 +192,27 @@ public class HomeNoticeController {
 					return "notice/noticeCreate";
 				}
 
-				int insertNotice = noticeService.createWorkspaceNotice(
+				NoticeCreateResultDto noticeResult = noticeService.createWorkspaceNotice(
 						workspace.getWorkspaceId(), workspace.getMemberId(),
 						title, content, files);
 
 				// 0 이랑 비교하는게 아니라 != 1 로 비교함
-				if (insertNotice != 1) {
+				if (noticeResult.getInsertCount() != 1) {
 					response.sendError(500, "공지를 등록할 수 없습니다.");
 					return null;
 
 				}
 				// 경험치 등록 성공 후 목록 화면(모달창)에 전달할 메시지
-				redirectAttributes.addFlashAttribute("growthExpMessage", "🌱 워크 성장나무 경험치가 +10 올랐습니다.");
+				String growthExpMessage = "🌱 워크 성장나무 경험치가 +10 올랐습니다.";
+
+				if (noticeResult.getLevelUpInfo() != null) {
+				    growthExpMessage += " ✨나무가 "
+				            + noticeResult.getLevelUpInfo().getLevelNo()
+				            + "단계(" + noticeResult.getLevelUpInfo().getLevelName()
+				            + ")로 성장했어요!✨";
+				}
+
+				redirectAttributes.addFlashAttribute("growthExpMessage", growthExpMessage);
 				
 				return "redirect:/" + domainKey + "/home/notice";
 			} catch (DataAccessException e) {

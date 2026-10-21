@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sun.jdi.LongValue;
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.GrowthExpLogDto;
 import com.tk.app.domain.dto.GrowthLevelDto;
@@ -20,16 +21,13 @@ public class GrowthTreeService {
 	
 	private final GrowthTreeMapper growthTreeMapper;
 	private final TaskService taskService;
-	private final ManageWorkspaceInviteService manageWorkspaceInviteService;
 	
 	public GrowthTreeService(
 			GrowthTreeMapper growthTreeMapper, 
-			TaskService taskService,
-			ManageWorkspaceInviteService manageWorkspaceInviteService) {
+			TaskService taskService) {
 		
 		this.growthTreeMapper = growthTreeMapper;
 		this.taskService = taskService;
-		this.manageWorkspaceInviteService = manageWorkspaceInviteService;
 	}
 	// 성장나무 잠금처리
 	private GrowthTreeDto lockGrowthTree(long workspaceId) {
@@ -96,7 +94,9 @@ public class GrowthTreeService {
 	}
 	
 	// 검증이 끝난 뒤 지급 처리
-	private void grantGrowthExp(GrowthTreeDto growthTree, GrowthExpLogDto expLog) {
+	private GrowthLevelDto grantGrowthExp(GrowthTreeDto growthTree, GrowthExpLogDto expLog) {
+		// 경험치 보관함
+		long previousTotalExp = growthTree.getTotalExp();
 		saveGrowthExpLog(expLog);
 		
 		// 지급 후 누적 경험치 계산
@@ -107,10 +107,13 @@ public class GrowthTreeService {
 		// 새 누적 경험치에 해당하는 성장 단계 찾기
 		GrowthLevelDto selectedLevel = findGrowthLevelByExp(newTotalExp);
 		
+		boolean levelUp = previousTotalExp < selectedLevel.getMinExp();
+		
 		growthTree.setGrowthLevelId(selectedLevel.getGrowthLevelId());
 		
 		// 계산된 경험치와 성장 단계 DB 에 저장
 		saveGrowthTree(growthTree, "성장나무 경험치와 단계를 저장할 수 없습니다.");
+		return levelUp ? selectedLevel : null;
 	}
 	
 	// 경험치 회수
@@ -126,6 +129,18 @@ public class GrowthTreeService {
 		
 		// 계산한 경험치와 단계를 DB에 저장
 		saveGrowthTree(growthTree, "회수 후 성장나무 경험치와 단계를 저장할 수 없습니다.");
+	}
+	
+	// 로그인 회원 검증
+	private void validateLoginMember(long memberId) {
+		// 로그인 회원 검증
+		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+		if(loginMember == null) {
+			throw new IllegalStateException("로그인이 필요합니다.");
+		}
+		if(memberId != loginMember.getMember_id()) {
+			throw new IllegalStateException("활동 회원과 로그인 회원이 일치하지 않습니다.");
+		}
 	}
 	
 	// 성장나무 목록 조회
@@ -175,7 +190,7 @@ public class GrowthTreeService {
 	
 	// 공지 등록 시 + 10 경험치 등록
 	@Transactional(rollbackFor = Exception.class)
-	public void grantNoticeCreateExp(
+	public GrowthLevelDto grantNoticeCreateExp(
 			long workspaceId, long memberId, long noticeId) throws Exception {
 		
 		// 워크의 성장나무를 조회하고 잠금처리
@@ -191,9 +206,9 @@ public class GrowthTreeService {
 		// 같은 공지에 이미 지급한 이력이 있으면 종료
 		int existingCount = growthTreeMapper.countNoticeCreateExpLog(expLog);
 		if(existingCount > 0) {
-			return;
+			return null;
 		}
-		grantGrowthExp(growthTree, expLog);
+		return grantGrowthExp(growthTree, expLog);
 	} 
 	
 	// 미회수 지급이력 조회 및 회수 시간 기록
@@ -426,15 +441,8 @@ public class GrowthTreeService {
 	public void grantTeamReportCreateExp(
 			long workspaceId, long memberId, long teamReportId) {
 		
-		// 로그인 회원 검증
-		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-		if(loginMember == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
-		
-		if(memberId != loginMember.getMember_id()) {
-			throw new IllegalStateException("활동 회원과 로그인 회원이 일치하지 않습니다.");
-		}
+		validateLoginMember(memberId);
+
 		// 워크의 성장나무를 조회하고 잠금처리
 		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
 		// 지급 이력 조회 및 저장
@@ -553,14 +561,7 @@ public class GrowthTreeService {
 			long teamReportId, long reviewId, long memberId) {
 		
 		// 로그인 회원 검증
-		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-		if(loginMember == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
-		
-		if(memberId != loginMember.getMember_id()) {
-			throw new IllegalStateException("활동 회원과 로그인 회원이 일치하지 않습니다.");
-		}
+		validateLoginMember(memberId);
 		
 		// 승인 정보 조회와 조회 실패 처리
 		// params : 조회 조건
@@ -627,20 +628,45 @@ public class GrowthTreeService {
 		return savedReport;
 	}
 	
-	// 초대 수락과 경험치 +5 지급을 묶는 메서드 
+	// 일일 보고서 승인 시 +10
 	@Transactional(rollbackFor = Exception.class)
-	public void acceptInviteWithExp(Map<String, Object> params) throws Exception {
-		manageWorkspaceInviteService.acceptInvite(params);
-	
-		// 워크 번호 조회
-		Long workspaceId = growthTreeMapper.selectAcceptedInviteWorkspaceId(params);
-		if(workspaceId == null) {
-			throw new IllegalStateException("해당 워크번호가 존재하지 않습니다.");
+	public void grantDailyReportApproveExp(
+			long dailyReportId, long reviewId, long memberId) {
+		
+		validateLoginMember(memberId);
+		
+		Map<String, Object> params = new HashMap<>();
+		params.put("dailyReportId", dailyReportId);
+		params.put("reviewId", reviewId);
+		params.put("memberId", memberId);
+		
+		Map<String, Object> context = growthTreeMapper.selectDailyReportApproveContext(params);
+		if(context == null) {
+			throw new IllegalStateException("승인된 일일 보고서 정보를 확인할 수 없습니다.");
+		
 		}
 		
-		// 회원번호 꺼내기
-		long memberId = ((Number) params.get("memberId")).longValue();
-		grantInviteAcceptExp(workspaceId, memberId, (String)params.get("inviteKey"));
+		int reviewerRole = ((Number) context.get("reviewerRole")).intValue();
+		if(reviewerRole != 70) {
+			return;
+		}
+		
+		long workspaceId = ((Number) context.get("workspaceId")).longValue();
+		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
+		GrowthExpLogDto expLog = new GrowthExpLogDto();
+		expLog.setWorkspaceId(workspaceId);
+		expLog.setMemberId(memberId);
+		expLog.setDailyReportId(dailyReportId);
+		expLog.setExp(10);
+		expLog.setActionType("DAILY_REPORT_APPROVE");
+		
+		// 같은 업무 보고서에 이미 지급한 이력이 있으면 종료
+		int existingCount = growthTreeMapper.countDailyReportApproveExpLog(expLog);
+		if(existingCount > 0) {
+			return;
+		}
+		grantGrowthExp(growthTree, expLog);
 	}
+
 }
 

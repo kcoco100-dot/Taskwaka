@@ -487,4 +487,40 @@
 	 		AND t.deleted IS NULL
 	 		AND p.deleted IS NULL
 	</select>
+	
+	<select id="countDailyReportApproveExpLog" resultType="int">
+		SELECT COUNT(*)
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND daily_report_id = #{dailyReportId}
+			AND action_type = #{actionType}
+	</select>
+	
+	<!-- 일일보고서 승인 조회 -->
+	<select id="selectDailyReportApproveContext" parameterType="map" resultType="map">
+		SELECT p.workspace_id AS "workspaceId",
+			pm.role AS "reviewerRole"
+		FROM daily_reports dr
+		JOIN sub_tasks st ON st.sub_task_id = dr.sub_task_id
+		JOIN tasks t ON t.project_id = st.project_id
+			AND t.task_id = st.task_id
+		JOIN projects p ON p.project_id = t.project_id
+		JOIN report_reviews rr ON rr.daily_report_id = dr.daily_report_id
+		JOIN project_members pm ON pm.project_member_id = rr.project_member_id
+			AND pm.project_id = p.project_id
+		JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+			AND wm.workspace_id = p.workspace_id
+		WHERE dr.daily_report_id = #{dailyReportId}
+			AND rr.report_id = #{reviewId}
+			AND rr.status = 1
+			AND wm.member_id = #{memberId}
+			AND pm.project_member_id != dr.project_member_id
+			AND pm.role IN (70, 50)
+			AND pm.status = 0
+			AND wm.status = 0
+			AND dr.deleted IS NULL
+			AND st.deleted IS NULL
+			AND t.deleted IS NULL
+			AND p.deleted IS NULL
+	</select>
 </mapper>

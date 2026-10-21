@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tk.app.common.StorageService;
+import com.tk.app.domain.dto.GrowthLevelDto;
+import com.tk.app.domain.dto.NoticeCreateResultDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.NoticeFileDto;
 import com.tk.app.exception.StorageException;
@@ -150,7 +152,7 @@ public class NoticeService {
 	
 	// 공지사항 등록 및 파일처리
 	@Transactional(rollbackFor = Exception.class)
-	public int createWorkspaceNotice(
+	public NoticeCreateResultDto createWorkspaceNotice(
 			long workspaceId, long memberId, String title, String content,
 			List<MultipartFile> files) throws Exception {
 		
@@ -204,9 +206,10 @@ public class NoticeService {
 			}
 			
 			// 공지 등록 성공 시 경험치 +10 추가
-			growthTreeService.grantNoticeCreateExp(workspaceId, memberId, notice.getNoticeId());
+			GrowthLevelDto levelUpInfo = growthTreeService.grantNoticeCreateExp(
+			        workspaceId, memberId, notice.getNoticeId());
 			
-			return insertCount;
+			return new NoticeCreateResultDto(insertCount, levelUpInfo);
 			
 		} catch (Exception e) {
 			for(String storedName : storedNames) {
