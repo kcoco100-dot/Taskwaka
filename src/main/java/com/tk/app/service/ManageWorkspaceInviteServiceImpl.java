@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
 
     private final ManageInviteMapper mapper;
     private final MailSender mailSender;
-    private final GrowthTreeService growthTreeService;
+    private final ObjectProvider<GrowthTreeService> growthTreeServiceProvider;
 
     @Value("${MAIL_USERNAME}")
     private String mailUsername;
@@ -131,7 +132,6 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
             if (inviteDto.getStatus() == null || inviteDto.getStatus() != 0 || !expiry.after(new java.util.Date())) {
                 throw new IllegalArgumentException("기간이 만료된 초대 링크입니다.");
             }
-            growthTreeService.grantInviteAcceptExp(inviteDto.getWorkspaceId(), memberId, inviteKey);
 
         } catch (java.text.ParseException e) {
             throw new IllegalArgumentException("초대 만료일이 올바르지 않습니다.", e);
@@ -151,5 +151,7 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
         inviteDto.setStatus(0);
         
         mapper.insertManageInviteMember(inviteDto);
+        
+        growthTreeServiceProvider.getObject().grantInviteAcceptExp(inviteDto.getWorkspaceId(), memberId, inviteKey);
     }
 }

@@ -16,7 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice(assignableTypes = {ManageController.class, ManageProjectController.class,
-		ManageReportController.class, ManageNoticeController.class})
+		ManageReportController.class, ManageNoticeController.class, ManageWorkController.class,
+		ManageInviteController.class})
 @RequiredArgsConstructor
 @Slf4j
 public class ManageMenuAdvice {

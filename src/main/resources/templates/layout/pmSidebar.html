@@ -3,7 +3,7 @@
 <body>
 <nav th:fragment="manageSidebar(activeMenu)" id="sidemenu" class="sidemenu" aria-label="PM 메뉴">
     <ul class="manage-menu">
-        <li class="menu-group" th:if="${manageWorkspaceRole == 70}">
+        <li class="menu-group">
             <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="dashboard-submenu">
                 대시보드<span aria-hidden="true">⌄</span>
             </button>
@@ -52,11 +52,11 @@
             </button>
             <ul id="notice-submenu" class="submenu">
                  <li><a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}" th:classappend="${activeMenu == 'noticeList' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeList' ? 'page' : null}">공지사항 조회</a></li>
-                <li th:if="${manageWorkspaceRole == 70}"><a th:href="@{/noticeCreate}" th:classappend="${activeMenu == 'noticeCreate' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeCreate' ? 'page' : null}">공지등록</a></li>
-                <li th:if="${manageWorkspaceRole == 70}"><a th:href="@{/noticeEdit}" th:classappend="${activeMenu == 'noticeEdit' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeEdit' ? 'page' : null}">공지수정</a></li>
+                <li><a th:href="@{/noticeCreate}" th:classappend="${activeMenu == 'noticeCreate' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeCreate' ? 'page' : null}">공지등록</a></li>
+                <li><a th:href="@{/noticeEdit}" th:classappend="${activeMenu == 'noticeEdit' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeEdit' ? 'page' : null}">공지수정</a></li>
             </ul>
         </li>
-        <li class="menu-group" th:if="${manageWorkspaceRole == 70}">
+        <li class="menu-group">
             <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="plan-submenu">
                 요금제 관리<span aria-hidden="true">⌄</span>
             </button>

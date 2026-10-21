@@ -106,6 +106,7 @@
                                             style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px;">워크 제외</button>
                                 </div>
                             </td>
+                            <td th:unless="${currentRole >= 50}">조회 전용</td>
                         </tr>
 
                         <tr th:if="${#lists.isEmpty(teamMembers)}">

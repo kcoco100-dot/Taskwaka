@@ -1,14 +1,156 @@
-﻿.calendar-content {
-    flex: 1;
-    min-height: 400px;
-    box-sizing: border-box;
-
-    margin-top: 24px;
-    padding: 24px;
-    background: #fff;
-    border-radius: 12px;
+@charset "UTF-8";
+/* 기존 베이지 디자인 유지 + 프로젝트 일정/색상 안내만 프로젝트별 파스텔 적용 */
+.manage-calendar-page .manage-content {
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
-
+.manage-calendar-page .calendar-content {
+    box-sizing: border-box;
+    display: block;
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    margin-top: 0;
+    padding: 24px;
+    overflow: visible;
+    background: #ffffff;
+    border: 1px solid #e7e1d8;
+    border-radius: 14px;
+}
 #myTaskCalendar {
     width: 100%;
+    min-height: 0;
+    height: auto;
+    color: #40362c;
+}
+#myTaskCalendar .fc,
+#myTaskCalendar .fc-view-harness,
+#myTaskCalendar .fc-daygrid-body {
+    height: auto;
+    max-height: none;
+}
+#myTaskCalendar .fc-daygrid-day-frame {
+    min-height: 110px;
+    height: auto;
+}
+#myTaskCalendar .fc-daygrid-day-events { margin: 4px 3px 7px; }
+#myTaskCalendar .fc-col-header-cell-cushion { color: #4c3d30; font-weight: 750; text-decoration: none; }
+#myTaskCalendar .fc-daygrid-day-number { color: #493e32; font-weight: 650; text-decoration: none; }
+#myTaskCalendar .fc-day-today { background: #f0f4e8 !important; }
+.mc-legend { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 18px; color: #5d534b; font-size: 13px; }
+.mc-legend label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+.mc-legend input { accent-color: #52704a; cursor: pointer; }
+.mc-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.mc-dot-project { background: #4a6040; }
+.mc-dot-task { background: #8aaa75; }
+#myTaskCalendar .fc-button-primary { background: #fff; border-color: #ded7ce; color: #5b4638; box-shadow: none; }
+#myTaskCalendar .fc-button-primary:hover, #myTaskCalendar .fc-button-primary:focus { background: #f0f4e8; border-color: #82936f; color: #3f5938; }
+#myTaskCalendar .fc-button-primary:not(:disabled).fc-button-active { background: #e7efdd; border-color: #96aa86; color: #42553d; }
+#myTaskCalendar .fc-toolbar-title { color: #493726; font-size: 19px; font-weight: 800; }
+#myTaskCalendar .fc-col-header-cell { background: #f6f3ee; color: #6e5f51; }
+#myTaskCalendar .fc-daygrid-event { border: 0; border-radius: 4px; cursor: pointer; padding: 2px 5px; font-size: 12px; }
+/* 막대 색상은 JS가 프로젝트 ID별로 할당하며 CSS에서 고정하지 않는다. */
+#myTaskCalendar .mc-event-project { color: #293a40; }
+#myTaskCalendar .mc-event-task { background: #eaf1e1; color: #465d3d; border: 1px solid #d8e6ce; }
+#myTaskCalendar .fc-event-title { font-weight: 650; }
+#myTaskCalendar .fc-more-link { color: #4a6040; }
+.mc-detail-panel { position: fixed; top: 62px; right: 0; bottom: 0; z-index: 1100; width: min(490px, 96vw); display: flex; flex-direction: column; overflow: hidden; background: #fff; box-shadow: -12px 0 28px rgba(60,48,34,.16); border-left: 1px solid #e5e0d7; transform: translateX(110%); visibility: hidden; transition: transform .24s ease, visibility .24s ease; }
+.mc-detail-panel.mc-open { transform: translateX(0); visibility: visible; }
+.mc-panel-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 25px 25px 18px; border-bottom: 1px solid #eee8df; }
+.mc-panel-heading { flex: 1; min-width: 0; }
+.mc-panel-badge { display: inline-block; border-radius: 16px; background: #edf3e6; color: #4b6541; padding: 4px 10px; font-size: 12px; font-weight: 750; }
+.mc-panel-head h2 { font-size: 22px; line-height: 1.5; color: #3c3028; margin: 12px 0 4px; word-break: break-word; }
+#mcPanelSubtitle { margin: 0; color: #877b70; font-size: 13px; }
+.mc-panel-close { appearance: none; border: 0; background: transparent; cursor: pointer; color: #8b8177; font-size: 29px; padding: 0 0 4px 14px; }
+.mc-panel-close:hover { color: #36291d; }
+.mc-panel-scroll { overflow: auto; padding: 20px 25px 30px; }
+.mc-panel-section { padding-bottom: 23px; margin-bottom: 23px; border-bottom: 1px solid #eee8df; }
+.mc-panel-section h3 { margin: 0 0 13px; font-size: 14px; color: #56473a; }
+.mc-info-grid { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px 13px; background: #f9f7f3; border: 1px solid #e7e0d6; border-radius: 10px; padding: 18px; }
+.mc-info-label { font-size: 12px; color: #8a7a6b; }
+.mc-info-value { font-size: 13px; color: #3d332a; font-weight: 650; overflow-wrap: anywhere; }
+.mc-panel-content { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; color: #5b5046; line-height: 1.8; min-height: 45px; margin: 0; }
+.mc-related-heading { display: flex; justify-content: space-between; align-items: center; }
+#mcRelatedCount { color: #9b8e82; font-size: 12px; }
+.mc-related-list { display: flex; flex-direction: column; gap: 8px; }
+.mc-related-item { appearance: none; display: block; width: 100%; box-sizing: border-box; border: 1px solid #eae2d7; border-radius: 9px; background: #fff; padding: 12px 13px; text-align: left; color: #48372a; cursor: pointer; }
+.mc-related-item:hover, .mc-related-item:focus-visible { background: #f3f7ee; border-color: #a1b38e; }
+.mc-related-item strong { display: block; font-size: 13px; margin-bottom: 5px; overflow-wrap: anywhere; }
+.mc-related-item small { display: block; color: #948578; font-size: 11px; line-height: 1.6; }
+.mc-related-empty { margin: 0; padding: 14px; border-radius: 8px; background: #f9f7f3; color: #968879; font-size: 13px; }
+@media (max-width: 800px) { .calendar-content { padding: 14px; } .mc-detail-panel { top: 52px; width: min(460px, 100vw); } .mc-panel-head { padding: 18px; } .mc-panel-scroll { padding: 16px 18px; } #myTaskCalendar .fc-toolbar-title { font-size: 16px; } }
+@media (prefers-reduced-motion: reduce) { .mc-detail-panel { transition: none; } }
+
+/* 상세 패널이 열릴 때 배경 내용과 구분 */
+.mc-detail-panel:focus { outline: none; }
+.mc-panel-close:focus-visible, .mc-related-item:focus-visible { outline: 2px solid #52704a; outline-offset: 2px; }
+
+/* 프로젝트 선택 시 기본정보 바로 아래에 표시되는 업무 카드 */
+.mc-legend-item { display: inline-flex; align-items: center; gap: 7px; }
+/* 프로젝트별 색상 범례는 기존 베이지 캘린더 색상을 건드리지 않는다. */
+.mc-legend-title { margin: 0; color: #4c3d30; font-size: 14px; font-weight: 800; }
+.mc-project-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 10px; }
+.mc-project-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    border: 1px solid;
+    border-radius: 20px;
+    padding: 6px 10px;
+    color: #293a40;
+    font-size: 12px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+.mc-project-legend-dot { display: inline-block; flex-shrink: 0; width: 10px; height: 10px; border-radius: 3px; border: 1px solid rgba(78,75,66,.15); }
+.mc-project-legend-empty { color: #877b70; font-size: 12px; }
+.mc-legend-help { margin: 0; font-size: 12px; color: #877b70; line-height: 1.6; }
+.mc-task-card { display: block; width: 100%; padding: 13px 14px; appearance: none; border: 1px solid #e8e1d7; border-radius: 10px; background: #fff; text-align: left; color: #45362c; cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
+.mc-task-card:hover, .mc-task-card:focus-visible { background: #f3f7ee; border-color: #97ae89; outline-offset: 2px; }
+.mc-task-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.mc-task-name { font-size: 13px; font-weight: 750; overflow-wrap: anywhere; }
+.mc-task-state { flex: 0 0 auto; font-size: 11px; padding: 3px 8px; border-radius: 20px; color: #6b5b4c; background: #f1ede8; }
+.mc-task-state-1 { background: #edf3e6; color: #4a6942; }
+.mc-task-state-2 { background: #fff2df; color: #956b32; }
+.mc-task-state-3 { background: #e9f0e6; color: #3b653f; }
+.mc-task-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12px; color: #7a6d62; margin-bottom: 8px; }
+.mc-task-meta strong { color: #4a6040; font-size: 13px; }
+.mc-task-progress { height: 6px; width: 100%; background: #eeeae3; border-radius: 10px; overflow: hidden; }
+.mc-task-progress > span { display: block; height: 100%; background: #64835a; border-radius: inherit; }
+.mc-task-dates { display: block; margin-top: 7px; font-size: 11px; color: #968779; }
+
+/* 프로젝트 기간 막대만 프로젝트별 파스텔색 적용. JS의 인라인 색상이 우선한다. */
+#myTaskCalendar .fc-daygrid-event.mc-event-project {
+    border-style: solid;
+    border-width: 1px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#myTaskCalendar .fc-daygrid-event.mc-event-project:hover,
+#myTaskCalendar .fc-daygrid-event.mc-event-project:focus-visible {
+    filter: brightness(.97);
+    outline: 2px solid #82936f;
+    outline-offset: 1px;
+}
+#myTaskCalendar .mc-event-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; min-width: 0; }
+#myTaskCalendar .mc-event-name { color: #293a40; font-size: 12px; font-weight: 750; line-height: 1.55; white-space: normal; overflow-wrap: anywhere; }
+#myTaskCalendar .mc-event-status {
+    flex: 0 0 auto;
+    padding: 1px 5px;
+    border-radius: 10px;
+    color: #4b463d;
+    background: rgba(255,255,255,.68);
+    border: 1px solid rgba(78,75,66,.2);
+    font-size: 10px;
+    font-weight: 700;
+}
+#myTaskCalendar .fc-more-link { color: #4a6040; font-weight: 750; }
+@media (max-width: 800px) {
+    .manage-calendar-page .calendar-content { padding: 12px; }
+    #myTaskCalendar .mc-event-status { display: none; }
 }

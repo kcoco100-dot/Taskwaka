@@ -10,7 +10,7 @@ public interface ManageService {
 	public Long findByDomainKey(String domainKey) throws Exception;
 	public List<ManageDto> listProjectManage(Map<String, Object> map) throws SQLException;
 	public Long getOwnWorkspaceMemberId(Map<String, Object> map);
-	public List<Map<String, Object>> listManageCalendarTasks(Map<String, Object> map) throws SQLException;
+	public Map<String, Object> getManageCalendarData(Map<String, Object> map) throws Exception;
 	public void assignOrUpdateProjectMember(Map<String, Object> map) throws Exception;
 	public void excludeProjectMember(Map<String, Object> map) throws Exception;
 	public void excludeWorkspaceMember(Map<String, Object> map) throws Exception;

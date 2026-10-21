@@ -1,88 +1,67 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout3}">
-
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manageCalender.css}">
 </th:block>
-
 <th:block layout:fragment="content">
-    <div class="home-layout manage-layout">
+    <div class="home-layout manage-layout manage-calendar-page">
         <nav th:replace="~{layout/pmSidebar::manageSidebar('manageCalender')}"></nav>
-
         <div class="section manage-content">
             <div class="page-heading">
                 <h1 class="page-title">프로젝트 캘린더</h1>
-                <p class="page-description">
-                    PM은 워크스페이스 전체, 그 외 직위는 참여 중인 프로젝트의 일정을 확인하세요.
-                </p>
+                <p class="page-description">프로젝트 기간을 클릭하면 오른쪽에서 해당 프로젝트의 업무·담당자·진행률을 확인할 수 있습니다.</p>
             </div>
-
             <div class="calendar-content">
+                <div class="mc-legend">
+                    <p class="mc-legend-title">프로젝트별 일정 색상</p>
+                    <div id="mcProjectLegend" class="mc-project-legend" aria-label="프로젝트별 색상 안내"></div>
+                    <p class="mc-legend-help">프로젝트마다 다른 색상으로 표시됩니다. 일정 클릭 시 오른쪽에서 담당 업무와 진행률을 확인할 수 있습니다.</p>
+                </div>
                 <div id="myTaskCalendar"></div>
             </div>
         </div>
     </div>
+    <!-- Manage 전용 우측 상세 조회 패널 (프로젝트 및 업무만) -->
+    <aside id="mcDetailPanel" class="mc-detail-panel" role="dialog" aria-modal="false"
+           aria-labelledby="mcPanelTitle" aria-hidden="true" inert>
+        <div class="mc-panel-head">
+            <div class="mc-panel-heading">
+                <span class="mc-panel-badge" id="mcPanelType">프로젝트</span>
+                <h2 id="mcPanelTitle">상세 정보</h2>
+                <p id="mcPanelSubtitle"></p>
+            </div>
+            <button type="button" class="mc-panel-close" id="mcPanelClose" aria-label="상세 패널 닫기">×</button>
+        </div>
+        <div class="mc-panel-scroll">
+            <div class="mc-panel-section mc-info-grid" id="mcPanelInfo"></div>
+            <!-- 프로젝트 기본 정보 바로 아래에 담당 업무 목록 표시 -->
+            <section class="mc-panel-section" id="mcRelatedSection">
+                <div class="mc-related-heading">
+                    <h3 id="mcRelatedTitle">프로젝트 업무 목록</h3>
+                    <span id="mcRelatedCount"></span>
+                </div>
+                <div class="mc-related-list" id="mcRelatedList"></div>
+            </section>
+            <section class="mc-panel-section">
+                <h3>상세 내용</h3>
+                <p id="mcPanelContent" class="mc-panel-content"></p>
+            </section>
+        </div>
+    </aside>
 </th:block>
-
 <th:block layout:fragment="script">
     <script th:src="@{/dist/vendor/fullcalendar6/dist/index.global.min.js}"></script>
     <script th:src="@{/dist/vendor/fullcalendar6/dist/locales/ko.global.min.js}"></script>
-
     <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-
-            const calendarEl = document.getElementById('myTaskCalendar');
-
-            if (!calendarEl) {
-                return;
-            }
-
-            const tasks = /*[[${myTasks}]]*/ [];
-
-            function nextDate(dateString) {
-                const [year, month, day] = dateString.split('-').map(Number);
-
-                return new Date(
-                    Date.UTC(year, month - 1, day + 1)
-                ).toISOString().slice(0, 10);
-            }
-
-            const taskEvents = (Array.isArray(tasks) ? tasks : [])
-                .filter(function(task) {
-                    return task.startAt && task.endAt;
-                })
-                .map(function(task) {
-                    return {
-                        id: String(task.taskId),
-                        title: `${task.projectName} · ${task.title} (${task.progress ?? 0}%)`,
-                        start: task.startAt,
-                        end: nextDate(task.endAt),
-                        allDay: true
-                    };
-                });
-
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'ko',
-                height: 'auto',
-
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: ''
-                },
-
-                events: taskEvents
-            });
-
-            calendar.render();
-        });
+        window.manageCalendarData = {
+            projects: /*[[${myProjects}]]*/ [],
+            tasks: /*[[${myTasks}]]*/ []
+        };
     </script>
+    <script th:src="@{/dist/manage/manageCalender.js}"></script>
 </th:block>
-
 </html>

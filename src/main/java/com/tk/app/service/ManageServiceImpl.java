@@ -1,6 +1,8 @@
 package com.tk.app.service;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tk.app.domain.dto.ManageDto;
+import com.tk.app.domain.dto.ManageCalendarDto;
 import com.tk.app.mapper.ManageMapper;
 import com.tk.app.repository.ProjectMemberRepository;
 
@@ -77,12 +80,14 @@ public class ManageServiceImpl implements ManageService{
 
 	@Override
 	public Long findByDomainKey(String domainKey) throws Exception {
+		Long result = null;
 		try {
-			return mapper.findByDomainKey(domainKey);
+			result = mapper.findByDomainKey(domainKey);
 		} catch (Exception e) {
 			log.info("findByDomainKey : ", e);
 			throw e;
 		}
+		return result;
 	}
 
 	@Override
@@ -100,19 +105,40 @@ public class ManageServiceImpl implements ManageService{
 		return list;
 	}
 
+	// 캘린더 프로젝트 및 업무 정보 조회
 	@Override
-	public List<Map<String, Object>> listManageCalendarTasks(Map<String, Object> map) throws SQLException {
+	public Map<String, Object> getManageCalendarData(Map<String, Object> map) throws Exception {
+		Map<String, Object> result = new HashMap<>();
+		List<ManageCalendarDto> projectList = new ArrayList<>();
+		List<ManageCalendarDto> taskList = new ArrayList<>();
 		try {
-			return mapper.listManageCalendarTasks(map);
+			requiredLong(map, "workspaceId");
+			requiredLong(map, "memberId");
+			Integer role = mapper.findManageCalendarRole(map);
+			if (role == null || role < 10) {
+				throw new SecurityException("워크스페이스 참여자만 캘린더를 조회할 수 있습니다.");
+			}
+			projectList = mapper.listManageCalendarProjects(map);
+			taskList = mapper.listManageCalendarTasks(map);
+			result.put("myProjects", projectList);
+			result.put("myTasks", taskList);
 		} catch (Exception e) {
-			log.info("listManageCalendarTasks : ", e);
+			log.info("getManageCalendarData : ", e);
 			throw e;
 		}
+		return result;
 	}
 
 	@Override
 	public Long getOwnWorkspaceMemberId(Map<String, Object> map) {
-		return mapper.getOwnWorkspaceMemberId(map);
+		Long result = null;
+		try {
+			result = mapper.getOwnWorkspaceMemberId(map);
+		} catch (Exception e) {
+			log.info("getOwnWorkspaceMemberId : ", e);
+			throw e;
+		}
+		return result;
 	}
 
 	// 프로젝트 팀원 등록 및 직위 변경
