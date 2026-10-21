@@ -14,13 +14,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	// 엔드포인트(설정주소) 등록
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/ws-chat")
+		registry.addEndpoint("/ws-workchat")
 			.setAllowedOriginPatterns("*")
-			.addInterceptors(new HttpSessionHandshakeInterceptor()) // HTTP 세션의 모든값을 웹소켓 Map 에 저장
+			.addInterceptors(new HttpSessionHandshakeInterceptor())
 			.withSockJS();
 	}
 	
-	// 메시지 브로커 설정
+	// 메시지 전송 및 구독 주소 설정
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		

@@ -1,6 +1,43 @@
 document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById("workchatModal");
     if (!modal) return;
+	
+	// ========================================
+	  //  워크 멤버 관련 기능
+	  // ========================================
+
+	  // selectMember()
+	  // memberVm
+	  // loadMembers()
+	  // searchMembers()
+
+
+	  // ========================================
+	  //  채팅방 관련 기능
+	  // ========================================
+
+	  // roomsVm
+	  // showDirectRoom()
+	  // openRoom()
+	  // loadMyDirectRooms()
+
+
+	  // ========================================
+	  //  메시지 관련 기능
+	  // ========================================
+
+	  // messageVm
+	  // loadMessages()
+
+
+	  // ========================================
+	  //  모달 및 탭 관리
+	  // ========================================
+
+	  // changeTab()
+	  // openWorkchat()
+	  // closeWorkchat()
+
 
     const openButton = document.getElementById("workchatToggle");
     const closeButton = document.getElementById("workchatClose");
@@ -25,14 +62,22 @@ document.addEventListener("DOMContentLoaded", function () {
         !personList || !personSearch || !personCounter || !personChips) return;
 
 		
-    function limitAvatarText(avatar) {
-        if (!avatar || avatar.querySelector("img, svg")) return;
-        const fullName = avatar.textContent.trim();
-        if (Array.from(fullName).length > 2) {
-            avatar.textContent = Array.from(fullName).slice(0, 2).join("");
-            avatar.title = fullName;
-        }
-    }
+
+		function limitAvatarText(avatar) {
+		    if (!avatar || avatar.querySelector("img, svg")) return;
+		    const fullName = avatar.textContent.trim();
+
+		    // Vue가 처리하기 전의 {{ }} 표현식은 건드리지 않음
+		    if (fullName.includes("{{") || fullName.includes("}}")) {
+		        return;
+		    }
+
+		    if (Array.from(fullName).length > 2) {
+		        avatar.textContent = Array.from(fullName).slice(0, 2).join("");
+		        avatar.title = fullName;
+		    }
+		}
+
     modal.querySelectorAll(".workchat-avatar").forEach(limitAvatarText);
 
 
@@ -54,9 +99,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	
 	const memberList = modal.querySelector(".workchat-member-groups");
 	
-	// 회원 클릭 시 상세 정보 표시
+	
+	
 	function selectMember(member) {
-
 	    const memberView = modal.querySelector('[data-workchat-view="members"]');
 	    if (!memberView) return;
 	    const avatar = memberView.querySelector(".workchat-chat-header .workchat-avatar");
@@ -71,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	    if (name) name.textContent = member.name;
 
 	    if (description) { 
-			description.textContent = "워크 직급: " + member.roleName;
+			description.textContent = "직급: " + member.roleName;
 		}
 		
 		const directChatButton = modal.querySelector("#workchatStartDirectChat");
@@ -90,54 +135,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	        return {
 	            members, memberGroups, selectMember, selectedMemberId
 	        };
-	    },
+	    }
 
-		template: `
-		    <div v-for="group in memberGroups" :key="group.roleName"
-		         class="workchat-role-group">
-
-		        <div class="workchat-role-heading">
-
-		            <span class="workchat-role-heading-title">
-		                <strong>{{ group.roleName }}</strong>
-		            </span>
-
-		            <span class="workchat-role-qty">
-		                {{ group.members.length }}명
-		            </span>
-
-		        </div>
-
-		        <div v-for="member in group.members" 
-					:key="member.memberId"
-		            class="workchat-list-item"
-					:class="{'workchat-list-item--selected': selectedMemberId === member.memberId}"
-					@click="selectedMemberId = member.memberId; selectMember(member)"
-					:aria-pressed="selectedMemberId === member.memberId">
-					
-		            <div class="workchat-avatar workchat-avatar--sand">
-		                {{ member.name.slice(-2) }}
-		            </div>
-
-		            <div class="workchat-list-content">
-
-		                <span class="workchat-list-name">
-		                    {{ member.name }}
-		                </span>
-		            </div>
-
-		            <span class="workchat-role-pill">
-		                {{ member.roleName }}
-		            </span>
-
-		        </div>
-		    </div>
-			<p v-if="members.length > 0 && memberGroups.length === 0"
-			   class="workchat-list-sub">
-			    검색 결과가 없습니다.
-			</p>
-		`
 	}).mount(memberList);
+	
 	
 	async function loadMembers() {
 		
@@ -148,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			
 			memberVm.members = res.data;
 			
-			const roles = ["PM", "DT", "TL", "AA"];
+			const roles = ["사장", "과장", "대리", "사원"];
 			const groups = [];
 
 			roles.forEach(function(role) {
@@ -172,10 +173,11 @@ document.addEventListener("DOMContentLoaded", function () {
 		
 	}
 	
+	
 	function searchMembers() {
 		const kwd = searchInput.value.trim().toLowerCase();
 		
-		const roles = ["PM", "DT", "TL", "AA"];
+		const roles = ["사장", "과장", "대리", "사원"];
 		const groups = [];
 		
 		roles.forEach(function(role) {
@@ -198,6 +200,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		memberVm.memberGroups = groups;
 	}
+	
+	
 		    
 	const roomList = document.getElementById("workchatRoomList");
 	const roomsVm = Vue.createApp({
@@ -208,33 +212,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	            rooms,
 	            openRoom
 	        };
-	    },
-
-	    template: `
-	        <p v-if="rooms.length === 0" class="workchat-list-sub">
-	            참여 중인 1:1 채팅방이 없습니다.
-	        </p>
-
-	        <button v-for="room in rooms" :key="room.chatRoomId"
-	                type="button" class="workchat-list-item"
-	                @click="openRoom(room)">
-
-	            <span class="workchat-avatar workchat-avatar--sand">
-	                {{ room.targetName.slice(-2) }}
-	            </span>
-
-	            <span class="workchat-list-content">
-	                <span class="workchat-list-name">
-	                    {{ room.targetName }}
-	                </span>
-
-	                <span class="workchat-list-sub">
-	                    1:1 채팅
-	                </span>
-	            </span>
-	        </button>
-	    `
+	    }
+		
 	}).mount(roomList);
+	
 	
 	function showDirectRoom(chatRoomId, targetName) {
 
@@ -257,6 +238,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	    createViews.forEach(function(view) {
 	        view.hidden = true;
 	    });
+		
+		loadMessages(chatRoomId);
 
 	}
 
@@ -265,8 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	async function loadMyDirectRooms() {
 
-	    const domainKey =
-	        window.location.pathname.split("/")[1];
+	    const domainKey = window.location.pathname.split("/")[1];
 
 	    try {
 	        const res = await axios.get(
@@ -280,7 +262,146 @@ document.addEventListener("DOMContentLoaded", function () {
 	    }
 	}
 	
+	
+	
+	const messageList = document.querySelector('.workchat-messages')
+	const messageVm = Vue.createApp({
 
+	    setup() {
+	        const messages = Vue.ref([]);
+	        const loading = Vue.ref(false);
+	        const failed = Vue.ref(false);
+
+	        return {
+	            messages,
+	            loading,
+	            failed
+	        };
+	    }
+	}).mount(messageList);
+	
+	async function loadMessages(chatRoomId) {
+
+	    const domainKey = window.location.pathname.split("/")[1];
+
+	    messageVm.messages = [];
+	    messageVm.loading = true;
+	    messageVm.failed = false;
+
+	    try {
+	        const res = await axios.get(
+	            "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/messages"
+	        );
+
+	        // 채팅방을 바꾼 경우 이전 요청 결과 무시
+	        if (activeChatRoomId !== chatRoomId) return;
+
+	        messageVm.messages = res.data;
+
+
+	    } catch (e) {
+	        if (activeChatRoomId !== chatRoomId) return;
+
+	        console.error("메시지 조회 실패:", e);
+	        messageVm.failed = true;
+
+	    } finally {
+	        if (activeChatRoomId === chatRoomId) {
+	            messageVm.loading = false;
+
+	            Vue.nextTick(function() {
+	                messageList.scrollTop = messageList.scrollHeight;
+	            });
+	        }
+	    }
+	}
+	
+	const messageInput = modal.querySelector(".workchat-input");
+	const sendButton = modal.querySelector(".workchat-send");
+	
+
+	async function sendMessage() {
+
+	    if (activeChatRoomId == null) {
+	        alert("채팅방을 먼저 선택해주세요."); return;
+	    }
+
+	    const content = messageInput.value.trim();
+
+	    if (content === "") {
+	        return;
+	    }
+
+	    const chatRoomId = activeChatRoomId;
+
+	    const domainKey = window.location.pathname.split("/")[1];
+
+	    try {
+	        sendButton.disabled = true;
+
+	        await axios.post(
+				"/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/messages",
+	            {
+	                content: content
+	            }
+	        );
+
+	        if (activeChatRoomId === chatRoomId) {
+
+	            messageInput.value = "";
+
+	            await loadMessages(chatRoomId);
+	        }
+
+	    } catch (e) {
+	        console.error("메시지 전송 실패:", e);
+	        alert("메시지를 전송하지 못했습니다.");
+
+	    } finally {
+	        sendButton.disabled = false;
+	    }
+	}
+	
+	sendButton.addEventListener("click", sendMessage);
+
+	messageInput.addEventListener("keydown", (e) => {
+
+	    if (e.key === "Enter" && ! e.isComposing) {
+	        e.preventDefault();
+	        sendMessage();
+	    }
+
+	});
+	
+
+
+	// ========================================
+	// WebSocket 연결
+	// ========================================
+
+	let stompClient = null;
+
+		function connect() {
+
+		    const socket = new SockJS("/ws-workchat");
+		    stompClient = Stomp.over(socket);
+
+		    stompClient.connect({},
+		        function(frame) {
+		            console.log("워크챗 WebSocket 연결 성공");
+		        },
+
+		        function(error) {
+		            console.error("워크챗 WebSocket 연결 실패:", error);
+		        }
+		    );
+		}
+
+
+
+
+
+	
 
 
 
@@ -497,29 +618,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	                workId: selectedMember.workId
 	            }
 	        );
-
-
+			
 			const chatRoomId = res.data;
 
-			activeChatRoomId = chatRoomId;
-
-			document.getElementById("workchatActiveRoomTitle")
-			    .textContent = selectedMember.name;
-
-			document.getElementById("workchatActiveRoomSubtitle")
-			    .textContent = "1:1 채팅 · 방 번호 " + chatRoomId;
-
-			document.getElementById("workchatActiveRoomAvatar")
-			    .textContent = selectedMember.name.slice(-2);
-
-			views.forEach((view) => { 
-				view.hidden = view.dataset.workchatView !== "chats";
-			});
-
-			createViews.forEach((view) => {
-			    view.hidden = true;
-			});
-
+			showDirectRoom(chatRoomId, selectedMember.name);
 
 	    } catch (e) {
 	        console.error("1:1 채팅방 처리 실패:", e);
@@ -548,4 +650,5 @@ document.addEventListener("DOMContentLoaded", function () {
         } else closeWorkchat();
     });
     changeTab("chats");
+	connect();
 });

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.tk.app.domain.dto.WorkChatMemberDto;
+import com.tk.app.domain.dto.WorkChatMessageDto;
 import com.tk.app.security.CustomUserDetails;
 import com.tk.app.service.WorkChatRoomService;
 
@@ -102,5 +103,88 @@ public class WorkChatRoomController {
 		            .body("채팅방 처리 중 오류가 발생했습니다.");
 		}	
 	}
+	
+
+	@GetMapping("/{chatRoomId}/messages")
+	public ResponseEntity<?> findRoomMessages(
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId,
+	        @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+	
+	    try {
+	        if (customUserDetails == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.UNAUTHORIZED)
+	                    .body("로그인이 필요합니다.");
+	        }
+	
+	        Long loginMemberId = customUserDetails.getMember().getMember_id();
+	
+	        List<WorkChatMessageDto> messages = service.findRoomMessages(domainKey, chatRoomId, loginMemberId);
+	
+	        
+	        return ResponseEntity.ok(messages);
+	
+	    } catch (ResponseStatusException e) {
+	        log.error("findRoomMessages : ", e);
+	
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+	
+	    } catch (Exception e) {
+	        log.error("findRoomMessages : ", e);
+	
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("메시지 조회 중 오류가 발생했습니다.");
+	    }
+	}
+	
+
+	@PostMapping("/{chatRoomId}/messages")
+	public ResponseEntity<?> sendMessage(
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId,
+	        @RequestBody WorkChatMessageDto req,
+	        @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+	
+	    try {
+	        if (customUserDetails == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.UNAUTHORIZED)
+	                    .body("로그인이 필요합니다.");
+	        }
+	
+	        Long loginMemberId = customUserDetails.getMember().getMember_id();
+	
+	        WorkChatMessageDto dto = new WorkChatMessageDto();
+	
+	        dto.setDomainKey(domainKey);
+	        dto.setChatRoomId(chatRoomId);
+	        dto.setLoginMemberId(loginMemberId);
+	        dto.setContent(req.getContent());
+	
+	        service.sendMessage(dto);
+	
+	        return ResponseEntity.ok("메시지 전송 완료");
+	
+	    } catch (ResponseStatusException e) {
+	        log.error("sendMessage : ", e);
+	
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+	
+	    } catch (Exception e) {
+	        log.error("sendMessage : ", e);
+	
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("메시지 전송 중 오류가 발생했습니다.");
+	    }
+	}
+
+
 
 }

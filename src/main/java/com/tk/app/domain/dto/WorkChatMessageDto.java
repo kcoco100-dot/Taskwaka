@@ -19,4 +19,5 @@ public class WorkChatMessageDto {
     
     private String domainKey;
     private Long loginMemberId;
+    private Long chatRoomMemberId;
 }

@@ -46,11 +46,11 @@ public class WorkChatMemberServiceImpl implements WorkChatMemberService {
 			}
 			
 			switch(role) {
-			case 70 -> member.setRoleName("PM");
-			case 50 -> member.setRoleName("DT");
-			case 30 -> member.setRoleName("TL");
-			case 10 -> member.setRoleName("AA");
-			default -> member.setRoleName("MEMBER");
+			case 70 -> member.setRoleName("사장");
+			case 50 -> member.setRoleName("과장");
+			case 30 -> member.setRoleName("대리");
+			case 10 -> member.setRoleName("사원");
+			default -> member.setRoleName("인턴");
 			}
 			
 				

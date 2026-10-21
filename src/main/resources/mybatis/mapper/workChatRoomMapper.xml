@@ -142,10 +142,28 @@
 	    JOIN member_details md ON wm.member_id = md.member_id
 	
 	    WHERE m.chat_room_id = #{chatRoomId} AND m.deleted IS NULL
-	
-	    ORDER BY m.sent ASC, m.message_id ASC
-	
+	    ORDER BY m.sent ASC, m.message_id ASC	
 	</select>
+	
+	
+	<select id="findSenderRoomMemberId" parameterType="WorkChatMessageDto" resultType="Long">
+	    SELECT crm.chat_room_member_id
+	    FROM chat_room_members crm
+	    JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND wm.member_id = #{loginMemberId}
+	      AND crm.status = 0
+	      AND wm.status = 0
+	</select>
+
+
+	<insert id="insertRoomMessage" parameterType="WorkChatMessageDto">
+	    INSERT INTO chat_messages (message_id, chat_room_id, chat_room_member_id, content, sent)
+	    VALUES (seq_chat_messages.NEXTVAL, #{chatRoomId}, #{chatRoomMemberId}, #{content, jdbcType=CLOB},
+	        SYSDATE)
+	</insert>
+	
+	
 
 	
 

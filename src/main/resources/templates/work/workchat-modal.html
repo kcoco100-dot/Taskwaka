@@ -6,9 +6,12 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
-    
-    
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    
+    
   <div class="workchat-dialog" role="dialog" aria-modal="true" aria-labelledby="workchatTitle" tabindex="-1">
     <button type="button" class="workchat-close workchat-dialog-close" id="workchatClose" aria-label="워크챗 닫기"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     <aside class="workchat-sidebar">
@@ -53,8 +56,49 @@
         <div class="workchat-section-caption">
           <span>워크 전체 멤버</span><span class="workchat-room-count">조회 전</span>
         </div>
-        <!-- 실제 워크 멤버 목록을 Vue.js로 출력할 영역 -->
-        <div class="workchat-list workchat-member-groups"></div>
+
+		<div class="workchat-list workchat-member-groups">
+		
+		    <div v-for="group in memberGroups" :key="group.roleName"
+		         class="workchat-role-group">
+
+		        <div class="workchat-role-heading">
+		            <span class="workchat-role-heading-title">
+		                <strong>{{ group.roleName }}</strong>
+		            </span>
+		
+		            <span class="workchat-role-qty">
+		                {{ group.members.length }}명
+		            </span>
+		        </div>
+
+		        <div v-for="member in group.members" :key="member.memberId"
+		             class="workchat-list-item"
+		             :class="{'workchat-list-item--selected': selectedMemberId === member.memberId}"
+		             @click="selectedMemberId = member.memberId; selectMember(member)"
+		             :aria-pressed="selectedMemberId === member.memberId">
+		
+		            <div class="workchat-avatar workchat-avatar--sand">
+		                {{ member.name.slice(-2) }}
+		            </div>
+		
+		            <div class="workchat-list-content">
+		                <span class="workchat-list-name">
+		                    {{ member.name }}
+		                </span>
+		            </div>
+		
+		            <span class="workchat-role-pill">
+		                {{ member.roleName }}
+		            </span>
+		        </div>
+		    </div>
+		
+		    <p v-if="members.length > 0 && memberGroups.length === 0"
+		       class="workchat-list-sub">
+		        검색 결과가 없습니다.
+		    </p>		
+		</div>
       </div>
       
       <div class="workchat-panel" id="workchatPanel-chats" role="tabpanel"
@@ -62,10 +106,31 @@
         <div class="workchat-section-caption">
           <span>내 채팅방</span><span class="workchat-room-count">0개</span>
         </div>
-        <!-- 실제 채팅방 목록 연동 예정 -->
-        <div class="workchat-list" id="workchatRoomList">
-          <p class="workchat-list-sub">참여 중인 채팅방이 없습니다.</p>
-        </div>
+ 
+		<div class="workchat-list" id="workchatRoomList">
+		
+		    <p v-if="rooms.length === 0" class="workchat-list-sub">
+		        참여 중인 1:1 채팅방이 없습니다.
+		    </p>
+		
+		    <button v-for="room in rooms" :key="room.chatRoomId"
+		            type="button" class="workchat-list-item" @click="openRoom(room)">
+		            
+		        <span class="workchat-avatar workchat-avatar--sand">
+		            {{ room.targetName.slice(-2) }}
+		        </span>
+		
+		        <span class="workchat-list-content">	
+		            <span class="workchat-list-name">
+		                {{ room.targetName }}
+		            </span>
+		
+		            <span class="workchat-list-sub">
+		                1:1 채팅
+		            </span>
+		        </span>
+		    </button>
+		</div>
       </div>
       
       <div class="workchat-panel" id="workchatPanel-meetings" role="tabpanel"
@@ -136,13 +201,42 @@
           </div>
         </div>
         
-        <!-- 서버에서 조회한 메시지가 들어올 영역 -->
-        <div class="workchat-messages"></div>
+
+		<div class="workchat-messages">
+		    <p v-if="loading">메시지를 불러오는 중입니다.</p>
+			<p v-else-if="failed">메시지 조회에 실패했습니다.</p>
+		    <p v-else-if="messages.length === 0">아직 메시지가 없습니다. </p>
+		
+		    <template v-else>
+		        <div v-for="message in messages" :key="message.messageId"
+		             class="workchat-message"
+		             :class="{'workchat-message--mine': message.mine === 1}">
+		
+		            <div class="workchat-message-content">
+		                <span v-if="message.mine !== 1" class="workchat-sender">
+		                    {{ message.senderName }}
+		                </span>
+		
+		                <div class="workchat-bubble-row">
+		                    <div class="workchat-bubble" style="white-space: pre-wrap;">
+		                        {{ message.content }}
+		                    </div>
+		
+		                    <span class="workchat-message-time">
+		                        {{ message.sent.slice(11, 16) }}
+		                    </span>
+		
+		                </div>
+		            </div>
+		        </div>
+		    </template>
+		</div>
+
         <div class="workchat-composer">
           <div class="workchat-composer-row">
             <button class="workchat-attach" type="button" disabled aria-label="파일 첨부 준비 중">+</button>
-            <input class="workchat-input" type="text" placeholder="메시지를 입력하세요" disabled aria-label="메시지 입력 준비 중">
-            <button class="workchat-send" type="button" disabled>전송</button>
+            <input class="workchat-input" type="text" placeholder="메시지를 입력하세요" aria-label="메시지 입력">
+            <button class="workchat-send" type="button">전송</button>
           </div>
           <p class="workchat-composer-note">채팅방 및 메시지 저장 기능은 연결 예정입니다.</p>
         </div>

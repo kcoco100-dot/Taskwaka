@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.tk.app.domain.dto.WorkChatMemberDto;
+import com.tk.app.domain.dto.WorkChatMessageDto;
 import com.tk.app.mapper.WorkChatRoomMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -122,6 +123,98 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 		} catch (Exception e) {
 			throw e;
 		}
+	}
+
+	@Override
+	public List<WorkChatMessageDto> findRoomMessages(String domainKey, Long chatRoomId, Long loginMemberId)
+			throws Exception {
+		try {
+		    if (domainKey == null || domainKey.isBlank() || chatRoomId == null || chatRoomId <= 0) {
+		        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "메시지 조회에 필요한 정보가 없습니다.");
+		    }
+
+		    if (loginMemberId == null) {
+		        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+		    }
+
+		    WorkChatMessageDto dto = new WorkChatMessageDto();
+
+		    dto.setDomainKey(domainKey);
+		    dto.setChatRoomId(chatRoomId);
+		    dto.setLoginMemberId(loginMemberId);
+
+		    int count = mapper.countReadableRoom(dto);
+
+		    if (count == 0) {
+		        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "접근할 수 없는 채팅방입니다.");
+		    }
+
+		    return mapper.findRoomMessages(dto);
+			
+		} catch (Exception e) {
+			log.error("findRoomMessages : ", e);
+			throw e;
+		}
+		
+	}
+
+	@Override
+	@Transactional
+	public void sendMessage(WorkChatMessageDto dto) throws Exception {
+	    try {
+	    	if (dto == null || dto.getDomainKey() == null || dto.getDomainKey().isBlank()
+		    		|| dto.getChatRoomId() == null || dto.getChatRoomId() <= 0) {
+		        throw new ResponseStatusException(
+		        		HttpStatus.BAD_REQUEST, "채팅방 정보가 올바르지 않습니다."
+		        );
+		    }
+		
+		    if (dto.getLoginMemberId() == null) {
+		        throw new ResponseStatusException(
+		            HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+		        );
+		    }
+		
+		    String content = dto.getContent();
+		
+		    if (content == null || content.isBlank()) {
+		        throw new ResponseStatusException(
+		            HttpStatus.BAD_REQUEST, "메시지 내용을 입력해주세요."
+		        );
+		    }
+		
+		    dto.setContent(content.trim());
+		    
+			int count = mapper.countReadableRoom(dto);
+		
+			if (count == 0) {
+			    throw new ResponseStatusException(
+			         HttpStatus.FORBIDDEN, "접근할 수 없는 채팅방입니다."
+			    );
+			}
+		
+			 Long chatRoomMemberId = mapper.findSenderRoomMemberId(dto);
+		
+			 if (chatRoomMemberId == null) {
+			     throw new ResponseStatusException(
+			         HttpStatus.FORBIDDEN, "채팅방 참여 정보를 찾을 수 없습니다."
+			     );
+			 }
+		
+			 dto.setChatRoomMemberId(chatRoomMemberId);
+		
+			 int result = mapper.insertRoomMessage(dto);
+		
+			 if (result != 1) {
+			     throw new IllegalStateException("메시지를 저장하지 못했습니다.");
+			 }
+
+			 
+		} catch (Exception e) {
+			log.info("sendMessage : ", e);
+			throw e;
+		}
+		
 	}
 }
 	
