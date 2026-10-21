@@ -14,7 +14,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "workspace_members")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 public class ManageWorkspaceMember {
 
@@ -32,4 +33,7 @@ public class ManageWorkspaceMember {
 
     @Column(name = "status", nullable = false)
     private Integer status = 0;
+    
+    @Column(name = "role", nullable = false)
+    private int role;
 }

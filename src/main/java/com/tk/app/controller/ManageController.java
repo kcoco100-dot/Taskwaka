@@ -304,7 +304,7 @@ public class ManageController {
 		if (info == null) return "redirect:/login";
 		Long workspaceId = service.findByDomainKey(domainKey);
 		Integer role = workspaceId == null ? null : projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
-		if (role == null || role != 70) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "PM만 접근할 수 있습니다.");
+		if (role == null || role != 70 || role != 50) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "PM만 접근할 수 있습니다.");
 		return "manage/pmDashboard";
 	}
 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/workspace-role.css}">
+</th:block>
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout manage-member-page workspace-role-page">
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('workspaceRoles')}"></nav>
+        <div class="section manage-content">
+            <div class="page-heading">
+                <h1 class="page-title">워크스페이스 직위 관리</h1>
+                <p class="workspace-role-description">기존 참여자의 직위를 사장·과장·대리·사원 기준으로 조회하고 변경합니다.</p>
+            </div>
+            <div class="member-content">
+                <div class="workspace-role-alert success" th:if="${message}" th:text="${message}"></div>
+                <div class="workspace-role-alert error" th:if="${error}" th:text="${error}"></div>
+                <form class="workspace-role-search" method="get" th:action="@{/{domainKey}/manage/workspaceRoles(domainKey=${domainKey})}">
+                    <label for="workspaceRoleKeyword">이름·이메일 검색</label>
+                    <input id="workspaceRoleKeyword" type="text" name="keyword" th:value="${keyword}" placeholder="이름 또는 이메일을 입력하세요">
+                    <button type="submit" class="workspace-role-button primary">조회</button>
+                    <a class="workspace-role-button" th:href="@{/{domainKey}/manage/workspaceRoles(domainKey=${domainKey})}">초기화</a>
+                </form>
+                <div class="member-table-wrap">
+                    <table class="project-list-table workspace-role-table">
+                        <thead>
+                            <tr>
+                                <th>이름</th>
+                                <th>이메일</th>
+                                <th>현재 워크 직위</th>
+                                <th>직위 부여·변경</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="member : ${memberList}">
+                                <td><strong th:text="${member.name}">홍길동</strong></td>
+                                <td th:text="${member.email}">member@example.com</td>
+                                <td>
+                                    <span class="workspace-role-badge"
+                                          th:classappend="${member.role == 70 ? 'boss' : (member.role == 50 ? 'manager' : (member.role == 30 ? 'assistant' : 'staff'))}"
+                                          th:text="${member.role == 70 ? '사장' : (member.role == 50 ? '과장' : (member.role == 30 ? '대리' : '사원'))}">과장</span>
+                                </td>
+                                <td>
+                                    <span th:if="${member.role == 70}" class="workspace-role-locked">사장 직위 변경 불가</span>
+                                    <form th:unless="${member.role == 70}" class="workspace-role-edit" method="post"
+                                          th:action="@{/{domainKey}/manage/workspaceRoles/update(domainKey=${domainKey})}">
+                                        <input type="hidden" name="workspaceMemberId" th:value="${member.workspaceMemberId}">
+                                        <input type="hidden" name="page" th:value="${page}">
+                                        <input type="hidden" name="keyword" th:value="${keyword}">
+                                        <select name="role" th:attr="aria-label=|${member.name} 직위 선택|" required>
+                                            <option value="50" th:selected="${member.role == 50}">과장</option>
+                                            <option value="30" th:selected="${member.role == 30}">대리</option>
+                                            <option value="10" th:selected="${member.role == 10}">사원</option>
+                                        </select>
+                                        <button type="submit" class="workspace-role-button primary"
+                                                onclick="return confirm('선택한 직위로 변경하시겠습니까?');">변경</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(memberList)}">
+                                <td colspan="4" class="project-empty">조회된 워크스페이스 팀원이 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="project-list-footer workspace-role-footer">
+                    <p th:text="|총 ${dataCount}명|">총 0명</p>
+                    <nav class="project-pagination" aria-label="워크스페이스 직위 관리 페이지" th:if="${totalPage > 0}">
+                        <a class="workspace-role-button" th:if="${page > 1}" th:href="${pageBaseUrl + (page - 1)}">이전</a>
+                        <span class="workspace-role-button disabled" th:unless="${page > 1}">이전</span>
+                        <div th:utext="${paging}"></div>
+                        <a class="workspace-role-button" th:if="${page < totalPage}" th:href="${pageBaseUrl + (page + 1)}">다음</a>
+                        <span class="workspace-role-button disabled" th:unless="${page < totalPage}">다음</span>
+                    </nav>
+                </div>
+                <p class="workspace-role-note">사장(70)은 다른 사장을 지정하거나 기존 사장 직위를 변경할 수 없습니다. 프로젝트 직위(PM·DT·TL·AA)는 별도로 관리됩니다.</p>
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

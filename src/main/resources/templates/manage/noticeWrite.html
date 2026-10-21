@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!-- 
+  [용어 설명] 
+  xmlns:th: Thymeleaf 템플릿 엔진의 문법을 사용하기 위한 네임스페이스 선언
+  xmlns:layout: Thymeleaf Layout Dialect를 사용하여 공통 레이아웃을 상속받기 위한 선언
+-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<!-- CSS 영역: 기존 공지사항 리스트에서 사용하던 CSS를 동일하게 유지합니다. -->
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
+    
+    <!-- 
+      첨부해주신 이미지의 폼 UI를 구현하기 위한 추가 스타일입니다. 
+      별도의 파일(예: notice-write.css)로 분리하여 사용하여도 좋습니다.
+    -->
+    <style>
+        /* 공지사항 등록 폼 전체를 감싸는 컨테이너 */
+        .notice-write-container {
+            background-color: #ffffff;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        /* 폼의 각 입력 영역(제목, 범위, 내용 등)을 구분하는 그룹 */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        /* 입력 필드의 라벨(이름) */
+        .form-label {
+            display: block;
+            font-weight: bold;
+            color: #4a3e3d; /* 이미지와 유사한 약간의 브라운/차콜 톤 */
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        /* 필수 입력 항목을 표시하는 붉은색 별표 표시 */
+        .required-mark {
+            color: #d9534f;
+            margin-left: 4px;
+        }
+
+        /* 텍스트 입력창, 셀렉트 박스 등 일반적인 입력 폼 컨트롤의 디자인 */
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        /* 입력창에 포커스가 갔을 때의 테두리 색상 변화 */
+        .form-control:focus {
+            outline: none;
+            border-color: #5d7049;
+        }
+
+        /* 공지 내용 입력을 위한 텍스트 에어리어 높이 설정 및 크기 조절 제한 */
+        textarea.form-control {
+            min-height: 250px;
+            resize: vertical; /* 세로로만 크기 조절 허용 */
+        }
+
+        /* 공지 범위 등을 선택하는 영역을 감싸는 박스 스타일 */
+        .notice-scope-box {
+            background-color: #faf9f7; /* 약간의 베이지 톤 배경 */
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        /* 첨부파일 영역 박스 디자인 (점선 테두리) */
+        .file-upload-box {
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            background-color: #faf9f7;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 첨부파일 선택 버튼 디자인 (커스텀 버튼) */
+        .file-upload-btn {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* 브라우저 기본 파일 선택 텍스트 숨김을 위한 클래스 */
+        .file-input-hidden {
+            display: none;
+        }
+
+        /* 파일 선택 여부를 텍스트로 보여주는 영역 */
+        .file-name-display {
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* 등록, 초기화, 목록 등 하단 액션 버튼들을 감싸는 영역 */
+        .btn-action-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* 버튼 공통 스타일 */
+        .btn-action {
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        /* 등록하기 버튼 (진녹색 계열 포인트 컬러) */
+        .btn-submit {
+            background-color: #5d7049;
+            color: #ffffff;
+        }
+
+        .btn-submit:hover {
+            background-color: #4a5a3a;
+        }
+
+        /* 초기화 및 목록으로 버튼 (흰 배경 + 테두리) */
+        .btn-outline {
+            background-color: #ffffff;
+            border-color: #e0e0e0;
+            color: #555;
+        }
+
+        .btn-outline:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout project-list-layout">
+        <!-- 
+          기존 목록 페이지와 동일하게 좌측 사이드바(pmSidebar)를 불러옵니다. 
+          'projectView' 메뉴가 활성화된 상태로 설정됩니다.
+        -->
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
+        
+        <!-- 공지사항 등록 메인 섹션 -->
+        <section class="section project-list-page" aria-labelledby="notice-write-heading">
+            
+            <!-- 페이지 상단 타이틀 영역 -->
+            <div class="page-heading">
+                <div>
+                    <h1 id="notice-write-heading" class="page-title">공지사항 등록</h1>
+                    <p class="page-description">새로운 공지사항을 작성하세요.</p>
+                </div>
+            </div>
+            
+            <!-- 
+              [용어 설명]
+              enctype="multipart/form-data": 폼 데이터에 파일이 포함될 때 서버로 올바르게 전송하기 위해 반드시 필요한 인코딩 타입 설정입니다. 
+            -->
+            <form id="notice-write-form" method="post" th:action="@{|/${domainKey}/manage/noticeWrite|}" enctype="multipart/form-data">
+                
+                <div class="notice-write-container">
+                    
+                    <!-- 1. 공지 제목 입력 영역 -->
+                    <div class="form-group">
+                        <label for="noticeTitle" class="form-label">공지 제목 <span class="required-mark">*</span></label>
+                        <input type="text" id="noticeTitle" name="title" class="form-control" 
+                               placeholder="공지사항 제목을 입력해 주세요 (최대 200자)" required maxlength="200">
+                    </div>
+
+                    <!-- 2. 공지 범위 선택 영역 (베이지색 박스로 구분) -->
+                    <div class="form-group notice-scope-box">
+                        <label for="noticeScope" class="form-label">공지 범위 <span class="required-mark">*</span></label>
+                        <select id="noticeScope" name="noticeScope" class="form-control" required>
+                            <!-- 워크페이스 전체 공지인지 특정 프로젝트 공지인지 선택 -->
+                            <option value="">-- 공지 범위를 선택해 주세요 --</option>
+                            <option value="WORK">워크 전체공지</option>
+                            <option value="PROJECT">프로젝트 공지</option>
+                        </select>
+                    </div>
+
+                    <!-- 3. 공지 내용 입력 영역 -->
+                    <div class="form-group">
+                        <label for="noticeContent" class="form-label">공지 상세 내용 <span class="required-mark">*</span></label>
+                        <textarea id="noticeContent" name="content" class="form-control" 
+                                  placeholder="팀원들에게 전달할 공지 내용을 작성해 주세요..." required></textarea>
+                    </div>
+
+                    <!-- 4. 첨부파일 등록 영역 -->
+                    <div class="form-group">
+                        <label class="form-label">첨부파일(선택)</label>
+                        <div class="file-upload-box">
+                            <!-- 
+                              커스텀 버튼(label)과 실제 file input을 연결하여 깔끔한 UI를 제공합니다. 
+                              multiple 속성을 추가하면 다중 파일 첨부도 가능합니다.
+                            -->
+                            <label for="noticeFiles" class="file-upload-btn">+ 파일 선택</label>
+                            <input type="file" id="noticeFiles" name="uploadFiles" class="file-input-hidden" multiple>
+                            <span class="file-name-display" id="fileNameDisplay">선택된 파일 없음</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 5. 하단 액션 버튼 그룹 (등록, 초기화, 목록) -->
+                <div class="btn-action-group">
+                    <button type="submit" class="btn-action btn-submit">등록하기</button>
+                    <!-- 입력 폼을 모두 초기 상태로 비웁니다 -->
+                    <button type="reset" class="btn-action btn-outline">초기화</button>
+                    <!-- 목록 페이지로 되돌아가는 기능 (domainKey 변수를 사용하여 경로 매핑) -->
+                    <button type="button" class="btn-action btn-outline" 
+                            th:onclick="|location.href='@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}'|">
+                        목록으로
+                    </button>
+                </div>
+
+            </form>
+        </section>
+    </div>
+
+    <!-- 첨부파일 선택 시 파일명을 화면에 보여주기 위한 간단한 JavaScript -->
+    <script>
+        document.getElementById('noticeFiles').addEventListener('change', function(e) {
+            const displaySpan = document.getElementById('fileNameDisplay');
+            if(this.files && this.files.length > 0) {
+                // 한 개일 때는 파일명 출력, 여러 개일 때는 n개 선택 표시
+                if(this.files.length === 1) {
+                    displaySpan.textContent = this.files[0].name;
+                } else {
+                    displaySpan.textContent = this.files.length + '개의 파일이 선택됨';
+                }
+                displaySpan.style.color = '#333';
+            } else {
+                displaySpan.textContent = '선택된 파일 없음';
+                displaySpan.style.color = '#888';
+            }
+        });
+    </script>
+</th:block>
+</html>

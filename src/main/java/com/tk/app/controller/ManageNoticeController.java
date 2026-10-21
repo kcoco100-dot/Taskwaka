@@ -99,9 +99,12 @@ public class ManageNoticeController {
 			log.info("noticeList : ", e);
 		}
 
-
 		return "manage/noticeList";
 	}
 
+	@GetMapping("/noticeWrite")
+	public String noticeWriteForm() {
+		return "manage/noticeWrite";
+	}
 
 }
