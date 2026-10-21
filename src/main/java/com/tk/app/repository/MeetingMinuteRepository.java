@@ -73,4 +73,29 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			@Param("workspaceId") Long workspaceId,
 			@Param("meetingMinuteId") Long meetingMinuteId,
 			@Param("memberId") Long memberId);
+	
+	// 회의록 게시글 조회
+	@Query(value = """
+			SELECT COUNT(*)
+			FROM meeting_minutes m
+			JOIN projects p ON p.project_id = m.project_id
+			WHERE p.workspace_id = :workspaceId
+			  AND m.deleted IS NULL
+			  AND EXISTS (
+			      SELECT 1
+			      FROM project_members pm
+			      JOIN workspace_members wm
+			        ON wm.workspace_member_id = pm.workspace_member_id
+			       AND wm.workspace_id = p.workspace_id
+			      WHERE pm.project_id = p.project_id
+			        AND wm.member_id = :memberId
+			        AND wm.status = 0
+			        AND pm.left IS NULL
+			  )
+				AND (:kwd IS NULL OR m.title LIKE '%' || :kwd || '%')
+			""", nativeQuery = (true))
+	int countMeetingMinutes(
+			@Param("workspaceId") Long workspaceId,
+			@Param("memberId") Long memberId,
+			@Param("kwd") String kwd);
 }

@@ -49,7 +49,7 @@ public class MeetingMinutesService {
 	public int countMeetingMinutes(
 			long workspaceId, long memberID, String kwd) {
 		
-		return meetingMinutesMapper.countMeetingMinutes(workspaceId, memberID, kwd);
+		return meetingMinuteRepository.countMeetingMinutes(workspaceId, memberID, kwd);
 	}
 	
 	// 워크 회의록 상세 조회
