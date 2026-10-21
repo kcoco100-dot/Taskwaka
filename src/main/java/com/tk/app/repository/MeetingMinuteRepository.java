@@ -42,4 +42,35 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			@Param("memberId") Long memberId,
 			@Param("title") String title,
 			@Param("content") String content);
+	
+	@Modifying
+	@Query(value = """
+			UPDATE meeting_minutes mm
+			SET updated = SYSDATE,
+			    deleted = SYSDATE
+			WHERE mm.meeting_minute_id = :meetingMinuteId
+			    AND mm.deleted IS NULL
+			    AND EXISTS (
+			        SELECT 1
+			        FROM projects p
+			        JOIN project_members pm 
+			            ON pm.project_id = p.project_id
+			        JOIN workspace_members wm 
+			            ON wm.workspace_member_id = pm.workspace_member_id
+			            AND wm.workspace_id = p.workspace_id
+			        WHERE p.project_id = mm.project_id
+				        AND p.workspace_id = :workspaceId
+				        AND wm.member_id = :memberId
+				        AND wm.status = 0
+				        AND pm.left IS NULL
+				        AND (
+				            mm.member_id = :memberId
+				            OR pm.role IN (70, 50, 30)
+				        )
+			    )
+			""", nativeQuery = (true))
+	int meetingsDelete(
+			@Param("workspaceId") Long workspaceId,
+			@Param("meetingMinuteId") Long meetingMinuteId,
+			@Param("memberId") Long memberId);
 }

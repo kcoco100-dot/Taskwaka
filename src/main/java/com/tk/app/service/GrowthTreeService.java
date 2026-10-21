@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.GrowthExpLogDto;
 import com.tk.app.domain.dto.GrowthLevelDto;
 import com.tk.app.domain.dto.GrowthTreeDto;
@@ -18,9 +19,17 @@ import com.tk.app.security.LoginMemberUtil;
 public class GrowthTreeService {
 	
 	private final GrowthTreeMapper growthTreeMapper;
+	private final TaskService taskService;
+	private final ManageWorkspaceInviteService manageWorkspaceInviteService;
 	
-	public GrowthTreeService(GrowthTreeMapper growthTreeMapper) {
+	public GrowthTreeService(
+			GrowthTreeMapper growthTreeMapper, 
+			TaskService taskService,
+			ManageWorkspaceInviteService manageWorkspaceInviteService) {
+		
 		this.growthTreeMapper = growthTreeMapper;
+		this.taskService = taskService;
+		this.manageWorkspaceInviteService = manageWorkspaceInviteService;
 	}
 	// 성장나무 잠금처리
 	private GrowthTreeDto lockGrowthTree(long workspaceId) {
@@ -412,7 +421,7 @@ public class GrowthTreeService {
 		return context;
 	}
 	
-	// 업무 보고서 등록 시 경험치 +10 지급
+	// 업무 보고서 등록 시 경험치 +20 지급
 	@Transactional(rollbackFor = Exception.class)
 	public void grantTeamReportCreateExp(
 			long workspaceId, long memberId, long teamReportId) {
@@ -433,7 +442,7 @@ public class GrowthTreeService {
 		expLog.setWorkspaceId(workspaceId);
 		expLog.setMemberId(memberId);
 		expLog.setTeamReportId(teamReportId);
-		expLog.setExp(10);
+		expLog.setExp(20);
 		expLog.setActionType("TEAM_REPORT_CREATE");
 		
 		// 같은 업무 보고서에 이미 지급한 이력이 있으면 종료
@@ -592,6 +601,46 @@ public class GrowthTreeService {
 			return;
 		}
 		grantGrowthExp(growthTree, expLog);
+	}
+	
+	// 경험치 등록 및 지급
+	@Transactional(rollbackFor = Exception.class)
+	public DailyReportDto createDailyReportWithExp(
+			DailyReportDto dto, Long projectId, String domainKey) {
+		
+		// 경험치 등록 전 검증 호출
+		Map<String, Object> context = findDailyReportCreateContext(dto.getSubTaskId(), projectId, domainKey);
+		long projectMemberId = ((Number) context.get("projectMemberId")).longValue();
+		dto.setProjectMemberId(projectMemberId);
+		
+		// 일일 보고서 확인
+		DailyReportDto savedReport = taskService.createDailyReport(dto);
+		if(savedReport == null || savedReport.getDailyReportId() == null) {
+			throw new IllegalStateException("일일 보고서 등록 결과를 확인할 수 없습니다.");
+		}
+		
+		// 경험치 지급 호출
+		long workspaceId = ((Number) context.get("workspaceId")).longValue();
+		long memberId = ((Number) context.get("memberId")).longValue();
+		grantDailyReportCreateExp(workspaceId, memberId, savedReport.getDailyReportId());
+		
+		return savedReport;
+	}
+	
+	// 초대 수락과 경험치 +5 지급을 묶는 메서드 
+	@Transactional(rollbackFor = Exception.class)
+	public void acceptInviteWithExp(Map<String, Object> params) throws Exception {
+		manageWorkspaceInviteService.acceptInvite(params);
+	
+		// 워크 번호 조회
+		Long workspaceId = growthTreeMapper.selectAcceptedInviteWorkspaceId(params);
+		if(workspaceId == null) {
+			throw new IllegalStateException("해당 워크번호가 존재하지 않습니다.");
+		}
+		
+		// 회원번호 꺼내기
+		long memberId = ((Number) params.get("memberId")).longValue();
+		grantInviteAcceptExp(workspaceId, memberId, (String)params.get("inviteKey"));
 	}
 }
 

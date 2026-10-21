@@ -112,7 +112,7 @@
 		SELECT COUNT(*)
 		FROM growth_exp_logs
 		WHERE workspace_id = #{workspaceId}
-			AND invite_key = #{inviteKey}
+			AND member_id = #{memberId}
 			AND action_type = #{actionType}
 	</select>
 	
@@ -130,6 +130,25 @@
 				SELECT 1
 				FROM workspace_members wm
 				WHERE wm.workspace_id = #{workspaceId}
+					AND wm.member_id = #{memberId}
+					AND wm.status = 0
+					AND wm.left IS NULL
+			)
+	</select>
+	
+	<!-- 초대 수락 완료된 워크 번호 조회 -->
+	<select id="selectAcceptedInviteWorkspaceId" parameterType="map" resultType="Long">
+		SELECT workspace_id AS "workspaceId"
+		FROM workspace_invites wi
+		WHERE wi.accepted_member_id = #{memberId}
+			AND wi.invite_key = #{inviteKey}
+			AND wi.status = 0
+			AND wi.invite_status = 1
+			AND wi.accepted IS NOT NULL
+			AND EXISTS (
+				SELECT 1
+				FROM workspace_members wm
+				WHERE wm.workspace_id = wi.workspace_id
 					AND wm.member_id = #{memberId}
 					AND wm.status = 0
 					AND wm.left IS NULL

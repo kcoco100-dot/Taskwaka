@@ -44,18 +44,5 @@ public interface MeetingMinutesMapper {
 			@Param("workspaceId") long workspaceId,
 			@Param("memberId") long memberId,
 			@Param("meetingMinuteId") long meetingMinuteId);
-	
-	// 회의록 제목 및 내용 수정
-	public int meetingsEdit(
-			@Param("workspaceId") long workspaceId,
-			@Param("memberId") long memberId,
-			@Param("meetingMinuteId") long meetingMinuteId,
-			@Param("title") String title,
-			@Param("content") String content);
-	
-	// 회의록 삭제
-	public int meetingsDelete(
-			@Param("workspaceId") long workspaceId,
-			@Param("memberId") long memberId,
-			@Param("meetingMinuteId") long meetingMinuteId);
+
 }

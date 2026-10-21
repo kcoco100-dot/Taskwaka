@@ -69,10 +69,11 @@ public class MeetingMinutesService {
 	}
 	
 	// 워크 회의록 삭제
+	@Transactional(rollbackFor = Exception.class)
 	public int meetingsDelete(
 			long workspaceId, long memberId, long meetingMinuteId) {
 		
-		return meetingMinutesMapper.meetingsDelete(workspaceId, memberId, meetingMinuteId);
+		return meetingMinuteRepository.meetingsDelete(workspaceId, meetingMinuteId, memberId);
 	}
 	
 	// 이전글

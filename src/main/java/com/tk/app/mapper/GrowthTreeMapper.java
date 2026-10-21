@@ -45,6 +45,10 @@ public interface GrowthTreeMapper {
 	// 실제 회원 초대 참여 완료를 확인
 	public int countAcceptedInviteMember(GrowthExpLogDto dto);
 	
+	// 초대 수락 완료된 워크 번호 조회
+	// Long (객체형) : 조회 결과가 없을때 null 을 받을 수 있도록 함
+	public Long selectAcceptedInviteWorkspaceId(Map<String, Object> params);
+	
 	// 하위업무 등록 시 경험치 +10 / 지급 여부 확인
 	public int countSubTaskCreateExpLog(GrowthExpLogDto dto);
 
