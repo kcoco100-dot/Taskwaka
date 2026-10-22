@@ -51,6 +51,8 @@ public class HomeGrowthTreeController {
 		
 		model.addAttribute("growthLevels", growthLevels);
 		model.addAttribute("growthTree", growthTree);
+		model.addAttribute("recentGrowthExpLogs", 
+				growthTreeService.findRecentGrowthExpLogs(workspace.getWorkspaceId()));
 		
 		return "tree/growthTree";
 	}

@@ -19,4 +19,9 @@ public class GrowthExpLogDto {
 	private Long subTaskId; // 하위업무 번호를 담을 변수
 	private Long dailyReportId; // 일일 보고서 번호
 	private Long teamReportId; // 업무 보고서 번호
+	
+	private String memberName; // 참여자 이름
+	private String actionName; // 활동명
+	private String earnedAt; // 지급 일시
+	private String revokedAt; // 회수 일시
 }

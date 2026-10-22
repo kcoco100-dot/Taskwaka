@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sun.jdi.LongValue;
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.GrowthExpLogDto;
 import com.tk.app.domain.dto.GrowthLevelDto;
@@ -175,6 +174,11 @@ public class GrowthTreeService {
 	}
 		
 		return growthTree;
+	}
+	
+	// 성장나무 페이지 최근활동기록
+	public List<GrowthExpLogDto> findRecentGrowthExpLogs(long workspaceId) {
+		return growthTreeMapper.findRecentGrowthExpLogs(workspaceId);
 	}
 	
 	// 성장나무 초기 저장
@@ -596,7 +600,7 @@ public class GrowthTreeService {
 		expLog.setExp(20);
 		expLog.setActionType("TEAM_REPORT_APPROVE");
 		
-		// 같은 업무 보고서에 이미 지급한 이력이 있으면 종료
+		// 같은 업무 보고서에 아직 회수되지 않은 승인 보상이 있으면 지급하지 않는다
 		int existingCount = growthTreeMapper.countTeamReportApproveExpLog(expLog);
 		if(existingCount > 0) {
 			return;
@@ -667,6 +671,43 @@ public class GrowthTreeService {
 		}
 		grantGrowthExp(growthTree, expLog);
 	}
-
+	
+	
+	// PM 이 업무 보고서 반려 시 경험치 실제 지급된 검토 보상 회수 시간 기록
+	@Transactional(rollbackFor = Exception.class)
+	public void revokeTeamReportApproveExp(
+			long workspaceId, long teamReportId) {
+		// 나무 잠금처리
+		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
+		
+		GrowthExpLogDto condition = new GrowthExpLogDto();
+		condition.setWorkspaceId(workspaceId);
+		condition.setTeamReportId(teamReportId);
+		
+		List<GrowthExpLogDto> expLogs = 
+				growthTreeMapper.findUnrevokedTeamReportApproveExpLogs(condition);
+		
+		// 기록이 비어있으면
+		if(expLogs.isEmpty()) {
+			return;
+		}
+		
+		// 총 회수 경험치
+		long totalRevokeExp = 0;
+		// 미회수 검토 보상 이력 하나씩 처리
+		for(GrowthExpLogDto expLog : expLogs) {
+			int revokeCount = 
+					growthTreeMapper.markTeamReportApproveExpLogRevoked(expLog);
+			// 회수 시간을 기록한 행수가 1이 아니면 실패
+			if(revokeCount != 1) {
+				throw new IllegalStateException("검토 보상 회수 시간을 기록할 수 없습니다.");
+			}
+			// 해당 이력의 실제 지급액을 총 회수량에 합산
+			totalRevokeExp += expLog.getExp();
+		}
+		revokeGrowthExp(growthTree, totalRevokeExp);
+	}
+	
 }
+	
 

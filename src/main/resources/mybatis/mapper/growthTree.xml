@@ -459,6 +459,7 @@
 		WHERE workspace_id = #{workspaceId}
 			AND team_report_id = #{teamReportId}
 			AND action_type = #{actionType}
+			AND deleted_at IS NULL
 	</select>
 	
 	<!-- 승인 정보 조회 -->
@@ -540,7 +541,7 @@
 	</select>
 	
 	<!-- PM 이 업무 보고서 반려 시 실제 지급된 검토 보상 회수 시간 기록 -->
-	<select id="markTeamReportApproveExpLogRevoked" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
+	<update id="markTeamReportApproveExpLogRevoked" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
 	    UPDATE growth_exp_logs
 	    SET deleted_at = SYSDATE
 	    WHERE exp_log_id = #{expLogId}
@@ -549,5 +550,34 @@
 	      AND action_type = 'TEAM_REPORT_APPROVE'
 	      AND exp > 0
 	      AND deleted_at IS NULL
+	</update>
+	
+	<!-- 성장나무 페이지 최근활동기록 -->
+	<select id="findRecentGrowthExpLogs" parameterType="long" resultType="com.tk.app.domain.dto.GrowthExpLogDto">
+		SELECT gel.exp_log_id AS "expLogId",
+			gel.workspace_id AS "workspaceId",
+			gel.member_id AS "memberId",
+			NVL(md.name, '알 수 없는 회원') AS "memberName",
+			gel.exp AS "exp", gel.action_type AS "actionType",
+			CASE gel.action_type
+				WHEN 'NOTICE_CREATE' THEN '공지사항 작성'
+				WHEN 'INVITE_ACCEPT' THEN '회원 초대'
+				WHEN 'SUBTASK_CREATE' THEN '하위 업무 등록'
+				WHEN 'DAILY_REPORT_CREATE' THEN '일일 보고서 작성'
+				WHEN 'TEAM_REPORT_CREATE' THEN '업무 보고서 작성'
+				WHEN 'TEAM_REPORT_APPROVE' THEN '업무 보고서 승인'
+				WHEN 'DAILY_REPORT_APPROVE' THEN '일일 보고서 승인'
+				ELSE '팀 활동'
+			END AS "actionName",
+			TO_CHAR(gel.earned_at, 'YYYY-MM-DD HH24:MI') AS "earnedAt",
+			TO_CHAR(gel.deleted_at, 'YYYY-MM-DD HH24:MI') AS "revokedAt"
+		FROM growth_exp_logs gel
+		LEFT JOIN member_details md 
+			ON md.member_id = gel.member_id
+		WHERE gel.workspace_id = #{workspaceId}
+			AND gel.exp > 0
+		ORDER BY gel.earned_at DESC NULLS LAST,
+			gel.exp_log_id DESC
+		FETCH FIRST 5 ROWS ONLY
 	</select>
 </mapper>

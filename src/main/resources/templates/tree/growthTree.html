@@ -207,7 +207,7 @@
 
                 <!-- 성장 단계와 진행률 -->
                 <div class="growth-stages">
-                    <h2>성장 단계</h2>
+                    <h2>🌳성장 단계🌳</h2>
                     <ol>
                         <li th:each="level : ${growthLevels}">
                             <div class="growth-stage-image">
@@ -221,10 +221,48 @@
                 </div>
 
                 <!-- 최근 경험치 획득 내역 -->
-                <div class="growth-history">
-                    <h2>최근 팀 활동</h2>
-
-                </div>
+                <div class="growth-history" aria-labelledby="growth-history-title">
+				    <div class="growth-history-heading">
+				        <h2 id="growth-history-title">최근 팀 활동</h2>
+				        <span class="growth-history-badge">활동 기록</span>
+				    </div>
+				
+				    <p class="growth-history-description">
+				        팀원들이 함께 쌓아 온 활동과 경험치를 확인하세요.
+				    </p>
+				
+				    <ul class="growth-history-list" th:unless="${#lists.isEmpty(recentGrowthExpLogs)}">
+				        <li class="growth-history-item"
+				        		th:each="activity : ${recentGrowthExpLogs}"
+				        		th:classappend="${activity.revokedAt != null ? 'is-revoked' : ''}">
+				        
+					        <span class="growth-history-icon" aria-hidden="true">
+					        		<i class="bi bi-activity"></i>
+					        </span>
+					        
+					        <div class="growth-history-detail">
+					        		<strong th:text="${activity.actionName}">활동 내용</strong>
+					        		<p class="growth-history-meta"
+					               th:text="|${activity.memberName} · ${activity.earnedAt}|">
+					            </p>
+					            <p class="growth-history-revoked-at"
+					               th:if="${activity.revokedAt != null}"
+					               th:text="|보상 회수 일시 ${activity.revokedAt}|">
+					            </p>
+					        </div>
+					        <span class="growth-history-exp"
+					              th:text="${activity.revokedAt == null ? '+' + activity.exp + ' EXP' : activity.exp + ' EXP 회수됨'}">
+					        </span>	        
+				        </li>
+				    </ul>
+				    
+				    <div class="growth-history-empty"
+					     th:if="${#lists.isEmpty(recentGrowthExpLogs)}">
+					    <i class="bi bi-clock-history" aria-hidden="true"></i>
+					    <strong>아직 기록된 팀 활동이 없어요.</strong>
+					    <p>경험치를 얻는 팀 활동을 하면 이곳에 기록됩니다.</p>
+					</div>
+				</div>
 
             </div>
         </div>

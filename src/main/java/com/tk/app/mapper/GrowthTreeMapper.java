@@ -116,4 +116,11 @@ public interface GrowthTreeMapper {
 	// PM 이 업무 보고서 반려 시 경험치 실제 지급된 검토 보상 회수
 	public List<GrowthExpLogDto> findUnrevokedTeamReportApproveExpLogs(GrowthExpLogDto dto);
 	
+	// PM 이 업무 보고서 반려 시 경험치 실제 지급된 검토 보상 회수 시간 기록
+	public int markTeamReportApproveExpLogRevoked(GrowthExpLogDto dto);
+
+	// 성장나무 페이지 활동기록
+	public List<GrowthExpLogDto> findRecentGrowthExpLogs(long workspaceId);
+	
+	
 }
