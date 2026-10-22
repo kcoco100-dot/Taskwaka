@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout3}">
+<head>
+    <title>1:1 문의 작성 | TASKWAKA</title>
+</head>
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/site-inquiry.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="site-inquiry-page">
+        <div class="site-inquiry-container">
+
+            <div class="site-inquiry-heading">
+                <p class="site-inquiry-breadcrumb">고객지원 <span>/</span> 1:1 문의</p>
+                <h1>1:1 문의 작성</h1>
+                <p class="site-inquiry-description">서비스 이용 중 궁금한 점이나 불편한 사항을 남겨 주세요.</p>
+            </div>
+
+            <section class="site-inquiry-card">
+
+                <div class="site-inquiry-card-header">
+                    <h2>문의 내용</h2>
+                    <p><span class="site-inquiry-required">*</span> 표시는 필수 입력 항목입니다.</p>
+                </div>
+
+                <form th:action="@{/service/inquiry/write}" method="post" class="site-inquiry-form">
+
+                    <div class="site-inquiry-field">
+                        <label for="title">문의 제목 <span class="site-inquiry-required">*</span></label>
+                        <input type="text" id="title" name="title" maxlength="200" placeholder="문의 제목을 입력해 주세요." required>
+                    </div>
+
+                    <div class="site-inquiry-field">
+                        <label for="content">문의 내용 <span class="site-inquiry-required">*</span></label>
+                        <textarea id="content" name="content" rows="10" placeholder="문의하실 내용을 자세히 입력해 주세요." required></textarea>
+                        <p class="site-inquiry-help">정확한 확인을 위해 문의 내용을 구체적으로 작성해 주세요.</p>
+                    </div>
+
+                    <div class="site-inquiry-notice">
+                        <strong>안내 사항</strong>
+                        <p>접수된 문의는 관리자 확인 후 답변해 드립니다.</p>
+                    </div>
+
+                    <div class="site-inquiry-actions">
+                        <button type="submit" class="site-inquiry-submit">문의 등록</button>
+                    </div>
+
+                </form>
+
+            </section>
+        </div>
+    </div>
+</th:block>
+
+</body>
+</html>
