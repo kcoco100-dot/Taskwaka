@@ -170,3 +170,17 @@
     border-color: #485D36;
     background: #485D36;
 }
+
+.notice-create-section .ql-toolbar.ql-snow {
+    margin-bottom: -10px;
+}
+
+.notice-create-section #noticeEditor {
+    height: 260px;
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.notice-create-section #noticeEditor .ql-editor {
+    line-height: 1.7;
+}
