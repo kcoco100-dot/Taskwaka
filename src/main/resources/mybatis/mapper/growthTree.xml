@@ -523,4 +523,31 @@
 			AND t.deleted IS NULL
 			AND p.deleted IS NULL
 	</select>
+	
+	<!-- PM 이 업무 보고서 반려 시 경험치 실제 지급된 검토 보상 회수 -->
+	<!-- 해당 워크, 보고서에 실제 지급되었고 아직 회수되지 않은 검토 보상 -->
+	<select id="findUnrevokedTeamReportApproveExpLogs" parameterType="com.tk.app.domain.dto.GrowthExpLogDto"
+		resultType="com.tk.app.domain.dto.GrowthExpLogDto">
+		SELECT exp_log_id AS "expLogId",
+			workspace_id AS "workspaceId",
+			team_report_id AS "teamReportId", exp
+		FROM growth_exp_logs
+		WHERE workspace_id = #{workspaceId}
+			AND team_report_id = #{teamReportId}
+			AND action_type = 'TEAM_REPORT_APPROVE'
+			AND exp > 0
+			AND deleted_at IS NULL
+	</select>
+	
+	<!-- PM 이 업무 보고서 반려 시 실제 지급된 검토 보상 회수 시간 기록 -->
+	<select id="markTeamReportApproveExpLogRevoked" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
+	    UPDATE growth_exp_logs
+	    SET deleted_at = SYSDATE
+	    WHERE exp_log_id = #{expLogId}
+	      AND workspace_id = #{workspaceId}
+	      AND team_report_id = #{teamReportId}
+	      AND action_type = 'TEAM_REPORT_APPROVE'
+	      AND exp > 0
+	      AND deleted_at IS NULL
+	</select>
 </mapper>

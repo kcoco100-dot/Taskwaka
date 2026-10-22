@@ -112,4 +112,8 @@ public interface GrowthTreeMapper {
 
 	// 일일 보고서 승인 조회
 	public Map<String, Object> selectDailyReportApproveContext(Map<String, Object> params);
+
+	// PM 이 업무 보고서 반려 시 경험치 실제 지급된 검토 보상 회수
+	public List<GrowthExpLogDto> findUnrevokedTeamReportApproveExpLogs(GrowthExpLogDto dto);
+	
 }
