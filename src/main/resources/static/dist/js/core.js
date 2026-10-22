@@ -9,10 +9,9 @@
 	// header 가 없으면 함수 실행을 여기서 끝냄
 	if (!selectHeader) return;
 	
-    if (!selectHeader?.classList?.contains('scroll-up-sticky') && !selectHeader?.classList?.contains('sticky-top') && !selectHeader.classList.contains('fixed-top')) return;
-    window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
-  
-   }
+    if (!selectHeader?.classList?.contains('scroll-up-sticky') && !selectHeader?.classList?.contains('sticky-top') && !selectHeader?.classList?.contains('fixed-top')) return;
+    	window.scrollY > 100 ? selectBody?.classList?.add('scrolled') : selectBody?.classList?.remove('scrolled');
+    }
 
   document.addEventListener('scroll', toggleScrolled);
   window.addEventListener('load', toggleScrolled);
@@ -24,12 +23,12 @@
 
   function mobileNavToogle() {
     document.querySelector('body').classList.toggle('mobile-nav-active');
-    mobileNavToggleBtn.classList.toggle('bi-list');
-    mobileNavToggleBtn.classList.toggle('bi-x');
+    mobileNavToggleBtn?.classList?.toggle('bi-list');
+    mobileNavToggleBtn?.classList?.toggle('bi-x');
   }
   // 모바일 버튼이 있을때만 실행함
   if (mobileNavToggleBtn) {
-      mobileNavToggleBtn.addEventListener('click', mobileNavToogle);
+      mobileNavToggleBtn?.addEventListener('click', mobileNavToogle);
   }
 
   /**

@@ -164,6 +164,18 @@
 	</insert>
 	
 	
+	<select id="findActiveRoomMemberIds" parameterType="WorkChatMessageDto" resultType="Long">
+	    SELECT DISTINCT wm.member_id
+	    FROM chat_room_members crm
+	    JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND crm.status = 0
+	      AND wm.status = 0
+	
+	</select>
+	
+	
+	
 
 	
 

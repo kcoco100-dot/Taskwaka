@@ -650,5 +650,37 @@ document.addEventListener("DOMContentLoaded", function () {
         } else closeWorkchat();
     });
     changeTab("chats");
-	connect();
+
+	stompClient = null;
+
+	function connect() {
+	    const socket = new SockJS("/ws-workchat");
+
+	    stompClient = Stomp.over(socket);
+		
+	    stompClient.connect({}, function(frame) {
+
+	        console.log("워크챗 WebSocket 연결 성공");
+
+	        // 로그인한 사용자 전용 알림 구독
+	        stompClient.subscribe("/user/queue/workchat",
+	            function(res) {
+	                // 서버에서 전달한 채팅방 번호
+	                const chatRoomId = Number(res.body);
+
+	                console.log("새 메시지 알림:", chatRoomId);
+
+	                // 현재 열어둔 채팅방인지 확인
+	                if (activeChatRoomId != null && Number(activeChatRoomId) === chatRoomId) {
+
+	                    loadMessages(chatRoomId);
+	                }
+	            }
+	        );
+
+	    }, function(error) {
+	        console.error("워크챗 WebSocket 연결 실패:", error);
+	    });
+	}
+
 });

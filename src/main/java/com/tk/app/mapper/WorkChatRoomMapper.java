@@ -26,6 +26,7 @@ public interface WorkChatRoomMapper {
 	
 	public Long findSenderRoomMemberId(WorkChatMessageDto dto);
 	public int insertRoomMessage(WorkChatMessageDto dto); 	
+	public List<Long> findActiveRoomMemberIds(WorkChatMessageDto dto);
 	
 	
 }

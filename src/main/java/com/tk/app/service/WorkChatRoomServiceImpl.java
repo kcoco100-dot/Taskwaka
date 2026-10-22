@@ -2,11 +2,13 @@ package com.tk.app.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.tk.app.chat.WorkChatMessageSavedEvent;
 import com.tk.app.domain.dto.WorkChatMemberDto;
 import com.tk.app.domain.dto.WorkChatMessageDto;
 import com.tk.app.mapper.WorkChatRoomMapper;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	private final WorkChatRoomMapper mapper;
+	private final ApplicationEventPublisher eventPublisher;
 	
 	@Transactional
 	@Override
@@ -208,6 +211,19 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 			 if (result != 1) {
 			     throw new IllegalStateException("메시지를 저장하지 못했습니다.");
 			 }
+			 
+
+			List<Long> memberIds =
+			        mapper.findActiveRoomMemberIds(dto);
+
+			
+			eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
+			        dto.getChatRoomId(),
+			        dto.getLoginMemberId(),
+			        memberIds
+			    )
+			);
+
 
 			 
 		} catch (Exception e) {
