@@ -3,341 +3,373 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.ManageNoticeMapper">
 
-    <!-- 검색 조건: 제목, 내용 또는 전체 검색 -->
-    <sql id="where-list">
-        <if test="kwd != null and kwd != ''">
-            <choose>
-                <when test="schType == 'all'">
-                    AND (INSTR(n.title, #{kwd}) &gt; 0 OR INSTR(n.content, #{kwd}) &gt; 0)
-                </when>
-                <when test="schType == 'title'">
-                    AND INSTR(n.title, #{kwd}) &gt; 0
-                </when>
-                <when test="schType == 'content'">
-                    AND INSTR(n.content, #{kwd}) &gt; 0
-                </when>
-            </choose>
-        </if>
-    </sql>
 
-	<!-- 공통 조회 조건 -->
+    <!-- 워크스페이스 회원 역할 조회 -->
+    <select id="selectWorkspaceRole" parameterType="map" resultType="java.lang.Integer">
+        SELECT MAX(wm.role)
+        FROM workspace_domains wd
+        JOIN workspace_members wm ON wm.workspace_id = wd.workspace_id
+        WHERE wd.domain_key = #{domainKey}
+          AND wd.active = 'Y'
+          AND wm.member_id = #{memberId}
+          AND wm.status = 0
+    </select>
+
+    <!-- 프로젝트 선택 목록 -->
+    <select id="selectProjectOptions" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT p.project_id, p.subject AS project_name
+        FROM projects p
+        JOIN workspace_domains wd ON wd.workspace_id = p.workspace_id
+        JOIN workspace_members wm ON wm.workspace_id = p.workspace_id
+        WHERE wd.domain_key = #{domainKey}
+          AND wd.active = 'Y'
+          AND wm.member_id = #{memberId}
+          AND wm.status = 0
+          AND p.deleted IS NULL
+        ORDER BY p.project_id DESC
+    </select>
+
+    <!-- 업무 선택 목록 -->
+    <select id="selectTaskOptions" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT t.task_id, t.project_id, t.title AS task_name
+        FROM tasks t
+        JOIN projects p ON p.project_id = t.project_id
+        JOIN workspace_domains wd ON wd.workspace_id = p.workspace_id
+        JOIN workspace_members wm ON wm.workspace_id = p.workspace_id
+        WHERE wd.domain_key = #{domainKey}
+          AND wd.active = 'Y'
+          AND wm.member_id = #{memberId}
+          AND wm.status = 0
+          AND p.deleted IS NULL
+          AND t.deleted IS NULL
+        ORDER BY t.task_id DESC
+    </select>
+
+    
+	<!-- 공지사항 조회 범위 및 삭제 자료 권한 -->
 	<sql id="noticeReadScope">
 	    AND EXISTS (
 	        SELECT 1
 	        FROM workspace_domains wd
-	        JOIN workspace_members actor ON actor.workspace_id = wd.workspace_id
+	        JOIN workspace_members wm ON wm.workspace_id = wd.workspace_id
 	        WHERE wd.domain_key = #{domainKey}
 	          AND wd.active = 'Y'
-	          AND actor.member_id = #{memberId}
-	          AND actor.status = 0
+	          AND wm.member_id = #{memberId}
+	          AND wm.status = 0
 	          AND (
-	              n.workspace_id = wd.workspace_id
-	              OR EXISTS (
-	                  SELECT 1
-	                  FROM projects p
-	                  WHERE p.project_id = n.project_id
-	                    AND p.workspace_id = wd.workspace_id
-	              )
-	              OR EXISTS (
-	                  SELECT 1
-	                  FROM tasks t
-	                  JOIN projects p ON p.project_id = t.project_id
-	                  WHERE t.task_id = n.task_id
-	                    AND p.workspace_id = wd.workspace_id
-	              )
+	              (n.notice_type = 'WORKSPACE'
+	               AND n.workspace_id = wd.workspace_id)
+	              OR (n.notice_type = 'PROJECT'
+	                  AND EXISTS (
+	                      SELECT 1
+	                      FROM projects p
+	                      WHERE p.project_id = n.project_id
+	                        AND p.workspace_id = wd.workspace_id
+	                  ))
+	              OR (n.notice_type = 'TASK'
+	                  AND EXISTS (
+	                      SELECT 1
+	                      FROM tasks t
+	                      JOIN projects p ON p.project_id = t.project_id
+	                      WHERE t.task_id = n.task_id
+	                        AND p.workspace_id = wd.workspace_id
+	                  ))
 	          )
 	          AND (
-	              (n.deleted IS NULL AND NVL(n.status, 1) &lt;&gt; 0)
-	              OR actor.role >= 80
+	              (n.deleted IS NULL AND NVL(n.status, 1) != 0)
+	              OR wm.role &gt;= 80
 	          )
 	    )
 	</sql>
 
-    <!-- 등록·수정·삭제 권한 -->
-    <sql id="noticeManagePermission">
+
+	<!-- 공지사항 등록·수정·삭제 권한 -->
+	<sql id="noticeWriteScope">
 	    AND EXISTS (
 	        SELECT 1
 	        FROM workspace_domains wd
-	        JOIN workspace_members actor ON actor.workspace_id = wd.workspace_id
+	        JOIN workspace_members wm ON wm.workspace_id = wd.workspace_id
 	        WHERE wd.domain_key = #{domainKey}
 	          AND wd.active = 'Y'
-	          AND actor.member_id = #{requester_member_id}
-	          AND actor.status = 0
+	          AND wm.member_id = #{requester_member_id}
+	          AND wm.status = 0
 	          AND (
-	              (
-	                  n.notice_type = '0'
-	                  AND n.workspace_id = wd.workspace_id
-	                  AND actor.role >= 70
-	              )
-	              OR
-	              (
-	                  n.notice_type = '1'
+	              (n.notice_type = 'WORKSPACE'
+	               AND n.workspace_id = wd.workspace_id
+	               AND wm.role = 70)
+	              OR (n.notice_type = 'PROJECT'
+	                  AND wm.role &gt;= 50
 	                  AND EXISTS (
 	                      SELECT 1
 	                      FROM projects p
 	                      WHERE p.project_id = n.project_id
 	                        AND p.workspace_id = wd.workspace_id
 	                        AND p.deleted IS NULL
-	                        AND (
-	                            actor.role >= 70
-	                            OR EXISTS (
-	                                SELECT 1
-	                                FROM project_members own
-	                                WHERE own.project_id = p.project_id
-	                                  AND own.workspace_member_id = actor.workspace_member_id
-	                                  AND own.status = 0
-	                                  AND own.role >= 50
-	                            )
-	                        )
-	                  )
-	              )
+	                  ))
+	              OR (n.notice_type = 'TASK'
+	                  AND wm.role &gt;= 50
+	                  AND EXISTS (
+	                      SELECT 1
+	                      FROM tasks t
+	                      JOIN projects p ON p.project_id = t.project_id
+	                      WHERE t.task_id = n.task_id
+	                        AND p.workspace_id = wd.workspace_id
+	                        AND p.deleted IS NULL
+	                        AND t.deleted IS NULL
+	                  ))
 	          )
 	    )
 	</sql>
 
-    <!-- 이전 글·다음 글 조회 범위 -->
-    <sql id="noticeTypeScope">
-        AND n.notice_type = #{notice_type}
-        <choose>
-            <when test='notice_type == "0"'>
-                AND n.workspace_id = #{workspace_id}
-            </when>
-            <when test='notice_type == "1"'>
-                AND n.project_id = #{project_id}
-            </when>
-            <when test='notice_type == "2"'>
-                AND n.task_id = #{task_id}
-            </when>
-        </choose>
+	<!-- 전체·워크·프로젝트·업무 공지 검색 -->
+	<sql id="where-notice-type">
+	    <if test="noticeType != null and noticeType != '' and noticeType != 'all'">
+	        AND n.notice_type = #{noticeType}
+	    </if>
+	</sql>
+
+    <!-- 제목+내용·제목·내용 검색 -->
+    <sql id="where-list">
+        <if test="kwd != null and kwd != ''">
+            <choose>
+                <when test="schType == 'title'">
+                    AND INSTR(n.title, #{kwd}) &gt; 0
+                </when>
+                <when test="schType == 'content'">
+                    AND DBMS_LOB.INSTR(n.content, #{kwd}) &gt; 0
+                </when>
+                <otherwise>
+                    AND (
+                        INSTR(n.title, #{kwd}) &gt; 0
+                        OR DBMS_LOB.INSTR(n.content, #{kwd}) &gt; 0
+                    )
+                </otherwise>
+            </choose>
+        </if>
     </sql>
 
-    <!-- 공지 개수 조회 -->
+    <!-- 공지사항 전체 개수 -->
     <select id="dataCount" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM notice n
+        WHERE 1 = 1
         <include refid="noticeReadScope"/>
+        <include refid="where-notice-type"/>
         <include refid="where-list"/>
     </select>
 
-    <!-- 공지 목록 조회 -->
-    <select id="selectNoticeList" parameterType="map" resultType="com.tk.app.domain.dto.ManageNoticeDto">
-        SELECT n.notice_id, n.notice_type, n.workspace_id, n.project_id,
-               n.task_id, n.member_id, n.title, n.status,
-               NVL(n.view_count, 0) AS view_count,
+    <!-- 공지사항 목록 및 페이징 -->
+    <select id="selectNoticeList" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT n.notice_id, n.workspace_id, n.project_id, n.task_id,
+               n.member_id, n.notice_type, n.title, n.status,
+               n.view_count,
                TO_CHAR(n.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
                md.name AS member_name,
                (SELECT COUNT(*)
-                FROM notice_files nf
-                WHERE nf.notice_id = n.notice_id) AS file_count
+                FROM notice_files f
+                WHERE f.notice_id = n.notice_id) AS file_count
         FROM notice n
         LEFT JOIN member_details md ON md.member_id = n.member_id
+        WHERE 1 = 1
         <include refid="noticeReadScope"/>
+        <include refid="where-notice-type"/>
         <include refid="where-list"/>
         ORDER BY n.notice_id DESC
         OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
 
-    <!-- 공지 상세 조회 -->
-    <select id="selectNoticeDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageNoticeDto">
-        SELECT n.notice_id, n.notice_type, n.workspace_id, n.project_id,
-               n.task_id, n.member_id, n.title, n.content,
+    <!-- 공지사항 상세 조회 -->
+    <select id="selectNoticeDetail" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT n.notice_id, n.workspace_id, n.project_id, n.task_id,
+               n.member_id, n.notice_type, n.title, n.content,
+               n.status, n.view_count,
                TO_CHAR(n.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
                TO_CHAR(n.updated, 'YYYY-MM-DD HH24:MI:SS') AS updated,
-               n.status, NVL(n.view_count, 0) AS view_count,
                md.name AS member_name,
-               (SELECT COUNT(*)
-                FROM notice_files nf
-                WHERE nf.notice_id = n.notice_id) AS file_count
+               p.subject AS project_name,
+               t.title AS task_name
         FROM notice n
         LEFT JOIN member_details md ON md.member_id = n.member_id
+        LEFT JOIN projects p ON p.project_id = n.project_id
+        LEFT JOIN tasks t ON t.task_id = n.task_id
         WHERE n.notice_id = #{notice_id}
-          AND n.deleted IS NULL
         <include refid="noticeReadScope"/>
     </select>
 
-    <!-- 첨부파일 목록 조회 -->
-    <select id="selectNoticeFiles" parameterType="map" resultType="com.tk.app.domain.dto.NoticeFileDto">
-        SELECT nf.notice_id AS "noticeId",
-               nf.notice_file_id AS "noticeFileId",
-               nf.original_name AS "originalName",
-               nf.stored_name AS "storedName",
-               nf.file_path AS "filePath",
-               nf.file_size AS "fileSize"
-        FROM notice_files nf
-        JOIN notice n ON n.notice_id = nf.notice_id
-        WHERE n.notice_id = #{notice_id}
-          AND n.deleted IS NULL
-        <include refid="noticeReadScope"/>
-        ORDER BY nf.notice_file_id
-    </select>
-
-    <!-- 첨부파일 단건 조회: 다운로드용 -->
-    <select id="selectNoticeFile" parameterType="map" resultType="com.tk.app.domain.dto.NoticeFileDto">
-        SELECT nf.notice_id AS "noticeId",
-               nf.notice_file_id AS "noticeFileId",
-               nf.original_name AS "originalName",
-               nf.stored_name AS "storedName",
-               nf.file_path AS "filePath",
-               nf.file_size AS "fileSize"
-        FROM notice_files nf
-        JOIN notice n ON n.notice_id = nf.notice_id
-        WHERE nf.notice_file_id = #{notice_file_id}
-          AND n.notice_id = #{notice_id}
-          AND n.deleted IS NULL
-        <include refid="noticeReadScope"/>
-    </select>
-
-    <!-- 조회수 증가 -->
-    <update id="updateViewCount" parameterType="map">
-        UPDATE notice n
-        SET view_count = NVL(n.view_count, 0) + 1
-        WHERE n.notice_id = #{notice_id}
-          AND n.deleted IS NULL
-        <include refid="noticeReadScope"/>
-    </update>
-
-    <!-- 이전 글 -->
-    <select id="selectPrevNotice" parameterType="map" resultType="com.tk.app.domain.dto.ManageNoticeDto">
-        SELECT n.notice_id, n.notice_type, n.title
+    <!-- 이전 글 조회 -->
+    <select id="selectPrevNotice" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT n.notice_id, n.title
         FROM notice n
-          AND n.notice_id &gt; #{notice_id}
+        WHERE n.notice_id &gt; #{notice_id}
         <include refid="noticeReadScope"/>
-        <include refid="noticeTypeScope"/>
+        <include refid="where-notice-type"/>
         <include refid="where-list"/>
         ORDER BY n.notice_id ASC
         FETCH FIRST 1 ROW ONLY
     </select>
 
-    <!-- 다음 글 -->
-    <select id="selectNextNotice" parameterType="map" resultType="com.tk.app.domain.dto.ManageNoticeDto">
-        SELECT n.notice_id, n.notice_type, n.title
+    <!-- 다음 글 조회 -->
+    <select id="selectNextNotice" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT n.notice_id, n.title
         FROM notice n
-          AND n.notice_id &lt; #{notice_id}
+        WHERE n.notice_id &lt; #{notice_id}
         <include refid="noticeReadScope"/>
-        <include refid="noticeTypeScope"/>
+        <include refid="where-notice-type"/>
         <include refid="where-list"/>
         ORDER BY n.notice_id DESC
         FETCH FIRST 1 ROW ONLY
     </select>
 
-    <!-- 공지 등록 -->
-    <insert id="insertNotice" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
-        <selectKey keyProperty="notice_id" resultType="long" order="BEFORE">
-            SELECT seq_notice.NEXTVAL FROM DUAL
-        </selectKey>
-        <choose>
-            <when test='notice_type == "0"'>
-                INSERT INTO notice (
-                    notice_id, notice_type, workspace_id, project_id, task_id,
-                    member_id, title, content, status, view_count, created
-                )
-                SELECT #{notice_id}, '0', wd.workspace_id, NULL, NULL,
-                       #{requester_member_id}, #{title}, #{content},
-                       NVL(#{status, jdbcType=NUMERIC}, 1), 0, SYSDATE
-                FROM workspace_domains wd
-                JOIN workspace_members actor ON actor.workspace_id = wd.workspace_id
-                WHERE wd.domain_key = #{domainKey}
-                  AND wd.workspace_id = #{workspace_id}
-                  AND wd.active = 'Y'
-                  AND actor.member_id = #{requester_member_id}
-                  AND actor.status = 0
-                  AND actor.role &gt;= 70
-            </when>
-            <when test='notice_type == "1"'>
-                INSERT INTO notice (
-                    notice_id, notice_type, workspace_id, project_id, task_id,
-                    member_id, title, content, status, view_count, created
-                )
-                SELECT #{notice_id}, '1', p.workspace_id, p.project_id, NULL,
-                       #{requester_member_id}, #{title}, #{content},
-                       NVL(#{status, jdbcType=NUMERIC}, 1), 0, SYSDATE
-                FROM projects p
-                JOIN workspace_domains wd ON wd.workspace_id = p.workspace_id
-                JOIN workspace_members actor ON actor.workspace_id = wd.workspace_id
-                WHERE p.project_id = #{project_id}
-                  AND p.deleted IS NULL
-                  AND wd.domain_key = #{domainKey}
-                  AND wd.active = 'Y'
-                  AND actor.member_id = #{requester_member_id}
-                  AND actor.status = 0
-                  AND (
-                      actor.role &gt;= 70
-                      OR EXISTS (
-                          SELECT 1
-                          FROM project_members own
-                          WHERE own.project_id = p.project_id
-                            AND own.workspace_member_id = actor.workspace_member_id
-                            AND own.status = 0
-                            AND own.role &gt;= 50
-                      )
-                  )
-            </when>
-            <!-- 유형 2는 권한 기준이 정해지지 않아 현재 등록 불가 -->
-            <otherwise>
-                INSERT INTO notice (
-                    notice_id, notice_type, workspace_id, project_id, task_id,
-                    member_id, title, content, status, view_count, created
-                )
-                SELECT #{notice_id}, #{notice_type}, NULL, NULL, NULL,
-                       #{requester_member_id}, #{title}, #{content},
-                       #{status, jdbcType=NUMERIC}, 0, SYSDATE
-                FROM DUAL
-                WHERE 1 = 0
-            </otherwise>
-        </choose>
-    </insert>
-
-    <!-- 첨부파일 등록 -->
-    <insert id="insertNoticeFile" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
-        INSERT INTO notice_files (
-            notice_file_id, notice_id, original_name, stored_name,
-            file_path, file_size, uploaded
-        )
-        SELECT seq_notice_files.NEXTVAL, n.notice_id,
-               #{original_name}, #{stored_name},
-               #{file_path, jdbcType=VARCHAR},
-               #{file_size, jdbcType=NUMERIC}, SYSDATE
-        FROM notice n
+    <!-- 공지사항 조회수 증가 -->
+    <update id="updateViewCount" parameterType="map">
+        UPDATE notice n
+        SET view_count = NVL(n.view_count, 0) + 1
         WHERE n.notice_id = #{notice_id}
-          AND n.deleted IS NULL
-        <include refid="noticeManagePermission"/>
-    </insert>
+        <include refid="noticeReadScope"/>
+    </update>
 
-    <!-- 공지 수정 -->
+	<!-- 공지사항 등록 -->
+	<insert id="insertNotice" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
+	    <selectKey keyProperty="notice_id" resultType="long" order="BEFORE">
+	        SELECT seq_notice.NEXTVAL FROM DUAL
+	    </selectKey>
+	
+	    INSERT INTO notice (
+	        notice_id, notice_type, workspace_id,
+	        project_id, task_id, member_id,
+	        title, content, status, view_count, created
+	    )
+	    SELECT #{notice_id},
+	           #{notice_type},
+	           wd.workspace_id,
+	           CASE
+	               WHEN #{notice_type} IN ('PROJECT', 'TASK')
+	               THEN p.project_id
+	               ELSE NULL
+	           END,
+	           CASE
+	               WHEN #{notice_type} = 'TASK'
+	               THEN t.task_id
+	               ELSE NULL
+	           END,
+	           #{requester_member_id},
+	           #{title},
+	           #{content},
+	           1, 0, SYSDATE
+	    FROM workspace_domains wd
+	    JOIN workspace_members wm ON wm.workspace_id = wd.workspace_id
+	    LEFT JOIN projects p
+	        ON p.project_id = #{project_id, jdbcType=NUMERIC}
+	       AND p.workspace_id = wd.workspace_id
+	       AND p.deleted IS NULL
+	    LEFT JOIN tasks t
+	        ON t.task_id = #{task_id, jdbcType=NUMERIC}
+	       AND t.project_id = p.project_id
+	       AND t.deleted IS NULL
+	    WHERE wd.domain_key = #{domainKey}
+	      AND wd.active = 'Y'
+	      AND wm.member_id = #{requester_member_id}
+	      AND wm.status = 0
+	      AND (
+	          (#{notice_type} = 'WORKSPACE'
+	           AND wm.role = 70)
+	
+	          OR (#{notice_type} = 'PROJECT'
+	              AND wm.role &gt;= 50
+	              AND p.project_id IS NOT NULL)
+	
+	          OR (#{notice_type} = 'TASK'
+	              AND wm.role &gt;= 50
+	              AND t.task_id IS NOT NULL)
+	      )
+	</insert>
+
+    <!-- 공지사항 수정 -->
     <update id="updateNotice" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
         UPDATE notice n
         SET title = #{title},
             content = #{content},
-            status = NVL(#{status, jdbcType=NUMERIC}, status),
             updated = SYSDATE
         WHERE n.notice_id = #{notice_id}
           AND n.deleted IS NULL
-        <include refid="noticeManagePermission"/>
+          AND NVL(n.status, 1) != 0
+        <include refid="noticeWriteScope"/>
     </update>
 
-    <!-- 첨부파일 메타데이터 삭제 -->
+    <!-- 공지사항 논리 삭제 -->
+    <update id="deleteNotice" parameterType="map">
+        UPDATE notice n
+        SET status = 0,
+            updated = SYSDATE
+        WHERE n.notice_id = #{notice_id}
+          AND n.deleted IS NULL
+          AND NVL(n.status, 1) != 0
+        <include refid="noticeWriteScope"/>
+    </update>
+
+    <!-- 공지사항 첨부파일 목록 -->
+    <select id="selectNoticeFiles" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT f.notice_file_id, f.notice_id,
+               f.original_name, f.stored_name,
+               f.file_path, f.file_size,
+               TO_CHAR(f.uploaded, 'YYYY-MM-DD HH24:MI:SS') AS uploaded
+        FROM notice_files f
+        JOIN notice n ON n.notice_id = f.notice_id
+        WHERE n.notice_id = #{notice_id}
+        <include refid="noticeReadScope"/>
+        ORDER BY f.notice_file_id
+    </select>
+
+    <!-- 공지사항 첨부파일 단건 -->
+    <select id="selectNoticeFile" parameterType="map"
+            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+        SELECT f.notice_file_id, f.notice_id,
+               f.original_name, f.stored_name,
+               f.file_path, f.file_size
+        FROM notice_files f
+        JOIN notice n ON n.notice_id = f.notice_id
+        WHERE n.notice_id = #{notice_id}
+          AND f.notice_file_id = #{notice_file_id}
+        <include refid="noticeReadScope"/>
+    </select>
+
+    <!-- 공지사항 첨부파일 등록 -->
+    <insert id="insertNoticeFile" parameterType="com.tk.app.domain.dto.ManageNoticeDto">
+        INSERT INTO notice_files (
+            notice_file_id, notice_id, original_name,
+            stored_name, file_path, file_size, uploaded
+        )
+        SELECT seq_notice_files.NEXTVAL, n.notice_id,
+               #{original_name}, #{stored_name},
+               #{file_path}, #{file_size}, SYSDATE
+        FROM notice n
+        WHERE n.notice_id = #{notice_id}
+          AND n.deleted IS NULL
+          AND NVL(n.status, 1) != 0
+        <include refid="noticeWriteScope"/>
+    </insert>
+
+    <!-- 공지사항 첨부파일 삭제 -->
     <delete id="deleteNoticeFile" parameterType="map">
-        DELETE FROM notice_files nf
-        WHERE nf.notice_id = #{notice_id}
-          AND nf.notice_file_id = #{notice_file_id}
+        DELETE FROM notice_files f
+        WHERE f.notice_id = #{notice_id}
+          AND f.notice_file_id = #{notice_file_id}
           AND EXISTS (
               SELECT 1
               FROM notice n
-              WHERE n.notice_id = nf.notice_id
+              WHERE n.notice_id = f.notice_id
                 AND n.deleted IS NULL
-                <include refid="noticeManagePermission"/>
+                AND NVL(n.status, 1) != 0
+              <include refid="noticeWriteScope"/>
           )
     </delete>
 
-	<!-- 공지 삭제 -->
-	<update id="deleteNotice" parameterType="map">
-	    UPDATE notice n
-	    SET status = 0,
-	        updated = SYSDATE
-	    WHERE n.notice_id = #{notice_id}
-	      AND n.deleted IS NULL
-	      AND NVL(n.status, 1) &lt;&gt; 0
-	    <include refid="noticeManagePermission"/>
-	</update>
 
 </mapper>

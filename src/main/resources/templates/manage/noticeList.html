@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -7,23 +8,63 @@
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/noticelist.css}">
 </th:block>
 
 <th:block layout:fragment="content">
     <div class="home-layout manage-layout project-list-layout">
         <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
-        
+
         <section class="section project-list-page" aria-labelledby="project-list-heading">
             <div class="page-heading">
                 <div>
                     <h1 id="project-list-heading" class="page-title">공지사항 조회</h1>
                     <p class="page-description">공지사항을 확인하고 관리하세요.</p>
                 </div>
-                <a class="project-button project-button-primary" th:href="@{|/${domainKey}/manage/noticeWrite|}">+ 공지사항 등록</a>
+                <a class="project-button project-button-primary"
+                   th:if="${currentRole >= 50}"
+                   th:href="@{|/${domainKey}/manage/noticeWrite|}">
+                    + 공지사항 등록
+                </a>
             </div>
-            
+
+			<nav class="approval-category-tabs notice-category-tabs" aria-label="공지사항 유형 선택">
+			    <a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey},noticeType='all',schType=${schType},kwd=${kwd})}"
+			       th:classappend="${noticeType == 'all'} ? ' is-active' : ''">
+			        전체
+			    </a>
+			    <a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey},noticeType='WORKSPACE',schType=${schType},kwd=${kwd})}"
+			       th:classappend="${noticeType == 'WORKSPACE'} ? ' is-active' : ''">
+			        워크 공지
+			    </a>
+			    <a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey},noticeType='PROJECT',schType=${schType},kwd=${kwd})}"
+			       th:classappend="${noticeType == 'PROJECT'} ? ' is-active' : ''">
+			        프로젝트 공지
+			    </a>
+			    <a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey},noticeType='TASK',schType=${schType},kwd=${kwd})}"
+			       th:classappend="${noticeType == 'TASK'} ? ' is-active' : ''">
+			        업무 공지
+			    </a>
+			</nav>
+
+            <p th:if="${message != null}" th:text="${message}"></p>
+            <p th:if="${errorMessage != null}" th:text="${errorMessage}"
+               style="color:#c62828;"></p>
+
             <div class="project-list-panel">
-                <form id="project-search-form" class="project-filters" method="get" th:action="@{|/${domainKey}/manage/noticeList|}">
+                <form id="project-search-form" class="project-filters"
+                      method="get" th:action="@{|/${domainKey}/manage/noticeList|}">
+
+					<div class="project-field">
+					    <label for="notice-type">공지 분류</label>
+					    <select id="notice-type" name="noticeType">
+					        <option value="all" th:selected="${noticeType == 'all'}">전체</option>
+					        <option value="WORKSPACE" th:selected="${noticeType == 'WORKSPACE'}">워크</option>
+					        <option value="PROJECT" th:selected="${noticeType == 'PROJECT'}">프로젝트</option>
+					        <option value="TASK" th:selected="${noticeType == 'TASK'}">업무</option>
+					    </select>
+					</div>
+
                     <div class="project-field">
                         <label for="project-filter-status">검색 조건</label>
                         <select id="project-filter-status" name="schType">
@@ -32,24 +73,36 @@
                             <option value="content" th:selected="${schType == 'content'}">내용</option>
                         </select>
                     </div>
+
                     <div class="project-field project-keyword-field">
                         <label for="project-keyword">검색어</label>
-                        <input id="project-keyword" name="kwd" type="search" maxlength="100" placeholder="검색어를 입력하세요" th:value="${kwd}">
+                        <input id="project-keyword" name="kwd" type="search"
+                               maxlength="100" placeholder="검색어를 입력하세요"
+                               th:value="${kwd}">
                     </div>
+
                     <div class="project-filter-actions">
                         <button type="submit" class="project-button project-button-primary">조회</button>
-						<button type="button" id="project-reset" class="project-button" th:onclick="|location.href='@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}'|">초기화</button>
+                        <button type="button" id="project-reset" class="project-button"
+                                th:onclick="|location.href='@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}'|">
+                            초기화
+                        </button>
                     </div>
                 </form>
-                
+
                 <div class="project-list-heading">
                     <h2>공지사항 목록</h2>
-                    <p role="status" aria-live="polite">총 <strong id="project-count" th:text="${dataCount}">0</strong>건</p>
+                    <p role="status" aria-live="polite">
+                        총 <strong id="project-count" th:text="${dataCount}">0</strong>건
+                    </p>
                 </div>
-                
-                <div class="project-table-wrap" tabindex="0" role="region" aria-label="공지사항 목록 표">
+
+                <div class="project-table-wrap" tabindex="0" role="region"
+                     aria-label="공지사항 목록 표">
                     <table class="project-list-table">
-                        <caption class="project-sr-only">번호, 프로젝트명, 제목, 등록일, 글쓴이</caption>
+                        <caption class="project-sr-only">
+                            번호, 공지 분류, 제목, 등록일, 작성자, 조회수, 첨부파일
+                        </caption>
                         <thead>
                             <tr>
                                 <th scope="col" class="project-number">번호</th>
@@ -62,47 +115,60 @@
                             </tr>
                         </thead>
                         <tbody id="project-list-body">
-                            <tr th:if="${#lists.isEmpty(list)}" class="project-list-row text-center">
+                            <tr th:if="${#lists.isEmpty(list)}"
+                                class="project-list-row text-center">
                                 <td colspan="7">등록된 공지사항이 없습니다.</td>
                             </tr>
                             <tr th:each="dto, status : ${list}" class="project-list-row">
-                                <td class="project-number" th:text="${dataCount - (page - 1) * size - status.index}"></td>
+                                <td class="project-number"
+                                    th:text="${dataCount - (page - 1) * size - status.index}"></td>
+								<td th:switch="${dto.notice_type}">
+								    <span th:case="'WORKSPACE'">워크</span>
+								    <span th:case="'PROJECT'">프로젝트</span>
+								    <span th:case="'TASK'">업무</span>
+								    <span th:case="*">기타</span>
+								</td>
                                 <td>
-                                    <span th:text="${dto.project_id > 0 ? '프로젝트 공지' : '워크 공지'}"></span>
-                                </td>
-                                <td>
-                                    <a class="project-name" 
-                                       th:href="@{|/${domainKey}/manage/noticeDetail/${dto.notice_id}|(page=${page}, schType=${schType}, kwd=${kwd})}" 
-                                       th:text="${dto.title}">
+                                    <a class="project-name"
+                                       th:href="@{/{domainKey}/manage/noticeDetail/{notice_id}(domainKey=${domainKey},notice_id=${dto.notice_id},page=${page},noticeType=${noticeType},schType=${schType},kwd=${kwd})}">
+                                        <span th:if="${dto.status == 0}">[삭제됨] </span>
+                                        <span th:text="${dto.title}">공지 제목</span>
                                     </a>
                                 </td>
                                 <td>
-                                    <time th:datetime="${dto.created}" th:text="${#strings.substring(dto.created, 0, 10)}"></time>
+                                    <time th:datetime="${dto.created}"
+                                          th:text="${dto.created != null ? #strings.substring(dto.created, 0, 10) : '-'}"></time>
                                 </td>
-                                <td th:text="${dto.member_name}">이팀장</td>
+                                <td th:text="${dto.member_name}">작성자</td>
                                 <td th:text="${dto.view_count}">0</td>
                                 <td>
-                                    <span th:if="${dto.file_count > 0}" title="첨부파일 있음" style="margin-left:5px; color:#666;">
-                                        💼
-                                    </span>
+                                    <span th:if="${dto.file_count > 0}"
+                                          title="첨부파일 있음"
+                                          style="margin-left:5px; color:#666;">💼</span>
                                 </td>
-                            </tr>  
+                            </tr>
                         </tbody>
                     </table>
                 </div>
-                
-                <div class="project-list-footer" style="display: flex; justify-content: center; align-items: center; position: relative;">
-                    <p style="position: absolute; left: 0; margin: 0;">
-                        <span id="project-range" th:text="${(page - 1) * size + 1} + '–' + ${((page - 1) * size + list.size())}"></span> 
+
+                <div class="project-list-footer"
+                     style="display:flex;justify-content:center;align-items:center;position:relative;">
+                    <p style="position:absolute;left:0;margin:0;">
+                        <span id="project-range" th:text="|${#lists.isEmpty(list) ? 0 : (page - 1) * size + 1}–${#lists.isEmpty(list) ? 0 : (page - 1) * size + list.size()}|"></span>
                         / <span id="project-total" th:text="${dataCount}"></span>건
                     </p>
-                    
-                    <nav class="project-pagination" aria-label="목록 페이지" th:if="${totalPage > 0}">
-                        <a class="manage-page-arrow" th:if="${page > 1}" th:href="${pageBaseUrl + (page - 1)}">이전</a>
-                        <span class="manage-page-arrow disabled" th:unless="${page > 1}">이전</span>
+
+                    <nav class="project-pagination" aria-label="목록 페이지"
+                         th:if="${totalPage > 0}">
+                        <a class="manage-page-arrow" th:if="${page > 1}"
+                           th:href="${pageBaseUrl + (page - 1)}">이전</a>
+                        <span class="manage-page-arrow disabled"
+                              th:unless="${page > 1}">이전</span>
                         <div th:utext="${paging}"></div>
-                        <a class="manage-page-arrow" th:if="${page < totalPage}" th:href="${pageBaseUrl + (page + 1)}">다음</a>
-                        <span class="manage-page-arrow disabled" th:unless="${page < totalPage}">다음</span>
+                        <a class="manage-page-arrow" th:if="${page < totalPage}"
+                           th:href="${pageBaseUrl + (page + 1)}">다음</a>
+                        <span class="manage-page-arrow disabled"
+                              th:unless="${page < totalPage}">다음</span>
                     </nav>
                 </div>
             </div>

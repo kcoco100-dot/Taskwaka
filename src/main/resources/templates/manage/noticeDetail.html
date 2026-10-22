@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/project-list.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/noticeDetail.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout project-list-layout">
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
+
+        <section class="section project-list-page">
+            <div class="page-heading">
+                <div>
+                    <h1 class="page-title">공지사항 상세</h1>
+                    <p class="page-description">공지사항 내용을 확인하세요.</p>
+                </div>
+            </div>
+
+			<article class="notice-card"
+			         th:with="canModify=${notice.status != 0 and
+			         ((notice.notice_type == 'WORKSPACE' and currentRole == 70)
+			         or ((notice.notice_type == 'PROJECT' or notice.notice_type == 'TASK')
+			         and currentRole >= 50))}">
+
+                <p th:if="${message != null}" th:text="${message}"></p>
+                <p th:if="${notice.status == 0}" style="color:#c62828;">삭제된 공지사항</p>
+
+                <h2 th:text="${notice.title}">공지 제목</h2>
+
+                <div class="notice-meta">
+					<span th:switch="${notice.notice_type}">
+					    <span th:case="'WORKSPACE'">워크</span>
+					    <span th:case="'PROJECT'">프로젝트</span>
+					    <span th:case="'TASK'">업무</span>
+					    <span th:case="*">기타</span>
+					</span>
+                    <span>작성자: <strong th:text="${notice.member_name}"></strong></span>
+                    <span>작성일: <span th:text="${notice.created}"></span></span>
+                    <span>조회수: <span th:text="${notice.view_count}"></span></span>
+                </div>
+
+                <p th:if="${notice.project_name != null}"
+                   th:text="|프로젝트: ${notice.project_name}|"></p>
+                <p th:if="${notice.task_name != null}"
+                   th:text="|업무: ${notice.task_name}|"></p>
+
+                <div class="notice-content" th:text="${notice.content}"></div>
+
+                <div class="notice-files">
+                    <strong>첨부파일</strong>
+                    <p th:if="${#lists.isEmpty(noticeFiles)}">첨부파일이 없습니다.</p>
+                    <a th:each="file : ${noticeFiles}"
+                       th:href="@{/{domainKey}/manage/noticeFile/{notice_id}/{file_id}/download(domainKey=${domainKey},notice_id=${notice.notice_id},file_id=${file.notice_file_id})}"
+                       th:text="${file.original_name}"></a>
+                </div>
+
+                <div class="notice-navigation">
+                    <a th:if="${prevNotice != null}"
+                       th:href="@{/{domainKey}/manage/noticeDetail/{notice_id}(domainKey=${domainKey},notice_id=${prevNotice.notice_id},page=${page},noticeType=${noticeType},schType=${schType},kwd=${kwd})}">
+                        ← 이전 글
+                    </a>
+                    <a th:if="${nextNotice != null}"
+                       th:href="@{/{domainKey}/manage/noticeDetail/{notice_id}(domainKey=${domainKey},notice_id=${nextNotice.notice_id},page=${page},noticeType=${noticeType},schType=${schType},kwd=${kwd})}">
+                        다음 글 →
+                    </a>
+                </div>
+
+                <div class="notice-actions">
+                    <a class="notice-button"
+                       th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey},page=${page},noticeType=${noticeType},schType=${schType},kwd=${kwd})}">
+                        목록
+                    </a>
+					<a class="notice-button notice-primary"
+					   th:if="${canModify}"
+					   th:href="@{/{domainKey}/manage/noticeEdit/{notice_id}(domainKey=${domainKey},notice_id=${notice.notice_id},page=${page},noticeType=${noticeType},schType=${schType},kwd=${kwd})}">
+					    수정
+					</a>
+                    <form th:if="${canModify}" method="post"
+                          th:action="@{/{domainKey}/manage/noticeDelete/{notice_id}(domainKey=${domainKey},notice_id=${notice.notice_id})}"
+                          onsubmit="return confirm('공지사항을 삭제하시겠습니까?');">
+                        <button type="submit" class="notice-button">삭제</button>
+                    </form>
+                </div>
+            </article>
+        </section>
+    </div>
+</th:block>
+</html>

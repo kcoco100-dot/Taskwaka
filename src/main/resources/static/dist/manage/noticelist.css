@@ -1,0 +1,41 @@
+@charset "UTF-8";
+
+.notice-category-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 0 0 20px;
+}
+
+.notice-category-tabs a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 16px;
+    background: #fff;
+    color: #665f57;
+    border: 1px solid #e8e2d9;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.notice-category-tabs a:hover {
+    background: #f7f5f0;
+    border-color: #b9c4ad;
+}
+
+.notice-category-tabs a.is-active {
+    background: #5d7049;
+    color: #fff;
+    border-color: #5d7049;
+}
+
+@media (max-width: 700px) {
+    .notice-category-tabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
