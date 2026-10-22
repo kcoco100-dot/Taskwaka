@@ -77,7 +77,7 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	        WorkChatMemberDto roomdto = new WorkChatMemberDto();
 	        roomdto.setWorkId(workId);
 	        roomdto.setMyWorkId(myWorkId);
-	        roomdto.setTargetWorkId(targetMemberId);
+	        roomdto.setTargetWorkId(targetWorkId);
 	        
 	        Long chatRoomId = mapper.findDirectRoom(roomdto);
 	
@@ -95,7 +95,7 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	        
 	        mapper.insertRoomMember(roomdto);
 	
-	        roomdto.setWorkMemberId(targetMemberId);
+	        roomdto.setWorkMemberId(targetWorkId);
 	
 	        mapper.insertRoomMember(roomdto);
 	
