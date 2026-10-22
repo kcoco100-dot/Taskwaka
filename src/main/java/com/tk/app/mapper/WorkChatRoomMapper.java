@@ -28,5 +28,8 @@ public interface WorkChatRoomMapper {
 	public int insertRoomMessage(WorkChatMessageDto dto); 	
 	public List<Long> findActiveRoomMemberIds(WorkChatMessageDto dto);
 	
+	public WorkChatMessageDto findLatestRoomMessage(WorkChatMemberDto dto);
+	public int countUnreadMessages(WorkChatMemberDto dto);
+	
 	
 }

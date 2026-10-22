@@ -121,8 +121,42 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 		    dto.setDomainKey(domainKey);
 		    dto.setLoginMemberId(loginMemberId);
 
-		    return mapper.findMyDirectRooms(dto);
+			List<WorkChatMemberDto> rooms = mapper.findMyDirectRooms(dto);
 			
+			for (WorkChatMemberDto room : rooms) {
+			
+			    WorkChatMessageDto latest = mapper.findLatestRoomMessage(room);
+			
+			    if (latest != null) {
+			        room.setLastMessage(latest.getContent());
+			        room.setLastSent(latest.getSent());
+			    }
+			    
+			    room.setLoginMemberId(loginMemberId);
+
+			    int unreadCount = mapper.countUnreadMessages(room);
+
+			    room.setUnreadCount(unreadCount);
+			}
+			
+			rooms.sort((a, b) -> {
+
+			    String dateA = a.getLastSent();
+			    String dateB = b.getLastSent();
+
+			    // 두 채팅방 모두 메시지가 없는 경우
+			    if (dateA == null && dateB == null) return 0;
+
+			    // 메시지가 없는 채팅방은 아래로
+			    if (dateA == null) return 1;
+			    if (dateB == null) return -1;
+
+			    // 최근 메시지부터 정렬
+			    return dateB.compareTo(dateA);
+			});
+
+			return rooms;
+
 		} catch (Exception e) {
 			throw e;
 		}

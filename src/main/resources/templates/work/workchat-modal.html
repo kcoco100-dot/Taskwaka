@@ -114,21 +114,30 @@
 		    </p>
 		
 		    <button v-for="room in rooms" :key="room.chatRoomId"
-		            type="button" class="workchat-list-item" @click="openRoom(room)">
+		            type="button" class="workchat-list-item workchat-room-list-row" 
+		            @click="openRoom(room)">
 		            
 		        <span class="workchat-avatar workchat-avatar--sand">
 		            {{ room.targetName.slice(-2) }}
 		        </span>
 		
-		        <span class="workchat-list-content">	
-		            <span class="workchat-list-name">
-		                {{ room.targetName }}
-		            </span>
-		
-		            <span class="workchat-list-sub">
-		                1:1 채팅
-		            </span>
-		        </span>
+
+				<span class="workchat-list-content">
+				    <span class="workchat-list-top">
+				        <span class="workchat-list-name">
+				            {{ room.targetName }}
+				        </span>
+				
+				        <small v-if="room.lastSent">
+				            {{ formatLastSent(room.lastSent) }}
+				        </small>
+				    </span>
+				
+				    <span v-if="room.lastMessage" class="workchat-list-sub">
+				        {{ room.lastMessage }}
+				    </span>
+				</span>
+
 		    </button>
 		</div>
       </div>

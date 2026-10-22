@@ -210,11 +210,32 @@ document.addEventListener("DOMContentLoaded", function () {
 			
 	        return {
 	            rooms,
-	            openRoom
+	            openRoom,
+				formatLastSent
 	        };
 	    }
 		
 	}).mount(roomList);
+	
+	function formatLastSent(lastSent) {
+
+	           if (!lastSent) return "";
+
+	           const sentDate = lastSent.slice(0, 10);
+
+	           const now = new Date();
+
+	           const today =
+	               now.getFullYear() + "-" +
+	               String(now.getMonth() + 1).padStart(2, "0") + "-" +
+	               String(now.getDate()).padStart(2, "0");
+
+	           if (sentDate === today) {
+	               return lastSent.slice(11, 16);
+	           }
+
+	           return sentDate;
+	       }
 	
 	
 	function showDirectRoom(chatRoomId, targetName) {
@@ -350,6 +371,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	            await loadMessages(chatRoomId);
 	        }
+			
+			await loadMyDirectRooms();
 
 	    } catch (e) {
 	        console.error("메시지 전송 실패:", e);
@@ -384,6 +407,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	    const socket = new SockJS("/ws-workchat");
 
 	    stompClient = Stomp.over(socket);
+		stompClient.debug = function() {};
 		
 	    stompClient.connect({}, function(frame) {
 
@@ -393,12 +417,13 @@ document.addEventListener("DOMContentLoaded", function () {
 	            function(res) {
 	                // 서버에서 전달한 채팅방 번호
 	                const chatRoomId = Number(res.body);
-
+					
+					loadMyDirectRooms();
 
 	                // 현재 열어둔 채팅방인지 확인
 	                if (activeChatRoomId != null && Number(activeChatRoomId) === chatRoomId) {
 
-	                    loadMessages(chatRoomId);
+	                    loadMessages(activeChatRoomId);
 	                }
 	            }
 	        );

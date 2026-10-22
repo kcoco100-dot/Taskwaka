@@ -26,4 +26,8 @@ public class WorkChatMemberDto {
 	private Long targetWorkId;
 	private Long targetMemberId;
 	private String targetName;
+	
+	private String lastMessage;
+	private String lastSent;
+	private Integer unreadCount;
 }
