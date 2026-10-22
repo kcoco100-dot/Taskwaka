@@ -152,7 +152,19 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 		        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "접근할 수 없는 채팅방입니다.");
 		    }
 
-		    return mapper.findRoomMessages(dto);
+			List<WorkChatMessageDto> messages = mapper.findRoomMessages(dto);
+			
+			for (WorkChatMessageDto message : messages) {
+			
+			    if (loginMemberId.equals(message.getSenderMemberId())) {
+			        message.setMine(1);
+			    } else {
+			        message.setMine(0);
+			    }
+			}
+			
+			return messages;
+
 			
 		} catch (Exception e) {
 			log.error("findRoomMessages : ", e);

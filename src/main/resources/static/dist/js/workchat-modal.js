@@ -292,12 +292,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	        const res = await axios.get(
 	            "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/messages"
 	        );
-
 	        // 채팅방을 바꾼 경우 이전 요청 결과 무시
 	        if (activeChatRoomId !== chatRoomId) return;
 
 	        messageVm.messages = res.data;
-
 
 	    } catch (e) {
 	        if (activeChatRoomId !== chatRoomId) return;
@@ -379,23 +377,36 @@ document.addEventListener("DOMContentLoaded", function () {
 	// WebSocket 연결
 	// ========================================
 
+
 	let stompClient = null;
+	
+	function connect() {
+	    const socket = new SockJS("/ws-workchat");
 
-		function connect() {
+	    stompClient = Stomp.over(socket);
+		
+	    stompClient.connect({}, function(frame) {
 
-		    const socket = new SockJS("/ws-workchat");
-		    stompClient = Stomp.over(socket);
 
-		    stompClient.connect({},
-		        function(frame) {
-		            console.log("워크챗 WebSocket 연결 성공");
-		        },
+	        // 로그인한 사용자 전용 알림 구독
+	        stompClient.subscribe("/user/queue/workchat",
+	            function(res) {
+	                // 서버에서 전달한 채팅방 번호
+	                const chatRoomId = Number(res.body);
 
-		        function(error) {
-		            console.error("워크챗 WebSocket 연결 실패:", error);
-		        }
-		    );
-		}
+
+	                // 현재 열어둔 채팅방인지 확인
+	                if (activeChatRoomId != null && Number(activeChatRoomId) === chatRoomId) {
+
+	                    loadMessages(chatRoomId);
+	                }
+	            }
+	        );
+
+	    }, function(error) {
+	        console.error("워크챗 WebSocket 연결 실패:", error);
+	    });
+	}
 
 
 
@@ -649,38 +660,10 @@ document.addEventListener("DOMContentLoaded", function () {
             createButton.focus();
         } else closeWorkchat();
     });
-    changeTab("chats");
+	
+	changeTab("chats");
 
-	stompClient = null;
+	connect();
 
-	function connect() {
-	    const socket = new SockJS("/ws-workchat");
-
-	    stompClient = Stomp.over(socket);
-		
-	    stompClient.connect({}, function(frame) {
-
-	        console.log("워크챗 WebSocket 연결 성공");
-
-	        // 로그인한 사용자 전용 알림 구독
-	        stompClient.subscribe("/user/queue/workchat",
-	            function(res) {
-	                // 서버에서 전달한 채팅방 번호
-	                const chatRoomId = Number(res.body);
-
-	                console.log("새 메시지 알림:", chatRoomId);
-
-	                // 현재 열어둔 채팅방인지 확인
-	                if (activeChatRoomId != null && Number(activeChatRoomId) === chatRoomId) {
-
-	                    loadMessages(chatRoomId);
-	                }
-	            }
-	        );
-
-	    }, function(error) {
-	        console.error("워크챗 WebSocket 연결 실패:", error);
-	    });
-	}
 
 });

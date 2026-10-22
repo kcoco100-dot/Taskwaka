@@ -115,15 +115,11 @@ public class WebSocketEventListener {
 	                    "/queue/workchat",
 	                    event.getChatRoomId()
 	                );
+	            }
 
-	                log.info("워크챗 알림 전송 - 방: {}, 회원: {}",
-	                    event.getChatRoomId(),
-	                    connectedMemberId);
-	            	}
-
-	        	} catch (Exception e) {
-	        		log.error("워크챗 실시간 알림 처리 실패", e);
-	        	}
+	        } catch (Exception e) {
+	        	log.error("워크챗 실시간 알림 처리 실패", e);
+	        }
 		
 	}
 }
