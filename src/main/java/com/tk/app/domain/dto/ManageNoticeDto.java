@@ -8,32 +8,32 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ManageNoticeDto {
-	private long notice_id;
-	private long workspace_id;
-	private long task_id;
-	private long member_id;
-	
-	private String notice_type;
-	private String title;
-	private String content;
-	private String created;
-	private String updated;
-	private String deleted;
-	
-	private int status;
-	private int view_count;
-	
-	
-	private long notice_file_id;
-	private int file_size;
-	
-	private String original_name; 
-	private String stored_name;
-	private String file_path;
-	private String uploaded;
-	
-	private long project_id;
-	private int file_count;
-	private String member_name;
+	private Long notice_id;
+    private Integer notice_type;
+    private Long workspace_id;
+    private Long project_id;
+    private Long task_id;
+    private Long member_id;
+    private Long requester_member_id;
+    private String domainKey;
+
+    private String title;
+    private String content;
+    private String created;
+    private String updated;
+    private String deleted;
+
+    private Integer status;
+    private Integer view_count;
+
+    private Long notice_file_id;
+    private String original_name;
+    private String stored_name;
+    private String file_path;
+    private Long file_size;
+    private String uploaded;
+
+    private Integer file_count;
+    private String member_name;
 	
 }
