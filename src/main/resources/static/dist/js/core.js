@@ -3,14 +3,16 @@
    * 페이지를 아래로 스크롤할 때 body에 scrolled 클래스를 추가
    */
   function toggleScrolled() {
+	
     const selectBody = document.querySelector('body');
     const selectHeader = document.querySelector('#header');
 	// header 가 없으면 함수 실행을 여기서 끝냄
 	if (!selectHeader) return;
 	
-    if (!selectHeader.classList.contains('scroll-up-sticky') && !selectHeader.classList.contains('sticky-top') && !selectHeader.classList.contains('fixed-top')) return;
+    if (!selectHeader?.classList?.contains('scroll-up-sticky') && !selectHeader?.classList?.contains('sticky-top') && !selectHeader.classList.contains('fixed-top')) return;
     window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
-  }
+  
+   }
 
   document.addEventListener('scroll', toggleScrolled);
   window.addEventListener('load', toggleScrolled);

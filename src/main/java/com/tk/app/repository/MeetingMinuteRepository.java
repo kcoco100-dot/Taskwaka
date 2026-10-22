@@ -1,5 +1,7 @@
 package com.tk.app.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +11,7 @@ import com.tk.app.domain.entity.MeetingMinute;
 
 public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Long> {
 	
+	// 회의록 수정
 	@Modifying
 	@Query(value = """
 			UPDATE meeting_minutes mm
@@ -43,6 +46,7 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			@Param("title") String title,
 			@Param("content") String content);
 	
+	// 회의록 삭제
 	@Modifying
 	@Query(value = """
 			UPDATE meeting_minutes mm
@@ -98,4 +102,40 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			@Param("workspaceId") Long workspaceId,
 			@Param("memberId") Long memberId,
 			@Param("kwd") String kwd);
+	
+	// 회의록 조회
+	@Query(value = """
+			SELECT m.meeting_minute_id AS "meetingMinuteId",
+			       m.title, m.content AS "summary",
+			       TO_CHAR(m.meeting, 'YYYY.MM.DD') AS "meetingDate",
+			       md.name AS "authorName"
+			FROM meeting_minutes m
+			JOIN projects p ON p.project_id = m.project_id
+			LEFT OUTER JOIN member_details md ON md.member_id = m.member_id
+			WHERE p.workspace_id = :workspaceId
+			  AND m.deleted IS NULL
+			  AND EXISTS (
+			      SELECT 1
+			      FROM project_members pm
+			      JOIN workspace_members wm
+			        ON wm.workspace_member_id = pm.workspace_member_id
+			       AND wm.workspace_id = p.workspace_id
+			      WHERE pm.project_id = p.project_id
+			        AND wm.member_id = :memberId
+			        AND wm.status = 0
+			        AND pm.left IS NULL
+			  )
+				AND (:kwd IS NULL OR m.title LIKE '%' || :kwd || '%')
+			ORDER BY m.meeting DESC NULLS LAST,
+			         m.created DESC,
+			         m.meeting_minute_id DESC
+			OFFSET :offset ROWS
+			FETCH FIRST :size ROWS ONLY
+			""", nativeQuery = (true))
+	List<MeetingMinuteListView> findMeetingMinutes(
+			@Param("workspaceId") Long workspaceId,
+			@Param("memberId") Long memberID,
+			@Param("kwd") String kwd,
+			@Param("offset") int offset,
+			@Param("size") int size);
 }
