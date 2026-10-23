@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
     <link rel="stylesheet" th:href="@{/dist/css/page-shell.css}">
     <link rel="stylesheet" th:href="@{/dist/css/meetingsDetail.css}">
+    <link rel="stylesheet" th:href="@{/dist/vendor/quill/css/quill.snow.css}">
 </th:block>
 
 <th:block layout:fragment="content">
@@ -49,12 +50,13 @@
 	                			</select>
 	                		</div>
 	                </div>
-	
-	                <div class="mt-4">
-	                		<label for="meetingContent" class="form-label">내용</label>
-	                		<textarea id="meetingContent" name="content" rows="12"
-	                				  class="form-control" required="required"></textarea>
-	                </div>
+					
+					<div class="mt-4">
+		                <label id="meetingContentLabel" class="form-label">내용</label>
+						<div id="meetingEditor" class="editor"
+						     th:data-upload-url="@{/editor/upload}"></div>
+						<textarea id="meetingContent" name="content" hidden></textarea>
+					</div>
             </form>
             
             <div th:if="${errorMessage != null}" class="alert alert-danger"
@@ -80,6 +82,7 @@
 </th:block>
  
 <th:block layout:fragment="script">
+<script th:src="@{/dist/vendor/quill/js/quill.js}"></script>
 	<script th:inline="javascript">
 		const projectSelect = document.getElementById('meetingProject');
 		const subTaskSelect = document.getElementById('meetingSubTask');
@@ -137,6 +140,137 @@
 			});
 		
 	</script>
-</th:block> 
 
+	<!-- 퀼 에디터 -->
+	<script>
+		// Quill 에디터 객체 생성
+		const meetingQuill = new Quill('#meetingEditor', {
+		    // 테마 적용
+			theme: 'snow',
+			// 내용이 비어있을때 넣어줄 문구
+		    placeholder: '회의록 내용을 입력하세요.',
+		    // 사용할 에디터 기능설정
+		    modules: {
+		        toolbar: [ // 툴바에 표시할 버튼
+		            ['bold', 'italic', 'underline'],
+		            [{ list: 'ordered' }, { list: 'bullet' }],
+		            ['image'],['clean']
+		        ]
+		    }
+		});
+		// 실제 입력 영역을 공지 내용 라벨과 연결해 
+		// 화면 읽기 프로그램이 입력 영역의 이름을 알 수 있게
+		meetingQuill.root.setAttribute('aria-labelledby', 'meetingContentLabel');
+		
+		const meetingContent = document.getElementById('meetingContent');
+		let meetingImageUploadCount = 0;
+		
+		meetingContent.form.addEventListener('submit', (event) => {
+			if (meetingImageUploadCount > 0) {
+			    event.preventDefault();
+			    alert('이미지 업로드가 끝난 후 등록해 주세요.');
+			    return;
+			}
+			
+			// 본문이 비었으면 전송 막기
+			// 글자와 이미지가 모두 없을 때만 빈 본문으로 처리
+			if (!meetingQuill.getText().trim() && !meetingQuill.root.querySelector('img')) {
+				event.preventDefault();
+				alert('회의록 내용을 입력하세요.');
+				meetingQuill.focus();
+				return;
+			}
+			
+			// 내용이 있으면 서식을 포함한 HTML 을 숨김 textarea 에 넣기
+			// getSemanticHTML() : Quill 에서 작성한 내용을 서식이 포함된 HTML 문자열로 꺼내는 메서드 
+			meetingContent.value = meetingQuill.getSemanticHTML();
+		});
+		
+		// 초기화 버튼을 Quill에 연결
+		const initialMeetingContents = meetingQuill.getContents();
+		
+		meetingContent.form.addEventListener('reset', () => {
+			// 이벤트 객체를 사용할 일이 없어서 매개변수를 생략
+			meetingQuill.setContents(initialMeetingContents);
+			// 초기화 후 실행 취소로 이전 본문이 복원되는 것을 막고, 제출용 값도 명시적으로 비움
+			meetingQuill.history.clear();
+			meetingContent.value = '';
+		});
+		
+		// 업로드 파일 이미지
+		async function uploadMeetingImage(file, uploadUrl) {
+			const formData = new FormData();
+			formData.append('imageFile', file);
+			
+			const response = await fetch(uploadUrl, {
+				method: 'POST',
+				body: formData
+			});
+			
+			// 요청이 실패했거나, 다른 주소로 이동됐다면
+			if(!response.ok || response.redirected) {
+				throw new Error('이미지 업로드에 실패했습니다.');
+			}
+			
+			// response.json(): 응답 본문을 JSON으로 해석
+			// 본문이 비었거나 JSON 형식이 아니면 null을 반환
+			const result = await response.json().catch(() => null);
+			
+			// !result : 응답을 읽지 못하거나
+			// result.imageUrl != 'string' : 이미지 주소가 없거나 문자열이 아니거나
+			// !result.imageUrl.trim() : 이미지 주소가 빈 문자열이거나 공백뿐일때
+			if(!result || typeof result.imageUrl != 'string' || !result.imageUrl.trim()) {
+				throw new Error('업로드된 이미지 주소를 확인할 수 없습니다.');	
+			}
+			
+			return result.imageUrl;
+		}
+			// 툴바 기능 가져오기
+			// 이미지 버튼 클릭 시 동작 지정
+			meetingQuill.getModule('toolbar').addHandler('image', () => {
+			    // 에디터에 초점. 이미지를 넣을 위치
+				const range = meetingQuill.getSelection(true);
+			    // 파일 선택에 사용할 input
+			    const input = document.createElement('input');
+			    input.type = 'file';
+			    input.accept = 'image/*';
+	
+			    // 파일 선택 시 업로드 처리
+			    input.addEventListener('change', async () => {
+			        // 첫번째 파일 꺼내기
+			    		const file = input.files[0];
+			        // 파일이 없으면 리턴
+			        if (!file) return;
+			        
+			        meetingImageUploadCount++;
+	
+			        try {
+			        		// 주소 읽기
+			            const uploadUrl =
+			                    document.getElementById('meetingEditor').dataset.uploadUrl;
+			            // 파일 업로드
+			        		const imageUrl = await uploadMeetingImage(file, uploadUrl);
+			            // 에디터 끝 줄바꿈 앞 위치 구하기
+			            const lastIndex = meetingQuill.getLength() - 1;
+			            // 기억한 커서 위치가 있으면 사용하고 없으면 본문 끝을 사용함
+			            const index = Math.min(range ? range.index : lastIndex, lastIndex);
+	
+			            // 이미지 넣기
+			            meetingQuill.insertEmbed(index, 'image', imageUrl, 'user');
+			            // 이미지 뒤로 커서 옮기기
+			            meetingQuill.setSelection(index + 1, 0, 'user');
+			        } catch (error) {
+			            alert(error.message);
+			        } finally {
+			        		// 이미지 업로드가 끝나기 전에 공지가 등록되는 것을 방지
+			        		meetingImageUploadCount--;
+			        }
+			    });
+				
+			    // 파일창 열기
+			    input.click();
+			});
+		
+	</script>
+</th:block> 
 </html>
