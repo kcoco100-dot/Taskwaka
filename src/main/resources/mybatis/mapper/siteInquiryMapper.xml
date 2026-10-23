@@ -2,7 +2,7 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.admin.mapper.SiteInquiryMapper">
-
+	<!-- 클라이언트 페이지 -->
 	<insert id="insertInquiry" parameterType="com.tk.app.admin.domain.dto.SiteInquiryDto">
 		<selectKey keyProperty="inquiry_id" resultType="long" order="BEFORE">
 			SELECT seq_inquiries.NEXTVAL FROM dual
@@ -12,10 +12,40 @@
 	</insert>
 	
 	<select id="selectMyInquiryList" parameterType="long" resultType="com.tk.app.admin.domain.dto.SiteInquiryDto">
-		SELECT inquiry_id, member_id, title, content, status, created, updated
+		SELECT inquiry_id, member_id, title, content, status, created, updated, answer_content, answered
 		FROM inquiries
 		WHERE member_id = #{member_id}
 		ORDER BY created DESC, inquiry_id DESC
 	</select>
 	
+	<select id="selectInquiryDetail" resultType="com.tk.app.admin.domain.dto.SiteInquiryDto">
+		SELECT inquiry_id, member_id, title, content, status, answer_content, answered, created, updated
+		FROM inquiries
+		WHERE inquiry_id = #{inquiry_id} AND member_id = #{member_id}
+	</select>
+	
+	<select id="selectAllInquiryList" resultType="com.tk.app.admin.domain.dto.SiteInquiryDto">
+		SELECT inquiry_id, member_id, title, content, status, created, updated, answered
+		FROM inquiries
+		ORDER BY created DESC, inquiry_id DESC
+	</select>
+	
+	<update id="updateInquiry" parameterType="com.tk.app.admin.domain.dto.SiteInquiryDto">
+		UPDATE inquiries
+		SET title = #{title}, content = #{content}, updated = SYSDATE
+		WHERE inquiry_id = #{inquiry_id} AND member_id = #{member_id} AND status = 0
+	</update>
+	
+	<!-- 관리자 페이지 -->
+	<select id="selectAdminInquiryDetail" parameterType="long" resultType="com.tk.app.admin.domain.dto.SiteInquiryDto">
+		SELECT inquiry_id, member_id, title, content, status, answer_content, answered, created, updated
+		FROM inquiries
+		WHERE inquiry_id = #{inquiry_id}
+	</select>
+	
+	<update id="updateInquiryAnswer" parameterType="com.tk.app.admin.domain.dto.SiteInquiryDto">
+		UPDATE inquiries
+		SET status = 1, answer_content = #{answer_content}, answered = SYSDATE
+		WHERE inquiry_id = #{inquiry_id}
+	</update>
 </mapper>

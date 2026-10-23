@@ -83,7 +83,7 @@ public class SpringSecurityConfig {
 						.requestMatchers("/", "/member/login", "/member/register", "/member/account", "/member/idFind", "/member/pwdFind", 
 								"/member/expired", "/member/check-id", "/member/email/send", "/member/email/verify", "/member/reset-password",
 								"/member/registerComplete", "/oauth/kakao", "/oauth/kakao/callback",
-								"/service/inquiry", "/service/inquiry/**", "/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
+								"/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
 								"/favicon.ico", "/error/**")
 						.permitAll()
 

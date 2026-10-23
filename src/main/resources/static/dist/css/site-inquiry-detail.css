@@ -1,0 +1,232 @@
+@charset "UTF-8";
+
+
+.site-inquiry-detail-page {
+    width: 100%;
+    min-height: 500px;
+    padding: 36px 24px 60px;
+    background: #f8f9fb;
+    color: #252b36;
+    box-sizing: border-box;
+}
+
+.site-inquiry-detail-page * {
+    box-sizing: border-box;
+}
+
+.site-inquiry-detail-container {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.site-inquiry-detail-heading {
+    margin-bottom: 28px;
+}
+
+.site-inquiry-detail-eyebrow {
+    display: block;
+    margin-bottom: 10px;
+    color: #315fc4;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.site-inquiry-detail-heading h1 {
+    margin: 0 0 10px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.site-inquiry-detail-heading p {
+    margin: 0;
+    color: #737b89;
+    font-size: 14px;
+}
+
+.site-inquiry-detail-card {
+    overflow: hidden;
+    border: 1px solid #e5e8ee;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.site-inquiry-detail-header {
+    padding: 32px;
+    border-bottom: 1px solid #e9ecf1;
+}
+
+.site-inquiry-detail-status {
+    margin-bottom: 16px;
+}
+
+.inquiry-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.inquiry-badge.pending {
+    background: #fff4df;
+    color: #a56b12;
+}
+
+.inquiry-badge.answered {
+    background: #e8f5ed;
+    color: #277749;
+}
+
+.site-inquiry-detail-header h2 {
+    margin: 0 0 20px;
+    font-size: 23px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.site-inquiry-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    color: #858c99;
+    font-size: 13px;
+}
+
+.site-inquiry-detail-meta strong {
+    margin-left: 6px;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.site-inquiry-detail-body {
+    padding: 32px;
+}
+
+.site-inquiry-detail-section-title {
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.site-inquiry-detail-content {
+    min-height: 180px;
+    color: #444d5b;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.site-inquiry-answer {
+    margin: 0 32px 32px;
+    padding: 24px;
+    border: 1px solid #dce7fa;
+    border-radius: 9px;
+    background: #f6f9ff;
+}
+
+.site-inquiry-answer-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #dfe8f8;
+}
+
+.site-inquiry-answer-header h3 {
+    margin: 0;
+    color: #315fc4;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.site-inquiry-answer-header span {
+    color: #858c99;
+    font-size: 12px;
+}
+
+.site-inquiry-answer-content {
+    padding-top: 18px;
+    color: #444d5b;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.site-inquiry-answer-empty {
+    margin: 0 32px 32px;
+    padding: 25px;
+    border: 1px solid #e7eaf0;
+    border-radius: 9px;
+    background: #f8f9fc;
+    text-align: center;
+}
+
+.site-inquiry-answer-empty strong {
+    display: block;
+    color: #555e6b;
+    font-size: 14px;
+}
+
+.site-inquiry-answer-empty p {
+    margin: 9px 0 0;
+    color: #858c99;
+    font-size: 13px;
+}
+
+.site-inquiry-detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.site-inquiry-list-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    height: 43px;
+    padding: 0 20px;
+    border: 1px solid #dce1e9;
+    border-radius: 7px;
+    background: #fff;
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.site-inquiry-list-btn:hover {
+    background: #f2f4f8;
+    color: #252b36;
+}
+
+@media (max-width: 600px) {
+    .site-inquiry-detail-page {
+        padding: 28px 14px 40px;
+    }
+
+    .site-inquiry-detail-header,
+    .site-inquiry-detail-body {
+        padding: 22px 18px;
+    }
+
+    .site-inquiry-detail-header h2 {
+        font-size: 20px;
+    }
+
+    .site-inquiry-answer,
+    .site-inquiry-answer-empty {
+        margin: 0 18px 20px;
+        padding: 18px;
+    }
+
+    .site-inquiry-answer-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

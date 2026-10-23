@@ -145,10 +145,13 @@ public class AdminController {
 //        return adminPage("notice", model);
 //    }
 
-    @GetMapping("/inquiry")
-    public String inquiry(Model model) {
-        return adminPage("inquiry", model);
-    }
+//    @GetMapping("/inquiry")
+//    public String inquiry(Model model) {
+//    	model.addAttribute("activeSection", "inquiry");
+//        model.addAttribute("adminName", "관리자 (ADMIN)");
+//
+//        return "admin/admin_layout";
+//    }
 
     @GetMapping("/stats")
     public String stats(Model model) {

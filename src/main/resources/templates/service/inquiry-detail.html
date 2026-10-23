@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout3}">
+<head>
+    <title>1:1 문의 상세 | TASKWAKA</title>
+</head>
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/site-inquiry-detail.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="site-inquiry-detail-page">
+        <div class="site-inquiry-detail-container">
+
+            <div class="site-inquiry-detail-heading">
+                <span class="site-inquiry-detail-eyebrow">TASKWAKA SUPPORT</span>
+                <h1>1:1 문의</h1>
+                <p>작성한 문의 내용과 관리자 답변을 확인할 수 있습니다.</p>
+            </div>
+
+            <div class="site-inquiry-detail-card" th:if="${inquiry != null}">
+
+                <div class="site-inquiry-detail-header">
+                    <div class="site-inquiry-detail-status">
+                        <span th:if="${inquiry.status == 0}" class="inquiry-badge pending">답변 대기</span>
+                        <span th:if="${inquiry.status == 1}" class="inquiry-badge answered">답변 완료</span>
+                    </div>
+
+                    <h2 th:text="${inquiry.title}">문의 제목</h2>
+
+                    <div class="site-inquiry-detail-meta">
+                        <span>문의번호 <strong th:text="${inquiry.inquiry_id}">1</strong></span>
+                        <span>작성일 <strong th:text="${#dates.format(inquiry.created, 'yyyy-MM-dd HH:mm')}">2026-10-23</strong></span>
+                    </div>
+                </div>
+
+                <div class="site-inquiry-detail-body">
+                    <div class="site-inquiry-detail-section-title">문의 내용</div>
+                    <div class="site-inquiry-detail-content" th:text="${inquiry.content}">문의 내용이 표시됩니다.</div>
+                </div>
+
+                <div class="site-inquiry-answer" th:if="${inquiry.status == 1}">
+                    <div class="site-inquiry-answer-header">
+                        <h3>관리자 답변</h3>
+                        <span th:if="${inquiry.answered != null}" th:text="${#dates.format(inquiry.answered, 'yyyy-MM-dd HH:mm')}"></span>
+                    </div>
+                    <div class="site-inquiry-answer-content" th:text="${inquiry.answer_content}">관리자 답변이 표시됩니다.</div>
+                </div>
+
+                <div class="site-inquiry-answer-empty" th:if="${inquiry.status == 0}">
+                    <strong>답변을 기다리고 있습니다.</strong>
+                    <p>담당자가 문의 내용을 확인한 후 답변해 드리겠습니다.</p>
+                </div>
+
+            </div>
+
+            <div class="site-inquiry-detail-actions">
+                <a th:href="@{/service/inquiry}" class="site-inquiry-list-btn">목록으로</a>
+            </div>
+
+        </div>
+    </div>
+</th:block>
+
+</body>
+</html>

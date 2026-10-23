@@ -36,4 +36,72 @@ public class SiteInquiryServiceImpl implements SiteInquiryService{
 		}
 	}
 
+	@Override
+	public SiteInquiryDto selectInquiryDetail(long inquiry_id, long member_id) {
+		try {
+			return siteInquiryMapper.selectInquiryDetail(inquiry_id, member_id);
+		} catch (Exception e) {
+			log.error("selectInquiryDetail : ",e);
+			throw e;
+		}
+	}
+
+	@Override
+	public List<SiteInquiryDto> selectAllInquiryList() {
+		try {
+			return siteInquiryMapper.selectAllInquiryList();
+		} catch (Exception e) {
+			log.error("selectAllInquiryList : ",e);
+			throw e;
+		}
+	}
+
+	@Override
+	public SiteInquiryDto selectAdminInquiryDetail(long inquiry_id) {
+		try {
+			return siteInquiryMapper.selectAdminInquiryDetail(inquiry_id);
+		} catch (Exception e) {
+			log.error("selectAdminInquiryDetail : ",e);
+			throw e;
+		}
+	}
+
+	@Override
+	public int updateInquiryAnswer(SiteInquiryDto dto) {
+		try {
+			return siteInquiryMapper.updateInquiryAnswer(dto);
+		} catch (Exception e) {
+			log.error("updateInquiryAnswer : ",e);
+			throw e;
+		}
+	}
+
+	@Override
+	public int updateInquiry(SiteInquiryDto dto) {
+		try {
+			return siteInquiryMapper.updateInquiry(dto);
+		} catch (Exception e) {
+			log.error("updateInquiry : ",e);
+			throw e;
+		}
+	}
+
+	@Override
+	public boolean canEditInquiry(long inquiry_id, long member_id) {
+		try {
+			SiteInquiryDto inquiry = siteInquiryMapper.selectInquiryDetail(inquiry_id, member_id);
+			
+			if(inquiry == null) {
+			    return false;
+			}
+
+			return inquiry.getStatus() == 0;
+			
+			
+		} catch (Exception e) {
+			log.error("canEditInquiry : ",e);
+			throw e;
+		}
+	}
+
 }

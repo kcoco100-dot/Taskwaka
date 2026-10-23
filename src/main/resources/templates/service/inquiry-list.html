@@ -12,6 +12,8 @@
 <th:block layout:fragment="content">
     <div class="site-inquiry-list-page">
         <div class="site-inquiry-list-container">
+        
+        	 <p th:if="${message != null}" th:text="${message}" class="text-danger"></p>
 
             <div class="site-inquiry-list-heading">
                 <span class="site-inquiry-list-eyebrow">TASKWAKA SUPPORT</span>
@@ -41,7 +43,9 @@
                         <tbody>
                             <tr th:each="inquiry, status : ${inquiryList}">
                                 <td class="site-inquiry-number" th:text="${status.count}">1</td>
-                                <td class="site-inquiry-title" th:text="${inquiry.title}">문의 제목</td>
+                                <td class="site-inquiry-title"> 
+                                	<a th:href="@{/service/inquiry/{id}(id=${inquiry.inquiry_id})}" th:text="${inquiry.title}">문의 제목</a>
+                                	</td>
                                 <td>
                                     <span th:if="${inquiry.status == 0}" class="site-inquiry-status pending">답변 대기</span>
                                     <span th:if="${inquiry.status == 1}" class="site-inquiry-status answered">답변 완료</span>

@@ -5,13 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.tk.app.admin.domain.dto.SiteInquiryDto;
 import com.tk.app.admin.service.SiteInquiryService;
-import com.tk.app.domain.dto.SessionInfo;
-import com.tk.app.security.LoginMemberUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,70 +18,55 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/service/*")
+@RequestMapping("/admin")
 public class SiteInquiryController {
 	private final SiteInquiryService siteInquiryService;
 	
-	/*
-    private Long getLoginMemberId() { //데이터 주인 확인용
-        SessionInfo info = LoginMemberUtil.getSessionInfo();
-        if (info == null || info.getMember_id() == null) {
-            throw new IllegalStateException("로그인이 필요한 서비스입니다.");
-        }
-        return info.getMember_id();
-    } 
-		컨트롤러 상단에 선언해서 아래에서 매소드 안에서 
-		Long memberId = getLoginMemberId(); 로 호출
-	*/
 	
-	@GetMapping("inquiry")
-	public String selectMyInquiryList(Model model) {
+	@GetMapping("/inquiry")
+	public String selectAllInquiryList(Model model) {
 		try {
-			SessionInfo info = LoginMemberUtil.getSessionInfo();
-			
-			if(info == null) {
-				return "redirect:/member/login";
-			}
-			
-			long member_id = info.getMember_id();
-			List<SiteInquiryDto> inquiryList = siteInquiryService.selectMyInquiryList(member_id);
+			List<SiteInquiryDto> inquiryList = siteInquiryService.selectAllInquiryList();
 			
 			model.addAttribute("inquiryList", inquiryList);
-			
+			model.addAttribute("activeSection", "inquiry");
+			model.addAttribute("adminName", "관리자 (ADMIN)");
 		} catch (Exception e) {
-			log.error("selectMyInquiryList : ", e);
+			log.error("selectAllInquiryList : ", e);
 			throw e;
 		}
-		return "service/inquiry-list";
+		return "admin/admin_layout";
 	}
 	
-	@GetMapping("inquiry/write")
-	public String inquiryWrite() {
-		return "service/inquiry-write";
-	}
-	
-	@PostMapping("inquiry/write")
-	public String inquiryWriteSubmit(SiteInquiryDto dto) {
+	@GetMapping("/inquiry/{inquiry_id}")
+	public String selectAdminInquiryDetail(@PathVariable ("inquiry_id") long inquiry_id,
+			Model model) {
 		try {
-			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			SiteInquiryDto inquiryDetail = siteInquiryService.selectAdminInquiryDetail(inquiry_id);
 			
-			if(info == null) {
-				return "redirect:/member/login";
+			if(inquiryDetail == null) {
+				return "redirect:/admin/inquiry";
 			}
 			
-			Long member_id =  info.getMember_id();
-			dto.setMember_id(member_id);
+			model.addAttribute("inquiryDetail", inquiryDetail);
+			model.addAttribute("activeSection", "inquiryDetail");
+			model.addAttribute("adminName", "관리자 (ADMIN)");
 			
-			if(member_id == null) {
-				return "redirect:/member/login";
-			}
-			
-			siteInquiryService.insertInquiry(dto);
 		} catch (Exception e) {
-			log.error("inquiryWriteSubmit : ", e);
+			log.error("selectAdminInquiryDetail : ", e);
 			throw e;
 		}
-		return "redirect:/service/inquiry";
+		return "admin/admin_layout";
 	}
 	
+	@PostMapping("/inquiry/answer")
+	public String updateInquiryAnswer(SiteInquiryDto dto) {
+		try {
+			siteInquiryService.updateInquiryAnswer(dto);
+		} catch (Exception e) {
+			log.error("updateInquiryAnswer : ", e);
+			throw e;
+		}
+		return "redirect:/admin/inquiry";
+	}
 }
