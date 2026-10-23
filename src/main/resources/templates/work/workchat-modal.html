@@ -132,10 +132,17 @@
 				            {{ formatLastSent(room.lastSent) }}
 				        </small>
 				    </span>
-				
-				    <span v-if="room.lastMessage" class="workchat-list-sub">
-				        {{ room.lastMessage }}
-				    </span>
+		
+					<span class="workchat-list-bottom">
+					    <span v-if="room.lastMessage" class="workchat-list-sub">
+					        {{ room.lastMessage }}
+					    </span>
+					
+					    <span v-if="room.unreadCount > 0" class="workchat-unread">
+					        {{ room.unreadCount > 99 ? '99+' : room.unreadCount }}
+					    </span>
+					
+					</span>
 				</span>
 
 		    </button>

@@ -13,8 +13,8 @@ public interface WorkChatRoomMapper {
 
 	public Long findWorkMemberId(WorkChatMemberDto dto) throws SQLException;
 	public Long findDirectRoom(WorkChatMemberDto dto) throws SQLException;
-	public Long nextRoomId() throws SQLException;
 	
+	public Long nextRoomId() throws SQLException;
 	public void insertDirectRoom(WorkChatMemberDto dto) throws SQLException;
 	public void insertRoomMember(WorkChatMemberDto dto) throws SQLException;
 	
@@ -30,6 +30,7 @@ public interface WorkChatRoomMapper {
 	
 	public WorkChatMessageDto findLatestRoomMessage(WorkChatMemberDto dto);
 	public int countUnreadMessages(WorkChatMemberDto dto);
+	public int updateLastReadMessage(WorkChatMessageDto dto);
 	
 	
 }

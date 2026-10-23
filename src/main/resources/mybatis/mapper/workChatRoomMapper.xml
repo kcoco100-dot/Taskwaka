@@ -117,7 +117,7 @@
 		     AND wms.status = 0
 		
 		    WHERE cr.chat_room_id = #{chatRoomId}
-		      AND cr.chat = 'PERSONAL'
+		      AND cr.chat IN ('PERSONAL', 'GROUP')
 		      AND wms.member_id = #{loginMemberId}
 	</select>
 	
@@ -203,6 +203,26 @@
 	      AND m.chat_room_member_id != crm.chat_room_member_id
 	
 	</select>
+	
+	
+	<update id="updateLastReadMessage" parameterType="WorkChatMessageDto">
+	
+	    UPDATE chat_room_members SET last_read_message_id = #{messageId}
+	    WHERE chat_room_member_id = #{chatRoomMemberId}
+	      AND chat_room_id = #{chatRoomId}
+	      AND status = 0
+	      AND (last_read_message_id IS NULL
+	           OR last_read_message_id &lt; #{messageId})
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_messages
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND message_id = #{messageId}
+	            AND deleted IS NULL
+	      )
+	
+	</update>
+	
 	
 	
 	
