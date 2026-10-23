@@ -139,6 +139,7 @@
 
 .notice-section .notice-table-wrap {
     overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .notice-section .notice-table {
@@ -215,4 +216,73 @@
     width: 100px;
     text-align: right;
     font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.notice-section .notice-pagination {
+    display: flex;
+    justify-content: center;
+    padding: 20px 24px;
+    border-top: 1px solid #EEE8E0;
+}
+
+.notice-section .notice-pagination .paginate {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.notice-section .notice-pagination .paginate > a,
+.notice-section .notice-pagination .paginate > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #E8E2D9;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #786B5E;
+    font-size: 14px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.notice-section .notice-pagination .paginate > a:hover {
+    border-color: #CBD7BE;
+    background: #EDF2E7;
+    color: #465B38;
+}
+
+.notice-section .notice-pagination .paginate > .active {
+    border-color: #71865B;
+    background: #71865B;
+    color: #FFFFFF;
+    font-weight: 700;
+}
+
+.notice-section .notice-pagination .paginate > a:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 3px;
+}
+/* notice-layout 요소가 있는 body 만 적용 */
+body:has(.notice-layout) {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+}
+
+body:has(.notice-layout) > main {
+    overflow: visible;
+}
+
+.home-layout.notice-layout {
+    height: auto;
+    overflow: visible;
+}
+
+.notice-layout > .notice-section {
+    overflow: visible;
 }

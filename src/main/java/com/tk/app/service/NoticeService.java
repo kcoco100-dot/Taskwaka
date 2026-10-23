@@ -106,9 +106,15 @@ public class NoticeService {
 	}
 	
 	// 워크 공지 목록 조회
-	public List<NoticeDto> findWorkspaceNotice(long workspaceId) {
+	public List<NoticeDto> findWorkspaceNotice(
+			long workspaceId, int offset, int size) {
 		
-		return noticeMapper.findWorkspaceNotice(workspaceId);
+		return noticeMapper.findWorkspaceNotice(workspaceId, offset, size);
+	}			
+	// 공지 페이징 처리
+	public int countWorkspaceNotice(long workspaceId) {
+		
+		return noticeMapper.countWorkspaceNotice(workspaceId);
 	}
 	
 	// 워크에 공개된 공지 상세조회

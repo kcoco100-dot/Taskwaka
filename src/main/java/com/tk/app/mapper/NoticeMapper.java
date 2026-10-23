@@ -49,6 +49,12 @@ public interface NoticeMapper {
 
 	// 공개되있는 공지 목록 조회
 	public List<NoticeDto> findWorkspaceNotice(
+			@Param("workspaceId") long workspaceId,
+			@Param("offset") int offset,
+			@Param("size") int size);
+	
+	// 공지 목록 페이징처리
+	public int countWorkspaceNotice(
 			@Param("workspaceId") long workspaceId);
 	
 	// 공지사항 조회수 증가

@@ -97,6 +97,12 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <nav class="notice-pagination"
+				     aria-label="공지사항 페이지 이동"
+				     th:if="${!#strings.isEmpty(paging)}"
+				     th:utext="${paging}">
+				</nav>
             </section>
         </div>
     </div>
@@ -115,6 +121,22 @@
 			showToast(growthExpMessage);
 		}
 	});
+	
+	console.table(
+		    [...document.querySelectorAll('html, body, body *')]
+		        .filter(el =>
+		            el.scrollHeight > el.clientHeight + 1 &&
+		            /auto|scroll/.test(getComputedStyle(el).overflowY)
+		        )
+		        .map(el => ({
+		            tag: el.tagName,
+		            class: el.className,
+		            height: el.clientHeight,
+		            contentHeight: el.scrollHeight,
+		            overflowY: getComputedStyle(el).overflowY,
+		            maxHeight: getComputedStyle(el).maxHeight
+		        }))
+		);
 </script>
 </th:block>
 </html>

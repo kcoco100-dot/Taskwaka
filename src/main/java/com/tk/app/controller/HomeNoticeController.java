@@ -1,6 +1,10 @@
 package com.tk.app.controller;
 
+
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
+import com.tk.app.common.MyUtil;
+import com.tk.app.common.PaginateUtil;
+import com.tk.app.common.RequestUtils;
 import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.NoticeCreateResultDto;
 import com.tk.app.domain.dto.NoticeDto;
@@ -39,6 +46,8 @@ public class HomeNoticeController {
 	
 	private final NoticeService noticeService;
 	private final StorageService storageService;
+	private final PaginateUtil paginateUtil;
+	private final MyUtil myUtil;
 	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(@PathVariable("domainKey") String domainKey) {
@@ -55,11 +64,69 @@ public class HomeNoticeController {
 	
 	@GetMapping("/notice")
 	public String notice(
-			@RequestAttribute("workspace") WorkspaceDto workspace, Model model) {
+			@RequestAttribute("workspace") WorkspaceDto workspace, 
+			@RequestParam(name = "page", defaultValue = "1") String pageValue,
+			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "kwd", defaultValue = "") String kwd,
+			Model model) {
 
-		List<NoticeDto> notices = noticeService.findWorkspaceNotice(workspace.getWorkspaceId());
+		int size = 10;
+		int dataCount = 0;
+		int totalPage = 0;
+		int page;
+		
+		try {
+			page = Integer.parseInt(pageValue.trim());
+		} catch (NumberFormatException e) {
+			page = 1;
+		}
+		
+		kwd = myUtil.decodeUrl(kwd);
 
-		model.addAttribute("notices", notices);
+		// 전체 페이지 수
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("schType", schType);
+		map.put("kwd", kwd);
+
+		dataCount = noticeService.countWorkspaceNotice(workspace.getWorkspaceId());
+		if (dataCount != 0) {
+			totalPage = paginateUtil.pageCount(dataCount, size);
+		}
+
+		// 다른 사람이 자료를 삭제하여 전체 페이지수가 변화 된 경우
+		page = Math.max(1, Math.min(page, totalPage));
+
+		// 리스트에 출력할 데이터를 가져오기
+		int offset = (page - 1) * size;
+		if(offset < 0) offset = 0;
+
+		map.put("offset", offset);
+		map.put("size", size);
+
+		// 글 리스트
+		List<NoticeDto> list = noticeService.findWorkspaceNotice(workspace.getWorkspaceId(), offset, size);
+
+		String query = "";
+		// getRequestURI : 페이지 번호를 눌러도 현재 워크의 공지 목록으로 이동하도록 주소를 만든다
+		String listUrl = RequestUtils.getCurrentRequest().getRequestURI();
+		
+		if (! kwd.isBlank()) { // if(kwd.length() != 0) {
+			query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+			
+			listUrl += "?" + query;
+		}
+
+		String paging = paginateUtil.paging(page, totalPage, listUrl);
+
+		model.addAttribute("notices", list);
+		model.addAttribute("page", page);
+		model.addAttribute("dataCount", dataCount);
+		model.addAttribute("size", size);
+		model.addAttribute("totalPage", totalPage);
+		model.addAttribute("paging", paging);
+
+		model.addAttribute("schType", schType);
+		model.addAttribute("kwd", kwd);
 
 		return "notice/notice";
 	}
