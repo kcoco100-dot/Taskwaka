@@ -716,4 +716,50 @@
             updated = SYSDATE
         WHERE notice_id = #{noticeId}
     </update>
+    
+    <!-- 
+        List<TeamReportDto> selectReportList(Long projectId);
+    List<MomDto> selectMomList(Long projectId);
+    
+    int insertTeamReport(TeamReportDto dto);
+    int updateTeamReport(TeamReportDto dto);
+    int softDeleteTeamReport(Long TeamReportId);
+    
+    int insertMOM (MomDto dto);
+    int updateMOM (MomDto dto);
+    int softDeleteMOM (Long meetingMinuteId);
+     -->
+     
+     <select id="selectReportList" parameterType="long" resultType="com.tk.app.domain.dto.TeamReportDto">
+     SELECT team_report_id, task_id, project_id, report_type, title, content, progress, status, TO_CHAR(created, 'YYYY-MM-DD') AS created, TO_CHAR(updated, 'YYYY-MM-DD') AS updated, TO_CHAR(deleted, 'YYYY-MM-DD') AS deleted
+     FROM team_reports
+     WHERE project_id = #{projectId}
+     </select>
+     <select id="selectMomList" parameterType="long" resultType="com.tk.app.domain.dto.MomDto">
+     SELECT 
+     </select>
+     <insert id="insertTeamReport" parameterType="com.tk.app.domain.dto.TeamReportDto">
+        <selectKey keyProperty="teamReportId" resultType="long" order="BEFORE">
+            SELECT seq_team_reports.NEXTVAL FROM dual
+        </selectKey>
+     INSERT INTO team_reports(team_report_id, task_id, project_member_id, project_id, report_type, title, content, progress, status, created)
+     VALUES (#{teamReportId}, #{taskId}, #{projectMemberId}, #{projectId}, #{reportType}, #{title}, #{content, jdbcType=CLOB}, #{progress}, 0, SYSDATE)
+     </insert>
+     <update id="updateTeamReport" parameterType="com.tk.app.domain.dto.TeamReportDto">
+     
+     </update>
+     <update id="softDeleteTeamReport" parameterType="long">
+     
+     </update>
+     
+     <insert id="insertMOM" parameterType="com.tk.app.domain.dto.MomDto">
+     
+     </insert>
+     <update id="updateMOM" parameterType="com.tk.app.domain.dto.MomDto">
+     
+     </update>
+     <update id="softDeleteMOM" parameterType="long">
+     
+     </update>
+
 </mapper>

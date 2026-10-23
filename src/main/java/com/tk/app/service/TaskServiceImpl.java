@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tk.app.domain.dto.DailyReportDto;
+import com.tk.app.domain.dto.MomDto;
 import com.tk.app.domain.dto.ProjectDto;
 import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.domain.dto.TaskMemberDto;
+import com.tk.app.domain.dto.TeamReportDto;
 import com.tk.app.mapper.ProjectMapper;
 import com.tk.app.mapper.TaskMapper;
 
@@ -248,5 +250,41 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void deleteTaskNotice(Long noticeId) {
         taskMapper.softDeleteTaskNotice(noticeId);
+    }
+    
+    @Transactional
+    public List<Map<String, Object>> getDocumentList(Long projectId) {
+    	List<Map<String, Object>> list; 
+    	taskMapper.selectReportList(projectId);
+    	taskMapper.selectMomList(projectId);
+    	
+    	return null;
+    }
+    
+    @Override
+    public void createTeamReport(TeamReportDto dto) {
+    	taskMapper.insertTeamReport(dto);
+    }
+    
+    public void updateTeamReport(TeamReportDto dto) { 
+    	taskMapper.updateTeamReport(dto);
+    	
+    }
+    
+    public void deleteTeamReport(Long TeamReportId) {
+    	taskMapper.softDeleteTeamReport(TeamReportId);
+    }
+    
+    public void createMOM(MomDto dto) {
+    	taskMapper.insertMOM(dto);
+    }
+    
+    public void updateMOM(MomDto dto) { 
+    	taskMapper.updateMOM(dto);
+    	
+    }
+    
+    public void deleteMOM(Long momId) {
+    	taskMapper.softDeleteMOM(momId);
     }
 }

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div th:fragment="content">
+		<link rel="stylesheet" th:href="@{/dist/css/project/task_document.css}">
+
+		<div class="document-split-wrapper" id="documentSplitWrapper">
+
+			<!-- [좌측/본문] 업무공지 목록 영역 -->
+			<div class="document-main-page">
+
+				<!-- 상단 툴바 (전체/워크스페이스/프로젝트/업무 필터 & 검색 & 팀 리더 전용 공지 작성 버튼) -->
+				<div class="document-toolbar">
+					<div class="document-toolbar-left">
+						<div class="document-filter-tabs">
+							<select onchange="filterDocumentList(this)">
+								<option value="all" selected>전체</option>
+								<option value="report">보고서</option>
+								<option value="mom">회의록</option>
+							</select>
+						</div>
+
+						<div class="document-search-box">
+							<input type="text" id="documentSearchInput" placeholder="공지 제목 또는 작성자 검색..." oninput="documentFilterAndSearch()">
+						</div>
+					</div>
+
+					<!-- 보고서, 회의록 작성 버튼 -->
+					<div class="document-toolbar-right">
+						<button type="button" class="btn-open-document-write" onclick="openReportWriteDrawer()">보고서 작성</button>
+						<button type="button" class="btn-open-document-write" onclick="openMoMWriteDrawer()">회의록 작성</button>
+					</div>
+				</div>
+
+				<!-- 보고서, 회의록 목록 테이블 카드 --> <!-- 하위업무 보고서는 전체공개, 업무 보고서는 쓴 사람만 열람 가능  --><!-- 페이징 필요 -->
+				<div class="document-board-card">
+					<ul class="document-grid-header document-grid-cols">
+						<li>번호</li>
+						<li>분류 / 대상업무</li>
+						<li>제목</li>
+						<li>작성자</li>
+						<li>작성일</li>
+					</ul>
+
+					<ul class="document-list-body" id="documentListBody">
+						<li class="document-empty-row" id="documentEmptyRow"
+						    th:style="${taskdocuments == null or #lists.isEmpty(taskdocuments)} ? 'display:block;' : 'display:none;'">
+							열람 가능한 회의록/보고서가 없습니다.
+						</li>
+
+						<th:block th:if="${taskdocuments != null}">
+							<li class="document-item-row document-grid-cols"
+							    th:each="n : ${taskdocuments}"
+							    th:attr="data-document-id=${n['documentId']}, data-type=${n['documentType']}, data-title=${n['title']}, data-writer=${n['writerName']}"
+							    th:onclick="|opendocumentDetailDrawer(${n['documentId']}, this)|">
+
+								<!-- 1. 공지 번호 -->
+								<div class="col-n-id" th:text="|#${n['documentId']}|">#1</div>
+
+								<!-- 2. 공지 범위(WORKSPACE / PROJECT / TASK) 및 연결 업무명 -->
+								<div class="col-n-type">
+									<span class="n-type-badge"
+									      th:classappend="${n['documentType'] == 'TASK'} ? 'type-task' : 'type-project'"
+									      th:text="${n['documentType'] == 'WORKSPACE' ? '전체공지' : (n['documentType'] == 'TASK' ? '업무공지' : '프로젝트')}">전체공지</span>
+									<span class="n-task-chip"
+									      th:if="${n['taskTitle'] != null}"
+									      th:text="${n['taskTitle']}">연결 업무명</span>
+								</div>
+
+								<!-- 3. 공지 제목 -->
+								<div class="col-n-title">
+									<span class="document-title-text" th:text="${n['title']}">공지사항 제목</span>
+								</div>
+
+								<!-- 5. 작성자 -->
+								<div class="col-n-writer" th:text="${n['writerName']}">팀 리더</div>
+
+								<!-- 7. 작성일 -->
+								<div class="col-n-date" th:text="${n['created'] != null ? n['created'] : '-'}">2026-10-16</div>
+							</li>
+						</th:block>
+					</ul>
+				</div>
+
+			</div>
+			<div id="">
+				<form th:action="@{/{domainKey}/project/{projectId}/api/tasks/{taskId}/reports(domainKey=${domainKey}, projectId=${projectId}, taskId=${taskId})}" method="post">
+					<input>
+					<button type="submit"></button>
+				</form>
+			
+			</div>
+
+			<aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
+
+		</div>
+
+		<!-- Thymeleaf 전역 변수 바인딩 -->
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
+			const currentProjectId = /*[[${projectId}]]*/ 1;
+			const currentProjectMemberId = /*[[${currentProjectMemberId}]]*/ 1;
+			const isTeamLeader = /*[[${isTeamLeader != null ? isTeamLeader : false}]]*/ false;
+			/*]]>*/
+		</script>
+		<script th:src="@{/dist/js/project/task_document.js}"></script>
+	</div>
+</body>
+</html>

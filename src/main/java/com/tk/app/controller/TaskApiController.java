@@ -11,6 +11,7 @@ import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.domain.dto.TaskMemberDto;
+import com.tk.app.domain.dto.TeamReportDto;
 import com.tk.app.service.TaskService;
 
 import lombok.RequiredArgsConstructor;
@@ -250,5 +251,14 @@ public class TaskApiController {
         taskService.deleteTaskNotice(noticeId);
         res.put("success", true);
         return ResponseEntity.ok(res);
+    }
+    
+    // 13. 보고서 CRUD
+    
+    @PostMapping("/{taskId}/reports")
+    public void createTaskNotice(
+            @PathVariable("taskId") Long taskId,
+            @RequestBody TeamReportDto dto) {
+    	taskService.createTeamReport(dto);
     }
 }

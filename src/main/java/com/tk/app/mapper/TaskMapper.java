@@ -9,9 +9,11 @@ import org.apache.ibatis.annotations.Param;
 import com.tk.app.domain.dto.CalendarEventDto;
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.DashboardSummaryDto;
+import com.tk.app.domain.dto.MomDto;
 import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.domain.dto.TaskMemberDto;
+import com.tk.app.domain.dto.TeamReportDto;
 
 @Mapper
 public interface TaskMapper {
@@ -56,7 +58,7 @@ public interface TaskMapper {
     int insertCalendarEvent(com.tk.app.domain.dto.CalendarEventDto dto);
     int deleteCalendarEvent(@Param("scheduleId") Long scheduleId);
     
-    // 8. 업무공지(notice) 탭 전용 CRUD 및 권한 확인
+    // 8. 업무공지(notice) 탭 전용 CRUD 
     Map<String, Object> selectProjectMemberRoleInfo(@Param("projectMemberId") Long projectMemberId);
     List<Map<String, Object>> selectTaskNoticesByProject(
             @Param("projectId") Long projectId,
@@ -66,4 +68,18 @@ public interface TaskMapper {
     int insertTaskNotice(Map<String, Object> param);
     int updateTaskNotice(Map<String, Object> param);
     int softDeleteTaskNotice(@Param("noticeId") Long noticeId);
+    
+    // 9. 문서 탭 CRUD 
+    List<TeamReportDto> selectReportList(Long projectId);
+    List<MomDto> selectMomList(Long projectId);
+    
+    int insertTeamReport(TeamReportDto dto);
+    int updateTeamReport(TeamReportDto dto);
+    int softDeleteTeamReport(Long TeamReportId);
+    
+    int insertMOM (MomDto dto);
+    int updateMOM (MomDto dto);
+    int softDeleteMOM (Long meetingMinuteId);
+    
+    
 }

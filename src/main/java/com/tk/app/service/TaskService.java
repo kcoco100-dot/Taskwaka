@@ -11,6 +11,7 @@ import com.tk.app.domain.dto.ProjectDto;
 import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.domain.dto.TaskMemberDto;
+import com.tk.app.domain.dto.TeamReportDto;
 import com.tk.app.mapper.ProjectMapper;
 
 public interface TaskService {
@@ -54,4 +55,6 @@ public interface TaskService {
     Map<String, Object> createTaskNotice(java.util.Map<String, Object> param);
     void updateTaskNotice(java.util.Map<String, Object> param);
     void deleteTaskNotice(Long noticeId);
+    
+    public void createTeamReport(TeamReportDto dto);
 }

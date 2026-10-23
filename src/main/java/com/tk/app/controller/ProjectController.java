@@ -35,8 +35,7 @@ public class ProjectController {
     	
     	log.info("currentProjectMemberId: " + currentProjectMemberId);
     	
-     // 탭 정규식 허용 범위에 notice 추가
-        if (!tab.matches("notice|dashboard|task|gantt|calendar|document")) {
+        if (!tab.matches("dashboard|task|gantt|calendar|document|notice")) {
             tab = "dashboard";
         }
 
@@ -49,17 +48,30 @@ public class ProjectController {
         model.addAttribute("activeTab", tab);
         model.addAttribute("projectName", pDto.getSubject());
         model.addAttribute("currentProjectMemberId", currentProjectMemberId);
+        model.addAttribute("tasks", taskService.getTaskList(projectId));
         
-        if ("dashboard".equals(tab)) {
-            model.addAttribute("summary", taskService.getDashboardSummary(projectId));
-            model.addAttribute("upcomingTasks", taskService.getUpcomingSubTasks(projectId));
-            model.addAttribute("notices", taskService.getRecentProjectNotices(projectId));
-            model.addAttribute("tasks", taskService.getTaskList(projectId));
-        } else if ("task".equals(tab) || "gantt".equals(tab) || "calendar".equals(tab)) {
-            model.addAttribute("tasks", taskService.getTaskList(projectId));
-        }else if ("notice".equals(tab)) {
-            model.addAttribute("taskNotices", taskService.getTaskNoticeList(projectId, isTeamLeader));
-            model.addAttribute("tasks", taskService.getTaskList(projectId));
+        switch(tab) {
+	        case "dashboard" -> {
+	            model.addAttribute("summary", taskService.getDashboardSummary(projectId));
+	            model.addAttribute("upcomingTasks", taskService.getUpcomingSubTasks(projectId));
+	            model.addAttribute("notices", taskService.getRecentProjectNotices(projectId));
+
+	        }
+	        case "task" -> {
+	        	
+	        }
+	        case "gantt" -> {
+	        	
+	        }
+	        case "calendar" -> {
+	        	
+	        }
+	        case "document" -> {
+	        	//model.addAttribute();
+	        }
+	        case "notice" -> {
+	        	model.addAttribute("taskNotices", taskService.getTaskNoticeList(projectId, isTeamLeader));
+	        }
         }
 
         return "project/project_layout";
