@@ -63,15 +63,21 @@
 		    AND mm.deleted IS NULL
 		    AND EXISTS (
 		        SELECT 1
-		        FROM project_members pm
-		        JOIN workspace_members wm
-		            ON wm.workspace_member_id = pm.workspace_member_id
-		            AND wm.workspace_id = p.workspace_id
-		        WHERE pm.project_id = p.project_id
+		        FROM workspace_members wm
+		        WHERE wm.workspace_id = p.workspace_id
 		            AND wm.member_id = #{memberId}
 		            AND wm.status = 0
-		            AND pm.left IS NULL
-		)
+		            AND (
+		            		wm.role = 70
+		            		OR EXISTS (
+			        			SELECT 1
+			        			FROM project_members pm
+			        			WHERE pm.project_id = p.project_id
+			        				AND pm.workspace_member_id = wm.workspace_member_id
+			        				AND pm.left IS NULL
+			        			)
+			        		)
+		            )
 	</select>
 	
 	<!-- 이전글 -->
@@ -85,25 +91,31 @@
 			AND cp.workspace_id = p.workspace_id
 		WHERE p.workspace_id = #{workspaceId}
 		  AND m.deleted IS NULL
-		  AND EXISTS (
-		      SELECT 1
-		      FROM project_members pm
-		      JOIN workspace_members wm
-		        ON wm.workspace_member_id = pm.workspace_member_id
-		        AND wm.workspace_id = p.workspace_id
-		      WHERE pm.project_id = p.project_id
-		        AND wm.member_id = #{memberId}
-		        AND wm.status = 0
-		        AND pm.left IS NULL
-		        AND c.deleted IS NULL
-		        AND (
-				    m.created &gt; c.created
-				    OR (
-				        m.created = c.created
-				        AND m.meeting_minute_id &gt; c.meeting_minute_id
-				    )
-				)
-		  )
+		 AND EXISTS (
+		    SELECT 1
+		    FROM workspace_members wm
+		    WHERE wm.workspace_id = p.workspace_id
+		      AND wm.member_id = #{memberId}
+		      AND wm.status = 0
+		      AND (
+		          wm.role = 70
+		          OR EXISTS (
+		              SELECT 1
+		              FROM project_members pm
+		              WHERE pm.project_id = p.project_id
+		                AND pm.workspace_member_id = wm.workspace_member_id
+		                AND pm.left IS NULL
+		          )
+		      )
+		)
+		AND c.deleted IS NULL
+		AND (
+		    m.created &gt; c.created
+		    OR (
+		        m.created = c.created
+		        AND m.meeting_minute_id &gt; c.meeting_minute_id
+		    )
+		)
 		  ORDER BY m.created ASC, m.meeting_minute_id ASC
 		  FETCH FIRST 1 ROWS ONLY
 	</select>
@@ -120,24 +132,30 @@
 		WHERE p.workspace_id = #{workspaceId}
 		  AND m.deleted IS NULL
 		  AND EXISTS (
-		      SELECT 1
-		      FROM project_members pm
-		      JOIN workspace_members wm
-		        ON wm.workspace_member_id = pm.workspace_member_id
-		        AND wm.workspace_id = p.workspace_id
-		      WHERE pm.project_id = p.project_id
-		        AND wm.member_id = #{memberId}
-		        AND wm.status = 0
-		        AND pm.left IS NULL
-		        AND c.deleted IS NULL
-		        AND (
-				    m.created &lt; c.created
-				    OR (
-				        m.created = c.created
-				        AND m.meeting_minute_id &lt; c.meeting_minute_id
-				    )
-				)
-		  )
+			    SELECT 1
+			    FROM workspace_members wm
+			    WHERE wm.workspace_id = p.workspace_id
+			      AND wm.member_id = #{memberId}
+			      AND wm.status = 0
+			      AND (
+			          wm.role = 70
+			          OR EXISTS (
+			              SELECT 1
+			              FROM project_members pm
+			              WHERE pm.project_id = p.project_id
+			                AND pm.workspace_member_id = wm.workspace_member_id
+			                AND pm.left IS NULL
+			          )
+			      )
+			)
+			AND c.deleted IS NULL
+			AND (
+			    m.created &lt; c.created
+			    OR (
+			        m.created = c.created
+			        AND m.meeting_minute_id &lt; c.meeting_minute_id
+			    )
+			)
 		  ORDER BY m.created DESC, m.meeting_minute_id DESC
 		  FETCH FIRST 1 ROWS ONLY
 	</select>

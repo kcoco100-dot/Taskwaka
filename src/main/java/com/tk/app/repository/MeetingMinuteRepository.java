@@ -87,14 +87,20 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			  AND m.deleted IS NULL
 			  AND EXISTS (
 			      SELECT 1
-			      FROM project_members pm
-			      JOIN workspace_members wm
-			        ON wm.workspace_member_id = pm.workspace_member_id
-			       AND wm.workspace_id = p.workspace_id
-			      WHERE pm.project_id = p.project_id
+			      FROM workspace_members wm
+			      WHERE wm.workspace_id = p.workspace_id
 			        AND wm.member_id = :memberId
 			        AND wm.status = 0
-			        AND pm.left IS NULL
+			        AND (
+			        		wm.role = 70
+			        		OR EXISTS (
+			        			SELECT 1
+			        			FROM project_members pm
+			        			WHERE pm.project_id = p.project_id
+			        				AND pm.workspace_member_id = wm.workspace_member_id
+			        				AND pm.left IS NULL
+			        			)
+			        		)
 			  )
 				AND (:kwd IS NULL OR m.title LIKE '%' || :kwd || '%')
 			""", nativeQuery = (true))
@@ -116,15 +122,21 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			  AND m.deleted IS NULL
 			  AND EXISTS (
 			      SELECT 1
-			      FROM project_members pm
-			      JOIN workspace_members wm
-			        ON wm.workspace_member_id = pm.workspace_member_id
-			       AND wm.workspace_id = p.workspace_id
-			      WHERE pm.project_id = p.project_id
+			      FROM workspace_members wm
+			      WHERE wm.workspace_id = p.workspace_id
 			        AND wm.member_id = :memberId
 			        AND wm.status = 0
-			        AND pm.left IS NULL
-			  )
+			        AND (
+			        		wm.role = 70
+			        		OR EXISTS (
+			        			SELECT 1
+			        			FROM project_members pm
+			        			WHERE pm.project_id = p.project_id
+			        				AND pm.workspace_member_id = wm.workspace_member_id
+			        				AND pm.left IS NULL
+			        		)
+			        	)
+			    )
 				AND (:kwd IS NULL OR m.title LIKE '%' || :kwd || '%')
 			ORDER BY m.meeting DESC NULLS LAST,
 			         m.created DESC,
