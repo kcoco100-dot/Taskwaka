@@ -260,29 +260,44 @@ document.addEventListener("DOMContentLoaded", function () {
 	        view.hidden = true;
 	    });
 		
-		loadMessages(chatRoomId);
+		loadMessages(chatRoomId, true);
 
 	}
 
 	function openRoom(room) {showDirectRoom(room.chatRoomId, room.targetName);}
 	
+	let roomListVersion = 0;
 
 	async function loadMyDirectRooms() {
-
 	    const domainKey = window.location.pathname.split("/")[1];
+	    // 가장 최근에 시작한 조회 요청인지 구분
+	    const version = ++roomListVersion;
 
 	    try {
 	        const res = await axios.get(
 	            "/" + domainKey + "/api/workchat/rooms/direct"
 	        );
 
-	        roomsVm.rooms = res.data;
+	        if (version !== roomListVersion) return;
+
+
+			const roomList = res.data;
+
+			roomList.forEach((room) => {
+			    if (isReadingRoom(room.chatRoomId)) {
+			        room.unreadCount = 0;
+			    }
+			});
+
+			roomsVm.rooms = roomList;
+
 
 	    } catch (e) {
+			
 	        console.error("채팅방 목록 조회 실패:", e);
 	    }
 	}
-	
+
 	
 	
 	const messageList = document.querySelector('.workchat-messages')
@@ -301,44 +316,114 @@ document.addEventListener("DOMContentLoaded", function () {
 	    }
 	}).mount(messageList);
 	
-	async function loadMessages(chatRoomId) {
+	// 채팅방을 보고 있는지 체크
+	function isReadingRoom(chatRoomId) {
+	    if (modal.hidden) return false;
+
+	    if (document.hidden) return false;
+
+	    if (Number(activeChatRoomId) !== Number(chatRoomId)) {
+	        return false;
+	    }
+
+	    const chatsPanel = modal.querySelector('[data-workchat-panel="chats"]');
+	    const chatsView = modal.querySelector('[data-workchat-view="chats"]');
+
+	    if (! chatsPanel || chatsPanel.hidden) return false;
+	    if (! chatsView || chatsView.hidden) return false;
+
+	    return true;
+	}
+
+	
+	let messageLoadVersion = 0;
+
+	async function loadMessages(chatRoomId, silent = false) {
 
 	    const domainKey = window.location.pathname.split("/")[1];
 
-	    messageVm.messages = [];
-	    messageVm.loading = true;
-	    messageVm.failed = false;
+	    // 요청마다 번호를 부여해 이전 요청 결과가 뒤늦게
+	    // 도착하더라도 최신 화면을 덮어쓰지 못하게 함
+	    const version = ++messageLoadVersion;
+
+	    let loadedMessages = null;
+
+		if (! silent) {
+		    messageVm.messages = [];
+		    messageVm.loading = true;
+		    messageVm.failed = false;
+		}
 
 	    try {
 	        const res = await axios.get(
 	            "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/messages"
 	        );
-	        // 채팅방을 바꾼 경우 이전 요청 결과 무시
-	        if (activeChatRoomId !== chatRoomId) return;
 
+	        if (version !== messageLoadVersion || Number(activeChatRoomId) !== Number(chatRoomId)) {
+	            return;
+	        }
+			
+			messageVm.failed = false;
 	        messageVm.messages = res.data;
+	        // 읽음 처리할 메시지 목록 보관
+	        loadedMessages = res.data;
 
 	    } catch (e) {
-	        if (activeChatRoomId !== chatRoomId) return;
 
 	        console.error("메시지 조회 실패:", e);
 	        messageVm.failed = true;
 
 	    } finally {
-	        if (activeChatRoomId === chatRoomId) {
+	        if (version === messageLoadVersion && Number(activeChatRoomId) === Number(chatRoomId)) {
+	            // 로딩 상태를 먼저 종료해야 메시지가 화면에 나타남
 	            messageVm.loading = false;
-
-	            Vue.nextTick(function() {
-	                messageList.scrollTop = messageList.scrollHeight;
-	            });
+	            // Vue가 화면을 갱신할 때까지 기다림
+	            await Vue.nextTick();
+	            // 메시지 목록을 맨 아래로 스크롤
+	            messageList.scrollTop = messageList.scrollHeight;
+	            // 정상 조회했고 실제 대화 화면을 보고 있다면 읽음 처리
+	            if (loadedMessages !== null && isReadingRoom(chatRoomId)) {
+	                await markRoomAsRead(chatRoomId, loadedMessages);
+	            }
 	        }
 	    }
 	}
+
+
+	// 메시지 읽음 처리
+	async function markRoomAsRead(chatRoomId, messages) {
+	    if (! isReadingRoom(chatRoomId)) return;
+
+	    if (! Array.isArray(messages) || messages.length === 0) {
+	        return;
+	    }
+
+	    const lastMessage = messages[messages.length - 1];
+	    const messageId = lastMessage.messageId;
+
+	    if (messageId == null) return;
+
+	    const domainKey = window.location.pathname.split("/")[1];
+
+	    try {
+	        await axios.post(
+	            "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/read",
+	            {
+	                messageId: messageId
+	            }
+	        );
+			
+	        await loadMyDirectRooms();
+
+	    } catch (e) {
+	        console.error("메시지 읽음 처리 실패:", e);
+	    }
+	}
+
 	
 	const messageInput = modal.querySelector(".workchat-input");
 	const sendButton = modal.querySelector(".workchat-send");
 	
-
 	async function sendMessage() {
 
 	    if (activeChatRoomId == null) {
@@ -366,12 +451,11 @@ document.addEventListener("DOMContentLoaded", function () {
 	        );
 
 	        if (activeChatRoomId === chatRoomId) {
-
 	            messageInput.value = "";
 
 	            await loadMessages(chatRoomId);
 	        }
-			
+	
 			await loadMyDirectRooms();
 
 	    } catch (e) {
@@ -396,10 +480,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	
 
 
-	// ========================================
 	// WebSocket 연결
 	// ========================================
-
 
 	let stompClient = null;
 	
@@ -409,35 +491,36 @@ document.addEventListener("DOMContentLoaded", function () {
 	    stompClient = Stomp.over(socket);
 		stompClient.debug = function() {};
 		
-	    stompClient.connect({}, function(frame) {
-
-
+	    stompClient.connect({}, () => {
 	        // 로그인한 사용자 전용 알림 구독
-	        stompClient.subscribe("/user/queue/workchat",
-	            function(res) {
-	                // 서버에서 전달한 채팅방 번호
-	                const chatRoomId = Number(res.body);
-					
-					loadMyDirectRooms();
+			stompClient.subscribe("/user/queue/workchat", function(res) {
 
-	                // 현재 열어둔 채팅방인지 확인
-	                if (activeChatRoomId != null && Number(activeChatRoomId) === chatRoomId) {
+			    const chatRoomId = Number(res.body);
 
-	                    loadMessages(activeChatRoomId);
-	                }
-	            }
-	        );
+			    loadMyDirectRooms();
 
-	    }, function(error) {
-	        console.error("워크챗 WebSocket 연결 실패:", error);
+			    if (isReadingRoom(chatRoomId)) loadMessages(chatRoomId, true);
+				
+			});
+	    }, (e) => {
+	        console.error("워크챗 WebSocket 연결 실패:", e);
 	    });
 	}
-
-
-
-
-
 	
+	// WebSocket 연결과 별도로 브라우저 탭 복귀 감지
+	document.addEventListener("visibilitychange", () => {
+
+	    if (document.hidden) return;
+
+	    if (modal.hidden) return;
+
+	    loadMyDirectRooms();
+
+	    if (activeChatRoomId != null && isReadingRoom(activeChatRoomId)) {
+	        loadMessages(activeChatRoomId, true);
+	    }
+	});
+
 
 
 

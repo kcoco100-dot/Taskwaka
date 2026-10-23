@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.WorkChatGroupMapper">
+
+	<select id="findWorkIdByDomain" resultType="Long">
+    	SELECT workspace_id
+    	FROM workspace_domains
+    	WHERE domain_key = #{domainKey}
+      	AND active = 'Y'
+	</select>
+	
+	<insert id="insertGroupRoom" parameterType="WorkChatGroupDto">
+		INSERT INTO chat_rooms (chat_room_id, workspace_member_id, chat, room_name, created)
+    	VALUES (#{chatRoomId}, #{myWorkId}, 'GROUP', #{roomName}, SYSDATE)
+	</insert>
+	
+	
+	<select id="findMyGroupRooms" parameterType="WorkChatMemberDto" resultType="WorkChatMemberDto">
+	    SELECT cr.chat_room_id "chatRoomId", cr.room_name "roomName",
+	        (
+	            SELECT COUNT(*)
+	            FROM chat_room_members crm
+	            JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
+	            WHERE crm.chat_room_id = cr.chat_room_id
+	              AND crm.status = 0
+	              AND wm.status = 0
+	        ) "participantCount"
+	        
+	    FROM chat_rooms cr
+	
+	    -- 채팅방이 속한 워크스페이스 확인
+	    JOIN workspace_members owner_wm
+	      ON cr.workspace_member_id = owner_wm.workspace_member_id
+	
+	    -- 현재 로그인 회원이 해당 그룹의 참여자인지 확인
+	    JOIN chat_room_members crm
+	      ON cr.chat_room_id = crm.chat_room_id
+	     AND crm.status = 0
+	
+	    JOIN workspace_members my_wm
+	      ON crm.workspace_member_id = my_wm.workspace_member_id
+	     AND my_wm.status = 0
+	
+	    JOIN workspace_domains wd
+	      ON my_wm.workspace_id = wd.workspace_id
+	     AND wd.domain_key = #{domainKey}
+	     AND wd.active = 'Y'
+	
+	    WHERE cr.chat = 'GROUP'
+	      AND my_wm.member_id = #{loginMemberId}
+	      AND owner_wm.workspace_id = my_wm.workspace_id
+	
+	    ORDER BY cr.created DESC, cr.chat_room_id DESC
+	
+	</select>
+	
+
+</mapper>

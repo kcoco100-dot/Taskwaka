@@ -184,7 +184,43 @@ public class WorkChatRoomController {
 	                .body("메시지 전송 중 오류가 발생했습니다.");
 	    }
 	}
+	
 
+	@PostMapping("/{chatRoomId}/read")
+	public ResponseEntity<?> markRoomAsRead(
+	        @PathVariable String domainKey,
+	        @PathVariable Long chatRoomId,
+	        @RequestBody WorkChatMessageDto dto,
+	        @AuthenticationPrincipal CustomUserDetails customUserDetails){
+		try {
+			if (customUserDetails == null) {
+		        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		    }
+		
+		    dto.setDomainKey(domainKey);
+		    dto.setChatRoomId(chatRoomId);
+		    dto.setLoginMemberId(customUserDetails.getMember().getMember_id());
+		
+		    service.markRoomAsRead(dto);
+		
+		    return ResponseEntity.ok().build();
+		    
+		} catch (ResponseStatusException e) {
 
+	        log.error("markRoomAsRead : ", e);
+
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+
+	    } catch (Exception e) {
+
+	        log.error("markRoomAsRead : ", e);
+
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("메시지 읽음 처리 중 오류가 발생했습니다.");
+	    }
+	}
 
 }

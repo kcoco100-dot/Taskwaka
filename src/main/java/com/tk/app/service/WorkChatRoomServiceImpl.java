@@ -278,6 +278,35 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 		}
 		
 	}
+
+	@Override
+	public void markRoomAsRead(WorkChatMessageDto dto) throws Exception {
+		try {
+		    int count = mapper.countReadableRoom(dto);
+
+		    if (count == 0) {
+		        throw new ResponseStatusException(
+		            HttpStatus.FORBIDDEN, "접근할 수 없는 채팅방입니다.");
+		    }
+
+		    // 로그인 회원의 채팅방 참여자 번호 조회
+		    Long roomMemberId = mapper.findSenderRoomMemberId(dto);
+
+		    if (roomMemberId == null) {
+		        throw new ResponseStatusException(
+		            HttpStatus.FORBIDDEN, "채팅방 참여 정보를 찾을 수 없습니다.");
+		    }
+
+		    dto.setChatRoomMemberId(roomMemberId);
+
+		    mapper.updateLastReadMessage(dto);
+			
+		} catch (Exception e) {
+			log.info("markRoomAsRead : ", e);
+			throw e;
+		}
+		
+	}
 }
 	
 	
