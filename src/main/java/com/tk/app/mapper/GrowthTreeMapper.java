@@ -107,6 +107,9 @@ public interface GrowthTreeMapper {
 	// 승인 정보 조회
 	public Map<String, Object> selectTeamReportApproveContext(Map<String, Object> params);
 
+	// 프로젝트 보고서 PM 이 최종 승인 시 +30
+	public Map<String, Object> selectProjectReportApproveContext(Map<String, Object> params);
+	
 	// 일일 보고서 승인 시 +10
 	public int countDailyReportApproveExpLog(GrowthExpLogDto dto);
 
