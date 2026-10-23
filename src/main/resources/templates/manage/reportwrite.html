@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/approval.css}">
+    <style>
+        .report-write-page .page-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+        .report-write-page .report-write-panel {max-width:1000px;margin:0 auto;padding:32px;border:1px solid #e8e2d9;border-radius:16px;background:#fff;box-shadow:0 4px 16px rgba(89,67,49,.035);}
+        .report-write-page .report-write-intro {margin:0 0 26px;padding-bottom:20px;border-bottom:1px solid #eee8e0;}
+        .report-write-page .report-write-intro h2 {margin:0 0 8px;color:#594331;font-size:18px;font-weight:700;}
+        .report-write-page .report-write-intro p {margin:0;color:#8b7d6e;font-size:13px;}
+        .report-write-page .report-form-grid {display:grid;grid-template-columns:1fr 1fr;gap:22px 20px;}
+        .report-write-page .report-form-field {min-width:0;}
+        .report-write-page .report-form-field.full {grid-column:1/-1;}
+        .report-write-page .report-form-field label {display:block;margin-bottom:9px;color:#665747;font-size:13px;font-weight:600;}
+        .report-write-page .report-form-field input:not([type=file]),
+        .report-write-page .report-form-field select,
+        .report-write-page .report-form-field textarea {width:100%;padding:11px 13px;border:1px solid #ddd5ca;border-radius:9px;background:#fff;color:#594331;font:inherit;font-size:14px;box-sizing:border-box;}
+        .report-write-page .report-form-field input:not([type=file]),
+        .report-write-page .report-form-field select {min-height:44px;}
+        .report-write-page .report-form-field textarea {min-height:260px;resize:vertical;line-height:1.7;}
+        .report-write-page .report-form-field input:focus,
+        .report-write-page .report-form-field select:focus,
+        .report-write-page .report-form-field textarea:focus {outline:2px solid #71865b;outline-offset:1px;}
+        .report-write-page .report-helper {margin:8px 0 0;color:#8b7d6e;font-size:12px;line-height:1.6;}
+        .report-write-page .report-file-box {display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px;border:1px dashed #cfc4b6;border-radius:10px;background:#faf9f7;}
+        .report-write-page .report-file-box input[type=file] {max-width:100%;font-size:13px;color:#665747;}
+        .report-write-page .report-file-list {margin:8px 0 0;padding-left:18px;color:#665747;font-size:13px;}
+        .report-write-page .report-actions {display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:30px;padding-top:24px;border-top:1px solid #eee8e0;}
+        .report-write-page .report-actions .approval-button {display:inline-flex;align-items:center;justify-content:center;min-height:42px;text-decoration:none;}
+        .report-write-page .report-error {margin:0 0 18px;color:#b42318;font-size:13px;}
+        @media (max-width:700px) {.report-write-page .report-write-panel{padding:20px}.report-write-page .report-form-grid{grid-template-columns:1fr}.report-write-page .report-form-field.full{grid-column:1}}
+    </style>
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout approval-layout">
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('approval')}"></nav>
+
+        <section class="section approval-page report-write-page" aria-labelledby="report-write-heading">
+            <div class="page-heading">
+                <div>
+                    <h1 id="report-write-heading" class="page-title">프로젝트 보고서 등록</h1>
+                    <p class="page-description">프로젝트 진행 상황을 작성하고 자료를 첨부하세요.</p>
+                </div>
+            </div>
+
+            <div class="report-write-panel">
+                <div class="report-write-intro">
+                    <h2>보고서 작성</h2>
+                    <p>프로젝트, 제목, 진행률, 내용 입력 후 등록완료를 눌러 주세요.</p>
+                </div>
+
+                <p class="report-error" th:if="${errorMessage != null}" th:text="${errorMessage}"></p>
+
+                <form id="reportForm" name="reportForm" method="post" enctype="multipart/form-data"
+                      th:action="@{/{domainKey}/manage/report/write(domainKey=${domainKey})}"
+                      th:object="${dto}">
+                    <input type="hidden" id="projectMemberId" th:field="*{projectMemberId}">
+                    <div class="report-form-grid">
+                        <div class="report-form-field full">
+                            <label for="reportProject">프로젝트 <span aria-hidden="true">*</span></label>
+                            <select id="reportProject" th:field="*{projectId}" required>
+                                <option value="">프로젝트를 선택하세요</option>
+                                <option th:each="p : ${projectOptions}"
+                                        th:value="${p.projectId}"
+                                        th:attr="data-member-id=${p.projectMemberId}"
+                                        th:text="${p.projectName}">프로젝트명</option>
+                            </select>
+                            <p class="report-helper">현재 참여 중인 프로젝트만 선택할 수 있습니다.</p>
+                        </div>
+
+                        <div class="report-form-field full">
+                            <label for="reportTitle">보고서 제목 <span aria-hidden="true">*</span></label>
+                            <input type="text" id="reportTitle" th:field="*{reportTitle}"
+                                   maxlength="200" placeholder="보고서 제목을 입력하세요" required>
+                        </div>
+
+                        <div class="report-form-field">
+                            <label for="reportProgress">현재 진행률(%) <span aria-hidden="true">*</span></label>
+                            <input type="number" id="reportProgress" th:field="*{progress}"
+                                   min="0" max="100" step="0.01" placeholder="0 ~ 100" required>
+                            <p class="report-helper">0부터 100까지 입력해 주세요.</p>
+                        </div>
+
+                        <div class="report-form-field">
+                            <label>보고서 유형</label>
+                            <input type="text" value="프로젝트 보고서" readonly aria-label="프로젝트 보고서">
+                        </div>
+
+                        <div class="report-form-field full">
+                            <label for="reportContent">보고서 내용 <span aria-hidden="true">*</span></label>
+                            <textarea id="reportContent" th:field="*{content}"
+                                      placeholder="진행 현황, 주요 완료 업무, 향후 계획 등을 작성하세요" required></textarea>
+                        </div>
+
+                        <div class="report-form-field full">
+                            <label for="reportFiles">첨부파일</label>
+                            <div class="report-file-box">
+                                <input type="file" id="reportFiles" name="files" multiple>
+                                <span class="report-helper" id="fileSummary">선택된 파일 없음</span>
+                            </div>
+                            <ul class="report-file-list" id="selectedFiles" hidden></ul>
+                        </div>
+                    </div>
+
+                    <div class="report-actions">
+                        <button type="submit" class="approval-button approval-button-primary">등록완료</button>
+                        <button type="reset" class="approval-button">다시입력</button>
+                        <a class="approval-button" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">등록취소</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('reportForm');
+            const project = document.getElementById('reportProject');
+            const memberId = document.getElementById('projectMemberId');
+            const files = document.getElementById('reportFiles');
+            const summary = document.getElementById('fileSummary');
+            const fileList = document.getElementById('selectedFiles');
+
+            function syncProject() {
+                const option = project.selectedOptions[0];
+                memberId.value = option && option.value ? (option.dataset.memberId || '') : '';
+            }
+            function syncFiles() {
+                fileList.replaceChildren();
+                const selected = Array.from(files.files || []);
+                summary.textContent = selected.length ? selected.length + '개 파일 선택' : '선택된 파일 없음';
+                fileList.hidden = selected.length === 0;
+                selected.forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    fileList.appendChild(li);
+                });
+            }
+
+            project.addEventListener('change', syncProject);
+            files.addEventListener('change', syncFiles);
+            form.addEventListener('reset', function () {
+                setTimeout(function () { syncProject(); syncFiles(); }, 0);
+            });
+            form.addEventListener('submit', function (e) {
+                syncProject();
+                if (!project.value || !memberId.value) {
+                    e.preventDefault();
+                    alert('등록할 수 있는 프로젝트를 선택해 주세요.');
+                }
+            });
+            syncProject();
+        });
+    </script>
+</th:block>
+</html>

@@ -328,5 +328,47 @@
 	    FROM (<include refid="reportListSource"/>) R
 	</select>
 
+	<!-- 보고서 등록 -->
+	<insert id="insertReport" parameterType="com.tk.app.domain.dto.ManageReportDto">
+		<selectKey keyProperty="reportId" resultType="long" order="BEFORE">
+			SELECT seq_project_reports.NEXTVAL FROM dual
+		</selectKey>
+		INSERT INTO project_reports(project_report_id, project_id, project_member_id, title, content,
+			progress, status, report_date, created)
+		SELECT #{reportId}, #{projectId}, #{projectMemberId},
+	         #{reportTitle}, #{content}, #{progress}, 0, SYSDATE, SYSDATE
+		FROM project_members pm
+		WHERE pm.project_member_id = #{projectMemberId} AND pm.role &gt;= 50 AND pm.project_id = #{projectId} AND pm.status = 0
+	</insert>
 
+	<!-- 보고서 파일 등록 -->
+	<insert id="insertReportFile"  parameterType="com.tk.app.domain.dto.ManageReportDto">
+		INSERT INTO report_files(report_file_id, project_report_id, original_name, stored_name, path, file_size, uploaded)
+		SELECT seq_report_files.NEXTVAL, pr.project_report_id, #{originalName}, #{storedName}, #{path}, #{fileSize}, SYSDATE
+		FROM project_reports pr
+		WHERE pr.project_report_id = #{projectReportId} AND pr.project_member_id = #{projectMemberId}
+	</insert>
+	
+	<!-- 보고서 등록 가능한 프로젝트 목록 -->
+	<select id="listWritableProjects" parameterType="map" resultType="map">
+	    SELECT p.project_id AS "projectId",
+	           p.subject AS "projectName",
+	           pm.project_member_id AS "projectMemberId"
+	    FROM projects p
+	    JOIN project_members pm
+	        ON pm.project_id = p.project_id
+	    JOIN workspace_members wm
+	        ON wm.workspace_member_id = pm.workspace_member_id
+	    JOIN workspace_domains wd
+	        ON wd.workspace_id = p.workspace_id
+	    WHERE wd.domain_key = #{domainKey}
+	      AND wd.active = 'Y'
+	      AND wm.member_id = #{memberId}
+	      AND wm.status = 0
+	      AND pm.status = 0
+	      AND pm.role &gt;= 50
+	      AND p.deleted IS NULL
+	    ORDER BY p.subject
+	</select>
+	
 </mapper>

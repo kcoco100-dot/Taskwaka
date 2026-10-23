@@ -11,4 +11,8 @@ public interface ManageReportService {
     public ManageReportDto openReport(Map<String, Object> map);
     public void updateReview(Map<String, Object> map);
     public Map<String, Object> countReportStatuses(Map<String, Object> map);
+    
+    public void insertReport(ManageReportDto dto) throws Exception;
+	public void insertReportFile(ManageReportDto dto) throws Exception;
+	public List<Map<String, Object>> listWritableProjects(Map<String, Object> map) throws Exception;
 }

@@ -34,4 +34,10 @@ public class ManageReportDto {
     private String reviewedDate;
 
     private int canReview;
+    
+    private Long reportFileId;
+    private String originalName;
+    private String storedName;
+    private String path;
+    private Long fileSize;
 }

@@ -1,5 +1,6 @@
 package com.tk.app.mapper;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -25,4 +26,8 @@ public interface ManageReportMapper {
 	public int updateProjectProgress(Map<String, Object> map);
 
 	public Map<String, Object> countReportStatuses(Map<String, Object> map);
+	
+	public void insertReport(ManageReportDto dto) throws Exception;
+	public void insertReportFile(ManageReportDto dto) throws Exception;
+	public List<Map<String, Object>> listWritableProjects(Map<String, Object> map) throws SQLException;
 }

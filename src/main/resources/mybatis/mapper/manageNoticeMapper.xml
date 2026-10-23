@@ -314,8 +314,7 @@
     </update>
 
     <!-- 공지사항 첨부파일 목록 -->
-    <select id="selectNoticeFiles" parameterType="map"
-            resultType="com.tk.app.domain.dto.ManageNoticeDto">
+    <select id="selectNoticeFiles" parameterType="map" resultType="com.tk.app.domain.dto.ManageNoticeDto">
         SELECT f.notice_file_id, f.notice_id,
                f.original_name, f.stored_name,
                f.file_path, f.file_size,

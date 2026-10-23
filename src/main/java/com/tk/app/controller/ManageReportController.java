@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,11 +13,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tk.app.common.MyUtil;
 import com.tk.app.common.PaginateUtil;
 import com.tk.app.common.RequestUtils;
+import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.ManageReportDto;
 import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.security.LoginMemberUtil;
@@ -36,7 +39,29 @@ public class ManageReportController {
 	private final ManageService manageService;
 	private final PaginateUtil paginateUtil;
 	private final MyUtil myUtil;
+	
+	private final StorageService storageService;
 
+	@Value("${file.upload-root}/reports")
+	private String uploadPath;
+
+	// 로그인 회원과 워크스페이스 조회 조건 생성
+	private Map<String, Object> requestMap(String domainKey) throws Exception {
+		SessionInfo info = LoginMemberUtil.getSessionInfo();
+		if (info == null) {
+			throw new IllegalStateException("로그인이 필요합니다.");
+		}
+		Long workspaceId = manageService.findByDomainKey(domainKey);
+		if (workspaceId == null) {
+			throw new IllegalStateException("워크스페이스를 찾을 수 없습니다.");
+		}
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("workspaceId", workspaceId);
+		map.put("memberId", info.getMember_id());
+		return map;
+	}
+	
 	// 보고서 목록 및 검색
 	@GetMapping({"", "/"})
 	public String listReport(@PathVariable("domainKey") String domainKey,
@@ -171,21 +196,99 @@ public class ManageReportController {
 	    return "redirect:/" + domainKey + "/manage/approval/detail"
 	            + "?reportCategory=" + reportCategory + "&reportId=" + reportId;
 	}
+	
 
-	// 로그인 회원과 워크스페이스 조회 조건 생성
-	private Map<String, Object> requestMap(String domainKey) throws Exception {
-		SessionInfo info = LoginMemberUtil.getSessionInfo();
-		if (info == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
-		Long workspaceId = manageService.findByDomainKey(domainKey);
-		if (workspaceId == null) {
-			throw new IllegalStateException("워크스페이스를 찾을 수 없습니다.");
-		}
+    // 프로젝트 보고서 등록 화면
+    @GetMapping({"/write", "/write/{projectId}"})
+    public String writeForm(@PathVariable("domainKey") String domainKey,
+            @PathVariable(name = "projectId", required = false) Long projectId,
+            Model model) {
 
-		Map<String, Object> map = new HashMap<>();
-		map.put("workspaceId", workspaceId);
-		map.put("memberId", info.getMember_id());
-		return map;
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            if (info == null) {
+                return "redirect:/login";
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("domainKey", domainKey);
+            map.put("memberId", info.getMember_id());
+
+            List<Map<String, Object>> projectOptions = service.listWritableProjects(map);
+            ManageReportDto dto = new ManageReportDto();
+
+            if (projectId != null) {
+                for (Map<String, Object> project : projectOptions) {
+                    Number id = (Number) project.get("projectId");
+                    Number memberId = (Number) project.get("projectMemberId");
+
+                    if (id != null && memberId != null
+                            && id.longValue() == projectId.longValue()) {
+                        dto.setProjectId(id.longValue());
+                        dto.setProjectMemberId(memberId.longValue());
+                        break;
+                    }
+                }
+            }
+
+            model.addAttribute("dto", dto);
+            model.addAttribute("projectOptions", projectOptions);
+            model.addAttribute("mode", "write");
+
+        } catch (Exception e) {
+            log.info("writeForm : ", e);
+            return "redirect:/" + domainKey + "/manage/approval";
+        }
+
+        return "manage/reportwrite";
+    }
+
+	
+	@PostMapping("/write")
+	public String writeSubmit(@PathVariable("domainKey") String domainKey,
+			ManageReportDto dto,
+			@RequestParam(value = "files", required = false) List<MultipartFile> files,
+			RedirectAttributes redict) {
+		
+	     try {
+	    	 if (dto.getProjectId() == null || dto.getProjectMemberId() == null) {
+	    		 throw new IllegalArgumentException("프로젝트 정보가 없습니다.");
+	    	 }
+
+            service.insertReport(dto);
+
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file == null || file.isEmpty()) {
+                        continue;
+                    }
+
+                    String originalName = file.getOriginalFilename();
+                    if (originalName == null || originalName.isBlank()) {
+                        throw new IllegalArgumentException("파일명이 없습니다.");
+                    }
+
+                    String storedName = storageService.uploadFileToServer(file, uploadPath);
+                    if (storedName == null || storedName.isBlank()) {
+                        throw new IllegalStateException("파일 저장에 실패했습니다.");
+                    }
+
+                    dto.setOriginalName(originalName);
+                    dto.setStoredName(storedName);
+                    dto.setPath(uploadPath);
+                    dto.setFileSize(file.getSize());
+
+                    service.insertReportFile(dto);
+                }
+            }
+
+		} catch (Exception e) {
+			log.info("writeSubmit : ", e);
+			
+		}
+		
+		
+	     return "redirect:/" + domainKey + "/manage/approval";
 	}
+	
 }

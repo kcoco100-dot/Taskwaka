@@ -1,5 +1,6 @@
 package com.tk.app.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ManageReportServiceImpl implements ManageReportService {
 
 	private final ManageReportMapper mapper;
-
+	private final GrowthTreeService growthTreeService;
+	
 	// 보고서 목록 조회
 	@Override
 	public List<ManageReportDto> listReport(Map<String, Object> map) {
@@ -148,6 +150,19 @@ public class ManageReportServiceImpl implements ManageReportService {
 						"이미 처리되었거나 결재할 수 없는 보고서입니다."
 				);
 			}
+			
+			if (dto.getReportCategory() == 2) {
+			    if (status == 1) {
+			        growthTreeService.grantTeamReportApproveExp(
+			                dto.getReportId(),
+			                dto.getReviewId(),
+			                ((Number) map.get("memberId")).longValue());
+			    } else if (status == 2) {
+			        growthTreeService.revokeTeamReportApproveExp(
+			                ((Number) map.get("workspaceId")).longValue(),
+			                dto.getReportId());
+			    }
+			}
 
 			if (status == 1 && dto.getReportCategory() == 2) {
 
@@ -181,4 +196,45 @@ public class ManageReportServiceImpl implements ManageReportService {
 			throw new IllegalStateException("보고서 결재 상태 조회 실패", e);
 		}
 	}
+
+	// 보고서 등록
+	@Override
+	public void insertReport(ManageReportDto dto) throws Exception {
+		try {
+			mapper.insertReport(dto);
+		} catch (Exception e) {
+			log.info("insertReport : ", e);
+			
+			throw e;
+		}
+	}
+
+	// 보고서 파일 등록
+	@Override
+	public void insertReportFile(ManageReportDto dto) throws Exception {
+		try {
+			mapper.insertReportFile(dto);
+		} catch (Exception e) {
+			log.info("insertReportFile : ", e);
+			
+			throw e;
+		}
+	}
+
+	@Override
+	public List<Map<String, Object>> listWritableProjects(Map<String, Object> map) throws Exception {
+		List<Map<String, Object>> result = new ArrayList<>();
+
+        try {
+            result = mapper.listWritableProjects(map);
+        } catch (Exception e) {
+            log.info("listWritableProjects : ", e);
+            throw e;
+        }
+
+        return result;
+	}
+	
+	
+	
 }

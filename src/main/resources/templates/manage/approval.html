@@ -15,11 +15,18 @@
 
         <section class="section approval-page" aria-labelledby="approval-heading">
             <div class="page-heading">
-                <h1 id="approval-heading" class="page-title">보고서 결재</h1>
-                <p class="page-description">프로젝트 보고서와 업무 보고서의 결재 현황을 확인하세요.</p>
-            </div>
+	            <div>
+	                <h1 id="approval-heading" class="page-title">보고서 결재</h1>
+	                <p class="page-description">프로젝트 보고서와 업무 보고서의 결재 현황을 확인하세요.</p>
+	            </div>
+                <a class="approval-button approval-button-primary"
+			       th:href="@{/{domainKey}/manage/report/write(domainKey=${domainKey})}">
+			        + 프로젝트 보고서 등록
+			    </a>
+			</div>
+            
+            
 
-            <!-- 공지사항과 같은 유형별 보고서 탭 -->
             <nav class="approval-category-tabs" aria-label="보고서 유형 선택">
                 <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=0,reviewStatus=${reviewStatus},keyword=${keyword})}"
                    th:classappend="${reportCategory == 0} ? ' is-active' : ''">전체 프로젝트</a>
@@ -29,28 +36,28 @@
                    th:classappend="${reportCategory == 2} ? ' is-active' : ''">업무 보고서</a>
             </nav>
 
-<div class="approval-summary-grid">
-    <div class="approval-summary-card">
-        <span class="approval-summary-label">미확인 보고서</span>
-        <strong class="approval-summary-count" th:text="${uncheckedCount != null ? uncheckedCount : 0}">0</strong>
-        <span class="approval-summary-description"></span>
-    </div>
-    <div class="approval-summary-card">
-        <span class="approval-summary-label">대기 중 보고서</span>
-        <strong class="approval-summary-count" th:text="${pendingCount != null ? pendingCount : 0}">0</strong>
-        <span class="approval-summary-description"></span>
-    </div>
-    <div class="approval-summary-card">
-        <span class="approval-summary-label">승인 된 보고서</span>
-        <strong class="approval-summary-count" th:text="${approvedCount != null ? approvedCount : 0}">0</strong>
-        <span class="approval-summary-description"></span>
-    </div>
-    <div class="approval-summary-card">
-        <span class="approval-summary-label">반려 된 보고서</span>
-        <strong class="approval-summary-count" th:text="${rejectedCount != null ? rejectedCount : 0}">0</strong>
-        <span class="approval-summary-description"></span>
-    </div>
-</div>
+			<div class="approval-summary-grid">
+			    <div class="approval-summary-card">
+			        <span class="approval-summary-label">미확인 보고서</span>
+			        <strong class="approval-summary-count" th:text="${uncheckedCount != null ? uncheckedCount : 0}">0</strong>
+			        <span class="approval-summary-description"></span>
+			    </div>
+			    <div class="approval-summary-card">
+			        <span class="approval-summary-label">대기 중 보고서</span>
+			        <strong class="approval-summary-count" th:text="${pendingCount != null ? pendingCount : 0}">0</strong>
+			        <span class="approval-summary-description"></span>
+			    </div>
+			    <div class="approval-summary-card">
+			        <span class="approval-summary-label">승인 된 보고서</span>
+			        <strong class="approval-summary-count" th:text="${approvedCount != null ? approvedCount : 0}">0</strong>
+			        <span class="approval-summary-description"></span>
+			    </div>
+			    <div class="approval-summary-card">
+			        <span class="approval-summary-label">반려 된 보고서</span>
+			        <strong class="approval-summary-count" th:text="${rejectedCount != null ? rejectedCount : 0}">0</strong>
+			        <span class="approval-summary-description"></span>
+			    </div>
+			</div>
 
             <div class="approval-panel">
                 <p class="approval-notice approval-notice-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>

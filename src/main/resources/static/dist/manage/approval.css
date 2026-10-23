@@ -519,6 +519,20 @@
     }
 }
 
+.approval-page .page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.approval-page .page-heading .approval-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
 
 
 /* 보고서 유형 선택: 전체 / 프로젝트 보고서 / 업무 보고서 */
