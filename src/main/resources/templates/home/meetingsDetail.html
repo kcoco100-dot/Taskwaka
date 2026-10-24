@@ -35,7 +35,7 @@
                 </div>
 
                 <div class="meeting-detail-body"
-                     th:text="${meeting.content}"></div>
+                     th:utext="${meeting.content}"></div>
                   <div class="meeting-navigation">
 		            		<p class="notice-navigation">이전글:
 							<a th:if="${prevMeeting != null}"

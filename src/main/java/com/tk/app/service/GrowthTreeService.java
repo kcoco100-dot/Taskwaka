@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sun.jdi.LongValue;
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.GrowthExpLogDto;
 import com.tk.app.domain.dto.GrowthLevelDto;
@@ -29,6 +28,9 @@ public class GrowthTreeService {
 		this.growthTreeMapper = growthTreeMapper;
 		this.taskService = taskService;
 	}
+	
+    // 공통 로직 분리 시작
+	
 	// 성장나무 잠금처리
 	// 여러 활동의 보상이 동시에 들어와도 누적 경험치가 덮어써지지 않게하기 위함
 	private GrowthTreeDto lockGrowthTree(long workspaceId) {
@@ -143,6 +145,18 @@ public class GrowthTreeService {
 			throw new IllegalStateException("활동 회원과 로그인 회원이 일치하지 않습니다.");
 		}
 	}
+	
+    private boolean isPmApprovalContext(
+            Map<String, Object> context, String errorMessage) {
+        if (context == null) {
+            throw new IllegalStateException(errorMessage);
+        }
+
+        int reviewerRole = ((Number) context.get("reviewerRole")).intValue();
+        return reviewerRole == 70;
+    }
+    
+    // 공통 로직 분리 끝
 	
 	// 성장나무 목록 조회
 	public List<GrowthLevelDto> findGrowthLevels() {
@@ -578,20 +592,10 @@ public class GrowthTreeService {
 		
 		// context : 실제 워크 번호와 검토자 역할
 		Map<String, Object> context = growthTreeMapper.selectTeamReportApproveContext(params);
-		if(context == null) {
-			throw new IllegalStateException("승인된 업무 보고서 정보를 확인할 수 없습니다.");
-		}
-		
-		// PM 역할 판별
-		// context 에서 역할 값을 꺼내 Number 로 형변환한 뒤, 
-		// intValue()로 int 값을 얻음.
-		int reviewerRole = ((Number) context.get("reviewerRole")).intValue();
-		// context.get("reviewerRole") : 권한 확인 (PM: 70, DT: 50)
-		// context 는 Map<String, Object>여서 꺼낸 값의 타입이 Object 라서 Number 로 형변환
-		// PM 이 아니면 종료
-		if(reviewerRole != 70) {
-			return;
-		}
+        if (!isPmApprovalContext(
+                context, "승인된 업무 보고서 정보를 확인할 수 없습니다.")) {
+            return;
+        }
 		long workspaceId = ((Number) context.get("workspaceId")).longValue();
 		// 잠금 처리
 		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
@@ -647,15 +651,10 @@ public class GrowthTreeService {
 		params.put("memberId", memberId);
 		
 		Map<String, Object> context = growthTreeMapper.selectDailyReportApproveContext(params);
-		if(context == null) {
-			throw new IllegalStateException("승인된 일일 보고서 정보를 확인할 수 없습니다.");
-		
-		}
-		
-		int reviewerRole = ((Number) context.get("reviewerRole")).intValue();
-		if(reviewerRole != 70) {
-			return;
-		}
+        if (!isPmApprovalContext(
+                context, "승인된 일일 보고서 정보를 확인할 수 없습니다.")) {
+            return;
+        }
 		
 		long workspaceId = ((Number) context.get("workspaceId")).longValue();
 		
@@ -715,10 +714,16 @@ public class GrowthTreeService {
 	// 프로젝트 보고서 PM 이 최종 승인 시 +30
 	@Transactional(rollbackFor = Exception.class)
 	public void selectProjectReportApproveContext(
-			long reviewId, long projectReportId, long memberId) {
+			long reviewId, long projectReportId, long memberId,
+			int reportCategory, int reviewStatus) {
 		
 		// 로그인 회원 검증
 		validateLoginMember(memberId);
+		
+		// 지급 대상 확인
+		if(reportCategory != 1 || reviewStatus != 1) {
+			return;
+		}
 		
 		Map<String, Object> params = new HashMap<>();
 		params.put("reviewId", reviewId);
@@ -727,16 +732,12 @@ public class GrowthTreeService {
 		
 		// 추후 공통 로직 분리
 		Map<String, Object> context = growthTreeMapper.selectProjectReportApproveContext(params);
-		if(context == null) {
-			throw new IllegalStateException("승인된 프로젝트 보고서 정보를 확인할 수 없습니다.");
-		}
-		int reviewerRole = ((Number) context.get("reviewerRole")).intValue();
-		if(reviewerRole != 70) {
-			return;
-		}
+        if (!isPmApprovalContext(
+                context, "승인된 프로젝트 보고서 정보를 확인할 수 없습니다.")) {
+            return;
+        }
 		
-		long workspaceId = ((Number) context.get("workspaceId")).longValue();
-		
+        long workspaceId = ((Number) context.get("workspaceId")).longValue();
 		// 잠금나무로 전달
 		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
 		GrowthExpLogDto expLog = new GrowthExpLogDto();
@@ -750,6 +751,18 @@ public class GrowthTreeService {
 
 	}
 	
-}
+	// PM 프로젝트 보고서 결재 정보를 받아 승인 보상 로직으로 연결하는 메서드
+	@Transactional(rollbackFor = Exception.class)
+	public void grantProjectReportApproveExp(Map<String, Object> reviewContext) {
+		
+		long reviewId = ((Number) reviewContext.get("reviewId")).longValue();
+		long projectReportId = ((Number) reviewContext.get("reportId")).longValue();
+		long memberId = ((Number) reviewContext.get("memberId")).longValue();
+		int reportCategory = ((Number) reviewContext.get("reportCategory")).intValue();
+		int reviewStatus = ((Number) reviewContext.get("reviewStatus")).intValue();
 	
-
+		// 기존 지급 메서드에 값 전달
+		selectProjectReportApproveContext(reviewId, projectReportId, memberId, reportCategory, reviewStatus);
+	}
+	
+}

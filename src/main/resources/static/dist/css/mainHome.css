@@ -177,22 +177,93 @@
 }
 
 .mainHome.myHome-page {
-    padding: 40px 24px;
+    padding: 48px 24px 64px;
+    background: #F8F9F6;
 }
 
 .myHome-page .mainHome-heading {
-    max-width: 1100px;
+    max-width: 960px;
     margin: 0 auto 28px;
     text-align: left;
 }
 
-.myHome-page .mainHome-menu {
-    max-width: 1100px;
-    grid-template-columns: repeat(3, minmax(0, max-content));
-    justify-content: start;
-    gap: 16px;
+.myHome-page .mainHome-heading h1 {
+    font-size: 28px;
+    letter-spacing: -0.8px;
 }
+
+.myHome-page .mainHome-heading p {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.myHome-page .mainHome-menu {
+    max-width: 960px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+}
+
 .mainHome.myHome-page .team-card {
-    min-height: 0;
-    padding: 24px;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "icon title action"
+        "icon description action";
+    align-items: center;
+    align-content: center;
+    gap: 4px 20px;
+    min-height: 108px;
+    padding: 22px 24px;
+    border: 1px solid #E3E7DF;
+    border-radius: 16px;
+    background: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(54, 65, 44, 0.025);
+}
+
+.mainHome.myHome-page .team-card:hover {
+    border-color: #B6C6A6;
+    box-shadow: 0 6px 18px rgba(54, 65, 44, 0.07);
+}
+
+.mainHome.myHome-page .team-card-icon {
+    grid-area: icon;
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    border-radius: 14px;
+    background: #EEF3E8;
+    color: #61764E;
+    font-size: 24px;
+}
+
+.mainHome.myHome-page .team-card-title {
+    grid-area: title;
+    min-width: 0;
+    margin: 0;
+    color: #493E33;
+    font-size: 18px;
+    line-height: 1.5;
+    letter-spacing: -0.4px;
+    overflow-wrap: anywhere;
+}
+
+.mainHome.myHome-page .team-card-description {
+    grid-area: description;
+    min-width: 0;
+    color: #847D73;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.mainHome.myHome-page .team-card-action {
+    grid-area: action;
+    margin: 0;
+    padding: 9px 14px;
+    border-radius: 10px;
+    background: #F2F5EE;
+    color: #566B45;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: nowrap;
 }

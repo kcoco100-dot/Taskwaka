@@ -52,7 +52,7 @@
 	                </div>
 					
 					<div class="mt-4">
-		                <label id="meetingContentLabel" class="form-label">내용</label>
+		                <label id="meetingContentLabel" class="form-label" th:utext="${project.content}">내용</label>
 						<div id="meetingEditor" class="editor"
 						     th:data-upload-url="@{/editor/upload}"></div>
 						<textarea id="meetingContent" name="content" hidden></textarea>

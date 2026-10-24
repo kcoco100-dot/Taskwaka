@@ -594,6 +594,7 @@
 				WHEN 'TEAM_REPORT_CREATE' THEN '업무 보고서 작성'
 				WHEN 'TEAM_REPORT_APPROVE' THEN '업무 보고서 승인'
 				WHEN 'DAILY_REPORT_APPROVE' THEN '일일 보고서 승인'
+				WHEN 'PROJECT_REPORT_APPROVE' THEN '프로젝트 보고서 승인'
 				ELSE '팀 활동'
 			END AS "actionName",
 			TO_CHAR(gel.earned_at, 'YYYY-MM-DD HH24:MI') AS "earnedAt",
