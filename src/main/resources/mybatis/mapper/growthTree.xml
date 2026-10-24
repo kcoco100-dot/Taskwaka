@@ -489,6 +489,33 @@
 	 		AND p.deleted IS NULL
 	</select>
 	
+	<!-- PM 이 프로젝트 보고서 결재 시 +30 -->
+	<select id="selectProjectReportApproveContext" parameterType="map" resultType="map">
+		SELECT p.workspace_id AS "workspaceId",
+			wm.role AS "reviewerRole"
+		FROM project_reports pr
+		JOIN projects p ON p.project_id = pr.project_id
+		JOIN report_reviews rr ON pr.project_report_id = rr.project_report_id
+		JOIN project_members pm ON pm.project_member_id = rr.project_member_id
+			AND pm.project_id = p.project_id
+		JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+			AND wm.workspace_id = p.workspace_id
+		JOIN project_members authorPm
+			ON authorPm.project_member_id = pr.project_member_id
+		JOIN workspace_members authorWm
+    			ON authorWm.workspace_member_id = authorPm.workspace_member_id
+		WHERE pr.project_report_id = #{projectReportId}
+			AND rr.report_id = #{reviewId}
+			AND wm.member_id = #{memberId}
+			AND rr.category = 1
+			AND rr.status = 1
+			AND pm.status = 0
+			AND wm.status = 0
+			AND p.deleted IS NULL
+			AND (wm.role = 70 OR pm.role = 50)
+			AND authorWm.member_id != #{memberId}
+	</select>
+	
 	<select id="countDailyReportApproveExpLog" resultType="int">
 		SELECT COUNT(*)
 		FROM growth_exp_logs

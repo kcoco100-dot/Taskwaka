@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sun.jdi.LongValue;
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.GrowthExpLogDto;
 import com.tk.app.domain.dto.GrowthLevelDto;
@@ -29,6 +30,7 @@ public class GrowthTreeService {
 		this.taskService = taskService;
 	}
 	// 성장나무 잠금처리
+	// 여러 활동의 보상이 동시에 들어와도 누적 경험치가 덮어써지지 않게하기 위함
 	private GrowthTreeDto lockGrowthTree(long workspaceId) {
 		GrowthTreeDto growthTree = growthTreeMapper.findGrowthTreeForUpdate(workspaceId);
 		if(growthTree == null) {
@@ -656,8 +658,10 @@ public class GrowthTreeService {
 		}
 		
 		long workspaceId = ((Number) context.get("workspaceId")).longValue();
+		
 		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
 		GrowthExpLogDto expLog = new GrowthExpLogDto();
+		
 		expLog.setWorkspaceId(workspaceId);
 		expLog.setMemberId(memberId);
 		expLog.setDailyReportId(dailyReportId);
@@ -706,6 +710,44 @@ public class GrowthTreeService {
 			totalRevokeExp += expLog.getExp();
 		}
 		revokeGrowthExp(growthTree, totalRevokeExp);
+	}
+	
+	// 프로젝트 보고서 PM 이 최종 승인 시 +30
+	@Transactional(rollbackFor = Exception.class)
+	public void selectProjectReportApproveContext(
+			long reviewId, long projectReportId, long memberId) {
+		
+		// 로그인 회원 검증
+		validateLoginMember(memberId);
+		
+		Map<String, Object> params = new HashMap<>();
+		params.put("reviewId", reviewId);
+		params.put("projectReportId", projectReportId);
+		params.put("memberId", memberId);
+		
+		// 추후 공통 로직 분리
+		Map<String, Object> context = growthTreeMapper.selectProjectReportApproveContext(params);
+		if(context == null) {
+			throw new IllegalStateException("승인된 프로젝트 보고서 정보를 확인할 수 없습니다.");
+		}
+		int reviewerRole = ((Number) context.get("reviewerRole")).intValue();
+		if(reviewerRole != 70) {
+			return;
+		}
+		
+		long workspaceId = ((Number) context.get("workspaceId")).longValue();
+		
+		// 잠금나무로 전달
+		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
+		GrowthExpLogDto expLog = new GrowthExpLogDto();
+		
+		expLog.setWorkspaceId(workspaceId);
+		expLog.setMemberId(memberId);
+		expLog.setExp(30);
+		expLog.setActionType("PROJECT_REPORT_APPROVE");
+		// 이력 저장, 누적 경험치 및 레벨 갱신
+		grantGrowthExp(growthTree, expLog);
+
 	}
 	
 }
