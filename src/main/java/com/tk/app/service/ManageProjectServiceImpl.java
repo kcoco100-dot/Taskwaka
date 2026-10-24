@@ -24,28 +24,33 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 
 	private final ManageProjectMapper mapper;
 
+	// 등록 버튼 표시 조건 조회
 	@Override
 	public boolean canCreateProject(Long workspaceId, Long memberId) throws SQLException {
+		boolean result = false;
 		try {
 			Map<String, Object> map = new HashMap<>();
 			map.put("workspaceId", workspaceId);
 			map.put("memberId", memberId);
-			return mapper.countWorkspacePm(map) == 1;
+			result = mapper.countWorkspacePm(map) == 1;
 		} catch (Exception e) {
 			log.info("canCreateProject : ", e);
 			throw e;
 		}
+		return result;
 	}
 
-	// 도메인 키로 워크스페이스 번호 조회
+	// 워크스페이스 번호 조회
 	@Override
 	public Long findByDomainKey(String domainKey) throws Exception {
+		Long result = null;
 		try {
-			return mapper.findByDomainKey(domainKey);
+			result = mapper.findByDomainKey(domainKey);
 		} catch (Exception e) {
 			log.info("findByDomainKey : ", e);
 			throw e;
 		}
+		return result;
 	}
 
 	// 프로젝트 등록
@@ -64,12 +69,6 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 					dto.getStatus()
 			);
 
-			Map<String, Object> access = new HashMap<>();
-			access.put("workspaceId", dto.getWorkspace_id());
-			access.put("memberId", dto.getMember_id());
-			if (dto.getMember_id() == null || mapper.countWorkspacePm(access) != 1) {
-				throw new SecurityException("프로젝트 생성은 해당 워크스페이스 PM만 가능합니다.");
-			}
 			mapper.insertProject(dto);
 
 		} catch (Exception e) {
@@ -82,56 +81,62 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 	@Override
 	public List<ManageDto> listProject(Map<String, Object> map)
 			throws SQLException {
+		List<ManageDto> result = new java.util.ArrayList<>();
 		try {
-			return mapper.listProject(map);
+			result = mapper.listProject(map);
 		} catch (Exception e) {
 			log.info("listProject : ", e);
 			throw e;
 		}
+		return result;
 	}
 
-	// 프로젝트 데이터 개수 조회
+	// 프로젝트 건수 조회
 	@Override
 	public int dataCount(Map<String, Object> map) throws SQLException {
+		int result = 0;
 		try {
-			return mapper.dataCount(map);
+			result = mapper.dataCount(map);
 		} catch (Exception e) {
 			log.info("dataCount : ", e);
 			throw e;
 		}
+		return result;
 	}
 
 	// 프로젝트 상세 조회
 	@Override
 	public ManageDto getProjectDetail(Map<String, Object> map)
 			throws SQLException {
+		ManageDto result = null;
 		try {
-			return mapper.getProjectDetail(map);
+			result = mapper.getProjectDetail(map);
 		} catch (Exception e) {
 			log.info("getProjectDetail : ", e);
 			throw e;
 		}
+		return result;
 	}
 
-	// PM은 전체 프로젝트, DT는 본인 참여 프로젝트 관리
+	// 수정 버튼 표시 조건 조회
 	@Override
 	public boolean canManageProject(Map<String, Object> map) throws SQLException {
+		boolean result = false;
 		try {
-			if (map == null || map.get("projectId") == null || map.get("domainKey") == null || map.get("memberId") == null) {
-				return false;
-			}
-			return mapper.countProjectAccess(map) == 1;
+			result = mapper.countProjectAccess(map) == 1;
 		} catch (Exception e) {
 			log.info("canManageProject : ", e);
 			throw e;
 		}
+		return result;
 	}
 
 	// 프로젝트 수정
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void updateProject(Map<String, Object> map) throws SQLException {
 		try {
-			checkProjectAccess(map);
+			lockProject(map);
 			validateProject((String) map.get("subject"), (String) map.get("start_date"),
 					(String) map.get("end_date"), (Integer) map.get("status"));
 			int result = mapper.updateProject(map);
@@ -144,12 +149,12 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 프로젝트 삭제
+	// 프로젝트 숨김
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteProject(Map<String, Object> map) throws SQLException {
 		try {
-			checkProjectAccess(map);
+			lockProject(map);
 
 			ManageDto existing = mapper.getProjectDetail(map);
 
@@ -165,7 +170,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 프로젝트 유효성 검사
+	// 프로젝트 입력값 확인
 	private void validateProject(
 			String subject,
 			String startDate,
@@ -175,7 +180,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		try {
 			if (subject == null
 					|| subject.isBlank()
-					|| subject.length() > 200) {
+					|| subject.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 200) {
 				throw new IllegalArgumentException("프로젝트명을 확인하세요.");
 			}
 
@@ -193,21 +198,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 프로젝트 수정·삭제 권한 검사
-	private void checkProjectAccess(Map<String, Object> map) throws SQLException {
-		if (!canManageProject(map)) {
-			throw new SecurityException("프로젝트 관리 권한이 없습니다.");
-		}
-	}
-
-	// 업무 관리 권한 검사
-	private void checkTaskManageAccess(Map<String, Object> map) throws SQLException {
-		if (!canManageProject(map)) {
-			throw new SecurityException("업무 관리 권한이 없습니다.");
-		}
-	}
-
-	// 날짜 유효성 검사
+	// 기간 입력값 확인
 	private void validateDates(String startDate, String endDate) {
 		try {
 			if (startDate == null
@@ -234,32 +225,36 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 프로젝트 업무 목록
+	// 프로젝트 업무 목록 조회
 	@Override
 	public List<ManageTaskDto> listManageTasks(Map<String, Object> map)
 			throws SQLException {
+		List<ManageTaskDto> result = new java.util.ArrayList<>();
 		try {
-			return mapper.listManageTasks(map);
+			result = mapper.listManageTasks(map);
 		} catch (Exception e) {
 			log.info("listManageTasks : ", e);
 			throw e;
 		}
+		return result;
 	}
 
-	// 업무 담당 TL 목록
+	// 업무 담당자 목록 조회
 	@Override
 	public List<Map<String, Object>> listManageTaskTL(
 			Map<String, Object> map) throws SQLException {
+		List<Map<String, Object>> result = new java.util.ArrayList<>();
 
 		try {
-			return mapper.listManageTaskTL(map);
+			result = mapper.listManageTaskTL(map);
 		} catch (Exception e) {
 			log.info("listManageTaskTL : ", e);
 			throw e;
 		}
+		return result;
 	}
 
-	// 업무 입력값 검증
+	// 업무 입력값 확인
 	private void validateTask(ManageTaskDto dto) {
 		try {
 			if (dto == null) {
@@ -268,7 +263,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 
 			if (dto.getTitle() == null
 					|| dto.getTitle().isBlank()
-					|| dto.getTitle().length() > 200) {
+					|| dto.getTitle().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 200) {
 				throw new IllegalArgumentException("업무명을 확인하세요.");
 			}
 
@@ -301,7 +296,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 프로젝트에 소속된 TL인지 확인
+	// 업무 담당자 조건 확인
 	private void checkTaskTL(ManageTaskDto dto) throws SQLException {
 		try {
 			Map<String, Object> map = new HashMap<>();
@@ -312,7 +307,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 
 			if (count != 1) {
 				throw new IllegalArgumentException(
-						"해당 프로젝트의 활성 TL이 아닙니다."
+						"해당 프로젝트의 활성 TL 이상 담당자가 아닙니다."
 				);
 			}
 
@@ -322,7 +317,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 프로젝트 행 잠금
+	// 프로젝트 변경 잠금
 	private void lockProject(Map<String, Object> map) throws SQLException {
 		try {
 			Long projectId = mapper.lockManageProject(map);
@@ -339,26 +334,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 업무 보고서 등록 여부 검사
-	private void checkTaskReports(Map<String, Object> map)
-			throws SQLException {
-
-		try {
-			int count = mapper.countManageTaskReports(map);
-
-			if (count > 0) {
-				throw new IllegalStateException(
-						"보고서가 등록된 업무는 삭제할 수 없습니다."
-				);
-			}
-
-		} catch (Exception e) {
-			log.info("checkTaskReports : ", e);
-			throw e;
-		}
-	}
-
-	// 업무 등록 및 TL 참여 등록
+	// 업무 등록
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void insertManageTask(
@@ -366,7 +342,6 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 			Map<String, Object> map) throws SQLException {
 
 		try {
-			checkTaskManageAccess(map);
 			validateTask(dto);
 			lockProject(map);
 			checkTaskTL(dto);
@@ -377,6 +352,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 				);
 			}
 
+			checkTaskWeight(dto, map);
 			int result = mapper.insertManageTask(dto);
 
 			if (result != 1) {
@@ -397,6 +373,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 			);
 
 			mapper.insertManageTaskMember(memberMap);
+			mapper.refreshProjectProgress(map);
 
 		} catch (Exception e) {
 			log.info("insertManageTask : ", e);
@@ -404,12 +381,11 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 업무 수정 및 담당 TL 변경
+	// 업무 수정
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void updateManageTask(ManageTaskDto dto, Map<String, Object> map) throws SQLException {
 		try {
-			checkTaskManageAccess(map);
 			validateTask(dto);
 			lockProject(map);
 			if (dto.getTask_id() == null || !dto.getProject_id().equals(map.get("projectId"))
@@ -421,25 +397,8 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 				throw new IllegalArgumentException("수정할 업무가 존재하지 않습니다.");
 			}
 			checkTaskTL(dto);
-			int reportCount = mapper.countManageTaskReports(map);
-			boolean otherChanged = !Objects.equals(existing.getTitle(), dto.getTitle())
-					|| !Objects.equals(existing.getContent(), dto.getContent())
-					|| existing.getTask_level() != dto.getTask_level()
-					|| !Objects.equals(existing.getStart_date(), dto.getStart_date())
-					|| !Objects.equals(existing.getEnd_date(), dto.getEnd_date());
-			int result;
-			if (reportCount > 0) {
-				if (otherChanged) {
-					throw new IllegalStateException("보고서가 등록된 업무는 담당 TL만 변경할 수 있습니다.");
-				}
-				Map<String, Object> updateMap = new HashMap<>();
-				updateMap.put("taskId", dto.getTask_id());
-				updateMap.put("projectId", dto.getProject_id());
-				updateMap.put("projectMemberId", dto.getProject_member_id());
-				result = mapper.updateManageTaskTL(updateMap);
-			} else {
-				result = mapper.updateManageTask(dto);
-			}
+			checkTaskWeight(dto, map);
+			int result = mapper.updateManageTask(dto);
 			if (result != 1) {
 				throw new IllegalStateException("업무 수정에 실패했습니다.");
 			}
@@ -447,6 +406,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 			memberMap.put("taskId", dto.getTask_id());
 			memberMap.put("projectMemberId", dto.getProject_member_id());
 			mapper.insertManageTaskMember(memberMap);
+			mapper.refreshProjectProgress(map);
 			if (!Objects.equals(existing.getProject_member_id(), dto.getProject_member_id())) {
 				memberMap.put("projectMemberId", existing.getProject_member_id());
 				mapper.deleteManageTaskMember(memberMap);
@@ -457,14 +417,13 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
-	// 업무 삭제 및 TL 참여 정리
+	// 업무 숨김
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteManageTask(Map<String, Object> map)
 			throws SQLException {
 
 		try {
-			checkTaskManageAccess(map);
 			lockProject(map);
 
 			ManageTaskDto existing = mapper.getManageTask(map);
@@ -475,8 +434,6 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 				);
 			}
 
-			checkTaskReports(map);
-
 			int result = mapper.deleteManageTask(map);
 
 			if (result != 1) {
@@ -485,18 +442,49 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 				);
 			}
 
-			Map<String, Object> memberMap = new HashMap<>();
-			memberMap.put("taskId", existing.getTask_id());
-			memberMap.put(
-					"projectMemberId",
-					existing.getProject_member_id()
-			);
-
-			mapper.deleteManageTaskMember(memberMap);
+			mapper.refreshProjectProgress(map);
 
 		} catch (Exception e) {
 			log.info("deleteManageTask : ", e);
 			throw e;
 		}
 	}
+
+    // 업무 배정 비중 확인
+    private void checkTaskWeight(ManageTaskDto dto, Map<String, Object> map) throws SQLException {
+        Double weight = dto.getProgress_weight();
+        if (weight == null || !Double.isFinite(weight) || weight <= 0 || weight > 100
+                || Math.abs(weight * 100 - Math.rint(weight * 100)) > 0.000001) {
+            throw new IllegalArgumentException("배정 비중은 소수점 두 자리까지 0 초과 100 이하로 입력하세요.");
+        }
+        if (mapper.sumTaskWeights(map) + weight > 100.000001) {
+            throw new IllegalArgumentException("업무 배정 비중의 합계는 100%를 초과할 수 없습니다.");
+        }
+
+    }
+
+    // 이전 프로젝트 조회
+    @Override
+    public ManageDto selectPrevProject(Map<String, Object> map) throws SQLException {
+        ManageDto result = null;
+        try {
+            result = mapper.selectPrevProject(map);
+        } catch (Exception e) {
+            log.info("selectPrevProject : ", e);
+            throw e;
+        }
+        return result;
+    }
+    // 다음 프로젝트 조회
+    @Override
+    public ManageDto selectNextProject(Map<String, Object> map) throws SQLException {
+        ManageDto result = null;
+        try {
+            result = mapper.selectNextProject(map);
+        } catch (Exception e) {
+            log.info("selectNextProject : ", e);
+            throw e;
+        }
+        return result;
+    }
 }

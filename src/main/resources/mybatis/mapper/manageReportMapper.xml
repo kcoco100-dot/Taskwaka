@@ -3,372 +3,656 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.ManageReportMapper">
 
-	<!-- 프로젝트 보고서와 업무 보고서 공통 목록 -->
-    <sql id="reportProjectAccess">
-        AND EXISTS (SELECT 1 FROM workspace_members actor
-            WHERE actor.workspace_id = p.workspace_id AND actor.member_id = #{memberId} AND actor.status = 0
-              AND (actor.role = 70 OR EXISTS (SELECT 1 FROM project_members mine
-                  WHERE mine.project_id = p.project_id AND mine.workspace_member_id = actor.workspace_member_id
-                    AND mine.role = 50 AND mine.status = 0)))
-    </sql>
-    <sql id="reportListSource">
-        SELECT 1 AS "reportCategory", pr.project_report_id AS "reportId", pr.project_id AS "projectId",
-            '프로젝트 보고서' AS "reportTypeName", p.subject AS "projectName", '-' AS "taskName",
-            pr.title AS "reportTitle", md.name AS "authorName", TO_CHAR(pr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate",
-            pr.created AS "sortDate",
-            CASE p.status
-                WHEN 0 THEN '예정'
-                WHEN 1 THEN '진행 중'
-                ELSE '완료'
-            END AS "stageName",
-            pr.progress AS "progress",
-            CASE
-                WHEN rr.status IN (1, 2) THEN rr.status
-                WHEN rr.viewed IS NOT NULL THEN 0
-                ELSE -1
-            END AS "reviewStatus"
-        FROM project_reports pr
-        JOIN projects p ON pr.project_id = p.project_id
-        JOIN project_members pm ON pr.project_member_id = pm.project_member_id
-        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-        JOIN member_details md ON wm.member_id = md.member_id
-        LEFT JOIN report_reviews rr
-            ON rr.report_id = (
-                SELECT MAX(r2.report_id)
-                FROM report_reviews r2
-                WHERE r2.project_report_id = pr.project_report_id
-                  AND r2.category = 1
-            )
-        WHERE p.workspace_id = #{workspaceId}
-          AND p.deleted IS NULL
-          <include refid="reportProjectAccess"/>
+	<!-- 보고서 프로젝트 소속 조건 -->
+	<sql id="reportProjectAccess">
+		AND EXISTS (
+			SELECT 1
+			FROM workspace_members actor
+			JOIN project_members mine
+				ON mine.workspace_member_id = actor.workspace_member_id
+			WHERE actor.workspace_id = p.workspace_id
+				AND actor.member_id = #{memberId}
+				AND actor.status = 0
+				AND mine.project_id = p.project_id
+				AND mine.status = 0)
+	</sql>
 
-        UNION ALL
+	<!-- 업무 보고서 조회 범위 -->
+	<sql id="teamReportReadScope">
+		AND EXISTS (
+			SELECT 1
+			FROM workspace_members actor
+			WHERE actor.workspace_id = p.workspace_id
+				AND actor.member_id = #{memberId}
+				AND actor.status = 0
+				AND (
+					actor.role = 70
+					OR EXISTS (
+						SELECT 1
+						FROM project_members mine
+						WHERE mine.project_id = p.project_id
+							AND mine.workspace_member_id = actor.workspace_member_id
+							AND mine.role = 50
+							AND mine.status = 0
+					)
+				)
+		)
+	</sql>
 
-        SELECT 2 AS "reportCategory", tr.team_report_id AS "reportId", tr.project_id AS "projectId",
-            '업무 보고서' AS "reportTypeName", p.subject AS "projectName", t.title AS "taskName", tr.title AS "reportTitle",
-            md.name AS "authorName", TO_CHAR(tr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate", tr.created AS "sortDate",
-            TO_CHAR(t.task_level) || ' 단계' AS "stageName",
-            tr.progress AS "progress",
-            CASE
-                WHEN rr.status IN (1, 2) THEN rr.status
-                WHEN rr.viewed IS NOT NULL THEN 0
-                ELSE -1
-            END AS "reviewStatus"
-        FROM team_reports tr
-        JOIN tasks t ON tr.task_id = t.task_id AND tr.project_id = t.project_id
-        JOIN projects p ON tr.project_id = p.project_id
-        JOIN project_members pm ON tr.project_member_id = pm.project_member_id
-        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-        JOIN member_details md ON wm.member_id = md.member_id
-        LEFT JOIN report_reviews rr
-            ON rr.report_id = (
-                SELECT MAX(r2.report_id)
-                FROM report_reviews r2
-                WHERE r2.team_report_id = tr.team_report_id AND r2.category = 2
-            )
-        WHERE p.workspace_id = #{workspaceId}
-          AND p.deleted IS NULL
-          AND t.deleted IS NULL
-          AND tr.deleted IS NULL
-          <include refid="reportProjectAccess"/>
-    </sql>
+	<!-- 프로젝트 및 업무 보고서 목록 -->
+	<sql id="reportListSource">
+		SELECT 1 AS "reportCategory", pr.project_report_id AS "reportId", pr.project_id AS "projectId",
+			'프로젝트 보고서' AS "reportTypeName", p.subject AS "projectName", '-' AS "taskName",
+			pr.title AS "reportTitle", md.name AS "authorName", TO_CHAR(pr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate",
+			pr.created AS "sortDate",
+			CASE p.status
+			WHEN 0 THEN '예정'
+			WHEN 1 THEN '진행 중'
+			ELSE '완료'
+		END AS "stageName",
+			pr.progress AS "progress",
+			CASE
+			WHEN rr.status IN (1, 2) THEN rr.status + 2
+			WHEN rr.viewed IS NOT NULL THEN 2
+			ELSE 1
+		END AS "reviewStatus"
+		FROM project_reports pr
+		JOIN projects p
+			ON pr.project_id = p.project_id
+		JOIN project_members pm
+			ON pr.project_member_id = pm.project_member_id
+		JOIN workspace_members wm
+			ON pm.workspace_member_id = wm.workspace_member_id
+		JOIN member_details md
+			ON wm.member_id = md.member_id
+		LEFT JOIN report_reviews rr
+			ON rr.report_id = (
+			SELECT MAX(r2.report_id)
+			FROM report_reviews r2
+			WHERE r2.project_report_id = pr.project_report_id
+				AND r2.category = 1
+		)
+		WHERE p.workspace_id = #{workspaceId}
+			AND p.deleted IS NULL
+			
+		<include refid="reportProjectAccess"/>
+		UNION ALL
+		SELECT 2 AS "reportCategory", tr.team_report_id AS "reportId", tr.project_id AS "projectId",
+			'업무 보고서' AS "reportTypeName", p.subject AS "projectName", t.title AS "taskName",
+			tr.title AS "reportTitle",
+			md.name AS "authorName", TO_CHAR(tr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate",
+			tr.created AS "sortDate",
+			TO_CHAR(t.task_level) || ' 단계' AS "stageName",
+			tr.progress AS "progress",
+			CASE
+			WHEN rr.status IN (1, 2) THEN rr.status + 2
+			WHEN rr.viewed IS NOT NULL THEN 2
+			ELSE 1
+		END AS "reviewStatus"
+		FROM team_reports tr
+		JOIN tasks t
+			ON tr.task_id = t.task_id
+			AND tr.project_id = t.project_id
+		JOIN projects p
+			ON tr.project_id = p.project_id
+		JOIN project_members pm
+			ON tr.project_member_id = pm.project_member_id
+		JOIN workspace_members wm
+			ON pm.workspace_member_id = wm.workspace_member_id
+		JOIN member_details md
+			ON wm.member_id = md.member_id
+		LEFT JOIN report_reviews rr
+			ON rr.report_id = (
+			SELECT MAX(r2.report_id)
+			FROM report_reviews r2
+			WHERE r2.team_report_id = tr.team_report_id
+				AND r2.category = 2
+		)
+		WHERE p.workspace_id = #{workspaceId}
+			AND p.deleted IS NULL
+			AND t.deleted IS NULL
+			AND tr.deleted IS NULL
+		<include refid="teamReportReadScope"/>
+	</sql>
 
-    <!-- 목록 검색 조건 -->
-    <sql id="reportFilters">
-        <if test="reportCategory != null and reportCategory != 0">
-            AND R."reportCategory" = #{reportCategory}
-        </if>
-        <if test="reviewStatus != null and reviewStatus != -2">
-            AND R."reviewStatus" = #{reviewStatus}
-        </if>
-        <if test="keyword != null and keyword != ''">
-            AND (
-                LOWER(R."projectName") LIKE '%' || LOWER(#{keyword}) || '%'
-                OR LOWER(R."taskName") LIKE '%' || LOWER(#{keyword}) || '%'
-                OR LOWER(R."reportTitle") LIKE '%' || LOWER(#{keyword}) || '%'
-                OR LOWER(R."authorName") LIKE '%' || LOWER(#{keyword}) || '%'
-            )
-        </if>
-    </sql>
+	<!-- 보고서 검색 조건 -->
+	<sql id="reportFilters">
+		<if test="reportCategory != null and reportCategory != 0">
+			AND R."reportCategory" = #{reportCategory}
+		</if>
+		<if test="reviewStatus != null and reviewStatus != 0">
+			AND R."reviewStatus" = #{reviewStatus}
+		</if>
+		<if test="kwd != null and kwd != ''">
+			AND (
+					LOWER(R."projectName") LIKE '%' || LOWER(#{kwd}) || '%'
+					OR LOWER(R."taskName") LIKE '%' || LOWER(#{kwd}) || '%'
+					OR LOWER(R."reportTitle") LIKE '%' || LOWER(#{kwd}) || '%'
+					OR LOWER(R."authorName") LIKE '%' || LOWER(#{kwd}) || '%'
+			)
+		</if>
+	</sql>
 
-    <!-- 보고서 목록 조회 -->
-    <select id="listReport" parameterType="map" resultType="com.tk.app.domain.dto.ManageReportDto">
-        SELECT R.*
-        FROM (
-            <include refid="reportListSource" />
-        ) R
-        <where>
-            <include refid="reportFilters" />
-        </where>
-        ORDER BY R."sortDate" DESC, R."reportCategory", R."reportId" DESC
-        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-    </select>
-
-    <!-- 보고서 개수 조회 -->
-    <select id="countReport" parameterType="map" resultType="int">
-        SELECT COUNT(*)
-        FROM (
-            <include refid="reportListSource" />
-        ) R
-        <where>
-            <include refid="reportFilters" />
-        </where>
-    </select>
-
-    <!-- 보고서 상세 조회 -->
-    <select id="reportDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageReportDto">
-        <choose>
-            <when test="reportCategory == 1">
-                SELECT pr.project_report_id AS "reportId", rr.report_id AS "reviewId", 1 AS "reportCategory",
-                    pr.project_id AS "projectId", pr.project_member_id AS "projectMemberId", '프로젝트 보고서' AS "reportTypeName",
-                    p.subject AS "projectName", '-' AS "taskName", pr.title AS "reportTitle", pr.content AS "content", md.name AS "authorName",
-                    TO_CHAR(pr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate",
-                    CASE p.status
-                        WHEN 0 THEN '예정'
-                        WHEN 1 THEN '진행 중'
-                        ELSE '완료'
-                    END AS "stageName",
-                    pr.progress AS "progress",
-                    rr.review AS "reviewComment",
-                    rr.reject AS "rejectReason",
-                    TO_CHAR(rr.reviewed, 'YYYY-MM-DD HH24:MI') AS "reviewedDate",
-                    CASE
-                        WHEN rr.status IN (1, 2) THEN rr.status
-                        WHEN rr.viewed IS NOT NULL THEN 0
-                        ELSE -1
-                    END AS "reviewStatus"
-                FROM project_reports pr
-                JOIN projects p ON pr.project_id = p.project_id
-                JOIN project_members pm ON pr.project_member_id = pm.project_member_id
-                JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-                JOIN member_details md ON wm.member_id = md.member_id
-                LEFT JOIN report_reviews rr ON rr.report_id = (
-                    SELECT MAX(r2.report_id)
-                    FROM report_reviews r2
-                    WHERE r2.project_report_id = pr.project_report_id AND r2.category = 1
-                )
-                WHERE pr.project_report_id = #{reportId}
-                  AND p.workspace_id = #{workspaceId}
-                  AND p.deleted IS NULL
-          <include refid="reportProjectAccess"/>
-            </when>
-            <otherwise>
-                SELECT tr.team_report_id AS "reportId", rr.report_id AS "reviewId", 2 AS "reportCategory", tr.project_id AS "projectId",
-                    tr.task_id AS "taskId", tr.project_member_id AS "projectMemberId", '업무 보고서' AS "reportTypeName", p.subject AS "projectName",
-                    t.title AS "taskName", tr.title AS "reportTitle", tr.content AS "content", md.name AS "authorName",
-                    TO_CHAR(tr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate", TO_CHAR(t.task_level) || ' 단계' AS "stageName",
-                    tr.progress AS "progress", rr.review AS "reviewComment", rr.reject AS "rejectReason",
-                    TO_CHAR(rr.reviewed, 'YYYY-MM-DD HH24:MI') AS "reviewedDate",
-                    CASE
-                        WHEN rr.status IN (1, 2) THEN rr.status
-                        WHEN rr.viewed IS NOT NULL THEN 0
-                        ELSE -1
-                    END AS "reviewStatus"
-                FROM team_reports tr
-                JOIN tasks t ON tr.task_id = t.task_id AND tr.project_id = t.project_id
-                JOIN projects p ON tr.project_id = p.project_id
-                JOIN project_members pm ON tr.project_member_id = pm.project_member_id
-                JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-                JOIN member_details md ON wm.member_id = md.member_id
-                LEFT JOIN report_reviews rr ON rr.report_id = (
-                    SELECT MAX(r2.report_id)
-                    FROM report_reviews r2
-                    WHERE r2.team_report_id = tr.team_report_id AND r2.category = 2
-                )
-                WHERE tr.team_report_id = #{reportId} AND tr.deleted IS NULL AND t.deleted IS NULL AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
-          <include refid="reportProjectAccess"/>
-            </otherwise>
-        </choose>
-    </select>
-
-    <!-- 외래키 기록 -->
-    <update id="ensureWorkspacePmReviewer" parameterType="map">
-        MERGE INTO project_members pm USING (
-            SELECT p.project_id, wm.workspace_member_id FROM projects p
-            JOIN workspace_members wm ON wm.workspace_id = p.workspace_id AND wm.member_id = #{memberId}
-            WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
-              AND wm.role = 70 AND wm.status = 0
-        ) src ON (pm.project_id = src.project_id AND pm.workspace_member_id = src.workspace_member_id)
-        WHEN MATCHED THEN UPDATE SET pm.status = 0, pm.role = 70, pm."LEFT" = NULL, pm.updated = SYSDATE
-        WHEN NOT MATCHED THEN INSERT (project_member_id, project_id, workspace_member_id, role, status, joined)
-            VALUES (seq_project_members.NEXTVAL, src.project_id, src.workspace_member_id, 70, 0, SYSDATE)
-    </update>
-
-    <!-- 결재 권한을 가진 프로젝트 참여자 조회 -->
-    <select id="findReviewerProjectMemberId" parameterType="map" resultType="long">
-        SELECT pm.project_member_id
-        FROM project_members pm
-        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-        JOIN projects p ON pm.project_id = p.project_id
-        WHERE pm.project_id = #{projectId}
-          AND p.workspace_id = #{workspaceId}
-          AND p.deleted IS NULL
-          AND pm.status = 0
-          AND wm.status = 0
-          AND wm.member_id = #{memberId}
-          AND NOT EXISTS (SELECT 1 FROM project_members authorPm
-              JOIN workspace_members authorWm ON authorPm.workspace_member_id = authorWm.workspace_member_id
-              WHERE authorPm.project_member_id = #{authorProjectMemberId} AND authorWm.member_id = #{memberId})
-          AND (wm.role = 70 OR pm.role = 50)
-        ORDER BY pm.role DESC
-        FETCH FIRST 1 ROW ONLY
-    </select>
-
-    <!-- 최초 열람 기록 생성을 위한 보고서 잠금 -->
-    <select id="lockReport" parameterType="map" resultType="long">
-        <choose>
-            <when test="reportCategory == 1">
-                SELECT project_report_id FROM project_reports
-                WHERE project_report_id = #{reportId} AND project_id = #{projectId}
-                FOR UPDATE
-            </when>
-            <otherwise>
-                SELECT team_report_id FROM team_reports
-                WHERE team_report_id = #{reportId} AND project_id = #{projectId} AND deleted IS NULL
-                FOR UPDATE
-            </otherwise>
-        </choose>
-    </select>
-
-    <!-- 최초 열람 시 검토 기록 등록 -->
-    <insert id="insertReview" parameterType="map">
-        <choose>
-            <when test="reportCategory == 1">
-                INSERT INTO report_reviews (report_id, project_report_id, project_member_id, status, viewed, category)
-                SELECT seq_report_reviews.NEXTVAL, #{reportId}, #{reviewerProjectMemberId}, 0, SYSDATE, 1
-                FROM dual
-                WHERE NOT EXISTS (SELECT 1 FROM report_reviews WHERE project_report_id = #{reportId} AND category = 1)
-            </when>
-            <otherwise>
-                INSERT INTO report_reviews (report_id, team_report_id, project_member_id, status, viewed, category)
-                SELECT seq_report_reviews.NEXTVAL, #{reportId}, #{reviewerProjectMemberId}, 0, SYSDATE, 2
-                FROM dual
-                WHERE NOT EXISTS (SELECT 1 FROM report_reviews WHERE team_report_id = #{reportId} AND category = 2)
-            </otherwise>
-        </choose>
-    </insert>
-
-    <!-- 검토 기록의 최초 열람일 저장 -->
-    <update id="updateViewed" parameterType="map">
-        UPDATE report_reviews
-        SET viewed = SYSDATE
-        WHERE report_id = #{reviewId} AND status = 0 AND viewed IS NULL
-    </update>
-
-    <!-- 승인 및 반려 처리 -->
-    <update id="updateReview" parameterType="map">
-        UPDATE report_reviews
-        SET status = #{reviewStatus},
-	    review = #{reviewComment, jdbcType=VARCHAR},
-	    reject = #{rejectReason, jdbcType=VARCHAR},
-	    project_member_id = #{reviewerProjectMemberId},
-	    reviewed = SYSDATE
-        WHERE report_id = #{reviewId} AND status = 0 AND viewed IS NOT NULL
-          AND EXISTS (
-              SELECT 1
-              FROM project_members pm
-              JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-              JOIN projects p ON pm.project_id = p.project_id
-              WHERE pm.project_member_id = #{reviewerProjectMemberId}
-                AND pm.project_id = #{projectId}
-                AND p.workspace_id = #{workspaceId}
-                AND p.deleted IS NULL
-                AND pm.status = 0
-                AND wm.status = 0
-                AND wm.member_id = #{memberId}
-                AND NOT EXISTS (SELECT 1 FROM project_members authorPm
-              JOIN workspace_members authorWm ON authorPm.workspace_member_id = authorWm.workspace_member_id
-              WHERE authorPm.project_member_id = #{authorProjectMemberId} AND authorWm.member_id = #{memberId})
-                AND (wm.role = 70 OR pm.role = 50)
-          )
-    </update>
-
-    <!-- 프로젝트 진행률 변경 시 잠금 -->
-	<select id="lockProjectProgress" parameterType="map" resultType="long">
-	    SELECT project_id
-	    FROM projects
-	    WHERE project_id = #{projectId} AND workspace_id = #{workspaceId} AND deleted IS NULL
-	    FOR UPDATE
+	<!-- 보고서 목록 조회 -->
+	<select id="listReport" parameterType="map" resultType="com.tk.app.domain.dto.ManageReportDto">
+		SELECT R.*
+		FROM (
+		<include refid="reportListSource" />
+		) R
+		<where>
+			<include refid="reportFilters" />
+		</where>
+		ORDER BY R."sortDate" DESC, R."reportCategory", R."reportId" DESC
+		OFFSET #{offset} ROWS
+		FETCH FIRST #{size} ROWS ONLY
 	</select>
 
-    <!-- 승인된 업무 보고서의 진행률 합계 -->
-	<update id="updateTaskProgress" parameterType="map">
-	    UPDATE tasks t SET progress = (SELECT LEAST(100, NVL(SUM(tr.progress), 0))
-	    FROM team_reports tr
-	    WHERE tr.task_id = t.task_id AND tr.project_id = t.project_id AND tr.deleted IS NULL
+	<!-- 보고서 건수 조회 -->
+	<select id="countReport" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM (
+		<include refid="reportListSource" />
+		) R
+		<where>
+			<include refid="reportFilters" />
+		</where>
+	</select>
+
+	<!-- 보고서 상세 조회 -->
+	<select id="reportDetail" parameterType="map" resultType="com.tk.app.domain.dto.ManageReportDto">
+		<choose>
+			<when test="reportCategory == 1">
+				SELECT pr.project_report_id AS "reportId", rr.report_id AS "reviewId", 1 AS "reportCategory",
+					pr.project_id AS "projectId", pr.project_member_id AS "projectMemberId",
+					'프로젝트 보고서' AS "reportTypeName",
+					p.subject AS "projectName", '-' AS "taskName", pr.title AS "reportTitle",
+					pr.content AS "content",
+					md.name AS "authorName",
+					TO_CHAR(pr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate",
+					CASE p.status
+					WHEN 0 THEN '예정'
+					WHEN 1 THEN '진행 중'
+					ELSE '완료'
+				END AS "stageName",
+					pr.progress AS "progress",
+					rr.review AS "reviewComment",
+					rr.reject AS "rejectReason",
+					TO_CHAR(rr.reviewed, 'YYYY-MM-DD HH24:MI') AS "reviewedDate",
+					CASE
+					WHEN rr.status IN (1, 2) THEN rr.status + 2
+					WHEN rr.viewed IS NOT NULL THEN 2
+					ELSE 1
+				END AS "reviewStatus"
+				FROM project_reports pr
+				JOIN projects p
+					ON pr.project_id = p.project_id
+				JOIN project_members pm
+					ON pr.project_member_id = pm.project_member_id
+				JOIN workspace_members wm
+					ON pm.workspace_member_id = wm.workspace_member_id
+				JOIN member_details md
+					ON wm.member_id = md.member_id
+				LEFT JOIN report_reviews rr
+					ON rr.report_id = (
+					SELECT MAX(r2.report_id)
+					FROM report_reviews r2
+					WHERE r2.project_report_id = pr.project_report_id
+						AND r2.category = 1
+				)
+				WHERE pr.project_report_id = #{reportId}
+					AND p.workspace_id = #{workspaceId}
+					AND p.deleted IS NULL
+				<include refid="reportProjectAccess"/>
+			</when>
+			<otherwise>
+				SELECT tr.team_report_id AS "reportId", rr.report_id AS "reviewId", 2 AS "reportCategory",
+					tr.project_id AS "projectId",
+					tr.task_id AS "taskId", tr.project_member_id AS "projectMemberId", '업무 보고서' AS "reportTypeName",
+					p.subject AS "projectName",
+					t.title AS "taskName", tr.title AS "reportTitle", tr.content AS "content",
+					md.name AS "authorName",
+					TO_CHAR(tr.created, 'YYYY-MM-DD HH24:MI') AS "createdDate", TO_CHAR(t.task_level) || ' 단계' AS "stageName",
+					tr.progress AS "progress", rr.review AS "reviewComment", rr.reject AS "rejectReason",
+					TO_CHAR(rr.reviewed, 'YYYY-MM-DD HH24:MI') AS "reviewedDate",
+					CASE
+					WHEN rr.status IN (1, 2) THEN rr.status + 2
+					WHEN rr.viewed IS NOT NULL THEN 2
+					ELSE 1
+				END AS "reviewStatus"
+				FROM team_reports tr
+				JOIN tasks t
+					ON tr.task_id = t.task_id
+					AND tr.project_id = t.project_id
+				JOIN projects p
+					ON tr.project_id = p.project_id
+				JOIN project_members pm
+					ON tr.project_member_id = pm.project_member_id
+				JOIN workspace_members wm
+					ON pm.workspace_member_id = wm.workspace_member_id
+				JOIN member_details md
+					ON wm.member_id = md.member_id
+				LEFT JOIN report_reviews rr
+					ON rr.report_id = (
+					SELECT MAX(r2.report_id)
+					FROM report_reviews r2
+					WHERE r2.team_report_id = tr.team_report_id
+						AND r2.category = 2
+				)
+				WHERE tr.team_report_id = #{reportId}
+					AND tr.deleted IS NULL
+					AND t.deleted IS NULL
+					AND p.workspace_id = #{workspaceId}
+					AND p.deleted IS NULL
+				<include refid="teamReportReadScope"/>
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 검토자 프로젝트 참여번호 조회 -->
+	<select id="findReviewerProjectMemberId" parameterType="map" resultType="long">
+		SELECT pm.project_member_id
+		FROM project_members pm
+		JOIN workspace_members wm
+			ON pm.workspace_member_id = wm.workspace_member_id
+		JOIN projects p
+			ON pm.project_id = p.project_id
+		WHERE pm.project_id = #{projectId}
+			AND p.workspace_id = #{workspaceId}
+			AND p.deleted IS NULL
+			AND pm.status = 0
+			AND wm.workspace_id = p.workspace_id
+			AND wm.status = 0
+			AND wm.member_id = #{memberId}
+		ORDER BY pm.role DESC
+		FETCH FIRST 1 ROW ONLY
+	</select>
+
+	<!-- 보고서 변경 금지 -->
+	<select id="lockReport" parameterType="map" resultType="long">
+		<choose>
+			<when test="reportCategory == 1">
+				SELECT project_report_id
+				FROM project_reports
+				WHERE project_report_id = #{reportId}
+					AND project_id = #{projectId}
+					FOR UPDATE
+			</when>
+			<otherwise>
+				SELECT team_report_id
+				FROM team_reports
+				WHERE team_report_id = #{reportId}
+					AND project_id = #{projectId}
+					AND deleted IS NULL
+					FOR UPDATE
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 최초 검토 기록 등록 -->
+	<insert id="insertReview" parameterType="map">
+		<choose>
+			<when test="reportCategory == 1">
+				INSERT INTO report_reviews (report_id, project_report_id, project_member_id, status, viewed,
+						category)
+				SELECT seq_report_reviews.NEXTVAL, #{reportId}, #{reviewerProjectMemberId},
+					0,
+					SYSDATE,
+					1
+				FROM dual
+				WHERE NOT EXISTS (
+					SELECT 1
+					FROM report_reviews
+					WHERE project_report_id = #{reportId}
+						AND category = 1)
+			</when>
+			<otherwise>
+				INSERT INTO report_reviews (report_id, team_report_id, project_member_id, status, viewed,
+						category)
+				SELECT seq_report_reviews.NEXTVAL, #{reportId}, #{reviewerProjectMemberId},
+					0,
+					SYSDATE,
+					2
+				FROM dual
+				WHERE NOT EXISTS (
+					SELECT 1
+					FROM report_reviews
+					WHERE team_report_id = #{reportId}
+						AND category = 2)
+			</otherwise>
+		</choose>
+	</insert>
+
+	<!-- 최초 열람일 기록 -->
+	<update id="updateViewed" parameterType="map">
+		UPDATE report_reviews
+		SET viewed = SYSDATE
+		WHERE report_id = #{reviewId}
+			AND status = 0
+			AND viewed IS NULL
+	</update>
+
+	<!-- 보고서 승인 및 반려 -->
+	<update id="updateReview" parameterType="map">
+		UPDATE report_reviews
+		SET status = #{reviewDbStatus},
+			review = #{reviewComment, jdbcType=VARCHAR},
+			reject = #{rejectReason, jdbcType=VARCHAR},
+			project_member_id = #{reviewerProjectMemberId},
+			reviewed = SYSDATE
+		WHERE report_id = #{reviewId}
+			AND status = 0
+			AND viewed IS NOT NULL
 			AND EXISTS (
-	          SELECT 1
-	          FROM report_reviews rr
-	          WHERE rr.team_report_id = tr.team_report_id
-	            AND rr.category = 2
-	            AND rr.status = 1)
-			),
-	    updated = SYSDATE
-	    WHERE t.task_id = #{taskId} AND t.project_id = #{projectId} AND t.deleted IS NULL
+			SELECT 1
+			FROM project_members pm
+			JOIN workspace_members wm
+				ON pm.workspace_member_id = wm.workspace_member_id
+			JOIN projects p
+				ON pm.project_id = p.project_id
+			WHERE pm.project_member_id = #{reviewerProjectMemberId}
+				AND pm.project_id = #{projectId}
+				AND p.workspace_id = #{workspaceId}
+				AND p.deleted IS NULL
+				AND pm.status = 0
+				AND wm.status = 0
+				AND wm.member_id = #{memberId}
+		)
 	</update>
 
-    <!-- 업무 진행률 평균으로 프로젝트 진행률 갱신 -->
-	<update id="updateProjectProgress" parameterType="map">
-	    UPDATE projects p SET progress = (SELECT ROUND(NVL(AVG(t.progress), 0), 2)
-	        FROM tasks t
-	        WHERE t.project_id = p.project_id AND t.deleted IS NULL
-	    ),
-	    updated = SYSDATE
-	    WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
-	</update>
-
-
-	<!-- 보고서 결재 상태별 개수 조회 -->
-	<select id="countReportStatuses" parameterType="map" resultType="map">
-	    SELECT COUNT(CASE WHEN R."reviewStatus" = -1 THEN 1 END) AS "uncheckedCount",
-	        COUNT(CASE WHEN R."reviewStatus" = 0 THEN 1 END) AS "pendingCount",
-	        COUNT(CASE WHEN R."reviewStatus" = 1 THEN 1 END) AS "approvedCount",
-	        COUNT(CASE WHEN R."reviewStatus" = 2 THEN 1 END) AS "rejectedCount"
-	    FROM (<include refid="reportListSource"/>) R
+	<!-- 프로젝트 진행률 변경 금지 -->
+	<select id="lockProjectProgress" parameterType="map" resultType="long">
+		SELECT project_id
+		FROM projects
+		WHERE project_id = #{projectId}
+			AND workspace_id = #{workspaceId}
+			AND deleted IS NULL
+			FOR UPDATE
 	</select>
 
-	<!-- 보고서 등록 -->
+	<!-- 승인된 보고서의 업무 진행률 계산 -->
+	<update id="updateTaskProgress" parameterType="map">
+		UPDATE tasks t
+		SET progress = (
+			SELECT LEAST(100, NVL(SUM(tr.progress), 0))
+			FROM team_reports tr
+			WHERE tr.task_id = t.task_id
+				AND tr.project_id = t.project_id
+				AND tr.deleted IS NULL
+				AND EXISTS (
+				SELECT 1
+				FROM report_reviews rr
+				WHERE rr.team_report_id = tr.team_report_id
+					AND rr.category = 2
+					AND rr.status = 1
+					AND rr.report_id = (
+					SELECT MAX(last_rr.report_id)
+					FROM report_reviews last_rr
+					WHERE last_rr.team_report_id = tr.team_report_id
+						AND last_rr.category = 2))
+		),
+			status = CASE
+			WHEN (
+			SELECT LEAST(100, NVL(SUM(tr.progress), 0))
+			FROM team_reports tr
+			WHERE tr.task_id = t.task_id
+				AND tr.deleted IS NULL
+				AND EXISTS (
+				SELECT 1
+				FROM report_reviews rr
+				WHERE rr.team_report_id = tr.team_report_id
+					AND rr.category = 2
+					AND rr.status = 1
+					AND rr.report_id = (
+					SELECT MAX(r2.report_id)
+					FROM report_reviews r2
+					WHERE r2.team_report_id = tr.team_report_id
+						AND r2.category = 2))) &gt;= 100 THEN 3
+			ELSE 1
+		END,
+			updated = SYSDATE
+		WHERE t.task_id = #{taskId}
+			AND t.project_id = #{projectId}
+			AND t.deleted IS NULL
+	</update>
+
+	<!-- 업무 비중에 따른 프로젝트 진행률 계산 -->
+	<update id="updateProjectProgress" parameterType="map">
+		UPDATE projects p
+		SET progress = (
+			SELECT ROUND(NVL(SUM(t.progress * NVL(t.progress_weight,
+								0) / 100),
+						0),
+					2)
+			FROM tasks t
+			WHERE t.project_id = p.project_id
+				AND t.deleted IS NULL
+		),
+			updated = SYSDATE
+		WHERE p.project_id = #{projectId}
+			AND p.workspace_id = #{workspaceId}
+			AND p.deleted IS NULL
+	</update>
+
+	<!-- 보고서 상태별 건수 조회 -->
+	<select id="countReportStatuses" parameterType="map" resultType="map">
+		SELECT COUNT(CASE
+				WHEN R."reviewStatus" = 1 THEN 1
+			END) AS "uncheckedCount",
+			COUNT(CASE
+				WHEN R."reviewStatus" = 2 THEN 1
+			END) AS "pendingCount",
+			COUNT(CASE
+				WHEN R."reviewStatus" = 3 THEN 1
+			END) AS "approvedCount",
+			COUNT(CASE
+				WHEN R."reviewStatus" = 4 THEN 1
+			END) AS "rejectedCount"
+		FROM (
+		<include refid="reportListSource"/>
+		) R
+	</select>
+
+	<!-- 프로젝트 보고서 등록 -->
 	<insert id="insertReport" parameterType="com.tk.app.domain.dto.ManageReportDto">
 		<selectKey keyProperty="reportId" resultType="long" order="BEFORE">
-			SELECT seq_project_reports.NEXTVAL FROM dual
+			SELECT seq_project_reports.NEXTVAL
+			FROM dual
 		</selectKey>
 		INSERT INTO project_reports(project_report_id, project_id, project_member_id, title, content,
-			progress, status, report_date, created)
+				progress, status, report_date, created)
 		SELECT #{reportId}, #{projectId}, #{projectMemberId},
-	         #{reportTitle}, #{content}, #{progress}, 0, SYSDATE, SYSDATE
+			#{reportTitle}, #{content}, #{progress}, 0, SYSDATE, SYSDATE
 		FROM project_members pm
-		WHERE pm.project_member_id = #{projectMemberId} AND pm.role &gt;= 50 AND pm.project_id = #{projectId} AND pm.status = 0
+		WHERE pm.project_member_id = #{projectMemberId}
+			AND pm.project_id = #{projectId}
+			AND pm.status = 0
 	</insert>
 
-	<!-- 보고서 파일 등록 -->
-	<insert id="insertReportFile"  parameterType="com.tk.app.domain.dto.ManageReportDto">
-		INSERT INTO report_files(report_file_id, project_report_id, original_name, stored_name, path, file_size, uploaded)
-		SELECT seq_report_files.NEXTVAL, pr.project_report_id, #{originalName}, #{storedName}, #{path}, #{fileSize}, SYSDATE
-		FROM project_reports pr
-		WHERE pr.project_report_id = #{projectReportId} AND pr.project_member_id = #{projectMemberId}
-	</insert>
-	
-	<!-- 보고서 등록 가능한 프로젝트 목록 -->
+	<!-- 보고서 등록용 프로젝트 조회 -->
 	<select id="listWritableProjects" parameterType="map" resultType="map">
-	    SELECT p.project_id AS "projectId",
-	           p.subject AS "projectName",
-	           pm.project_member_id AS "projectMemberId"
-	    FROM projects p
-	    JOIN project_members pm
-	        ON pm.project_id = p.project_id
-	    JOIN workspace_members wm
-	        ON wm.workspace_member_id = pm.workspace_member_id
-	    JOIN workspace_domains wd
-	        ON wd.workspace_id = p.workspace_id
-	    WHERE wd.domain_key = #{domainKey}
-	      AND wd.active = 'Y'
-	      AND wm.member_id = #{memberId}
-	      AND wm.status = 0
-	      AND pm.status = 0
-	      AND pm.role &gt;= 50
-	      AND p.deleted IS NULL
-	    ORDER BY p.subject
+		SELECT p.project_id AS "projectId",
+			p.subject AS "projectName",
+			pm.project_member_id AS "projectMemberId"
+		FROM projects p
+		JOIN project_members pm
+			ON pm.project_id = p.project_id
+		JOIN workspace_members wm
+			ON wm.workspace_member_id = pm.workspace_member_id
+		JOIN workspace_domains wd
+			ON wd.workspace_id = p.workspace_id
+		WHERE wd.domain_key = #{domainKey}
+			AND wd.active = 'Y'
+			AND wm.member_id = #{memberId}
+			AND wm.status = 0
+			AND pm.status = 0
+			AND p.deleted IS NULL
+			AND p.workspace_id = #{workspaceId}
+		ORDER BY p.subject
 	</select>
-	
+
+	<!-- 작성자 프로젝트 참여번호 조회 -->
+	<select id="findOwnProjectMemberId" parameterType="map" resultType="long">
+		SELECT pm.project_member_id
+		FROM project_members pm
+		JOIN projects p
+			ON p.project_id = pm.project_id
+		JOIN workspace_members wm
+			ON wm.workspace_member_id = pm.workspace_member_id
+			AND wm.workspace_id = p.workspace_id
+		WHERE p.project_id = #{projectId}
+			AND p.workspace_id = #{workspaceId}
+			AND p.deleted IS NULL
+			AND pm.status = 0
+			AND wm.status = 0
+			AND wm.member_id = #{memberId}
+	</select>
+
+	<!-- 프로젝트 보고서 수정 -->
+	<update id="updateReport" parameterType="com.tk.app.domain.dto.ManageReportDto">
+		UPDATE project_reports
+		SET title = #{reportTitle}, content = #{content}, progress = #{progress},
+			updated = SYSDATE
+		WHERE project_report_id = #{reportId}
+			AND project_id = #{projectId}
+	</update>
+
+	<!-- 보고서 검토 기록 삭제 -->
+	<delete id="deleteReportReviews" parameterType="map">
+		DELETE
+		FROM report_reviews
+		WHERE project_report_id = #{reportId}
+			AND category = 1
+	</delete>
+
+	<!-- 프로젝트 보고서 삭제 -->
+	<delete id="deleteReport" parameterType="map">
+		DELETE
+		FROM project_reports
+		WHERE project_report_id = #{reportId}
+			AND project_id = #{projectId}
+	</delete>
+
+	<!-- 수정한 보고서 검토 상태 초기화 -->
+	<update id="resetReview" parameterType="map">
+		UPDATE report_reviews
+		SET status = 0, viewed = NULL, reviewed = NULL, review = NULL, reject = NULL
+		WHERE project_report_id = #{reportId}
+			AND category = 1
+	</update>
+
+	<!-- 보고서 첨부파일 목록 조회 -->
+	<select id="listReportFiles" parameterType="map" resultType="com.tk.app.domain.dto.ManageFileDto">
+		SELECT report_file_id AS "fileId", original_name AS "originalName", stored_name AS "storedName",
+			path AS "path", file_size AS "fileSize"
+		FROM report_files
+		<choose>
+			<when test="reportCategory == 1">
+				WHERE project_report_id = #{reportId}
+			</when>
+			<otherwise>
+				WHERE team_report_id = #{reportId}
+			</otherwise>
+		</choose>
+		ORDER BY report_file_id
+	</select>
+
+	<!-- 보고서 첨부파일 등록 -->
+	<insert id="insertReportFile" parameterType="com.tk.app.domain.dto.ManageFileDto">
+		INSERT INTO report_files (report_file_id, project_report_id, original_name, stored_name,
+				path,
+				file_size,
+				uploaded)
+		VALUES (seq_report_files.NEXTVAL, #{reportId}, #{originalName}, #{storedName}, #{path},
+				#{fileSize},
+				SYSDATE)
+	</insert>
+
+	<!-- 보고서 첨부파일 삭제 -->
+	<delete id="deleteReportFile" parameterType="map">
+		DELETE
+		FROM report_files
+		WHERE project_report_id = #{reportId}
+			AND report_file_id = #{fileId}
+	</delete>
+
+	<!-- 이전 보고서 조회 -->
+	<select id="selectPrevReport" parameterType="map" resultType="com.tk.app.domain.dto.ManageReportDto">
+		SELECT R.*
+		FROM (
+		<include refid="reportListSource"/>
+		) R
+		JOIN (
+		<include refid="reportListSource"/>
+		) C
+			ON C."reportCategory" = #{currentCategory}
+			AND C."reportId" = #{reportId}
+		WHERE (
+			R."sortDate" &gt; C."sortDate"
+			OR (R."sortDate" = C."sortDate"
+				AND R."reportCategory" &lt; C."reportCategory")
+			OR (R."sortDate" = C."sortDate"
+				AND R."reportCategory" = C."reportCategory"
+				AND R."reportId" &gt; C."reportId")
+		)
+		<include refid="reportFilters"/>
+		ORDER BY R."sortDate" ASC, R."reportCategory" DESC, R."reportId" ASC
+		FETCH FIRST 1 ROW ONLY
+	</select>
+
+	<!-- 다음 보고서 조회 -->
+	<select id="selectNextReport" parameterType="map" resultType="com.tk.app.domain.dto.ManageReportDto">
+		SELECT R.*
+		FROM (
+		<include refid="reportListSource"/>
+		) R
+		JOIN (
+		<include refid="reportListSource"/>
+		) C
+			ON C."reportCategory" = #{currentCategory}
+			AND C."reportId" = #{reportId}
+		WHERE (
+			R."sortDate" &lt; C."sortDate"
+			OR (R."sortDate" = C."sortDate"
+				AND R."reportCategory" &gt; C."reportCategory")
+			OR (R."sortDate" = C."sortDate"
+				AND R."reportCategory" = C."reportCategory"
+				AND R."reportId" &lt; C."reportId")
+		)
+		<include refid="reportFilters"/>
+		ORDER BY R."sortDate" DESC, R."reportCategory", R."reportId" DESC
+		FETCH FIRST 1 ROW ONLY
+	</select>
+
+	<!-- 결재 버튼 표시 조건 조회 -->
+	<select id="countReviewButtonVisible" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM project_members pm
+		JOIN workspace_members wm
+			ON wm.workspace_member_id = pm.workspace_member_id
+		WHERE pm.project_id = #{projectId}
+			AND pm.status = 0
+			AND wm.status = 0
+			AND wm.workspace_id = #{workspaceId}
+			AND wm.member_id = #{memberId}
+			AND (wm.role = 70
+				OR pm.role = 50)
+			AND NOT EXISTS (
+			SELECT 1
+			FROM project_members author_pm
+			JOIN workspace_members author_wm
+				ON author_wm.workspace_member_id = author_pm.workspace_member_id
+			WHERE author_pm.project_member_id = #{authorProjectMemberId}
+				AND author_wm.member_id = #{memberId})
+	</select>
+
+	<!-- 기존 검토 보상 대상 확인 -->
+	<select id="countRewardEligibleReviewer" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM project_members pm
+		WHERE pm.project_member_id = #{reviewerProjectMemberId}
+			AND pm.role = 70
+			AND pm.status = 0
+			AND pm.project_member_id != #{authorProjectMemberId}
+	</select>
+
 </mapper>

@@ -24,6 +24,7 @@ public class ManageTaskDto {
 	private int status;
 
 	private double progress;
+	private Double progress_weight;
 
 	private String tl_name;
 }

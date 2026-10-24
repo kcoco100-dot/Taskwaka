@@ -1,4 +1,3 @@
-
 package com.tk.app.controller;
 
 import java.util.ArrayList;
@@ -45,13 +44,13 @@ public class ManageNoticeController {
     @Value("${file.upload-root}/notice")
     private String uploadPath;
 
-    // 공통 도메인 키 전달
+    // 도메인키 설정
     @ModelAttribute("domainKey")
     public String domainKey(@PathVariable("domainKey") String domainKey) {
         return domainKey;
     }
 
-    // 현재 역할을 HTML에 전달
+    // 화면 표시용 직위 조회
     @ModelAttribute("currentRole")
     public int currentRole(@PathVariable("domainKey") String domainKey) {
         int result = 0;
@@ -67,14 +66,14 @@ public class ManageNoticeController {
         return result;
     }
 
-    // 공지사항 조회 및 검색, 페이징
+    // 공지 목록 조회
     @GetMapping("/noticeList")
     public String noticeList(@PathVariable("domainKey") String domainKey,
             @RequestParam(name = "page", defaultValue = "1") int current_page,
             @RequestParam(name = "noticeType", defaultValue = "all") String noticeType,
             @RequestParam(name = "schType", defaultValue = "all") String schType,
             @RequestParam(name = "kwd", defaultValue = "") String kwd,
-            Model model) {
+            Model model) throws Exception {
 
         int size = 10;
         int dataCount = 0;
@@ -85,7 +84,9 @@ public class ManageNoticeController {
 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
-            if (info == null) return "redirect:/login";
+            if (info == null) {
+                throw new IllegalStateException("로그인 정보가 없습니다.");
+            }
 
             if (!List.of("all", "WORKSPACE", "PROJECT", "TASK").contains(noticeType)) {
                 noticeType = "all";
@@ -129,7 +130,7 @@ public class ManageNoticeController {
 
         } catch (Exception e) {
             log.info("noticeList : ", e);
-            model.addAttribute("errorMessage", "공지사항 목록을 조회하지 못했습니다.");
+            throw e;
         }
 
         model.addAttribute("list", list);
@@ -146,7 +147,7 @@ public class ManageNoticeController {
         return "manage/noticeList";
     }
 
-    // 공지사항 상세 조회
+    // 공지 상세 조회
     @GetMapping("/noticeDetail/{notice_id}")
     public String noticeDetail(@PathVariable("domainKey") String domainKey,
             @PathVariable("notice_id") Long notice_id,
@@ -154,18 +155,20 @@ public class ManageNoticeController {
             @RequestParam(name = "noticeType", defaultValue = "all") String noticeType,
             @RequestParam(name = "schType", defaultValue = "all") String schType,
             @RequestParam(name = "kwd", defaultValue = "") String kwd,
-            Model model) {
+            Model model) throws Exception {
 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
-            if (info == null) return "redirect:/login";
+            if (info == null) {
+                throw new IllegalStateException("로그인 정보가 없습니다.");
+            }
 
             Map<String, Object> map = createMap(domainKey, info);
             map.put("notice_id", notice_id);
 
             ManageNoticeDto dto = service.selectNoticeDetail(map);
             if (dto == null) {
-                return "redirect:/" + domainKey + "/manage/noticeList";
+                throw new IllegalArgumentException("공지사항을 찾을 수 없습니다.");
             }
 
             service.updateViewCount(map);
@@ -190,21 +193,21 @@ public class ManageNoticeController {
 
         } catch (Exception e) {
             log.info("noticeDetail : ", e);
-            return "redirect:/" + domainKey + "/manage/noticeList";
+            throw e;
         }
 
         return "manage/noticeDetail";
     }
 
-    // 공지사항 등록 화면
+    // 공지 등록 화면
     @GetMapping("/noticeWrite")
     public String writeForm(@PathVariable("domainKey") String domainKey,
-            Model model) {
+            Model model) throws Exception {
 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             if (info == null) {
-                return "redirect:/login";
+                throw new IllegalStateException("로그인 정보가 없습니다.");
             }
 
             Map<String, Object> map = new HashMap<>();
@@ -218,23 +221,23 @@ public class ManageNoticeController {
 
         } catch (Exception e) {
             log.info("writeForm : ", e);
-            return "redirect:/" + domainKey + "/manage/noticeList";
+            throw e;
         }
 
         return "manage/noticeWrite";
     }
 
-    // 공지사항 등록 처리
+    // 공지 등록
     @PostMapping("/noticeWrite")
     public String writeSubmit(@PathVariable("domainKey") String domainKey,
             @ModelAttribute ManageNoticeDto dto,
             @RequestParam(name = "files", required = false) List<MultipartFile> files,
-            RedirectAttributes ra) {
+            RedirectAttributes ra) throws Exception {
 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             if (info == null) {
-                return "redirect:/login";
+                throw new IllegalStateException("로그인 정보가 없습니다.");
             }
 
             dto.setDomainKey(domainKey);
@@ -243,22 +246,19 @@ public class ManageNoticeController {
 
             int result = service.createNotice(dto, files);
 
-            if (result > 0) {
-                ra.addFlashAttribute("message", "공지사항이 등록되었습니다.");
-                return "redirect:/" + domainKey + "/manage/noticeDetail/" + dto.getNotice_id();
+            if (result != 1) {
+                throw new IllegalStateException("공지 등록에 실패했습니다.");
             }
-
-            ra.addFlashAttribute("errorMessage", "공지사항 등록에 실패했습니다.");
 
         } catch (Exception e) {
             log.info("writeSubmit : ", e);
-            ra.addFlashAttribute("errorMessage", "공지사항 등록 중 오류가 발생했습니다.");
+            throw e;
         }
 
-        return "redirect:/" + domainKey + "/manage/noticeWrite";
+        return "redirect:/" + domainKey + "/manage/noticeDetail/" + dto.getNotice_id();
     }
 
-    // 공지사항 수정 화면
+    // 공지 수정 화면
     @GetMapping("/noticeEdit/{notice_id}")
     public String updateForm(@PathVariable("domainKey") String domainKey,
             @PathVariable("notice_id") Long notice_id,
@@ -266,12 +266,12 @@ public class ManageNoticeController {
             @RequestParam(name = "noticeType", defaultValue = "all") String noticeType,
             @RequestParam(name = "schType", defaultValue = "all") String schType,
             @RequestParam(name = "kwd", defaultValue = "") String kwd,
-            Model model) {
+            Model model) throws Exception {
 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             if (info == null) {
-                return "redirect:/login";
+                throw new IllegalStateException("로그인 정보가 없습니다.");
             }
 
             Map<String, Object> map = new HashMap<>();
@@ -281,7 +281,7 @@ public class ManageNoticeController {
 
             ManageNoticeDto dto = service.selectNoticeDetail(map);
             if (dto == null) {
-                return "redirect:/" + domainKey + "/manage/noticeList";
+                throw new IllegalArgumentException("공지사항을 찾을 수 없습니다.");
             }
 
             model.addAttribute("mode", "update");
@@ -294,13 +294,13 @@ public class ManageNoticeController {
 
         } catch (Exception e) {
             log.info("updateForm : ", e);
-            return "redirect:/" + domainKey + "/manage/noticeList";
+            throw e;
         }
 
         return "manage/noticeWrite";
     }
 
-    // 공지사항 수정 처리
+    // 공지 수정
     @PostMapping("/noticeEdit")
     public String updateSubmit(@PathVariable("domainKey") String domainKey,
             @ModelAttribute ManageNoticeDto dto,
@@ -310,12 +310,12 @@ public class ManageNoticeController {
             @RequestParam(name = "noticeType", defaultValue = "all") String noticeType,
             @RequestParam(name = "schType", defaultValue = "all") String schType,
             @RequestParam(name = "kwd", defaultValue = "") String kwd,
-            RedirectAttributes ra) {
+            RedirectAttributes ra) throws Exception {
 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             if (info == null) {
-                return "redirect:/login";
+                throw new IllegalStateException("로그인 정보가 없습니다.");
             }
 
             dto.setDomainKey(domainKey);
@@ -328,55 +328,48 @@ public class ManageNoticeController {
             ra.addAttribute("schType", schType);
             ra.addAttribute("kwd", kwd);
 
-            if (result > 0) {
-                ra.addFlashAttribute("message", "공지사항이 수정되었습니다.");
-                return "redirect:/" + domainKey + "/manage/noticeDetail/" + dto.getNotice_id();
+            if (result != 1) {
+                throw new IllegalStateException("공지 수정에 실패했습니다.");
             }
-
-            ra.addFlashAttribute("errorMessage", "공지사항 수정에 실패했습니다.");
 
         } catch (Exception e) {
             log.info("updateSubmit : ", e);
-            ra.addFlashAttribute("errorMessage", "공지사항 수정 중 오류가 발생했습니다.");
+            throw e;
         }
 
-        return "redirect:/" + domainKey + "/manage/noticeEdit/" + dto.getNotice_id()
-                + "?page=" + page
-                + "&noticeType=" + noticeType
-                + "&schType=" + schType
-                + "&kwd=" + myUtil.encodeUrl(kwd);
+        return "redirect:/" + domainKey + "/manage/noticeDetail/" + dto.getNotice_id();
     }
 
-    // 공지사항 논리 삭제
+    // 공지 숨김
     @PostMapping("/noticeDelete/{notice_id}")
     public String deleteNotice(@PathVariable("domainKey") String domainKey,
             @PathVariable("notice_id") Long notice_id,
-            RedirectAttributes ra) {
+            RedirectAttributes ra) throws Exception {
 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
-            if (info == null) return "redirect:/login";
+            if (info == null) {
+                throw new IllegalStateException("로그인 정보가 없습니다.");
+            }
 
             Map<String, Object> map = createMap(domainKey, info);
             map.put("requester_member_id", info.getMember_id());
             map.put("notice_id", notice_id);
 
             int result = service.deleteNotice(map);
-            if (result > 0) {
-                ra.addFlashAttribute("message", "공지사항이 삭제되었습니다.");
-            } else {
-                ra.addFlashAttribute("errorMessage", "공지사항을 삭제할 수 없습니다.");
+            if (result != 1) {
+                throw new IllegalStateException("공지 삭제에 실패했습니다.");
             }
 
         } catch (Exception e) {
             log.info("deleteNotice : ", e);
-            ra.addFlashAttribute("errorMessage", "공지사항 삭제 중 오류가 발생했습니다.");
+            throw e;
         }
 
         return "redirect:/" + domainKey + "/manage/noticeList";
     }
 
-    // 공지사항 첨부파일 다운로드
+    // 공지 첨부파일 다운로드
     @GetMapping("/noticeFile/{notice_id}/{notice_file_id}/download")
     public ResponseEntity<?> downloadNoticeFile(@PathVariable("domainKey") String domainKey,
             @PathVariable("notice_id") Long notice_id,
@@ -411,7 +404,7 @@ public class ManageNoticeController {
         }
     }
 
-    // 공통 조회 조건 생성
+    // 조회 조건 생성
     private Map<String, Object> createMap(String domainKey, SessionInfo info) {
         Map<String, Object> map = new HashMap<>();
         map.put("domainKey", domainKey);

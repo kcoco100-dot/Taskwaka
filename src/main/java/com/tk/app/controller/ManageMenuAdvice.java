@@ -26,16 +26,26 @@ public class ManageMenuAdvice {
 
 	@ModelAttribute("manageWorkspaceRole")
 	public int manageWorkspaceRole(HttpServletRequest request) {
-		if (!"GET".equalsIgnoreCase(request.getMethod())) return 0;
+		if (!"GET".equalsIgnoreCase(request.getMethod())) {
+			return 0;
+		}
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
-			if (info == null) return 0;
+			if (info == null) {
+				return 0;
+			}
 			Object values = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			if (!(values instanceof Map<?, ?> variables)) return 0;
+			if (!(values instanceof Map<?, ?> variables)) {
+				return 0;
+			}
 			Object value = variables.get("domainKey");
-			if (!(value instanceof String domainKey)) return 0;
+			if (!(value instanceof String domainKey)) {
+				return 0;
+			}
 			Long workspaceId = manageService.findByDomainKey(domainKey);
-			if (workspaceId == null) return 0;
+			if (workspaceId == null) {
+				return 0;
+			}
 			Integer role = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
 			return role == null ? 0 : role;
 		} catch (Exception e) {

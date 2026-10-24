@@ -44,7 +44,7 @@
         <section class="section approval-page report-write-page" aria-labelledby="report-write-heading">
             <div class="page-heading">
                 <div>
-                    <h1 id="report-write-heading" class="page-title">프로젝트 보고서 등록</h1>
+                    <h1 id="report-write-heading" class="page-title" th:text="${mode == 'write' ? '프로젝트 보고서 등록' : '프로젝트 보고서 수정'}">프로젝트 보고서 등록</h1>
                     <p class="page-description">프로젝트 진행 상황을 작성하고 자료를 첨부하세요.</p>
                 </div>
             </div>
@@ -55,16 +55,18 @@
                     <p>프로젝트, 제목, 진행률, 내용 입력 후 등록완료를 눌러 주세요.</p>
                 </div>
 
-                <p class="report-error" th:if="${errorMessage != null}" th:text="${errorMessage}"></p>
+                
 
                 <form id="reportForm" name="reportForm" method="post" enctype="multipart/form-data"
-                      th:action="@{/{domainKey}/manage/report/write(domainKey=${domainKey})}"
+                      th:action="${mode == 'write'} ? @{/{domainKey}/manage/approval/write(domainKey=${domainKey})} : @{/{domainKey}/manage/approval/update/{id}(domainKey=${domainKey},id=${dto.reportId})}"
                       th:object="${dto}">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" id="projectMemberId" th:field="*{projectMemberId}">
                     <div class="report-form-grid">
                         <div class="report-form-field full">
                             <label for="reportProject">프로젝트 <span aria-hidden="true">*</span></label>
-                            <select id="reportProject" th:field="*{projectId}" required>
+                            <input th:if="${mode != 'write'}" type="hidden" th:field="*{projectId}">
+                            <select id="reportProject" th:field="*{projectId}" th:disabled="${mode != 'write'}" required>
                                 <option value="">프로젝트를 선택하세요</option>
                                 <option th:each="p : ${projectOptions}"
                                         th:value="${p.projectId}"
@@ -84,7 +86,7 @@
                             <label for="reportProgress">현재 진행률(%) <span aria-hidden="true">*</span></label>
                             <input type="number" id="reportProgress" th:field="*{progress}"
                                    min="0" max="100" step="0.01" placeholder="0 ~ 100" required>
-                            <p class="report-helper">0부터 100까지 입력해 주세요.</p>
+                            <p class="report-helper">프로젝트 진행 현황을 기록합니다. 실제 진행률은 승인된 업무 보고서와 업무 비중으로 계산됩니다.</p>
                         </div>
 
                         <div class="report-form-field">
@@ -100,6 +102,10 @@
 
                         <div class="report-form-field full">
                             <label for="reportFiles">첨부파일</label>
+                            <div th:each="file : ${files}" class="report-helper">
+                                <label><input type="checkbox" name="deleteFileIds" th:value="${file.fileId}"> 삭제
+                                    <span th:text="${file.originalName}"></span></label>
+                            </div>
                             <div class="report-file-box">
                                 <input type="file" id="reportFiles" name="files" multiple>
                                 <span class="report-helper" id="fileSummary">선택된 파일 없음</span>
@@ -109,9 +115,9 @@
                     </div>
 
                     <div class="report-actions">
-                        <button type="submit" class="approval-button approval-button-primary">등록완료</button>
+                        <button type="submit" class="approval-button approval-button-primary" th:text="${mode == 'write' ? '등록완료' : '수정완료'}">등록완료</button>
                         <button type="reset" class="approval-button">다시입력</button>
-                        <a class="approval-button" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">등록취소</a>
+                        <a class="approval-button" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">취소</a>
                     </div>
                 </form>
             </div>
@@ -152,7 +158,7 @@
             });
             form.addEventListener('submit', function (e) {
                 syncProject();
-                if (!project.value || !memberId.value) {
+                if (!project.value) {
                     e.preventDefault();
                     alert('등록할 수 있는 프로젝트를 선택해 주세요.');
                 }

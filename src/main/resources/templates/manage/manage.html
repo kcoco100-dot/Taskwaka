@@ -20,6 +20,11 @@
 			    <p class="page-description"></p>
 			</div>
         
+            <form method="get" class="project-search-form" th:action="@{/{domainKey}/manage/manage(domainKey=${domainKey})}" style="display:flex;gap:8px;margin-bottom:20px;">
+                    <input type="hidden" name="schType" th:value="${schType}">
+                <input type="search" name="kwd" th:value="${kwd}" placeholder="이름 검색" aria-label="이름 검색">
+                <button class="project-button" type="submit">검색</button>
+            </form>
             <div class="member-content">
                 <div class="member-table-wrap">
                 <table class="project-list-table">
@@ -73,8 +78,8 @@
                             
                             <td>
                                 <span class="project-status" 
-                                      th:classappend="${member.status == 0 ? 'project-status-completed' : 'project-status-paused'}"
-                                      th:text="${member.status == 0 ? '참여중' : '비활성'}">참여중</span>
+                                      th:classappend="${#lists.isEmpty(member.projects) ? 'project-status-paused' : 'project-status-completed'}"
+                                      th:text="${#lists.isEmpty(member.projects) ? '대기중' : '참여중'}">참여중</span>
                             </td>
                             
                             <td th:if="${currentRole >= 50}">
@@ -133,10 +138,16 @@
 </th:block>
 
 <th:block layout:fragment="script">
-    <script>
+    <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            const pathParts = window.location.pathname.split('/');
-            const domainKey = pathParts[1]; 
+            const domainKey = /*[[${domainKey}]]*/ "";
+            const contextPath = /*[[@{/}]]*/ "/";
+            const csrfHeader = /*[[${_csrf != null ? _csrf.headerName : null}]]*/ null;
+            const csrfToken = /*[[${_csrf != null ? _csrf.token : null}]]*/ null;
+            const requestHeaders = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            if (csrfHeader && csrfToken) {
+                requestHeaders[csrfHeader] = csrfToken;
+            } 
         
             const assignButtons = document.querySelectorAll('.project-assign');
             assignButtons.forEach(button => {
@@ -154,9 +165,9 @@
                         return;
                     }
         
-                    fetch(`/${domainKey}/manage/assignProject`, {
+                    fetch(`${contextPath}${domainKey}/manage/assignProject`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: requestHeaders,
                         body: `workspaceMemberId=${workspaceMemberId}&projectId=${projectId}&role=${roleInput}`
                     })
                     .then(response => response.json())
@@ -165,7 +176,7 @@
                             alert("배정이 완료되었습니다.");
                             window.location.reload(); 
                         } else {
-                            alert("배정에 실패했습니다: " + (data.message || "오류 발생"));
+                            alert("배정에 실패했습니다.");
                         }
                     })
                     .catch(error => {
@@ -177,15 +188,17 @@
 
             document.querySelectorAll('.btn-exclude-project').forEach(button => {
                 button.addEventListener('click', function() {
-                    if(!confirm("해당 팀원을 이 프로젝트에서 제외하시겠습니까?")) return;
+                    if(!confirm("해당 팀원을 이 프로젝트에서 제외하시겠습니까?")) {
+                        return;
+                    }
                     
                     const projectMemberId = this.getAttribute('data-id');
                     const formData = new URLSearchParams();
                     formData.append('projectMemberId', projectMemberId);
 
-                    fetch(`/${domainKey}/manage/excludeProject`, {
+                    fetch(`${contextPath}${domainKey}/manage/excludeProject`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: requestHeaders,
                         body: formData
                     })
                     .then(res => res.json())
@@ -202,15 +215,17 @@
 
             document.querySelectorAll('.btn-exclude-workspace').forEach(button => {
                 button.addEventListener('click', function() {
-                    if(!confirm("정말 이 팀원을 워크스페이스에서 제외하시겠습니까?")) return;
+                    if(!confirm("정말 이 팀원을 워크스페이스에서 제외하시겠습니까?")) {
+                        return;
+                    }
                     
                     const workspaceMemberId = this.getAttribute('data-id');
                     const formData = new URLSearchParams();
                     formData.append('workspaceMemberId', workspaceMemberId);
 
-                    fetch(`/${domainKey}/manage/excludeWorkspace`, {
+                    fetch(`${contextPath}${domainKey}/manage/excludeWorkspace`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: requestHeaders,
                         body: formData
                     })
                     .then(res => res.json())

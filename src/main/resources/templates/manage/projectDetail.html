@@ -21,10 +21,10 @@
                 <h1 class="page-title">프로젝트 상세 정보</h1>
                 <p class="page-description">프로젝트의 업무와 진행 현황을 관리합니다.</p>
             </div>
-            <a class="project-button project-button-primary" th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">목록으로</a>
+            <a class="project-button project-button-primary" th:href="@{/{domainKey}/manage/view(domainKey=${domainKey},status=${status},schType=${schType},kwd=${kwd},page=${page})}">목록으로</a>
         </div>
 
-        <div class="pd-message" th:if="${message != null}" th:text="${message}"></div>
+        
         <div class="project-detail-panel">
             <div class="pd-header">
                 <div>
@@ -46,7 +46,7 @@
                     <span>프로젝트 진행률</span>
                     <strong th:text="|${project.progress}%|">0%</strong>
                     <progress max="100" th:value="${project.progress}"></progress>
-                    <small>현재 프로젝트에 저장된 진행률</small>
+                    <small>업무 진행률 × 배정 비중의 합계</small>
                 </div>
 
                 <div class="pd-summary-card">
@@ -56,7 +56,7 @@
                 </div>
 
                 <div class="pd-summary-card">
-                    <span>프로젝트 담당자 (PM · DT)</span>
+                    <span>프로젝트 담당자</span>
                     <strong th:text="${project.pm_name != null ? project.pm_name : '미정'}">담당 PM</strong>
                     <small th:text="|참여 인원 ${project.member_count}명|">참여 인원</small>
                 </div>
@@ -84,7 +84,7 @@
                         <div class="pd-simple-task-top">
                             <div class="pd-task-identity">
                                 <span class="pd-task-name" th:text="|${stat.count}. ${task.title}|">업무명</span>
-                                <small th:text="${task.tl_name != null ? task.tl_name : '담당자 미정'}">담당 TL</small>
+                                <small th:text="${task.tl_name != null ? task.tl_name : '담당자 미정'}">담당자 (TL 이상)</small>
                             </div>
                             <span class="pd-status-pill" th:classappend="${task.status == 3 ? ' approved' : ''}" th:text="${task.status == 0 ? '예정' : task.status == 1 ? '진행 중' : task.status == 2 ? '검토 중' : task.status == 3 ? '완료' : '상태 미정'}">예정</span>
                         </div>
@@ -93,7 +93,7 @@
                             <div class="pd-simple-progress">
                                 <div class="pd-simple-progress-fill" th:style="|width:${task.progress}%;|"></div>
                             </div>
-                            <span class="pd-task-weight" th:text="|진행률 ${task.progress}%|">진행률 0%</span>
+                            <span class="pd-task-weight" th:text="|진행률 ${task.progress}% · 배정 비중 ${task.progress_weight}%|">진행률 0%</span>
                         </div>
 
                         <div class="pd-task-actions">
@@ -129,7 +129,7 @@
                                         </div>
 
                                         <div class="pd-form-group">
-                                            <label>담당 TL *</label>
+                                            <label>담당자 (TL 이상) *</label>
                                             <select name="project_member_id" required>
                                                 <option th:each="tl : ${tlList}" th:value="${tl.project_member_id}" th:text="${tl.tl_name}" th:selected="${tl.project_member_id == task.project_member_id}"></option>
                                             </select>
@@ -152,7 +152,7 @@
                                         
                                         <div class="pd-form-group">
     <label>배정 비중 (%) *</label>
-    <input type="number" name="progress_weight" min="0.01" max="100" step="0.01" placeholder="예: 20" required>
+    <input type="number" name="progress_weight" min="0.01" max="100" step="0.01" th:value="${task.progress_weight}" placeholder="예: 20" required>
 </div>
                                         
                                     </div>
@@ -177,7 +177,7 @@
 
                     <summary class="pd-task-add-trigger">
                         <span class="pd-add-title">⊕ 새 업무 등록</span>
-                        <span class="pd-add-subtitle">업무명 · 담당 TL · 기간 · 단계 · 배정 비중</span>
+                        <span class="pd-add-subtitle">업무명 · 담당자 (TL 이상) · 기간 · 단계 · 배정 비중</span>
                     </summary>
 
                     <div class="pd-task-editor">
@@ -196,9 +196,9 @@
                                 </div>
 
                                 <div class="pd-form-group">
-                                    <label for="taskTl">담당 TL *</label>
+                                    <label for="taskTl">담당자 (TL 이상) *</label>
                                     <select id="taskTl" name="project_member_id" required>
-                                        <option value="">담당 TL 선택</option>
+                                        <option value="">담당자 (TL 이상) 선택</option>
                                         <option th:each="tl : ${tlList}" th:value="${tl.project_member_id}" th:text="${tl.tl_name}"></option>
                                     </select>
                                 </div>
@@ -229,7 +229,7 @@
                                 <textarea id="taskContent" name="content" rows="4" placeholder="업무 내용을 입력하세요" required></textarea>
                             </div>
 
-                            <p class="pd-weight-help">업무별 진행 현황을 확인하고 담당 TL과 업무 일정을 관리합니다.</p>
+                            <p class="pd-weight-help">업무별 진행 현황을 확인하고 담당자 (TL 이상)과 업무 일정을 관리합니다.</p>
 
                             <div class="pd-editor-actions">
                                 <button type="submit" class="pd-save-btn">업무 등록</button>
@@ -241,10 +241,14 @@
 
         </div>
 
+        <div class="pd-bottom-actions" style="justify-content:space-between;">
+            <a th:if="${prev != null}" class="project-button" th:href="@{/{domainKey}/manage/detail/{id}(domainKey=${domainKey},id=${prev.project_id},status=${status},schType=${schType},kwd=${kwd},page=${page})}" th:text="|이전: ${prev.subject}|"></a>
+            <a th:if="${next != null}" class="project-button" th:href="@{/{domainKey}/manage/detail/{id}(domainKey=${domainKey},id=${next.project_id},status=${status},schType=${schType},kwd=${kwd},page=${page})}" th:text="|다음: ${next.subject}|"></a>
+        </div>
         <div class="pd-bottom-actions">
             <a th:if="${canEditProject}" class="project-button project-edit" th:href="@{/{domainKey}/manage/detail/{projectId}/update(domainKey=${domainKey}, projectId=${project.project_id})}">프로젝트 수정</a>
 
-            <form th:if="${canEditProject}" method="post" th:action="@{/{domainKey}/manage/detail/{projectId}/delete(domainKey=${domainKey}, projectId=${project.project_id})}" onsubmit="return confirm('프로젝트를 삭제하시겠습니까?');">
+            <form th:if="${canEditProject}" method="post" th:action="@{/{domainKey}/manage/detail/{projectId}/delete(domainKey=${domainKey}, projectId=${project.project_id})}" onsubmit="return confirm('프로젝트를 숨기시겠습니까? 관련 데이터는 보존됩니다.');">
                 <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button type="submit" class="project-button project-delete">프로젝트 삭제</button>
             </form>
@@ -284,10 +288,10 @@
 	            const result = await response.json();
 	
 	            if (result.status === 'success') {
-	                alert(result.message);
+	                alert('처리되었습니다.');
 	                location.reload();
 	            } else {
-	                alert(result.message || '업무 삭제에 실패했습니다.');
+	                alert('업무 삭제에 실패했습니다.');
 	            }
 	        } catch (error) {
 	            console.error('Error:', error);
@@ -310,10 +314,10 @@
 	            const result = await response.json();
 	
 	            if (result.status === 'success') {
-	                alert(result.message);
+	                alert('처리되었습니다.');
 	                location.reload(); 
 	            } else {
-	                alert(result.message || '업무 등록에 실패했습니다.');
+	                alert('업무 등록에 실패했습니다.');
 	            }
 	        } catch (error) {
 	            console.error('Error:', error);
@@ -340,10 +344,10 @@
 	            const result = await response.json();
 	
 	            if (result.status === 'success') {
-	                alert(result.message);
+	                alert('처리되었습니다.');
 	                location.reload(); 
 	            } else {
-	                alert(result.message || '업무 수정에 실패했습니다.');
+	                alert('업무 수정에 실패했습니다.');
 	            }
 	        } catch (error) {
 	            console.error('Error:', error);

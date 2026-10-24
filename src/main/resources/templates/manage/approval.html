@@ -20,7 +20,7 @@
 	                <p class="page-description">프로젝트 보고서와 업무 보고서의 결재 현황을 확인하세요.</p>
 	            </div>
                 <a class="approval-button approval-button-primary"
-			       th:href="@{/{domainKey}/manage/report/write(domainKey=${domainKey})}">
+			       th:href="@{/{domainKey}/manage/approval/write(domainKey=${domainKey})}">
 			        + 프로젝트 보고서 등록
 			    </a>
 			</div>
@@ -28,11 +28,11 @@
             
 
             <nav class="approval-category-tabs" aria-label="보고서 유형 선택">
-                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=0,reviewStatus=${reviewStatus},keyword=${keyword})}"
+                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=0,reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd})}"
                    th:classappend="${reportCategory == 0} ? ' is-active' : ''">전체 프로젝트</a>
-                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=1,reviewStatus=${reviewStatus},keyword=${keyword})}"
+                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=1,reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd})}"
                    th:classappend="${reportCategory == 1} ? ' is-active' : ''">프로젝트 보고서</a>
-                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=2,reviewStatus=${reviewStatus},keyword=${keyword})}"
+                <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=2,reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd})}"
                    th:classappend="${reportCategory == 2} ? ' is-active' : ''">업무 보고서</a>
             </nav>
 
@@ -60,26 +60,27 @@
 			</div>
 
             <div class="approval-panel">
-                <p class="approval-notice approval-notice-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-                <p class="approval-notice" th:if="${message}" th:text="${message}"></p>
+                
+                
 
                 <form name="searchForm" id="approval-search-form" class="approval-filters"
                       method="get" th:action="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">
+                    <input type="hidden" name="schType" th:value="${schType}">
                     <input type="hidden" name="reportCategory" th:value="${reportCategory}">
                     <div class="approval-field">
                         <label for="approval-status">처리 상태</label>
                         <select id="approval-status" name="reviewStatus">
-                            <option value="-2" th:selected="${reviewStatus == -2}">전체 상태</option>
-                            <option value="-1" th:selected="${reviewStatus == -1}">미확인</option>
-                            <option value="0" th:selected="${reviewStatus == 0}">대기</option>
-                            <option value="1" th:selected="${reviewStatus == 1}">승인</option>
-                            <option value="2" th:selected="${reviewStatus == 2}">반려</option>
+                            <option value="0" th:selected="${reviewStatus == 0}">전체 상태</option>
+                            <option value="1" th:selected="${reviewStatus == 1}">미확인</option>
+                            <option value="2" th:selected="${reviewStatus == 2}">대기</option>
+                            <option value="3" th:selected="${reviewStatus == 3}">승인</option>
+                            <option value="4" th:selected="${reviewStatus == 4}">반려</option>
                         </select>
                     </div>
                     <div class="approval-field approval-keyword-field">
                         <label for="approval-keyword">검색어</label>
-                        <input id="approval-keyword" name="keyword" type="search"
-                               th:value="${keyword}" placeholder="제목, 프로젝트, 업무, 작성자 검색" maxlength="100">
+                        <input id="approval-keyword" name="kwd" type="search"
+                               th:value="${kwd}" placeholder="제목, 프로젝트, 업무, 작성자 검색" maxlength="100">
                     </div>
                     <div class="approval-actions">
                         <button type="submit" class="approval-button approval-button-primary">조회</button>
@@ -118,17 +119,17 @@
                                 <td class="approval-project" th:text="${dto.projectName}">프로젝트</td>
                                 <td th:text="${dto.taskName}">업무</td>
                                 <td><a class="approval-title"
-                                       th:href="@{/{domainKey}/manage/approval/detail(domainKey=${domainKey},reportCategory=${dto.reportCategory},reportId=${dto.reportId})}"
+                                       th:href="@{/{domainKey}/manage/approval/detail(domainKey=${domainKey},reportCategory=${dto.reportCategory},reportId=${dto.reportId},listCategory=${reportCategory},reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd},page=${page})}"
                                        th:text="${dto.reportTitle}">보고서 제목</a></td>
                                 <td class="approval-author" th:text="${dto.authorName}">작성자</td>
                                 <td th:text="${dto.createdDate}">작성일</td>
                                 <td th:text="${dto.stageName}">단계</td>
                                 <td th:text="|${dto.progress}%|">0%</td>
                                 <td>
-                                    <span th:if="${dto.reviewStatus == -1}" class="approval-status approval-status-unread">미확인</span>
-                                    <span th:if="${dto.reviewStatus == 0}" class="approval-status approval-status-pending">대기</span>
-                                    <span th:if="${dto.reviewStatus == 1}" class="approval-status approval-status-reviewed">승인</span>
-                                    <span th:if="${dto.reviewStatus == 2}" class="approval-status approval-status-rejected">반려</span>
+                                    <span th:if="${dto.reviewStatus == 1}" class="approval-status approval-status-unread">미확인</span>
+                                    <span th:if="${dto.reviewStatus == 2}" class="approval-status approval-status-pending">대기</span>
+                                    <span th:if="${dto.reviewStatus == 3}" class="approval-status approval-status-reviewed">승인</span>
+                                    <span th:if="${dto.reviewStatus == 4}" class="approval-status approval-status-rejected">반려</span>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(list)}">

@@ -3,6 +3,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.ManageMapper">
 
+	<!-- 워크스페이스 번호 조회 -->
 	<select id="findByDomainKey" parameterType="string" resultType="Long">
         SELECT w.workspace_id
         FROM workspaces w
@@ -11,22 +12,16 @@
           AND d.active = 'Y'
     </select>
 
-	<sql id="projectPmName">
-		(SELECT md.name
-		FROM project_members pm
-		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-		JOIN member_details md ON wm.member_id = md.member_id
-		WHERE pm.project_id = p.project_id
-			AND pm.status = 0
-			AND pm.role = (
-				SELECT MAX(role)
-				FROM project_members
-				WHERE project_id = p.project_id AND status = 0
-			)
-			AND ROWNUM = 1
-		) AS pm_name
-	</sql>
+    <!-- 프로젝트 담당자 표시 -->
+    <sql id="projectPmName">
+        (SELECT md.name FROM project_members pm
+         JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+         JOIN member_details md ON md.member_id = wm.member_id
+         WHERE pm.project_id = p.project_id AND pm.status = 0 AND wm.status = 0 AND wm.workspace_id = p.workspace_id
+         ORDER BY pm.role DESC, md.name, wm.member_id FETCH FIRST 1 ROW ONLY) AS pm_name
+    </sql>
 
+	<!-- 프로젝트 참여 인원 -->
 	<sql id="projectMemberCount">
 		(SELECT COUNT(*)
 		FROM project_members
@@ -34,6 +29,7 @@
 		) AS member_count
 	</sql>
 
+	<!-- 팀원 배정용 프로젝트 조회 -->
 	<select id="listProjectManage" parameterType="map" resultType="com.tk.app.domain.dto.ManageDto">
 		SELECT p.project_id, p.workspace_id, p.subject, p.content, TO_CHAR(p.start_at, 'YYYY-MM-DD') AS start_date,
 			TO_CHAR(p."END", 'YYYY-MM-DD') AS end_date, p.status, p.progress, p.archive, TO_CHAR(p.created, 'YYYY-MM-DD HH24:MI:SS') AS created,
@@ -41,45 +37,10 @@
 			<include refid="projectMemberCount"></include>
 		FROM projects p
         WHERE p.workspace_id = #{workspace_id} AND p.deleted IS NULL
-        AND EXISTS (SELECT 1 FROM workspace_members actor
-            WHERE actor.workspace_id = p.workspace_id AND actor.member_id = #{actorId} AND actor.status = 0
-            AND (actor.role = 70 OR EXISTS (
-                SELECT 1 FROM project_members own
-                WHERE own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
-                  AND own.role = 50 AND own.status = 0)))
         ORDER BY p.project_id DESC
 	</select>
 
-    <!-- PM: 70, 해당 프로젝트 DT: 50, 나머지: 0 -->
-    <select id="getManageRoleForProject" parameterType="map" resultType="int">
-        SELECT NVL(MAX(CASE WHEN actor.role = 70 THEN 70 WHEN own.role = 50 AND own.status = 0 THEN 50 ELSE 0 END), 0)
-        FROM projects p
-        JOIN workspace_members actor ON actor.workspace_id = p.workspace_id AND actor.member_id = #{actorId} AND actor.status = 0
-        LEFT JOIN project_members own ON own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
-        WHERE p.project_id = #{projectId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL
-    </select>
-    <select id="getProjectIdForProjectMember" parameterType="map" resultType="long">
-        SELECT p.project_id FROM project_members pm JOIN projects p ON pm.project_id = p.project_id
-        WHERE pm.project_member_id = #{projectMemberId} AND p.workspace_id = #{workspaceId} AND p.deleted IS NULL AND pm.status = 0
-    </select>
-    <!-- 현재 로그인한 워크스페이스 PM 본인의 프로젝트 PM 소속인지 확인 -->
-    <select id="countOwnPmProjectMember" parameterType="map" resultType="int">
-        SELECT COUNT(*)
-        FROM project_members pm
-        JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-        JOIN projects p ON pm.project_id = p.project_id
-        WHERE pm.project_member_id = #{projectMemberId}
-          AND p.workspace_id = #{workspaceId}
-          AND wm.member_id = #{actorId}
-          AND wm.workspace_id = p.workspace_id
-          AND wm.role = 70 AND wm.status = 0
-          AND pm.role = 70 AND pm.status = 0
-          AND p.deleted IS NULL
-    </select>
-    <select id="getTargetWorkspaceRole" parameterType="map" resultType="int">
-        SELECT role FROM workspace_members WHERE workspace_member_id = #{workspaceMemberId} AND workspace_id = #{workspaceId} AND status = 0
-    </select>
-    <!-- 현재 도메인의 활성 워크스페이스 PM 본인 번호 -->
+    <!-- 본인 워크 참여번호 조회 -->
     <select id="getOwnWorkspaceMemberId" parameterType="map" resultType="long">
         SELECT MAX(workspace_member_id)
         FROM workspace_members
@@ -87,16 +48,7 @@
           AND status = 0 AND role = 70
     </select>
 
-    <!-- 캘린더 조회자의 활성 워크스페이스 직위 -->
-    <select id="findManageCalendarRole" parameterType="map" resultType="java.lang.Integer">
-        SELECT MAX(wm.role)
-        FROM workspace_members wm
-        WHERE wm.workspace_id = #{workspaceId}
-          AND wm.member_id = #{memberId}
-          AND wm.status = 0
-    </select>
-
-    <!-- 사장(70)은 워크스페이스 전체, 그 외 직위는 실제 참여 프로젝트만 -->
+    <!-- 캘린더 프로젝트 조회 범위 -->
     <sql id="manageCalendarVisibleProject">
         AND EXISTS (
             SELECT 1
@@ -114,7 +66,7 @@
         )
     </sql>
 
-    <!-- 업무가 없는 프로젝트도 시작일~종료일 전체 기간으로 표시 -->
+    <!-- 캘린더 프로젝트 조회 -->
     <select id="listManageCalendarProjects" parameterType="map" resultType="com.tk.app.domain.dto.ManageCalendarDto">
         SELECT p.project_id AS "projectId", p.subject AS "projectName",
                DBMS_LOB.SUBSTR(p.content, 1000, 1) AS "content",
@@ -129,7 +81,7 @@
         ORDER BY p.start_at, p.project_id
     </select>
 
-    <!-- 프로젝트 업무 기간 및 상세 정보 -->
+    <!-- 캘린더 업무 조회 -->
     <select id="listManageCalendarTasks" parameterType="map" resultType="com.tk.app.domain.dto.ManageCalendarDto">
         SELECT t.task_id AS "taskId", t.project_id AS "projectId",
                t.title AS "title", p.subject AS "projectName",

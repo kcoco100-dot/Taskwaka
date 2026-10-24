@@ -17,17 +17,20 @@ public interface ProjectMemberRepository extends JpaRepository<ManageProjectMemb
 	        "   md.name AS name, " +
 	        "   wm.status AS status, " +
 	        "   pm.project_member_id AS projectMemberId, " +
-	        "   pm.project_id AS projectId, " +
+	        "   p.project_id AS projectId, " +
 	        "   p.subject AS projectName, " +
 	        "   pm.role AS role " +
 	        "FROM workspace_members wm " +
 	        "JOIN member_details md ON wm.member_id = md.member_id " +
 	        "LEFT JOIN project_members pm ON wm.workspace_member_id = pm.workspace_member_id AND pm.status = 0 " +
-	        "LEFT JOIN projects p ON pm.project_id = p.project_id " +
+            "AND EXISTS (SELECT 1 FROM projects active_p WHERE active_p.project_id = pm.project_id " +
+            "AND active_p.workspace_id = wm.workspace_id AND active_p.deleted IS NULL) " +
+	        "LEFT JOIN projects p ON pm.project_id = p.project_id AND p.workspace_id = wm.workspace_id AND p.deleted IS NULL " +
 	        "WHERE wm.workspace_id = :workspaceId AND wm.status = 0 " +
-	        "ORDER BY md.name ASC", 
+	        "AND (:kwd IS NULL OR INSTR(LOWER(md.name), LOWER(:kwd)) > 0) " +
+            "ORDER BY md.name ASC, wm.workspace_member_id, p.project_id DESC", 
 	        nativeQuery = true)
-	    List<ProjectTeamView> findWorkspaceMembersWithProject(@Param("workspaceId") Long workspaceId);
+	    List<ProjectTeamView> findWorkspaceMembersWithProject(@Param("workspaceId") Long workspaceId, @Param("kwd") String kwd);
 
     // 프로젝트 팀원 등록 및 직위 변경
     @Modifying
@@ -180,4 +183,23 @@ public interface ProjectMemberRepository extends JpaRepository<ManageProjectMemb
         @Param("projectMemberId") Long projectMemberId
     );
     
+
+    @Query(value = """
+        SELECT COUNT(*) FROM tasks t
+        JOIN projects p ON p.project_id = t.project_id
+        WHERE t.project_member_id = :projectMemberId
+          AND p.workspace_id = :workspaceId AND p.deleted IS NULL AND t.deleted IS NULL
+        """, nativeQuery = true)
+    int countAssignedTasks(@Param("workspaceId") Long workspaceId,
+            @Param("projectMemberId") Long projectMemberId);
+
+    @Query(value = """
+        SELECT COUNT(*) FROM tasks t
+        JOIN projects p ON p.project_id = t.project_id
+        JOIN project_members pm ON pm.project_member_id = t.project_member_id AND pm.project_id = p.project_id
+        WHERE p.workspace_id = :workspaceId AND pm.workspace_member_id = :workspaceMemberId
+          AND p.deleted IS NULL AND t.deleted IS NULL
+        """, nativeQuery = true)
+    int countWorkspaceAssignedTasks(@Param("workspaceId") Long workspaceId,
+            @Param("workspaceMemberId") Long workspaceMemberId);
 }

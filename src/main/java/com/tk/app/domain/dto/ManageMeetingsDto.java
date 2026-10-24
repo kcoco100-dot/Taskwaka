@@ -19,4 +19,8 @@ public class ManageMeetingsDto {
 	private String authorName;
 	private String summary;
 	private boolean canDelete;
+    private Long prevId;
+    private String prevTitle;
+    private Long nextId;
+    private String nextTitle;
 }

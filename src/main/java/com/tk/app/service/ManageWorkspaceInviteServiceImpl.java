@@ -33,19 +33,15 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+    // 팀원 초대 및 메일 전송
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sendInvitesAndMail(Map<String, Object> map) throws Exception {
         String domainKey = (String) map.get("domainKey");
         Long workspaceId = (Long) map.get("workspaceId");
         Long inviterId = (Long) map.get("inviterId");
-        if (workspaceId == null || inviterId == null) throw new SecurityException("초대자 정보가 없습니다.");
-        Map<String, Object> permissionMap = new java.util.HashMap<>();
-        permissionMap.put("domainKey", domainKey);
-        permissionMap.put("workspaceId", workspaceId);
-        permissionMap.put("memberId", inviterId);
-        if (mapper.countActiveWorkspacePm(permissionMap) != 1) {
-            throw new SecurityException("현재 워크스페이스 PM만 팀원을 초대할 수 있습니다.");
+        if (workspaceId == null || inviterId == null) {
+            throw new SecurityException("초대자 정보가 없습니다.");
         }
         
         @SuppressWarnings("unchecked")
@@ -82,6 +78,7 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
         }
     }
 
+    // 초대 메일 전송
     private void sendMail(String domainKey, String toEmail, String name, String inviteKey) {
         String inviteLink = "http://localhost:9090/main?inviteKey=" + inviteKey;
         
@@ -105,16 +102,20 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
         }
     }
     
+    // 초대 대상 검색
     @Override
     public List<ManageInviteDto> getSearchEligibleMembers(Map<String, Object> map) {
+        List<ManageInviteDto> result = new java.util.ArrayList<>();
         try {
-            return mapper.selectSearchEligibleMembers(map);
+            result = mapper.selectSearchEligibleMembers(map);
         } catch (Exception e) {
             log.info("getSearchEligibleMembers 오류 : ", e);
             throw new IllegalStateException("초대 대상 조회 중 오류가 발생했습니다.", e);
         }
+        return result;
     }
     
+    // 초대 수락
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void acceptInvite(Map<String, Object> map) throws Exception {

@@ -20,8 +20,8 @@
             </div>
 
             <div class="approval-panel">
-                <p class="approval-notice" th:if="${message}" th:text="${message}"></p>
-                <p class="approval-notice approval-notice-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+                
+                
 
                 <div class="approval-table-wrap">
                     <table class="approval-table approval-detail-table">
@@ -36,25 +36,33 @@
                             <tr>
                                 <th>처리 상태</th>
                                 <td>
-                                    <span th:if="${dto.reviewStatus == -1}" class="approval-status approval-status-unread">미확인</span>
-                                    <span th:if="${dto.reviewStatus == 0}" class="approval-status approval-status-pending">대기</span>
-                                    <span th:if="${dto.reviewStatus == 1}" class="approval-status approval-status-reviewed">승인</span>
-                                    <span th:if="${dto.reviewStatus == 2}" class="approval-status approval-status-rejected">반려</span>
+                                    <span th:if="${dto.reviewStatus == 1}" class="approval-status approval-status-unread">미확인</span>
+                                    <span th:if="${dto.reviewStatus == 2}" class="approval-status approval-status-pending">대기</span>
+                                    <span th:if="${dto.reviewStatus == 3}" class="approval-status approval-status-reviewed">승인</span>
+                                    <span th:if="${dto.reviewStatus == 4}" class="approval-status approval-status-rejected">반려</span>
                                 </td>
                             </tr>
                             <tr th:if="${dto.reviewedDate != null}"><th>처리일</th><td th:text="${dto.reviewedDate}">처리일</td></tr>
                             <tr th:if="${dto.reviewComment != null}"><th>검토 의견</th><td class="approval-detail-content" th:text="${dto.reviewComment}">의견</td></tr>
-                            <tr th:if="${dto.reviewStatus == 2}"><th>반려 사유</th><td class="approval-detail-content" th:text="${dto.rejectReason}">사유</td></tr>
+                            <tr th:if="${dto.reviewStatus == 4}"><th>반려 사유</th><td class="approval-detail-content" th:text="${dto.rejectReason}">사유</td></tr>
                             <tr><th>보고서 내용</th><td class="approval-detail-content" th:text="${dto.content}">보고서 본문</td></tr>
+                        <tr><th>첨부파일</th><td>
+                                <p th:if="${#lists.isEmpty(files)}">첨부파일이 없습니다.</p>
+                                <p th:each="file : ${files}">
+                                    <a th:href="@{/{domainKey}/manage/approval/files/{id}(domainKey=${domainKey},id=${file.fileId},reportCategory=${dto.reportCategory},reportId=${dto.reportId})}" th:text="${file.originalName}"></a>
+                                    <small th:text="|(${file.fileSize} bytes)|"></small>
+                                </p>
+                            </td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div th:if="${dto.canReview == 1 and dto.reviewStatus == 0}" class="approval-review-forms">
+                <div th:if="${dto.canReview == 1 and dto.reviewStatus == 2}" class="approval-review-forms">
                     <form th:action="@{/{domainKey}/manage/approval/updateReview(domainKey=${domainKey})}" method="post" class="approval-review-form">
+                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <input type="hidden" name="reportCategory" th:value="${dto.reportCategory}">
                         <input type="hidden" name="reportId" th:value="${dto.reportId}">
-                        <input type="hidden" name="reviewStatus" value="1">
+                        <input type="hidden" name="reviewStatus" value="3">
                         <div class="approval-field">
                             <label for="approve-comment">검토 의견 (선택)</label>
                             <textarea id="approve-comment" name="reviewComment" rows="3" maxlength="1000"></textarea>
@@ -62,9 +70,10 @@
                         <button class="approval-button approval-button-primary" type="submit">승인</button>
                     </form>
                     <form th:action="@{/{domainKey}/manage/approval/updateReview(domainKey=${domainKey})}" method="post" class="approval-review-form">
+                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <input type="hidden" name="reportCategory" th:value="${dto.reportCategory}">
                         <input type="hidden" name="reportId" th:value="${dto.reportId}">
-                        <input type="hidden" name="reviewStatus" value="2">
+                        <input type="hidden" name="reviewStatus" value="4">
                         <div class="approval-field">
                             <label for="reject-reason">반려 사유 (필수)</label>
                             <textarea id="reject-reason" name="rejectReason" rows="3" maxlength="1000" required></textarea>
@@ -74,7 +83,16 @@
                 </div>
 
                 <div class="approval-detail-footer">
-                    <a class="approval-button" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}">목록으로</a>
+                    <a class="approval-button" th:if="${prevReport != null}" th:href="@{/{domainKey}/manage/approval/detail(domainKey=${domainKey},reportCategory=${prevReport.reportCategory},reportId=${prevReport.reportId},listCategory=${listCategory},reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd},page=${page})}" th:text="|이전: ${prevReport.reportTitle}|"></a>
+                    <a class="approval-button" th:if="${nextReport != null}" th:href="@{/{domainKey}/manage/approval/detail(domainKey=${domainKey},reportCategory=${nextReport.reportCategory},reportId=${nextReport.reportId},listCategory=${listCategory},reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd},page=${page})}" th:text="|다음: ${nextReport.reportTitle}|"></a>
+                </div>
+                <div class="approval-detail-footer">
+                    <a th:if="${dto.reportCategory == 1}" class="approval-button" th:href="@{/{domainKey}/manage/approval/update/{id}(domainKey=${domainKey},id=${dto.reportId})}">수정</a>
+                    <form th:if="${dto.reportCategory == 1}" method="post" th:action="@{/{domainKey}/manage/approval/delete/{id}(domainKey=${domainKey},id=${dto.reportId})}" onsubmit="return confirm('보고서와 첨부파일을 삭제하시겠습니까?');">
+                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit" class="approval-button">삭제</button>
+                    </form>
+                    <a class="approval-button" th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey},reportCategory=${listCategory},reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd},page=${page})}">목록으로</a>
                 </div>
             </div>
         </section>

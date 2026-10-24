@@ -11,7 +11,8 @@ import com.tk.app.domain.dto.ManageTaskDto;
 
 @Mapper
 public interface ManageProjectMapper {
-
+	public double sumTaskWeights(Map<String, Object> map) throws SQLException;
+	public int refreshProjectProgress(Map<String, Object> map) throws SQLException;
 	public Long findByDomainKey(String domainKey) throws Exception;
 	public void insertProject(ManageDto dto) throws SQLException;
 	public List<ManageDto> listProject(Map<String, Object> map) throws SQLException;
@@ -36,4 +37,6 @@ public interface ManageProjectMapper {
 	public int insertManageTaskMember(Map<String, Object> map) throws SQLException;
 	public int deleteManageTaskMember(Map<String, Object> map) throws SQLException;
 	public int updateManageTaskTL(Map<String, Object> map) throws SQLException;
+	public ManageDto selectPrevProject(Map<String, Object> map) throws SQLException;
+    public ManageDto selectNextProject(Map<String, Object> map) throws SQLException;
 }

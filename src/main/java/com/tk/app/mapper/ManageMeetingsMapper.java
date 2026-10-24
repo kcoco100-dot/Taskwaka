@@ -14,4 +14,7 @@ public interface ManageMeetingsMapper {
 	public List<ManageMeetingsDto> findMeetingsById(Map<String, Object> map);
 	public int updateMeetings(Map<String, Object> map);
 	public int deleteMeetings(Map<String, Object> map);
+
+    public ManageMeetingsDto selectPrevMeeting(Map<String, Object> map);
+    public ManageMeetingsDto selectNextMeeting(Map<String, Object> map);
 }

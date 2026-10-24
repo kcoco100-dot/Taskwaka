@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -36,9 +35,7 @@
                 </div>
             </div>
 
-            <p th:if="${errorMessage != null}"
-               th:text="${errorMessage}"
-               style="color:#c62828;"></p>
+            
 
             <form name="noticeForm" id="notice-form"
                   method="post"
@@ -233,7 +230,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('notice-form');
-            if (!form) return;
+            if (!form) {
+                return;
+            }
 
             const type = document.getElementById('noticeType');
             const project = document.getElementById('projectId');
@@ -244,10 +243,14 @@
             const display = document.getElementById('fileNameDisplay');
 
             function filterTasks() {
-                if (!task || !project) return;
+                if (!task || !project) {
+                    return;
+                }
 
                 for (const option of task.options) {
-                    if (!option.value) continue;
+                    if (!option.value) {
+                        continue;
+                    }
 
                     const enabled = option.dataset.project === project.value;
                     option.hidden = !enabled;
@@ -260,7 +263,9 @@
             }
 
             function changeType() {
-                if (!type) return;
+                if (!type) {
+                    return;
+                }
 
                 const showProject = type.value === 'PROJECT' || type.value === 'TASK';
                 const showTask = type.value === 'TASK';
@@ -303,7 +308,9 @@
             form.addEventListener('reset', function () {
                 setTimeout(function () {
                     changeType();
-                    if (display) display.textContent = '선택된 파일 없음';
+                    if (display) {
+                        display.textContent = '선택된 파일 없음';
+                    }
                 }, 0);
             });
         });

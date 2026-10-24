@@ -22,7 +22,7 @@ public class ManageDto {
 	private String deleted;
 
 	private int status;
-	private int progress;
+	private double progress;
 
 
 	private Long project_member_id;

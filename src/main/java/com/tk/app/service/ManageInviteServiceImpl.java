@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tk.app.domain.dto.ManageInviteDto;
 import com.tk.app.mapper.ManageInviteMapper;
 
-// [중요 수정] 스프링 기본 라이브러리가 아닌, 프로젝트에 기존 등록되어 있던 커스텀 Mail 객체를 가져옵니다.
 import com.tk.app.mail.Mail;
 import com.tk.app.mail.MailSender;
 
@@ -30,6 +29,7 @@ public class ManageInviteServiceImpl implements ManageInviteService {
     
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+    // 워크스페이스 번호 조회
     @Override
     public Long getWorkspaceIdByDomainKey(Map<String, Object> map) {
         Long workspaceId = null;
@@ -42,6 +42,7 @@ public class ManageInviteServiceImpl implements ManageInviteService {
         return workspaceId;
     }
 
+    // 초대 대상 조회
     @Override
     public List<ManageInviteDto> getEligibleMembers(Map<String, Object> map) {
         List<ManageInviteDto> list = null;
@@ -53,6 +54,7 @@ public class ManageInviteServiceImpl implements ManageInviteService {
         return list;
     }
 
+    // 팀원 초대 등록
     @Override
     @Transactional(rollbackFor = Exception.class) 
     public void sendInvites(Map<String, Object> map) throws Exception {
@@ -60,13 +62,6 @@ public class ManageInviteServiceImpl implements ManageInviteService {
             String domainKey = (String) map.get("domainKey");
             Long workspaceId = (Long) map.get("workspaceId");
             Long inviterId = (Long) map.get("inviterId");
-            Map<String, Object> permissionMap = new java.util.HashMap<>();
-            permissionMap.put("domainKey", domainKey);
-            permissionMap.put("workspaceId", workspaceId);
-            permissionMap.put("memberId", inviterId);
-            if (mapper.countActiveWorkspacePm(permissionMap) != 1) {
-                throw new SecurityException("현재 워크스페이스 PM만 팀원을 초대할 수 있습니다.");
-            }
             
             @SuppressWarnings("unchecked")
             List<Integer> targetMemberIds = (List<Integer>) map.get("targetMemberIds");
@@ -93,9 +88,9 @@ public class ManageInviteServiceImpl implements ManageInviteService {
                 inviteDto.setInviterId(inviterId);
                 inviteDto.setEmail(targetInfo.getEmail());
                 inviteDto.setName(targetInfo.getName());
-                inviteDto.setStatus(0); // 0 = 대기중
+                inviteDto.setStatus(0); 
                 inviteDto.setExpires(expiresStr); 
-                inviteDto.setInviteStatus(0); // 0 = 미사용
+                inviteDto.setInviteStatus(0); 
 
                 mapper.insertManageInvite(inviteDto);
 
@@ -107,6 +102,7 @@ public class ManageInviteServiceImpl implements ManageInviteService {
         }
     }
 
+    // 초대 메일 전송
     private void sendInviteEmail(String domainKey, String toEmail, String name, String inviteKey) {
         String inviteLink = "http://localhost:8080/" + domainKey + "/manage/invite/accept?inviteKey=" + inviteKey;
         
@@ -129,6 +125,7 @@ public class ManageInviteServiceImpl implements ManageInviteService {
         }
     }
 
+    // 초대 수락
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void acceptInvite(Map<String, Object> map) throws Exception {
@@ -172,7 +169,5 @@ public class ManageInviteServiceImpl implements ManageInviteService {
             throw e;
         }
     }
-    
-    
-    
+
 }

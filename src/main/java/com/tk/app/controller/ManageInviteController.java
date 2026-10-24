@@ -19,10 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.tk.app.domain.dto.ManageInviteDto;
+import com.tk.app.mapper.ManageInviteMapper;
 import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.security.LoginMemberUtil;
 import com.tk.app.service.ManageInviteService;
-import com.tk.app.mapper.ManageInviteMapper;
+
 import com.tk.app.service.ManageWorkspaceInviteService; 
 
 import lombok.RequiredArgsConstructor;
@@ -36,45 +37,49 @@ public class ManageInviteController {
 
     private final ManageInviteService manageInviteService;
     private final ManageWorkspaceInviteService myInviteService;
-    private final ManageInviteMapper inviteMapper; 
-    
+    private final ManageInviteMapper inviteMapper;
+
+    // 도메인키 설정
     @ModelAttribute("domainKey")
     public String setDomainKey(@PathVariable("domainKey") String domainKey) {
         return domainKey;
     }
 
-    // 워크스페이스 초대는 현재 도메인의 PM만 가능
-    private Long requireWorkspacePm(String domainKey) {
+    // 워크스페이스 조회
+    private Long requireWorkspaceContext(String domainKey) {
         SessionInfo info = LoginMemberUtil.getSessionInfo();
-        if (info == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        if (info == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("domainKey", domainKey);
         Long workspaceId = manageInviteService.getWorkspaceIdByDomainKey(map);
-        if (workspaceId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스가 없습니다.");
-        map.put("workspaceId", workspaceId);
-        map.put("memberId", info.getMember_id());
-        if (inviteMapper.countActiveWorkspacePm(map) != 1) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "워크스페이스 PM만 팀원을 초대할 수 있습니다.");
+        if (workspaceId == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스가 없습니다.");
         }
         return workspaceId;
     }
 
+    // 팀원 초대 화면
     @GetMapping("/view")
     public String invitationForm(@PathVariable("domainKey") String domainKey) {
-        requireWorkspacePm(domainKey);
+        requireWorkspaceContext(domainKey);
         return "manage/invitation";
     }
 
+    // 초대 대상 조회
     @GetMapping("/eligible-members")
     @ResponseBody
     public ResponseEntity<?> getEligibleMembers(
             @PathVariable("domainKey") String domainKey,
-            @RequestParam(value = "keyword", required = false) String keyword) {
+            @RequestParam(name = "schType", defaultValue = "all") String schType,
+            @RequestParam(name = "kwd", defaultValue = "") String kwd) {
         try {
-            Long workspaceId = requireWorkspacePm(domainKey);
+            Long workspaceId = requireWorkspaceContext(domainKey);
             Map<String, Object> map = new HashMap<>();
             map.put("workspaceId", workspaceId);
-            map.put("keyword", keyword); 
+            map.put("schType", schType);
+            map.put("kwd", kwd); 
             
             List<ManageInviteDto> eligibleList = myInviteService.getSearchEligibleMembers(map);
             
@@ -84,10 +89,11 @@ public class ManageInviteController {
             throw e;
         } catch (Exception e) {
             log.info("getEligibleMembers 오류 : ", e);
-            return ResponseEntity.badRequest().body("목록 조회 중 오류가 발생했습니다.");
+            return ResponseEntity.badRequest().build();
         }
     }
 
+    // 팀원 초대 전송
     @PostMapping("/send")
     @ResponseBody
     public ResponseEntity<?> sendInvitations(
@@ -98,16 +104,16 @@ public class ManageInviteController {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             if (info == null) {
                 log.info("로그인 정보가 존재하지 않습니다.");
-                return ResponseEntity.status(401).body("로그인 정보가 존재하지 않습니다.");
+                return ResponseEntity.status(401).build();
             }
 
-            Long workspaceId = requireWorkspacePm(domainKey);
+            Long workspaceId = requireWorkspaceContext(domainKey);
 
             @SuppressWarnings("unchecked")
             List<Integer> targetMemberIds = (List<Integer>) requestData.get("memberIds");
             
             if (targetMemberIds == null || targetMemberIds.isEmpty()) {
-                return ResponseEntity.badRequest().body("초대할 회원을 선택해주세요.");
+                return ResponseEntity.badRequest().build();
             }
 
             Map<String, Object> inviteMap = new HashMap<>();
@@ -118,16 +124,17 @@ public class ManageInviteController {
 
             myInviteService.sendInvitesAndMail(inviteMap);
 
-            return ResponseEntity.ok("선택한 회원에게 초대 메일이 성공적으로 발송되었습니다.");
+            return ResponseEntity.ok().build();
 
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
             log.info("sendInvitations 오류 : ", e);
-            return ResponseEntity.badRequest().body("서버 처리 중 오류가 발생했습니다.");
+            return ResponseEntity.badRequest().build();
         }
     }
 
+    // 초대 수락
     @GetMapping("/accept")
     public String acceptInvitation(
             @PathVariable("domainKey") String domainKey,
@@ -139,7 +146,7 @@ public class ManageInviteController {
             
             if (info == null) {
                 log.info("초대 수락을 위한 로그인 정보가 존재하지 않습니다.");
-                return "redirect:/login"; 
+                throw new IllegalStateException("로그인 정보가 없습니다."); 
             }
 
             Map<String, Object> acceptMap = new HashMap<>();
@@ -151,13 +158,11 @@ public class ManageInviteController {
 
         } catch (IllegalArgumentException e) {
             log.info("acceptInvitation 유효성 에러 : ", e);
-            model.addAttribute("message", e.getMessage());
-            return "manage/inviteError"; 
+            throw e; 
             
         } catch (Exception e) {
             log.error("acceptInvitation 시스템 에러 : ", e);
-            model.addAttribute("message", "워크스페이스 가입 처리 중 데이터베이스 오류가 발생했습니다. 로그를 확인해 주세요.");
-            return "manage/inviteError";
+            throw e;
         }
         
         return "redirect:/" + domainKey + "/home/dashboard";

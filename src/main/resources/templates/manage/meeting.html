@@ -87,6 +87,10 @@
                         <span>작성자 <strong>{{ currentMeeting.authorName }}</strong></span>
                     </div>
                     <div class="meeting-detail-body">{{ currentMeeting.content }}</div>
+                    <div class="shell-actions" style="margin-top:24px;">
+                        <button class="shell-action" type="button" :disabled="!currentMeeting.prevId" @click="openMeetingDetail({meetingMinuteId:currentMeeting.prevId})">이전: {{ currentMeeting.prevTitle || '없음' }}</button>
+                        <button class="shell-action" type="button" :disabled="!currentMeeting.nextId" @click="openMeetingDetail({meetingMinuteId:currentMeeting.nextId})">다음: {{ currentMeeting.nextTitle || '없음' }}</button>
+                    </div>
                 </article>
                 <div class="shell-actions" style="margin-top:30px;">
                     <a href="#" class="shell-action" @click.prevent="viewMode = 'LIST'">← 목록으로</a>
@@ -141,6 +145,7 @@
                 const viewMode = ref('LIST');
 
                 const searchParams = reactive({
+                    schType: 'all',
                     kwd: '',
                     page: 1,
                     size: 10
@@ -153,7 +158,9 @@
 
                 const blockSize = 5;
                 const pageNumbers = computed(() => {
-                    if (pageInfo.totalPage === 0) return [];
+                    if (pageInfo.totalPage === 0) {
+                        return [];
+                    }
                     const startPage = Math.floor((searchParams.page - 1) / blockSize) * blockSize + 1;
                     const endPage = Math.min(startPage + blockSize - 1, pageInfo.totalPage);
                     const pages = [];
@@ -168,7 +175,9 @@
                 const editMeetingData = reactive({ title: '', content: '' });
 
                 const truncateContent = (text) => {
-                    if(!text) return '';
+                    if(!text) {
+                        return '';
+                    }
                     return text.length > 50 ? text.substring(0, 50) + '...' : text;
                 };
 
@@ -193,7 +202,7 @@
 
                 const openMeetingDetail = async (meeting) => {
                     try {
-                        const response = await axios.get(`${baseUrl}/${meeting.meetingMinuteId}`);
+                        const response = await axios.get(`${baseUrl}/${meeting.meetingMinuteId}`, { params: { schType: searchParams.schType, kwd: searchParams.kwd } });
                         currentMeeting.value = response.data;
                         viewMode.value = 'DETAIL';
                     } catch (error) {

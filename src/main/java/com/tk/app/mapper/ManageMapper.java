@@ -13,12 +13,7 @@ import com.tk.app.domain.dto.ManageCalendarDto;
 public interface ManageMapper {
 	public Long findByDomainKey(String domainKey) throws Exception;
 	public List<ManageDto> listProjectManage(Map<String, Object> map) throws SQLException;
-	public Integer findManageCalendarRole(Map<String, Object> map) throws SQLException;
 	public List<ManageCalendarDto> listManageCalendarProjects(Map<String, Object> map) throws SQLException;
 	public List<ManageCalendarDto> listManageCalendarTasks(Map<String, Object> map) throws SQLException;
-	public Integer getManageRoleForProject(Map<String, Object> map);
-	public Long getProjectIdForProjectMember(Map<String, Object> map);
-	public int countOwnPmProjectMember(Map<String, Object> map);
-	public Integer getTargetWorkspaceRole(Map<String, Object> map);
 	public Long getOwnWorkspaceMemberId(Map<String, Object> map);
 }

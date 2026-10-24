@@ -17,11 +17,12 @@
                 <p class="workspace-role-description">기존 참여자의 직위를 사장·과장·대리·사원 기준으로 조회하고 변경합니다.</p>
             </div>
             <div class="member-content">
-                <div class="workspace-role-alert success" th:if="${message}" th:text="${message}"></div>
+                
                 <div class="workspace-role-alert error" th:if="${error}" th:text="${error}"></div>
                 <form class="workspace-role-search" method="get" th:action="@{/{domainKey}/manage/workspaceRoles(domainKey=${domainKey})}">
+                    <input type="hidden" name="schType" th:value="${schType}">
                     <label for="workspaceRoleKeyword">이름·이메일 검색</label>
-                    <input id="workspaceRoleKeyword" type="text" name="keyword" th:value="${keyword}" placeholder="이름 또는 이메일을 입력하세요">
+                    <input id="workspaceRoleKeyword" type="text" name="kwd" th:value="${kwd}" placeholder="이름 또는 이메일을 입력하세요">
                     <button type="submit" class="workspace-role-button primary">조회</button>
                     <a class="workspace-role-button" th:href="@{/{domainKey}/manage/workspaceRoles(domainKey=${domainKey})}">초기화</a>
                 </form>
@@ -50,7 +51,8 @@
                                           th:action="@{/{domainKey}/manage/workspaceRoles/update(domainKey=${domainKey})}">
                                         <input type="hidden" name="workspaceMemberId" th:value="${member.workspaceMemberId}">
                                         <input type="hidden" name="page" th:value="${page}">
-                                        <input type="hidden" name="keyword" th:value="${keyword}">
+                                        <input type="hidden" name="schType" th:value="${schType}">
+                                        <input type="hidden" name="kwd" th:value="${kwd}">
                                         <select name="role" th:attr="aria-label=|${member.name} 직위 선택|" required>
                                             <option value="50" th:selected="${member.role == 50}">과장</option>
                                             <option value="30" th:selected="${member.role == 30}">대리</option>

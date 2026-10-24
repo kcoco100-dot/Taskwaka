@@ -43,16 +43,16 @@
 
     <!-- 검색유형 -->
     <div class="project-field project-type-field">
-        <label for="searchType">검색유형</label>
-        <select id="searchType" name="searchType">
+        <label for="schType">검색유형</label>
+        <select id="schType" name="schType">
             <option value="all"
-                    th:selected="${searchType == null or searchType == 'all'}">전체</option>
+                    th:selected="${schType == null or schType == 'all'}">전체</option>
             <option value="subject"
-                    th:selected="${searchType == 'subject'}">프로젝트명</option>
+                    th:selected="${schType == 'subject'}">프로젝트명</option>
             <option value="content"
-                    th:selected="${searchType == 'content'}">프로젝트 내용</option>
+                    th:selected="${schType == 'content'}">프로젝트 내용</option>
             <option value="manager"
-                    th:selected="${searchType == 'manager'}">담당자</option>
+                    th:selected="${schType == 'manager'}">담당자</option>
         </select>
     </div>
 
@@ -61,9 +61,9 @@
         <label for="searchKeyword">검색어</label>
         <input type="search"
                id="searchKeyword"
-               name="keyword"
+               name="kwd"
                maxlength="100"
-               th:value="${keyword}"
+               th:value="${kwd}"
                placeholder="검색어를 입력하세요">
     </div>
 
@@ -100,7 +100,7 @@
                             <td class="project-number" th:text="${project.project_id}">1</td>
                             <td>
 	                            <a class="project-name" 
-	                            th:href="@{/{domainKey}/manage/detail/{projectId}(domainKey=${domainKey}, projectId=${project.project_id})}"
+	                            th:href="@{/{domainKey}/manage/detail/{projectId}(domainKey=${domainKey}, projectId=${project.project_id},status=${status},schType=${schType},kwd=${kwd},page=${page})}"
 	                            th:text="${project.subject}">TASKWAKA 협업 플랫폼</a>
                             </td>
                             <td class="project-manager" th:text="${project.pm_name != null ? project.pm_name : '미정'}">이팀장</td>

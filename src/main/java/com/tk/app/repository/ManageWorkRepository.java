@@ -30,11 +30,11 @@ public interface ManageWorkRepository extends JpaRepository<ManageWorkspaceMembe
 			FROM ManageWorkspaceMember wm
 			LEFT JOIN ManageMemberDetail md ON md.memberId = wm.memberId
 			WHERE wm.workspaceId = :workspaceId AND wm.status = 0
-			  AND (LOWER(COALESCE(md.name, ' ')) LIKE :keyword OR LOWER(COALESCE(md.email, ' ')) LIKE :keyword)
+			  AND (LOWER(COALESCE(md.name, ' ')) LIKE :kwd OR LOWER(COALESCE(md.email, ' ')) LIKE :kwd)
 			""")
 	long dataCount(
 	    @Param("workspaceId") Long workspaceId,
-	    @Param("keyword") String keyword
+	    @Param("kwd") String kwd
 	);
 
 	 // 워크 팀원 목록
@@ -44,12 +44,12 @@ public interface ManageWorkRepository extends JpaRepository<ManageWorkspaceMembe
         )
         FROM ManageWorkspaceMember wm
         LEFT JOIN ManageMemberDetail md ON md.memberId = wm.memberId
-        WHERE wm.workspaceId = :workspaceId AND wm.status = 0 AND (LOWER(COALESCE(md.name, ' ')) LIKE :keyword OR LOWER(COALESCE(md.email, ' ')) LIKE :keyword)
+        WHERE wm.workspaceId = :workspaceId AND wm.status = 0 AND (LOWER(COALESCE(md.name, ' ')) LIKE :kwd OR LOWER(COALESCE(md.email, ' ')) LIKE :kwd)
         ORDER BY CASE WHEN wm.role = 70 THEN 0 ELSE 1 END, md.name ASC, wm.workspaceMemberId ASC
         """)
     List<ManageWorkDto> listWorkMember(
         @Param("workspaceId") Long workspaceId,
-        @Param("keyword") String keyword,
+        @Param("kwd") String kwd,
         Pageable pageable
     );
 
@@ -61,15 +61,12 @@ public interface ManageWorkRepository extends JpaRepository<ManageWorkspaceMembe
         WHERE wm.workspaceMemberId = :workspaceMemberId
           AND wm.workspaceId = :workspaceId
           AND wm.status = 0
-          AND wm.role IN (10, 30, 50)
-          AND wm.memberId <> :actorId
           AND EXISTS (
               SELECT actor.workspaceMemberId
               FROM ManageWorkspaceMember actor
               WHERE actor.workspaceId = wm.workspaceId
                 AND actor.memberId = :actorId
                 AND actor.status = 0
-                AND actor.role = 70
           )
         """)
     int updateWorkRole(

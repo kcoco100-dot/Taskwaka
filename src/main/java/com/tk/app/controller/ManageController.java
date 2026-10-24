@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.tk.app.common.PaginateUtil;
+import com.tk.app.common.MyUtil;
 import com.tk.app.common.RequestUtils;
 import com.tk.app.domain.dto.ManageDto;
 import com.tk.app.domain.dto.SessionInfo;
@@ -41,7 +42,9 @@ public class ManageController {
 	private final ProjectMemberRepository projectMemberRepository;
 	private final ManageService service;
 	private final PaginateUtil paginateUtil;
+	private final MyUtil myUtil;
 
+	// 도메인키 설정
 	@ModelAttribute("domainKey")
 	public String setDomainKey(
 			@PathVariable("domainKey") String domainKey) {
@@ -49,25 +52,31 @@ public class ManageController {
 		return domainKey;
 	}
 
-	// 대시보드 페이지
+	// 대시보드 화면
 	@GetMapping
 	public String dashBoard(@PathVariable("domainKey") String domainKey) throws Exception {
-		return pmDashboardForm(domainKey);
+		return "manage/pmDashboard";
 	}
 
-	// 팀원관리 페이지
+	// 팀원 목록 조회
 	@GetMapping("manage")
 	public String manage(@PathVariable("domainKey") String domainKey,
-			@RequestParam(value = "page", defaultValue = "1") int current_page, Model model) {
+			@RequestParam(value = "page", defaultValue = "1") int current_page,
+            @RequestParam(name = "schType", defaultValue = "all") String schType,
+            @RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) {
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
-			if (info == null) return "redirect:/login";
-			Long workspaceId = service.findByDomainKey(domainKey);
-			if (workspaceId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
-			Integer currentRole = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
-			if (currentRole == null) {
-				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "워크스페이스 참여자만 조회할 수 있습니다.");
+			if (info == null) {
+				throw new IllegalStateException("로그인 정보가 없습니다.");
 			}
+			Long workspaceId = service.findByDomainKey(domainKey);
+			if (workspaceId == null) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
+			}
+			Integer currentRole = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
+            if (currentRole == null) {
+                currentRole = 0;
+            }
 
 			Map<String, Object> map = new HashMap<>();
 			map.put("workspace_id", workspaceId);
@@ -79,11 +88,12 @@ public class ManageController {
 			for (ManageDto project : allProjects) {
 				accessibleIds.add(project.getProject_id());
 			}
-			List<ProjectTeamView> rawMembers = projectMemberRepository.findWorkspaceMembersWithProject(workspaceId);
+			kwd = kwd == null ? "" : kwd.trim();
+            List<ProjectTeamView> rawMembers = projectMemberRepository.findWorkspaceMembersWithProject(workspaceId, kwd);
 
 			Map<Long, WorkspaceMemberGroupDto> groupedMembers = new LinkedHashMap<>();
 			for (ProjectTeamView view : rawMembers) {
-				// 팀원 기본정보는 워크스페이스 참여자에게 표시하고, 프로젝트 정보는 기존 조회 범위만 노출
+				
 				WorkspaceMemberGroupDto groupDto = groupedMembers.computeIfAbsent(view.getWorkspaceMemberId(), k -> {
 					WorkspaceMemberGroupDto newDto = new WorkspaceMemberGroupDto();
 					newDto.setWorkspaceMemberId(view.getWorkspaceMemberId());
@@ -111,14 +121,18 @@ public class ManageController {
 				totalPage = paginateUtil.pageCount(dataCount, size);
 			}
 			current_page = Math.min(current_page, totalPage);
-			if (current_page < 1) current_page = 1;
+			if (current_page < 1) {
+				current_page = 1;
+			}
 			int offset = (current_page - 1) * size;
 			int end = Math.min(offset + size, dataCount);
 			List<WorkspaceMemberGroupDto> teamMembers = allMembers.subList(offset, end);
-			String listUrl = RequestUtils.getContextPath() + "/" + domainKey + "/manage/manage";
+			String listUrl = RequestUtils.getContextPath() + "/" + domainKey + "/manage/manage?schType=" + myUtil.encodeUrl(schType) + "&kwd=" + myUtil.encodeUrl(kwd);
+            model.addAttribute("schType", schType);
+            model.addAttribute("kwd", kwd);
 			String paging = paginateUtil.paging(current_page, totalPage, listUrl);
 			model.addAttribute("paging", paging);
-			model.addAttribute("pageBaseUrl", listUrl + "?page=");
+			model.addAttribute("pageBaseUrl", listUrl + "&page=");
 			model.addAttribute("page", current_page);
 			model.addAttribute("size", size);
 			model.addAttribute("dataCount", dataCount);
@@ -126,7 +140,9 @@ public class ManageController {
 
 			List<ManageDto> activeProjects = new ArrayList<>();
 			for (ManageDto p : allProjects) {
-				if (p.getStatus() == 0 || p.getStatus() == 1) activeProjects.add(p);
+				if (p.getStatus() == 0 || p.getStatus() == 1) {
+					activeProjects.add(p);
+				}
 			}
 
 			model.addAttribute("teamMembers", teamMembers);
@@ -138,12 +154,13 @@ public class ManageController {
 			throw e;
 		} catch (Exception e) {
 			log.info("manage : ", e);
+            throw new IllegalStateException(e);
 		}
 
 		return "manage/manage";
 	}
 
-	 // 프로젝트 인원 등록 및 직위 변경
+	// 프로젝트 배정 및 직위 변경
 	@PostMapping("/assignProject")
 	@ResponseBody
 	public Map<String, Object> assignProject(
@@ -171,18 +188,16 @@ public class ManageController {
 			service.assignOrUpdateProjectMember(map);
 
 			resultMap.put("status", "success");
-			resultMap.put("message", "프로젝트 팀원 배정이 완료되었습니다.");
 
 		} catch (Exception e) {
 			log.error("assignProject 오류: ", e);
 			resultMap.put("status", "fail");
-			resultMap.put("message", e.getMessage());
 		}
 
 		return resultMap;
 	}
 
-	// 프로젝트에서 제외
+	// 프로젝트 팀원 제외
 	@PostMapping("/excludeProject")
 	@ResponseBody
 	public Map<String, Object> excludeProject(
@@ -206,19 +221,16 @@ public class ManageController {
 			service.excludeProjectMember(map);
 
 			resultMap.put("status", "success");
-			resultMap.put("message", "프로젝트에서 제외되었습니다.");
 
 		} catch (Exception e) {
 			log.error("excludeProject 오류: ", e);
 			resultMap.put("status", "fail");
-			resultMap.put("message", e.getMessage());
 		}
 
 		return resultMap;
 	}
 
-
-	// 워크에서 제외
+	// 워크 팀원 제외
 	@PostMapping("/excludeWorkspace")
 	@ResponseBody
 	public Map<String, Object> excludeWorkspace(
@@ -242,80 +254,71 @@ public class ManageController {
 			service.excludeWorkspaceMember(map);
 
 			resultMap.put("status", "success");
-			resultMap.put("message", "워크스페이스에서 제외되었습니다.");
 
 		} catch (Exception e) {
 			log.error("excludeWorkspace 오류: ", e);
 			resultMap.put("status", "fail");
-			resultMap.put("message", e.getMessage());
 		}
 
 		return resultMap;
 	}
 
-	// 인원 초대 페이지
+	// 팀원 초대 화면
 	@GetMapping("/invitation")
 	public String invitationForm(@PathVariable("domainKey") String domainKey) throws Exception {
 		SessionInfo info = LoginMemberUtil.getSessionInfo();
-		if (info == null) return "redirect:/login";
+		if (info == null) {
+			throw new IllegalStateException("로그인 정보가 없습니다.");
+		}
 		Long workspaceId = service.findByDomainKey(domainKey);
-		Integer role = workspaceId == null ? null : projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
-		if (role == null || role != 70) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "팀원 초대는 사장(70)만 가능합니다.");
 		return "manage/invitation";
 	}
 
-	// 사장(70)은 전체 프로젝트, 다른 직위는 참여 프로젝트의 캘린더 조회
-	@GetMapping("/calender")
-	public String calender(@PathVariable("domainKey") String domainKey, Model model) throws Exception {
-		String result = "manage/manageCalender";
-		try {
-			SessionInfo info = LoginMemberUtil.getSessionInfo();
-			if (info == null) {
-				result = "redirect:/login";
-			} else {
-				Long workspaceId = service.findByDomainKey(domainKey);
-				if (workspaceId == null) {
-					throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
-				}
-				Map<String, Object> map = new HashMap<>();
-				map.put("workspaceId", workspaceId);
-				map.put("memberId", info.getMember_id());
-				Map<String, Object> calendarData = service.getManageCalendarData(map);
-				model.addAttribute("myProjects", calendarData.get("myProjects"));
-				model.addAttribute("myTasks", calendarData.get("myTasks"));
-			}
-		} catch (SecurityException e) {
-			log.info("calender : ", e);
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
-		} catch (ResponseStatusException e) {
-			throw e;
-		} catch (Exception e) {
-			log.info("calender : ", e);
-			throw e;
-		}
-		return result;
-	}
+    // 캘린더 조회
+    @GetMapping("/calender")
+    public String calender(@PathVariable("domainKey") String domainKey, Model model) throws Exception {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            Long workspaceId = service.findByDomainKey(domainKey);
+            Map<String, Object> map = new HashMap<>();
+            map.put("workspaceId", workspaceId);
+            map.put("memberId", info.getMember_id());
+            Map<String, Object> calendarData = service.getManageCalendarData(map);
+            model.addAttribute("myProjects", calendarData.get("myProjects"));
+            model.addAttribute("myTasks", calendarData.get("myTasks"));
+        } catch (Exception e) {
+            log.info("calender : ", e);
+            throw e;
+        }
+        return "manage/manageCalender";
+    }
 
-
-	// 회의록 페이지
+	// 회의록 화면
 	@GetMapping("/meetings")
 	public String meetingsForm(@PathVariable("domainKey") String domainKey) throws Exception {
 		SessionInfo info = LoginMemberUtil.getSessionInfo();
-		if (info == null) return "redirect:/login";
+		if (info == null) {
+			throw new IllegalStateException("로그인 정보가 없습니다.");
+		}
 		Long workspaceId = service.findByDomainKey(domainKey);
-		if (workspaceId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
+		if (workspaceId == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
+		}
 		return "manage/meeting";
 	}
 
-	// 대쉬보드 페이지
+	// 대시보드 화면
 	@GetMapping("/pmDashboard")
 	public String pmDashboardForm(@PathVariable("domainKey") String domainKey) throws Exception {
 		SessionInfo info = LoginMemberUtil.getSessionInfo();
-		if (info == null) return "redirect:/login";
+		if (info == null) {
+			throw new IllegalStateException("로그인 정보가 없습니다.");
+		}
 		Long workspaceId = service.findByDomainKey(domainKey);
-		if (workspaceId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
+		if (workspaceId == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
+		}
 		return "manage/pmDashboard";
 	}
-
 
 }

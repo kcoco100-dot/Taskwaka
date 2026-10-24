@@ -2,14 +2,12 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.ManageMeetingsMapper">
+    <!-- 숨긴 프로젝트 제외 조건 -->
     <sql id="meetingAccess">
-        AND p.deleted IS NULL AND EXISTS (SELECT 1 FROM workspace_members actor
-            WHERE actor.workspace_id = p.workspace_id AND actor.member_id = #{memberId} AND actor.status = 0
-              AND (actor.role = 70 OR EXISTS (SELECT 1 FROM project_members own
-                  WHERE own.project_id = p.project_id AND own.workspace_member_id = actor.workspace_member_id
-                    AND own.role = 50 AND own.status = 0)))
+        AND p.deleted IS NULL
     </sql>
 
+	<!-- 회의록 목록 조회 -->
 	<select id="findMeetingList" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
 		SELECT
             m.meeting_minute_id AS meetingMinuteId,
@@ -28,10 +26,11 @@
         <if test="kwd != null and kwd != ''">
             AND m.title LIKE '%' || #{kwd} || '%'
         </if>
-        ORDER BY m.meeting DESC NULLS LAST, m.created DESC
+        ORDER BY m.meeting DESC NULLS LAST, m.created DESC, m.meeting_minute_id DESC
         OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
     </select>
 
+    <!-- 회의록 건수 조회 -->
     <select id="countMeetings" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM meeting_minutes m
@@ -44,6 +43,7 @@
         </if>
     </select>
 
+    <!-- 회의록 상세 조회 -->
     <select id="findMeetingsById" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
        SELECT
             m.meeting_minute_id AS meetingMinuteId,
@@ -61,33 +61,64 @@
           AND m.deleted IS NULL
         <include refid="meetingAccess"/>
     </select>
-
+    
+    <!-- 회의록 수정 -->
     <update id="updateMeetings" parameterType="map">
-        UPDATE meeting_minutes
-        SET title = #{title},
-            content = #{content},
-            updated = SYSDATE
-        WHERE meeting_minute_id = #{meetingMinuteId}
-          AND deleted IS NULL
-          AND member_id = #{memberId}
-          AND project_id IN (SELECT p.project_id FROM projects p WHERE p.workspace_id = #{workspaceId}
-              AND p.deleted IS NULL AND EXISTS (SELECT 1 FROM workspace_members wm
-                  WHERE wm.workspace_id = p.workspace_id AND wm.member_id = #{memberId} AND wm.status = 0
-                    AND (wm.role = 70 OR EXISTS (SELECT 1 FROM project_members own
-                        WHERE own.project_id = p.project_id AND own.workspace_member_id = wm.workspace_member_id
-                          AND own.role = 50 AND own.status = 0))))
+        UPDATE meeting_minutes SET title = #{title}, content = #{content}, updated = SYSDATE
+        WHERE meeting_minute_id = #{meetingMinuteId} AND deleted IS NULL
+          AND project_id IN (SELECT project_id FROM projects WHERE workspace_id = #{workspaceId} AND deleted IS NULL)
     </update>
-
+    
+    <!-- 회의록 숨김 -->
     <update id="deleteMeetings" parameterType="map">
-        UPDATE meeting_minutes
-        SET deleted = SYSDATE
-        WHERE meeting_minute_id = #{meetingMinuteId}
-          AND project_id IN (SELECT p.project_id FROM projects p WHERE p.workspace_id = #{workspaceId}
-              AND p.deleted IS NULL AND EXISTS (SELECT 1 FROM workspace_members wm
-                  WHERE wm.workspace_id = p.workspace_id AND wm.member_id = #{memberId} AND wm.status = 0
-                    AND (wm.role = 70 OR EXISTS (SELECT 1 FROM project_members own
-                        WHERE own.project_id = p.project_id AND own.workspace_member_id = wm.workspace_member_id
-                          AND own.role = 50 AND own.status = 0))))
+        UPDATE meeting_minutes SET deleted = SYSDATE, updated = SYSDATE
+        WHERE meeting_minute_id = #{meetingMinuteId} AND deleted IS NULL
+          AND project_id IN (SELECT project_id FROM projects WHERE workspace_id = #{workspaceId} AND deleted IS NULL)
     </update>
+    
+    <!-- 이전 회의록 조회 -->
+    <select id="selectPrevMeeting" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
+        SELECT m.meeting_minute_id AS "meetingMinuteId", m.title
+        FROM meeting_minutes m
+        JOIN projects p ON p.project_id = m.project_id
+        JOIN meeting_minutes current_m ON current_m.meeting_minute_id = #{meetingMinuteId}
+          AND current_m.deleted IS NULL
+        JOIN projects current_p ON current_p.project_id = current_m.project_id
+          AND current_p.workspace_id = #{workspaceId} AND current_p.deleted IS NULL
+        WHERE p.workspace_id = #{workspaceId} AND m.deleted IS NULL
+        <include refid="meetingAccess"/>
+        <if test="kwd != null and kwd != ''">AND m.title LIKE '%' || #{kwd} || '%'</if>
+          AND (
+              m.meeting &gt; current_m.meeting
+              OR (m.meeting IS NOT NULL AND current_m.meeting IS NULL)
+              OR ((m.meeting = current_m.meeting OR (m.meeting IS NULL AND current_m.meeting IS NULL))
+                  AND (m.created &gt; current_m.created
+                      OR (m.created = current_m.created AND m.meeting_minute_id &gt; current_m.meeting_minute_id)))
+          )
+        ORDER BY m.meeting ASC NULLS FIRST, m.created ASC, m.meeting_minute_id ASC
+        FETCH FIRST 1 ROW ONLY
+    </select>
 
+    <!-- 다음 회의록 조회 -->
+    <select id="selectNextMeeting" parameterType="map" resultType="com.tk.app.domain.dto.ManageMeetingsDto">
+        SELECT m.meeting_minute_id AS "meetingMinuteId", m.title
+        FROM meeting_minutes m
+        JOIN projects p ON p.project_id = m.project_id
+        JOIN meeting_minutes current_m ON current_m.meeting_minute_id = #{meetingMinuteId}
+          AND current_m.deleted IS NULL
+        JOIN projects current_p ON current_p.project_id = current_m.project_id
+          AND current_p.workspace_id = #{workspaceId} AND current_p.deleted IS NULL
+        WHERE p.workspace_id = #{workspaceId} AND m.deleted IS NULL
+        <include refid="meetingAccess"/>
+        <if test="kwd != null and kwd != ''">AND m.title LIKE '%' || #{kwd} || '%'</if>
+          AND (
+              m.meeting &lt; current_m.meeting
+              OR (m.meeting IS NULL AND current_m.meeting IS NOT NULL)
+              OR ((m.meeting = current_m.meeting OR (m.meeting IS NULL AND current_m.meeting IS NULL))
+                  AND (m.created &lt; current_m.created
+                      OR (m.created = current_m.created AND m.meeting_minute_id &lt; current_m.meeting_minute_id)))
+          )
+        ORDER BY m.meeting DESC NULLS LAST, m.created DESC, m.meeting_minute_id DESC
+        FETCH FIRST 1 ROW ONLY
+    </select>
 </mapper>

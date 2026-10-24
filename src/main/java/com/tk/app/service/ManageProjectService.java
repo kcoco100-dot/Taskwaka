@@ -21,10 +21,13 @@ public interface ManageProjectService {
 	public int dataCount(Map<String, Object> map) throws SQLException;
 	public ManageDto getProjectDetail(Map<String, Object> map) throws SQLException;
 
-
 	public List<ManageTaskDto> listManageTasks(Map<String, Object> map) throws SQLException;
 	public List<Map<String, Object>> listManageTaskTL(Map<String, Object> map) throws SQLException;
+	
 	public void insertManageTask(ManageTaskDto dto, Map<String, Object> context) throws SQLException;
 	public void updateManageTask(ManageTaskDto dto, Map<String, Object> context) throws SQLException;
 	public void deleteManageTask(Map<String, Object> map) throws SQLException;
+	
+	public ManageDto selectPrevProject(Map<String, Object> map) throws SQLException;
+    public ManageDto selectNextProject(Map<String, Object> map) throws SQLException;
 }

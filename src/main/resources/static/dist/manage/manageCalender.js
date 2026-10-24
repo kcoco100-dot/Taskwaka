@@ -3,7 +3,9 @@
     document.addEventListener('DOMContentLoaded', function () {
         const calendarEl = document.getElementById('myTaskCalendar');
         const panel = document.getElementById('mcDetailPanel');
-        if (!calendarEl || !panel || typeof FullCalendar === 'undefined') return;
+        if (!calendarEl || !panel || typeof FullCalendar === 'undefined') {
+            return;
+        }
 
         const source = window.manageCalendarData || {};
         const projects = Array.isArray(source.projects) ? source.projects : [];
@@ -31,7 +33,9 @@
         }
         function nextDate(dateText) {
             const date = new Date(String(dateText) + 'T00:00:00Z');
-            if (Number.isNaN(date.getTime())) return null;
+            if (Number.isNaN(date.getTime())) {
+                return null;
+            }
             date.setUTCDate(date.getUTCDate() + 1);
             return date.toISOString().slice(0, 10);
         }
@@ -52,7 +56,9 @@
             infoEl.append(key, data);
         }
         function showPanel(type, title, subtitle, content, fields) {
-            if (!panel.classList.contains('mc-open')) lastCalendarFocus = document.activeElement;
+            if (!panel.classList.contains('mc-open')) {
+                lastCalendarFocus = document.activeElement;
+            }
             typeEl.textContent = type;
             titleEl.textContent = text(title);
             subtitleEl.textContent = text(subtitle, '');
@@ -123,7 +129,9 @@
         }
         function showProject(id) {
             const project = projectById.get(String(id));
-            if (!project) return;
+            if (!project) {
+                return;
+            }
             const relatedTasks = tasks.filter(function (task) {
                 return String(task.projectId) === String(project.projectId);
             });
@@ -152,7 +160,9 @@
         }
         function showTask(id) {
             const task = taskById.get(String(id));
-            if (!task) return;
+            if (!task) {
+                return;
+            }
             const project = projectById.get(String(task.projectId));
             showPanel('업무', task.title, text(task.projectName, '') + ' · ' + period(task), task.content, [
                 ['상태', taskStatus(task.status)],
@@ -184,7 +194,9 @@
         }
         closeBtn.addEventListener('click', closePanel);
         document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && panel.classList.contains('mc-open')) closePanel();
+            if (event.key === 'Escape' && panel.classList.contains('mc-open')) {
+                closePanel();
+            }
         });
 
         // 프로젝트별로 고유한 밝은 파스텔색을 사용한다. 같은 프로젝트의 모든 날짜는 같은 색상이다.
@@ -205,7 +217,9 @@
         }
         function renderProjectLegend() {
             const legendEl = document.getElementById('mcProjectLegend');
-            if (!legendEl) return;
+            if (!legendEl) {
+                return;
+            }
             legendEl.replaceChildren();
             if (!projects.length) {
                 const empty = document.createElement('span');
@@ -234,9 +248,13 @@
         // 달력에는 프로젝트 기간만 표시하고, 업무는 프로젝트 클릭 후 우측 패널에서 확인한다.
         const projectEvents = [];
         projects.forEach(function (project) {
-            if (!project.startAt || !project.endAt || project.startAt > project.endAt) return;
+            if (!project.startAt || !project.endAt || project.startAt > project.endAt) {
+                return;
+            }
             const end = nextDate(project.endAt);
-            if (!end) return;
+            if (!end) {
+                return;
+            }
             const colors = projectColor(project.projectId);
             projectEvents.push({
                 id: 'project-' + project.projectId,
