@@ -27,7 +27,22 @@
                         <span th:if="${inquiry.status == 1}" class="inquiry-badge answered">답변 완료</span>
                     </div>
 
-                    <h2 th:text="${inquiry.title}">문의 제목</h2>
+                    <div class="site-inquiry-title-row">
+					    <h2 th:text="${inquiry.title}">문의 제목</h2>
+					
+					    <details class="site-inquiry-dropdown">
+					        <summary>⋯</summary>
+					
+							<input type="hidden" id="inquiry_id" th:value="${inquiry.inquiry_id}">
+						
+					        <div class="site-inquiry-dropdown-menu">
+					            <a th:if="${inquiry.status == 0}" th:href="@{/service/inquiry/{id}/edit(id=${inquiry.inquiry_id})}">문의 수정</a>
+					            <span th:if="${inquiry.status != 0}" class="site-inquiry-menu-disabled">문의 수정 불가</span>
+					            <button type="button" th:if="${inquiry.status == 0}" onclick="deleteInquiry()" >문의 삭제</button>
+					            <span th:if="${inquiry.status != 0}" class="site-inquiry-menu-disabled">문의 삭제 불가</span>
+					        </div>
+					    </details>
+					</div>
 
                     <div class="site-inquiry-detail-meta">
                         <span>문의번호 <strong th:text="${inquiry.inquiry_id}">1</strong></span>
@@ -39,6 +54,14 @@
                     <div class="site-inquiry-detail-section-title">문의 내용</div>
                     <div class="site-inquiry-detail-content" th:text="${inquiry.content}">문의 내용이 표시됩니다.</div>
                 </div>
+                
+                <div class="site-inquiry-attachments" th:if="${fileList != null and !fileList.isEmpty()}">
+				    <h4>첨부파일</h4>
+				    <div class="site-inquiry-attachment" th:each="file : ${fileList}">
+					    <span class="site-inquiry-file-icon">📎</span>
+					    <span th:text="${file.original_name}"></span>
+					</div>
+				</div>
 
                 <div class="site-inquiry-answer" th:if="${inquiry.status == 1}">
                     <div class="site-inquiry-answer-header">
@@ -61,6 +84,35 @@
 
         </div>
     </div>
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript">
+		function deleteInquiry() {
+			const inquiry_id = document.getElementById("inquiry_id").value;
+
+			if(!confirm("정말 삭제하시겠습니까?")) {
+				return;
+			}
+			
+			fetch("/service/inquiry/" + inquiry_id + "/delete", {
+				method: "POST"
+				})
+			.then(response => response.text())	
+			.then(result => {
+				if(result === "success") {
+					location.href = "/service/inquiry";
+				} else if (result === "fail") {
+					alert("삭제 할 수 없습니다.");
+				} else if (result === "login") {
+					location.href = "/member/login";
+				}
+			})
+			.catch(error => {
+				alert("삭제 요청 중 오류가 발생했습니다.");
+			});
+		}
+	</script>
 </th:block>
 
 </body>

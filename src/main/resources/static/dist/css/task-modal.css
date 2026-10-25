@@ -1,0 +1,134 @@
+@charset "UTF-8";
+
+
+@charset "UTF-8";
+
+/* 푸터 모달 버튼 */
+.footer-modal-link {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.footer-modal-link:hover {
+    text-decoration: underline;
+}
+
+/* 모달 전체 */
+.task-modal {
+    width: min(560px, calc(100% - 32px));
+    max-height: 80vh;
+    padding: 0;
+    border: none;
+    border-radius: 14px;
+    background: #fff;
+    color: #252b36;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+    margin: auto;
+}
+
+/* 모달 뒤 어두운 배경 */
+.task-modal::backdrop {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+/* 모달 제목 */
+.task-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 26px;
+    border-bottom: 1px solid #e5e8ee;
+}
+
+.task-modal-header h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.task-modal-close {
+    border: none;
+    background: transparent;
+    color: #858c99;
+    font-size: 27px;
+    cursor: pointer;
+}
+
+/* 모달 내용 */
+.task-modal-body {
+    max-height: 55vh;
+    padding: 24px 26px;
+    overflow-y: auto;
+}
+
+.task-modal-body h3 {
+    margin: 24px 0 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #303846;
+}
+
+.task-modal-body h3:first-of-type {
+    margin-top: 18px;
+}
+
+.task-modal-body p {
+    margin: 0 0 12px;
+    color: #626b79;
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+/* 모달 하단 */
+.task-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 26px;
+    border-top: 1px solid #e5e8ee;
+}
+
+.task-modal-confirm {
+    min-width: 96px;
+    height: 40px;
+    border: none;
+    border-radius: 7px;
+    background: #315fc4;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.task-modal-confirm:hover {
+    background: #254fa9;
+}
+
+/* 푸터 링크 및 버튼 디자인 통일 */
+.footer-menu a,
+.footer-menu .footer-modal-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.footer-menu a:hover,
+.footer-menu .footer-modal-link:hover {
+    color: #315fc4;
+    text-decoration: none;
+}

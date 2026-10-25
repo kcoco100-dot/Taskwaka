@@ -423,3 +423,347 @@ body {
 	background: var(--badge-inactive-bg);
 	color: var(--badge-inactive-text);
 }
+
+
+.inquiry-table th,
+.inquiry-table td {
+    vertical-align: middle;
+}
+
+.inquiry-table .inquiry-title {
+    text-align: left;
+    padding-left: 24px;
+}
+
+.inquiry-table .inquiry-title a {
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.inquiry-table .inquiry-title a:hover {
+    color: #3159ae;
+    text-decoration: underline;
+}
+
+.inquiry-view-link {
+    color: #3159ae;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.inquiry-view-link:hover {
+    text-decoration: underline;
+}
+
+
+.inquiry-table .inquiry-title a {
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.inquiry-table .inquiry-title a:hover {
+    color: #3159ae;
+    text-decoration: none;
+}
+
+
+/* 관리자 1:1 문의 상세 */
+
+.inquiry-detail .panel-card-title {
+    margin-bottom: 0;
+}
+
+.inquiry-top-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inquiry-detail-header {
+    padding: 26px 0 22px;
+}
+
+.inquiry-detail-header h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.inquiry-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    color: #8a8179;
+    font-size: 13px;
+}
+
+.inquiry-detail-meta b {
+    margin-left: 5px;
+    color: #625b55;
+    font-weight: 500;
+}
+
+.inquiry-detail-section {
+    padding: 22px 0;
+    border-top: 1px solid #ebe6e0;
+}
+
+.inquiry-detail-section h4 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.inquiry-detail-content {
+    padding: 18px 20px;
+    background: #faf9f7;
+    border: 1px solid #eee9e3;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.inquiry-file-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.inquiry-file-heading h4 {
+    margin-bottom: 0;
+}
+
+.inquiry-zip-link {
+    color: #526748;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.inquiry-file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #eee9e3;
+    border-radius: 6px;
+    margin-bottom: 7px;
+    font-size: 13px;
+}
+
+.inquiry-file-item a {
+    color: #4b5563;
+    text-decoration: none;
+}
+
+.inquiry-file-item a:hover,
+.inquiry-zip-link:hover {
+    color: #526748;
+    text-decoration: underline;
+}
+
+.inquiry-file-icon {
+    font-size: 15px;
+}
+
+.inquiry-answer-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    line-height: 1.7;
+}
+
+.inquiry-answer-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.inquiry-top-buttons .btn-subtle {
+    text-decoration: none;
+}
+
+.inquiry-top-buttons .btn-subtle:hover {
+    text-decoration: none;
+}
+
+
+/* 공지사항 상세 화면 */
+.notice-detail .panel-card {
+    padding: 28px 32px;
+}
+
+.notice-detail .notice-body {
+    min-height: 0;
+    height: auto;
+    padding: 24px 0;
+    line-height: 1.8;
+}
+
+/* 첨부파일 영역 */
+.notice-detail .notice-files {
+    margin-top: 24px;
+    padding: 18px;
+    border: 1px solid #e5e5e0;
+    border-radius: 10px;
+    background: #faf9f7;
+}
+
+.notice-detail .notice-files-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.notice-detail .notice-files-header strong {
+    font-size: 14px;
+    color: #3f4940;
+}
+
+.notice-detail .notice-download-all {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 14px;
+    border: 1px solid #d6dfd4;
+    border-radius: 7px;
+    background: #fff;
+    color: #456b4a;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.notice-detail .notice-download-all:hover {
+    background: #eef4ed;
+    text-decoration: none;
+}
+
+/* 개별 첨부파일 */
+.notice-detail .notice-file-item {
+    margin-top: 8px;
+    padding: 0;
+    border: 1px solid #e3e7e2;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.notice-detail .notice-file-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: #465348;
+}
+
+.notice-detail .notice-file-link:hover {
+    background: #f4f8f3;
+    text-decoration: none;
+}
+
+.notice-detail .notice-file-icon {
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.notice-detail .notice-file-name {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+}
+
+/* 하단 버튼 */
+.notice-detail .notice-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.notice-detail .notice-action-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notice-detail .notice-action-right form {
+    margin: 0;
+}
+
+.notice-detail .notice-list-btn,
+.notice-detail .notice-action-right .btn-sage,
+.notice-detail .notice-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 42px;
+    min-height: 42px;
+    padding: 0 18px;
+    margin: 0;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.notice-detail .notice-list-btn:hover,
+.notice-detail .notice-action-right .btn-sage:hover {
+    text-decoration: none;
+}
+
+@media (max-width: 640px) {
+    .notice-detail .panel-card {
+        padding: 20px 16px;
+    }
+
+    .notice-detail .notice-actions {
+        flex-wrap: wrap;
+    }
+}
+
+
+.notice-detail .notice-file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+}
+
+.notice-detail .notice-file-link {
+    display: inline;
+    width: auto;
+    padding: 0;
+    color: #465348;
+    text-decoration: none;
+}
+
+.notice-detail .notice-file-link:hover {
+    background: transparent;
+    text-decoration: underline;
+}
+
+/* FAQ 등록 화면 */
+.notice-form-page textarea.warm-textarea {
+    display: block;
+    width: 100%;
+    min-height: 180px;
+    box-sizing: border-box;
+    resize: none;
+}

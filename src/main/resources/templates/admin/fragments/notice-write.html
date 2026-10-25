@@ -31,9 +31,13 @@
 					<input type="hidden" name="content" id="content">
 				</div>
 				
-				<div class="notice-field">
-					<label>첨부파일</label>
-					<input type="file" name="files" multiple>
+				<div class="notice-field notice-upload">
+				    <label>첨부파일</label>
+				    <div class="notice-upload-box">
+				        <div class="notice-upload-description">📎 등록할 파일을 선택해 주세요.</div>
+				        <input type="file" id="noticeWriteFiles" name="files" multiple onchange="showNoticeWriteFiles()">
+				        <div id="noticeWriteFileList" class="notice-upload-list"></div>
+				    </div>
 				</div>
 
 				<div class="notice-form-actions">
@@ -44,5 +48,68 @@
 			</form>
 		</div>
 	</div>
+	
+<th:block th:fragment="script">
+    <script>
+        document.getElementById('noticeWriteForm')
+            .addEventListener('submit', function() {
+                document.getElementById('content').value =
+                    document.querySelector('#editor .ql-editor').innerHTML;
+            });
+    </script>
+</th:block>	
+
+<th:block th:fragment="script">
+    <script>
+        document.getElementById('noticeWriteForm')
+            .addEventListener('submit', function() {
+                document.getElementById('content').value =
+                    document.querySelector('#editor .ql-editor').innerHTML;
+            });
+
+        function showNoticeWriteFiles() {
+            const input = document.getElementById('noticeWriteFiles');
+            const fileList = document.getElementById('noticeWriteFileList');
+
+            fileList.innerHTML = '';
+
+            Array.from(input.files).forEach(function(file, index) {
+                const item = document.createElement('div');
+                item.className = 'notice-upload-item';
+
+                const name = document.createElement('span');
+                name.className = 'notice-upload-name';
+                name.textContent = file.name;
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'notice-upload-remove';
+                button.textContent = '삭제';
+                button.onclick = function() {
+                    removeNoticeWriteFile(index);
+                };
+
+                item.appendChild(name);
+                item.appendChild(button);
+                fileList.appendChild(item);
+            });
+        }
+
+        function removeNoticeWriteFile(index) {
+            const input = document.getElementById('noticeWriteFiles');
+            const dataTransfer = new DataTransfer();
+
+            Array.from(input.files).forEach(function(file, i) {
+                if (i !== index) {
+                    dataTransfer.items.add(file);
+                }
+            });
+
+            input.files = dataTransfer.files;
+            showNoticeWriteFiles();
+        }
+    </script>
+</th:block>
+	
 </body>
 </html>

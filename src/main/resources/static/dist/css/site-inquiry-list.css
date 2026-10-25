@@ -59,7 +59,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 24px 28px;
+    padding: 20px 28px;
     border-bottom: 1px solid #e9ecf1;
 }
 
@@ -219,4 +219,20 @@
     .site-inquiry-date-col {
         width: 110px;
     }
+    
+
+}
+
+	.site-inquiry-title a {
+	    color: #303846;
+	    text-decoration: none;
+	}
+	
+	.site-inquiry-title a:hover {
+	    color: #315fc4;
+	    text-decoration: none;
+	}
+
+#scroll-top {
+    display: none !important;
 }

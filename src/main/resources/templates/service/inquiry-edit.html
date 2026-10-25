@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout3}">
+<head>
+    <title>1:1 문의 수정 | TASKWAKA</title>
+</head>
+<body>
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/site-inquiry.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="site-inquiry-page">
+        <div class="site-inquiry-container">
+
+            <div class="site-inquiry-heading">
+                <p class="site-inquiry-breadcrumb">고객지원 <span>/</span> 1:1 문의</p>
+                <h1>1:1 문의 수정</h1>
+                <p class="site-inquiry-description">관리자 답변이 등록되기 전까지 문의 내용을 수정할 수 있습니다.</p>
+            </div>
+
+            <section class="site-inquiry-card">
+                <div class="site-inquiry-card-header">
+                    <h2>문의 내용 수정</h2>
+                    <p><span class="site-inquiry-required">*</span> 표시는 필수 입력 항목입니다.</p>
+                </div>
+
+                <form id="inquiryForm" class="site-inquiry-form">
+
+                    <input type="hidden" id="inquiry_id" name="inquiry_id" th:value="${inquiry.inquiry_id}">
+
+                    <div class="site-inquiry-field">
+                        <label for="title">문의 제목 <span class="site-inquiry-required">*</span></label>
+                        <input type="text" id="title" name="title" maxlength="200" th:value="${inquiry.title}" required>
+                    </div>
+
+                    <div class="site-inquiry-field">
+                        <label for="content">문의 내용 <span class="site-inquiry-required">*</span></label>
+                        <textarea id="content" name="content" rows="10" th:text="${inquiry.content}" required></textarea>
+                    </div>
+                    
+                    <div class="site-inquiry-existing-files" th:if="${fileList != null and !fileList.isEmpty()}">
+					    <label>기존 첨부파일</label>
+					
+					    <div class="site-inquiry-edit-file-item" th:each="file : ${fileList}">
+					        <span class="site-inquiry-edit-file-name" th:text="${file.original_name}"></span>
+					        <button type="button" class="site-inquiry-edit-file-remove" th:attr="data-file-id=${file.inquiries_file_id}" onclick="deleteInquiryFile(this)">삭제</button>
+					    </div>
+					</div>
+					
+					<div class="site-inquiry-field">
+					    <label for="files">새 첨부파일</label>
+					    <input type="file" id="files" name="files" multiple onchange="showSelectedFiles()">
+						<div id="selectedFileList" class="site-inquiry-edit-file-list"></div>
+					</div>
+
+                    <div class="site-inquiry-notice">
+                        <strong>안내 사항</strong>
+                        <p>관리자 답변이 등록된 문의는 수정할 수 없습니다.</p>
+                    </div>
+
+                    <div class="site-inquiry-actions site-inquiry-edit-actions">
+                        <a th:href="@{/service/inquiry/{id}(id=${inquiry.inquiry_id})}" class="site-inquiry-help">취소</a>
+                        <button type="button" class="site-inquiry-submit" onclick="updateInquiry()">수정 완료</button>
+                    </div>
+
+                </form>
+            </section>
+
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+	<script type="text/javascript">
+	    function updateInquiry() {
+	    	const inquiry_id = document.getElementById("inquiry_id").value;
+	    	
+	    	const form = document.getElementById("inquiryForm");
+	    	const params = new FormData(form);
+	    	
+	    fetch("/service/inquiry/" + inquiry_id + "/edit", {
+	    		method: "POST",
+	    		body: params
+	    })
+	    	.then(response => response.text())
+	    .then(result => {
+	    		if(result === "success") {
+	    			location.href = "/service/inquiry/" + inquiry_id;
+	    		} else if (result === "fail") {
+	    			alert("수정할 수 없는 문의입니다.");
+	    		} else if (result === "login") {
+	    			location.href = "/member/login"
+	    		}
+	    })
+	    .catch(error => {
+	    		alert("수정 요청 중 오류가 발생했습니다.");
+	    });
+	    }
+	</script>
+	
+	<script type="text/javascript">
+		function deleteInquiryFile(button) {
+		    const fileId = button.getAttribute("data-file-id");
+		    
+		    fetch("/service/inquiry/file/" + fileId + "/delete", {
+		    		method: "POST"
+		    })
+		    .then(response => response.text())
+		    .then(result => {
+		    		if(result === "login") {
+		    			location.href = "/member/login";
+		    		} else if (result === "fail") {
+		    			alert("첨부파일 삭제에 실패했습니다.");
+		    		} else if (result === "success") {
+		    			button.closest("div").remove();
+		    		}
+		    })
+		    .catch(error => {
+		  	  	console.error("첨부파일 삭제 오류:", error);
+		    })
+		}
+	</script>
+	
+	<script type="text/javascript">
+		function showSelectedFiles() {
+		    const files = document.getElementById("files").files;
+		    const fileList = document.getElementById("selectedFileList");
+		
+		    fileList.innerHTML = "";
+		
+		    for(let i = 0; i < files.length; i++) {
+		    	fileList.innerHTML += "<div class='site-inquiry-edit-file-item'>"
+		    	    + "<span class='site-inquiry-edit-file-name'>" + files[i].name + "</span>"
+		    	    + "<button type='button' class='site-inquiry-edit-file-remove' onclick='removeSelectedFile(" + i + ")'>삭제</button>"
+		    	    + "</div>";
+		    }
+		}
+	</script>
+	
+	<script type="text/javascript">
+		function removeSelectedFile(index) {
+		    const input = document.getElementById("files");
+		    const dt = new DataTransfer();
+		
+		    for(let i = 0; i < input.files.length; i++) {
+		        if(i !== index) {
+		            dt.items.add(input.files[i]);
+		        }
+		    }
+		
+		    input.files = dt.files;
+		    showSelectedFiles();
+		}
+	</script>
+	
+</th:block>
+
+
+
+</body>
+</html>

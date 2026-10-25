@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="content" class="notice-form-page">
+    <div class="panel-card">
+        <div class="panel-card-title">FAQ 수정</div>
+
+        <form th:action="@{/admin/faq/update}" method="post">
+       	    <input type="hidden" name="faqId" th:value="${faq.faqId}">
+            <div class="notice-field">
+			    <label>대분류</label>
+			    <select id="faqCategory" name="category" class="warm-select" onchange="changeFaqCategory()" required>
+			        <option value="">대분류 선택</option>
+			        <option value="워크스페이스 관리" th:selected="${faq.category == '워크스페이스 관리'}">워크스페이스 관리</option>
+					<option value="프로젝트 관리" th:selected="${faq.category == '프로젝트 관리'}">프로젝트 관리</option>
+			        <option value="업무 관리" th:selected="${faq.category == '업무 관리'}">업무 관리</option>
+			        <option value="일정 및 협업" th:selected="${faq.category == '일정 및 협업'}">일정 및 협업</option>
+			        <option value="고객 지원" th:selected="${faq.category == '고객 지원'}">고객 지원</option>
+			    </select>
+			</div>
+			
+			<div class="notice-field">
+			    <label>소분류</label>
+			    <select id="faqSubcategory" name="subcategory" class="warm-select" th:attr="data-selected=${faq.subcategory}" required>
+			        <option value="">대분류를 먼저 선택하세요</option>
+			    </select>
+			</div>
+            		
+            <div>
+                <label>질문</label>
+                <input type="text" name="question" class="warm-input" th:value="${faq.question}" placeholder="자주 묻는 질문을 입력하세요." maxlength="300" required>
+            </div>
+
+            <div class="notice-field">
+                <label>답변</label>
+                <textarea name="answer" class="warm-textarea" th:text="${faq.answer}" rows="8" placeholder="질문에 대한 답변을 입력하세요." required></textarea>
+            </div>
+
+            <div class="notice-form-actions">
+                <a th:href="@{/admin/faq}" class="notice-list-btn">취소</a>
+                <button type="submit" class="btn-sage">FAQ 수정</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block th:fragment="script">
+    <script>
+        function changeFaqCategory() {
+            const category = document.getElementById('faqCategory').value;
+            const subcategory = document.getElementById('faqSubcategory');
+
+            subcategory.innerHTML = '<option value="">소분류 선택</option>';
+
+            let items = [];
+
+            if (category === '워크스페이스 관리') {
+                items = ['워크스페이스 생성·참여', 'PM 변경·권한'];
+            } else if (category === '프로젝트 관리') {
+                items = ['프로젝트 생성·설정', '프로젝트 멤버 관리'];
+            } else if (category === '업무 관리') {
+                items = ['업무 등록·담당자', '진행 상태·우선순위'];
+            } else if (category === '일정 및 협업') {
+                items = ['캘린더·일정', '채팅·회의'];
+            } else if (category === '고객 지원') {
+                items = ['공지사항', '1:1 문의'];
+            }
+
+            items.forEach(function(item) {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                subcategory.appendChild(option);
+            });
+           
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            changeFaqCategory();
+
+            const subcategory = document.getElementById('faqSubcategory');
+            const selected = subcategory.dataset.selected;
+            subcategory.value = selected;
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

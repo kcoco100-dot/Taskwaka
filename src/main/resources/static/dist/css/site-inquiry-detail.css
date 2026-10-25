@@ -230,3 +230,184 @@
         flex-direction: column;
     }
 }
+
+
+/* 문의 제목 오른쪽 드롭다운 */
+.site-inquiry-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.site-inquiry-title-row h2 {
+    flex: 1;
+    min-width: 0;
+}
+
+.site-inquiry-dropdown {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.site-inquiry-dropdown summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #dce1e9;
+    border-radius: 7px;
+    background: #fff;
+    color: #4b5563;
+    font-size: 24px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.site-inquiry-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.site-inquiry-dropdown summary:hover {
+    background: #f2f4f8;
+}
+
+.site-inquiry-dropdown-menu {
+    position: absolute;
+    z-index: 10;
+    top: 43px;
+    right: 0;
+    width: 180px;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid #e5e8ee;
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(19, 32, 50, .12);
+}
+
+.site-inquiry-dropdown-menu a,
+.site-inquiry-dropdown-menu span {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 5px;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.site-inquiry-dropdown-menu a {
+    color: #253d6b;
+}
+
+.site-inquiry-dropdown-menu a:hover {
+    background: #f1f5fc;
+}
+
+.site-inquiry-menu-disabled {
+    color: #9aa1ad;
+    cursor: not-allowed;
+}
+
+.site-inquiry-attachments {
+    padding: 20px 32px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.site-inquiry-attachments h4 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.site-inquiry-attachment {
+    padding: 6px 0;
+    font-size: 13px;
+    color: #475569;
+}
+
+
+/* 회원 문의 상세 화면 */
+
+/* 문의 내용의 불필요한 큰 여백 제거 */
+.site-inquiry-detail-body {
+    min-height: 0;
+    height: auto;
+    padding: 24px 32px;
+}
+
+.site-inquiry-detail-content {
+    min-height: 0;
+    height: auto;
+    margin-top: 14px;
+    padding: 18px 20px;
+    background: #f8f9fc;
+    border: 1px solid #e5e8ee;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* 첨부파일 영역 */
+.site-inquiry-attachments {
+    padding: 22px 32px;
+    border-top: 1px solid #e5e8ee;
+}
+
+.site-inquiry-attachments h4 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.site-inquiry-attachment {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    margin-bottom: 8px;
+    border: 1px solid #e5e8ee;
+    border-radius: 8px;
+    background: #f8f9fc;
+    font-size: 13px;
+    color: #475569;
+}
+
+/* 문의 수정·삭제 드롭다운 */
+.site-inquiry-dropdown-menu {
+    padding: 6px;
+    border: 1px solid #e5e8ee;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+}
+
+.site-inquiry-dropdown-menu a,
+.site-inquiry-dropdown-menu button,
+.site-inquiry-dropdown-menu .site-inquiry-menu-disabled {
+    display: block;
+    width: 100%;
+    padding: 11px 12px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 400;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.site-inquiry-dropdown-menu a:hover,
+.site-inquiry-dropdown-menu button:hover {
+    background: #f1f5f9;
+    text-decoration: none;
+}
+
+.site-inquiry-dropdown-menu .site-inquiry-menu-disabled {
+    color: #9ca3af;
+    cursor: default;
+}

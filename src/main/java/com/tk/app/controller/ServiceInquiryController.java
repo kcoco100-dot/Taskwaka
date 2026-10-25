@@ -8,9 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tk.app.admin.domain.dto.SiteInquiryDto;
+import com.tk.app.admin.domain.dto.SiteInquiryFileDto;
 import com.tk.app.admin.service.SiteInquiryService;
 import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.security.LoginMemberUtil;
@@ -64,7 +68,8 @@ public class ServiceInquiryController {
 	}
 	
 	@PostMapping("inquiry/write")
-	public String inquiryWriteSubmit(SiteInquiryDto dto) {
+	public String inquiryWriteSubmit(SiteInquiryDto dto,
+			@RequestParam(name = "files", required = false) MultipartFile[] files) {
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
 			
@@ -73,13 +78,10 @@ public class ServiceInquiryController {
 			}
 			
 			Long member_id =  info.getMember_id();
+
 			dto.setMember_id(member_id);
 			
-			if(member_id == null) {
-				return "redirect:/member/login";
-			}
-			
-			siteInquiryService.insertInquiry(dto);
+			siteInquiryService.insertInquiry(dto, files);
 		} catch (Exception e) {
 			log.error("inquiryWriteSubmit : ", e);
 			throw e;
@@ -105,6 +107,9 @@ public class ServiceInquiryController {
 				return "redirect:/service/inquiry";
 			}
 			
+			List<SiteInquiryFileDto> fileList = siteInquiryService.selectInquiryFileList(inquiry_id);
+			
+			model.addAttribute("fileList", fileList);
 			model.addAttribute("inquiry", inquiry);
 			
 		} catch (Exception e) {
@@ -133,7 +138,9 @@ public class ServiceInquiryController {
 			if(!canEdit) {
 				return "redirect:/service/inquiry";
 			}
+			List<SiteInquiryFileDto> fileList = siteInquiryService.selectInquiryFileList(inquiry_id);
 			
+			model.addAttribute("fileList", fileList);
 			model.addAttribute("inquiry", inquiry);
 			
 		} catch (Exception e) {
@@ -143,4 +150,85 @@ public class ServiceInquiryController {
 		return "service/inquiry-edit";
 	}
 	
-}
+	@PostMapping("inquiry/{inquiry_id}/edit")
+	@ResponseBody
+	public String inquiryEditSubmit(@PathVariable("inquiry_id") long inquiry_id, SiteInquiryDto dto,
+			@RequestParam(name="files", required=false) MultipartFile[] files) {
+	    try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			
+			if(info == null) {
+				return "login";
+			}
+			
+			dto.setInquiry_id(inquiry_id);
+			dto.setMember_id(info.getMember_id());
+			
+			int result = siteInquiryService.updateInquiry(dto, files);
+			
+			if(result == 0) {
+				return "fail";
+			}
+			
+		} catch (Exception e) {
+			log.error("inquiryEdit : ", e);
+			throw e;
+		}
+		
+	    return "success";
+	}
+	
+	@PostMapping("inquiry/{inquiry_id}/delete")
+	@ResponseBody
+	public String deleteInquiry(@PathVariable ("inquiry_id") long inquiry_id) {
+		try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			
+			if(info == null) {
+				return "login";
+			}
+			
+			SiteInquiryDto dto = new SiteInquiryDto();
+			
+			dto.setInquiry_id(inquiry_id);
+			dto.setMember_id(info.getMember_id());
+			
+			int result = siteInquiryService.deleteInquiry(dto);
+			
+			if(result == 0) {
+				return "fail";
+			}
+		
+		} catch (Exception e) {
+			log.error("deleteInquiry : ", e);
+			throw e;
+		}
+		return "success";
+	}
+	
+	@PostMapping("inquiry/file/{inquiries_file_id}/delete")
+	@ResponseBody
+	public String deleteInquiryFile(@PathVariable ("inquiries_file_id") long inquiries_file_id) {
+		try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			
+			if(info == null) {
+				return "login";
+			}
+			
+			long member_id = info.getMember_id();
+			
+			boolean result = siteInquiryService.deleteInquiryFile(inquiries_file_id, member_id);
+			if(!result) {
+				return "fail";
+			}
+			
+		} catch (Exception e) {
+			log.error("deleteInquiryFile : ", e);
+			throw e;
+		}
+		return "success";
+	}
+		
+
+}	

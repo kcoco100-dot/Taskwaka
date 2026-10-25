@@ -26,29 +26,116 @@
 				</div>
 
 				<div class="notice-field">
-					<label>기존 첨부파일</label>
-
-					<div class="notice-edit-files" th:if="${fileList != null and !fileList.isEmpty()}">
-					    <div class="notice-edit-file" th:each="file : ${fileList}">
-					        <span th:text="${file.original_name}"></span>
-					        <label class="delete-file" th:data-fileNum="${file.notice_file_id}">🗑</label>
-					    </div>
-					</div>
-
-					<div th:if="${fileList == null or fileList.isEmpty()}">첨부된 파일이 없습니다.</div>
+				    <label>기존 첨부파일</label>
+				
+				    <div class="notice-edit-files" th:if="${fileList != null and !fileList.isEmpty()}">
+				        <div class="notice-edit-file" th:each="file : ${fileList}">
+				            <span class="notice-upload-name" th:text="${file.original_name}"></span>
+				            <button type="button" class="delete-file notice-upload-remove" th:attr="data-fileNum=${file.notice_file_id}">삭제</button>
+				        </div>
+				    </div>
+				
+				    <div class="notice-empty-files" th:if="${fileList == null or fileList.isEmpty()}">
+				        첨부된 파일이 없습니다.
+				    </div>
 				</div>
 
-				<div class="notice-field">
-				    <label>파일 추가</label> <input type="file" id="noticeNewFiles" name="files" multiple>
-				    <div id="noticeNewFileList"></div>
+				<div class="notice-field notice-upload">
+				    <label>파일 추가</label>
+				
+				    <div class="notice-upload-box">
+				        <div class="notice-upload-description">📎 추가할 파일을 선택해 주세요.</div>
+				        <input type="file" id="noticeNewFiles" name="files" multiple>
+				        <div id="noticeNewFileList" class="notice-upload-list"></div>
+				    </div>
 				</div>
 
-				<label> <input type="checkbox" name="hideNotice" value="true" th:checked="${detail.status == 0}"> 비공개 (체크하면 숨기기)
-				</label>
-
-				<button type="submit" class="btn-sage">수정하기</button>
+				<div class="notice-edit-bottom">
+				    <label class="notice-edit-status">
+				        <input type="checkbox" name="hideNotice" value="true" th:checked="${detail.status == 0}">
+				        비공개 (체크하면 숨기기)
+				    </label>
+				
+				    <div class="notice-form-actions">
+				        <a th:href="@{/admin/notice}" class="notice-list-btn">취소</a>
+				        <button type="submit" class="btn-sage">수정하기</button>
+				    </div>
+				</div>
 			</form>
 		</div>
 	</div>
+	
+<th:block th:fragment="script">
+    <script th:if="${activeSection == 'noticeEdit'}">
+	
+	    const originalContent = document.getElementById('originalContent').value;
+	
+	    quill.clipboard.dangerouslyPasteHTML(originalContent);
+	
+	    document.getElementById('noticeEditForm').addEventListener('submit', function() {
+	
+	            document.getElementById('content').value = quill.root.innerHTML;
+	        });
+	    
+	    document.querySelectorAll('.delete-file').forEach(function(button) {
+	        button.addEventListener('click', function() {
+	            const fileNum = this.getAttribute('data-fileNum');
+
+	
+	            fetch('/admin/notice/deleteFile', {
+	                method: 'POST',
+	                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	                body: 'notice_file_id=' + fileNum
+	            })
+	            .then(response => {
+	                if (!response.ok) {
+	                    throw new Error('파일 삭제 실패');
+	                }
+	                this.closest('.notice-edit-file').remove();
+	            })
+	            .catch(error => {
+	                console.error(error);
+	                alert('파일 삭제 중 오류가 발생했습니다.');
+	            });
+	        });
+	    });
+	    
+	    const noticeNewFiles = document.getElementById('noticeNewFiles');
+	    const noticeNewFileList = document.getElementById('noticeNewFileList');
+	
+	    noticeNewFiles.addEventListener('change', function() {
+	        noticeNewFileList.innerHTML = '';
+	
+	        const selectedFiles = Array.from(this.files);
+	        
+	        selectedFiles.forEach(function(file, index) {
+	        	noticeNewFileList.innerHTML += '<div>' + file.name + ' <button type="button" class="notice-new-delete" data-index="' + index + '">삭제</button></div>';
+	        });
+	        
+	        document.querySelectorAll('.notice-new-delete').forEach(function(button) {
+	            button.addEventListener('click', function() {
+	                const index = Number(this.getAttribute('data-index'));
+	                
+	                selectedFiles.splice(index, 1);
+	
+	                document.querySelectorAll('.notice-new-delete').forEach(function(button, i) {
+	                    button.setAttribute('data-index', i);
+	                });
+	
+	                const dataTransfer = new DataTransfer();
+	                
+	                this.parentElement.remove();
+	
+	                selectedFiles.forEach(function(file) {
+	                    dataTransfer.items.add(file);
+	                });
+	
+	                noticeNewFiles.files = dataTransfer.files;
+	            });
+	        });
+	    });
+	</script>
+</th:block>	
+	
 </body>
 </html>

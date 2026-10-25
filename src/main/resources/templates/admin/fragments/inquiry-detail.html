@@ -2,45 +2,89 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
     <div th:fragment="content">
-        <div class="panel-card">
+	    <div class="panel-card inquiry-detail">
+	
+	        <div class="panel-card-title">
+	            <span>1:1 고객 문의 상세 및 답변 관리</span>
+	            <div class="inquiry-top-buttons">
+	                <input type="hidden" id="delete_inquiry_id" th:value="${inquiryDetail.inquiry_id}">
+	                <button type="button" class="btn-subtle" onclick="deleteAdminInquiry()">문의 삭제</button>
+	                <a th:href="@{/admin/inquiry}" class="btn-subtle">목록으로</a>
+	            </div>
+	        </div>
+	
+	        <!-- 문의 정보 -->
+	        <div class="inquiry-detail-header">
+	            <h3 th:text="${inquiryDetail.title}">문의 제목</h3>
+	            <div class="inquiry-detail-meta">
+	                <span>문의번호 <b th:text="${inquiryDetail.inquiry_id}">1</b></span>
+	                <span>작성자 번호 <b th:text="${inquiryDetail.member_id}">7</b></span>
+	                <span>작성일 <b th:text="${#dates.format(inquiryDetail.created, 'yyyy-MM-dd HH:mm')}"></b></span>
+	            </div>
+	        </div>
+	
+	        <!-- 문의 내용 -->
+	        <div class="inquiry-detail-section">
+	            <h4>문의 내용</h4>
+	            <div class="inquiry-detail-content" th:text="${inquiryDetail.content}">문의 내용</div>
+	        </div>
+	
+	        <!-- 첨부파일 -->
+	        <div class="inquiry-detail-section" th:if="${fileList != null and !fileList.isEmpty()}">
+	            <div class="inquiry-file-heading">
+	                <h4>첨부파일</h4>
+	                <a class="inquiry-zip-link" th:href="@{/admin/inquiry/{id}/download-zip(id=${inquiryDetail.inquiry_id})}">전체 다운로드 (ZIP)</a>
+	            </div>
+	
+	            <div class="inquiry-file-item" th:each="file : ${fileList}">
+	                <span class="inquiry-file-icon">📎</span>
+	                <a th:href="@{/admin/inquiry/file/{id}/download(id=${file.inquiries_file_id})}" th:text="${file.original_name}">첨부파일</a>
+	            </div>
+	        </div>
+	
+	        <!-- 관리자 답변 -->
+	        <div class="inquiry-detail-section inquiry-answer-section">
+	            <h4>관리자 답변</h4>
+	
+	            <form th:action="@{/admin/inquiry/answer}" method="post">
+	                <input type="hidden" name="inquiry_id" th:value="${inquiryDetail.inquiry_id}">
+	                <textarea name="answer_content" class="warm-input inquiry-answer-input" rows="6" th:text="${inquiryDetail.answer_content}" placeholder="답변 내용을 입력하세요."></textarea>
+	
+	                <div class="inquiry-answer-buttons">
+	                    <button type="submit" class="btn-sage" th:text="${inquiryDetail.status == 1 ? '답변 수정' : '답변 등록'}">답변 등록</button>
+	                </div>
+	            </form>
+	        </div>
+	
+	    </div>
+	</div>
+    
 
-            <div class="panel-card-title">
-                <span>1:1 고객 문의 상세 및 답변 관리</span>
-                <a th:href="@{/admin/inquiry}" class="btn-subtle">목록으로</a>
-            </div>
+	<script th:fragment="script" type="text/javascript">
+		function deleteAdminInquiry() {
+			const inquiry_id = document.getElementById("delete_inquiry_id").value;
 
-            <div style="padding:20px 0;">
-                <h3 th:text="${inquiryDetail.title}">문의 제목</h3>
+			if(!confirm("정말 삭제하시겠습니까?")) {
+				return;
+			}
+			
+			fetch("/admin/inquiry/" + inquiry_id + "/delete", {
+				method: "POST"
+			})
+			.then(response => response.text())
+			.then(result => {
+				if(result === "success") {
+					location.href = "/admin/inquiry";
+				} else if(result === "fail") {
+					alert("삭제 할 수 없습니다.");
+				}
+			})
+			.catch(error => {
+				alert("삭제 요청 중 오류가 발생했습니다.");
+			});
+		}
+	</script>   
 
-                <p style="color:var(--text-sub); font-size:13px;">
-                    문의번호: <span th:text="${inquiryDetail.inquiry_id}">1</span>
-                    |
-                    작성자 번호: <span th:text="${inquiryDetail.member_id}">7</span>
-                    |
-                    작성일: <span th:text="${#dates.format(inquiryDetail.created, 'yyyy-MM-dd HH:mm')}"></span>
-                </p>
 
-                <hr>
-
-                <h4>문의 내용</h4>
-                <div style="min-height:150px; white-space:pre-wrap;" th:text="${inquiryDetail.content}">문의 내용</div>
-            </div>
-
-            <div style="border-top:1px solid #eee; padding-top:20px;">
-                <h4>관리자 답변</h4>
-
-                <form th:action="@{/admin/inquiry/answer}" method="post">
-                    <input type="hidden" name="inquiry_id" th:value="${inquiryDetail.inquiry_id}">
-
-                    <textarea name="answer_content" class="warm-input" rows="6" style="width:100%; resize:vertical;" th:text="${inquiryDetail.answer_content}" placeholder="답변 내용을 입력하세요."></textarea>
-
-                    <div style="text-align:right; margin-top:15px;">
-                        <button type="submit" class="btn-sage" th:text="${inquiryDetail.status == 1 ? '답변 수정' : '답변 등록'}">답변 등록</button>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-    </div>
 </body>
 </html>

@@ -6,57 +6,70 @@
         <div class="panel-card">
             <div class="panel-card-title">
                 <span>1:1 고객 문의 접수 및 답변 관리</span>
-                <select class="warm-select">
-                    <option>전체 상태</option>
-                    <option>답변 대기</option>
-                    <option>답변 완료</option>
-                </select>
+                <select class="warm-select" onchange="filterInquiry(this.value)">
+				    <option value="all">전체 상태</option>
+				    <option value="0">답변 대기</option>
+				    <option value="1">답변 완료</option>
+				</select>
             </div>
 
-            <table class="warm-table">
-                <thead>
-                    <tr>
-                        <th>문의 제목</th>
-                        <th style="width:100px;">작성자</th>
-                        <th style="width:110px;">등록일</th>
-                        <th style="width:100px;">처리 상태</th>
-                        <th style="width:110px;">답변일</th>
-                        <th style="width:120px; text-align:right;">관리</th>
-                    </tr>
-                </thead>
+            
+			<table class="warm-table inquiry-table">
+			    <thead>
+			        <tr>
+			            <th>문의 제목</th>
+			            <th style="width:100px;">작성자</th>
+			            <th style="width:130px;">등록일</th>
+			            <th style="width:110px;">처리 상태</th>
+			            <th style="width:130px;">답변일</th>
+			        </tr>
+			    </thead>
+			
+			    <tbody>
+			        <tr th:each="inquiry : ${inquiryList}" th:attr="data-status=${inquiry.status}">
+			            <td class="inquiry-title">
+			                <a th:href="@{/admin/inquiry/{id}(id=${inquiry.inquiry_id})}" th:text="${inquiry.title}">문의 제목</a>
+			            </td>
+			
+			            <td th:text="${inquiry.member_id}">회원번호</td>
+			
+			            <td th:text="${#dates.format(inquiry.created, 'yyyy-MM-dd')}">등록일</td>
+			
+			            <td>
+			                <span th:if="${inquiry.status == 0}" class="badge badge-inactive" style="background:#FEF3C7; color:#92400E;">답변 대기</span>
+			                <span th:if="${inquiry.status == 1}" class="badge badge-active">답변 완료</span>
+			            </td>
+			
+			            <td>
+			                <span th:if="${inquiry.answered != null}" th:text="${#dates.format(inquiry.answered, 'yyyy-MM-dd')}">답변일</span>
+			                <span th:if="${inquiry.answered == null}">-</span>
+			            </td>
+			        </tr>
+			
+			        <tr th:if="${inquiryList == null or #lists.isEmpty(inquiryList)}">
+			            <td colspan="5" style="text-align:center; padding:40px;">등록된 문의가 없습니다.</td>
+			        </tr>
+			    </tbody>
+			</table>
 
-                <tbody>
-                    <tr th:each="inquiry : ${inquiryList}">
-                        <td>
-                            <a th:href="@{/admin/inquiry/{id}(id=${inquiry.inquiry_id})}" th:text="${inquiry.title}">문의 제목</a>
-                        </td>
-
-                        <td th:text="${inquiry.member_id}">회원번호</td>
-
-                        <td th:text="${#dates.format(inquiry.created, 'yyyy-MM-dd')}">등록일</td>
-
-                        <td>
-                            <span th:if="${inquiry.status == 0}" class="badge badge-inactive" style="background:#FEF3C7; color:#92400E;">답변 대기</span>
-                            <span th:if="${inquiry.status == 1}" class="badge badge-active">답변 완료</span>
-                        </td>
-
-                        <td>
-                            <span th:if="${inquiry.answered != null}" th:text="${#dates.format(inquiry.answered, 'yyyy-MM-dd')}">답변일</span>
-                            <span th:if="${inquiry.answered == null}">-</span>
-                        </td>
-
-                        <td style="text-align:right;">
-                            <span th:if="${inquiry.status == 0}">답변 대기</span>
-                            <span th:if="${inquiry.status == 1}">답변 완료</span>
-                        </td>
-                    </tr>
-
-                    <tr th:if="${inquiryList == null or #lists.isEmpty(inquiryList)}">
-                        <td colspan="6" style="text-align:center; padding:40px;">등록된 문의가 없습니다.</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
+    
+<th:block th:fragment="script">
+	<script>
+	    function filterInquiry(status) {
+	        const rows = document.querySelectorAll(".inquiry-table tbody tr[data-status]");
+	
+	        rows.forEach(row => {
+	            if(status === "all" || row.getAttribute("data-status") === status) {
+	                row.style.display = "";
+	            } else {
+	                row.style.display = "none";
+	            }
+	        });
+	    }
+	</script>
+</th:block>	
+
 </body>
 </html>

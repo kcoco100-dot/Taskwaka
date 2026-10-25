@@ -6,12 +6,115 @@
 	<small class="footer-brand">TASKWAKA</small>
 
 	<nav class="footer-menu" aria-label="서비스 안내">
-		<a th:href="@{/main}">이용 가이드</a>
+		<button type="button" class="footer-modal-link" onclick="document.getElementById('guideModal').showModal()">이용가이드</button>
 		<a th:href="@{/service/notice}">공지사항</a>
-		<a th:href="@{/service/inquiry}">1:1 문의</a>
-		<a th:href="@{/main}">개인정보처리방침</a>
-		<a th:href="@{/main}">이용약관</a>
+		<a th:href="@{/service/inquiry}">나의 1:1 문의</a>
+		<button type="button" class="footer-modal-link" onclick="document.getElementById('privacyModal').showModal()">개인정보처리방침</button>
+		<button type="button" class="footer-modal-link" onclick="document.getElementById('termsModal').showModal()">이용약관</button>
 	</nav>
+	
+	<dialog id="guideModal" class="task-modal">
+	    <div class="task-modal-header">
+	        <h2>Taskwaka 이용 가이드</h2>
+	        <form method="dialog">
+	            <button type="submit" class="task-modal-close">×</button>
+	        </form>
+	    </div>
+	
+	    <div class="task-modal-body">
+	        <p>Taskwaka는 팀의 프로젝트와 업무를 효율적으로 관리하기 위한 협업 서비스입니다.</p>
+	
+	        <h3>01. 프로젝트 관리</h3>
+	        <p>프로젝트를 생성하고 팀원들과 업무를 공유할 수 있습니다.</p>
+	
+	        <h3>02. 업무 및 일정 관리</h3>
+	        <p>담당 업무와 진행 상태를 확인하고 일정을 관리할 수 있습니다.</p>
+	
+	        <h3>03. 팀 협업</h3>
+	        <p>팀원들과 프로젝트 진행 상황을 공유하고 협업할 수 있습니다.</p>
+	
+	        <h3>04. 고객 지원</h3>
+	        <p>서비스 이용 중 궁금한 사항은 공지사항과 1:1 문의를 통해 확인할 수 있습니다.</p>
+	    </div>
+	
+	    <form method="dialog" class="task-modal-footer">
+	        <button type="submit" class="task-modal-confirm">확인</button>
+	    </form>
+	</dialog>
+	
+	<dialog id="termsModal" class="task-modal">
+    <div class="task-modal-header">
+        <h2>Taskwaka 이용약관</h2>
+        <form method="dialog">
+            <button type="submit" class="task-modal-close">×</button>
+	        </form>
+	    </div>
+	
+	    <div class="task-modal-body">
+	        <p>본 약관은 Taskwaka 서비스의 이용 조건과 이용자의 권리 및 의무에 관한 기본 사항을 안내합니다.</p>
+	
+	        <h3>제1조 (목적)</h3>
+	        <p>본 약관은 Taskwaka가 제공하는 프로젝트 및 업무 협업 서비스의 이용과 관련한 기본적인 사항을 규정하는 것을 목적으로 합니다.</p>
+	
+	        <h3>제2조 (서비스 제공)</h3>
+	        <p>Taskwaka는 프로젝트 관리, 업무 및 일정 관리, 팀 협업, 공지사항 및 고객 문의 등의 기능을 제공합니다.</p>
+	
+	        <h3>제3조 (회원의 의무)</h3>
+	        <p>회원은 계정 정보를 안전하게 관리해야 하며, 다른 이용자의 권리를 침해하거나 서비스 운영을 방해해서는 안 됩니다.</p>
+	
+	        <h3>제4조 (서비스 이용 제한)</h3>
+	        <p>서비스의 정상적인 운영을 방해하거나 부정한 방법으로 서비스를 이용하는 경우 이용이 제한될 수 있습니다.</p>
+	
+	        <h3>제5조 (서비스 변경)</h3>
+	        <p>서비스의 기능이나 운영 정책은 필요에 따라 변경될 수 있으며, 중요한 변경 사항은 공지사항 등을 통해 안내합니다.</p>
+	
+	        <h3>제6조 (문의 및 지원)</h3>
+	        <p>서비스 이용과 관련된 문의는 1:1 문의 기능을 통해 접수할 수 있습니다.</p>
+	    </div>
+	
+	    <form method="dialog" class="task-modal-footer">
+	        <button type="submit" class="task-modal-confirm">확인</button>
+	    </form>
+	</dialog>
+	
+	<dialog id="privacyModal" class="task-modal">
+	    <div class="task-modal-header">
+	        <h2>Taskwaka 개인정보처리방침</h2>
+	        <form method="dialog">
+	            <button type="submit" class="task-modal-close">×</button>
+	        </form>
+	    </div>
+	
+	    <div class="task-modal-body">
+	        <p>Taskwaka는 이용자의 개인정보 보호를 중요하게 생각하며, 개인정보를 안전하게 처리하기 위해 노력합니다.</p>
+	
+	        <h3>01. 개인정보 처리 목적</h3>
+	        <p>회원 가입 및 로그인, 회원 관리, 프로젝트 협업 서비스 제공, 고객 문의 처리 등을 위해 필요한 개인정보를 처리합니다.</p>
+	
+	        <h3>02. 개인정보 처리 항목</h3>
+	        <p>회원 식별을 위한 계정 정보와 서비스 이용 과정에서 생성되는 프로젝트, 업무 및 문의 관련 정보를 처리할 수 있습니다.</p>
+	
+	        <h3>03. 개인정보 보유 및 이용 기간</h3>
+	        <p>개인정보는 서비스 제공에 필요한 기간 동안 보유하며, 처리 목적이 달성되거나 보유 기간이 종료되면 관련 법령에 따라 처리합니다.</p>
+	
+	        <h3>04. 개인정보의 제3자 제공</h3>
+	        <p>이용자의 개인정보는 법령에 따른 경우 등 정당한 근거가 있는 경우를 제외하고 임의로 제3자에게 제공하지 않습니다.</p>
+	
+	        <h3>05. 개인정보 보호 조치</h3>
+	        <p>개인정보의 무단 접근과 유출을 방지하기 위해 접근 권한 관리 등 필요한 보호 조치를 적용합니다.</p>
+	
+	        <h3>06. 이용자의 권리</h3>
+	        <p>이용자는 관계 법령에 따라 자신의 개인정보에 대한 열람, 정정, 삭제 및 처리 정지를 요청할 수 있습니다.</p>
+	
+	        <h3>07. 개인정보 관련 문의</h3>
+	        <p>개인정보 처리에 관한 문의는 서비스의 고객 지원 기능을 통해 전달할 수 있습니다.</p>
+	    </div>
+	
+	    <form method="dialog" class="task-modal-footer">
+	        <button type="submit" class="task-modal-confirm">확인</button>
+	    </form>
+	</dialog>
+	
 </div>
 
 </html>

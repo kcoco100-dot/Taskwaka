@@ -67,11 +67,14 @@
 				</div>
 				<ul class="submenu">
 					<li><a th:href="@{/admin/notice}"
-						th:classappend="${activeSection == 'notice'} ? 'active'">📣 전체
-							공지사항 관리</a></li>
+						th:classappend="${activeSection == 'notice'} ? 'active'">📣 전체 공지사항 관리</a>
+					</li>
 					<li><a th:href="@{/admin/inquiry}"
-						th:classappend="${activeSection == 'inquiry'} ? 'active'">💬
-							1:1 고객 문의 관리</a></li>
+						th:classappend="${activeSection == 'inquiry'} ? 'active'">💬 1:1 고객 문의 관리</a>
+					</li>
+					<li>
+					    <a th:href="@{/admin/faq}" th:classappend="${activeSection == 'faq'} ? 'active'">🤖 FAQ 관리</a>
+					</li>		
 				</ul>
 			</div>
 
@@ -98,6 +101,7 @@
 					<a th:href="@{/admin/domain}" class="tab-btn" th:classappend="${activeSection == 'domain'} ? 'active'">도메인 관리</a> 
 					<a th:href="@{/admin/notice}" class="tab-btn" th:classappend="${activeSection == 'notice'} ? 'active'">전체 공지사항</a>
 					<a th:href="@{/admin/inquiry}" class="tab-btn" th:classappend="${activeSection == 'inquiry'} ? 'active'">1:1 문의 답변</a> 
+					<a th:href="@{/admin/faq}" class="tab-btn" th:classappend="${activeSection == 'faq' or activeSection == 'faqWrite'} ? 'active'">FAQ 관리</a>
 					<a th:href="@{/admin/stats}" class="tab-btn" th:classappend="${activeSection == 'stats'} ? 'active'">통계 관리</a>
 					<a th:href="@{/admin/security}" class="tab-btn" th:classappend="${activeSection == 'security'} ? 'active'">보안 및 공개설정</a>
 				</nav>
@@ -132,6 +136,15 @@
 					<div th:case="'inquiryDetail'">
 						<div th:replace="~{admin/fragments/inquiry-detail :: content}"></div>
 					</div>
+					<div th:case="'faq'">
+						<div th:replace="~{admin/fragments/faq :: content}"></div>
+					</div>
+					<div th:case="'faqWrite'">
+					    <div th:replace="~{admin/fragments/faq-write :: content}"></div>
+					</div>
+					<div th:case="'faqEdit'">
+						<div th:replace="~{admin/fragments/faq-edit :: content}"></div>
+					</div>
 					<div th:case="'stats'">
 						<div th:replace="~{admin/fragments/stats :: content}"></div>
 					</div>
@@ -164,301 +177,19 @@
 	<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
 
-	<script th:if="${activeSection == 'domain'}">
-    const { createApp } = Vue;
-
-    createApp({
-    	data: function() {
-    	    return {
-    	        workspaces: [],
-    	        pmChanges: [],
-    	        workspacePage: 1,
-    	        workspacePageSize: 5,
-    	        pmPage: 1,
-    	        pmPageSize: 5,
-    	        keyword: '',
-    	        status: '',
-    	        selectedWorkspace: null,
-    	        stopReason: ''
-    	    };
-    	},
-    	
-    	computed: {
-    	    filteredWorkspaces: function() {
-    	        return this.workspaces.filter(workspace => {
-    	        	const keywordMatch =
-    	        	    (workspace.subject || '').toLowerCase().includes(this.keyword.toLowerCase())
-    	        	    || (workspace.domain_key || '').toLowerCase().includes(this.keyword.toLowerCase())
-    	        	    || (workspace.pm_name || '').toLowerCase().includes(this.keyword.toLowerCase());
-
-    	            const statusMatch =
-    	                this.status === '' || workspace.active === this.status;
-
-    	            return keywordMatch && statusMatch;
-    	        });
-    	    },
-    	    pagedWorkspaces: function() {
-    	        const start = (this.workspacePage - 1) * this.workspacePageSize;
-
-    	        return this.filteredWorkspaces.slice(
-    	            start,
-    	            start + this.workspacePageSize
-    	        );
-    	    },
-
-    	    workspaceTotalPages: function() {
-    	        return Math.ceil(
-    	            this.filteredWorkspaces.length / this.workspacePageSize
-    	        );
-    	    },
-    	    pagedPmChanges: function() {
-    	        const start = (this.pmPage - 1) * this.pmPageSize;
-
-    	        return this.pmChanges.slice(
-    	            start,
-    	            start + this.pmPageSize
-    	        );
-    	    },
-
-    	    pmTotalPages: function() {
-    	        return Math.ceil(
-    	            this.pmChanges.length / this.pmPageSize
-    	        );
-    	    }
-    	},
-    	
-    	watch: {
-    	    keyword: function() {
-    	        this.workspacePage = 1;
-    	    },
-
-    	    status: function() {
-    	        this.workspacePage = 1;
-    	    }
-    	},
-    	
-    	methods: {
-    	    showDetail: function(workspace) {
-    	        this.selectedWorkspace = workspace;
-    	    },
-
-    	    closeDetail: function() {
-    	        this.selectedWorkspace = null;
-    	    },
-    	    
-    	    changeWorkspaceStatus: function(active) {
-
-    	        if (active === 'N' && !this.stopReason.trim()) {
-    	            alert('정지 사유를 입력해주세요.');
-    	            return;
-    	        }
-
-    	        if (!confirm(active === 'N'
-    	                ? '이 워크를 정지하시겠습니까?'
-    	                : '이 워크의 정지를 해제하시겠습니까?')) {
-    	            return;
-    	        }
-
-    	        const dto = {
-    	            workspace_id: this.selectedWorkspace.workspace_id,
-    	            active: active,
-    	            reason: active === 'N' ? this.stopReason.trim() : null
-    	        };
-
-    	        fetch('/admin/api/workspaces/status', {
-    	            method: 'POST',
-    	            headers: {
-    	                'Content-Type': 'application/json'
-    	            },
-    	            body: JSON.stringify(dto)
-    	        })
-    	        .then(response => {
-    	            if (!response.ok) {
-    	                throw new Error('워크 상태 변경 실패');
-    	            }
-    	            return response.text();
-    	        })
-    	        .then(data => {
-    	            alert(data);
-    	            location.reload();
-    	        })
-    	        .catch(error => {
-    	            console.error(error);
-    	            alert('워크 상태 변경 중 오류가 발생했습니다.');
-    	        });
-    	    },
-    	    
-
-    	    processPmChange: function(pm, status) {
-
-    	        let rejectReason = null;
-
-    	        if (status === 2) {
-    	            rejectReason = prompt('거절 사유를 입력하세요.');
-
-    	            if (rejectReason === null) {
-    	                return;
-    	            }
-
-    	            if (!rejectReason.trim()) {
-    	                alert('거절 사유를 입력해주세요.');
-    	                return;
-    	            }
-    	        }
-
-    	        if (!confirm(status === 1 ? '사장 변경 요청을 승인하시겠습니까?' : '사장 변경 요청을 거절하시겠습니까?')) {
-    	            return;
-    	        }
-
-    	        const dto = {
-    	            pm_change_id: pm.pm_change_id,
-    	            status: status,
-    	            reject_reason: rejectReason
-    	        };
-
-    	        fetch('/admin/api/pm-changes/process', {
-    	            method: 'POST',
-    	            headers: {
-    	                'Content-Type': 'application/json'
-    	            },
-    	            body: JSON.stringify(dto)
-    	        })
-    	        .then(async response => {
-			    const message = await response.text();
-			
-			    if (!response.ok) {
-			        throw new Error(message);
-			    }
-			    return message;
-			})
-    	        .then(data => {
-    	            alert(data);
-    	            location.reload();
-    	        })
-    	        .catch(error => {
-    	            console.error(error);
-    	            alert(error.message);
-    	        });
-    	    }
-
-    	},
-
-        mounted: function() {
-            fetch('/admin/api/workspaces')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('워크 목록 조회 실패');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.workspaces = data;
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-
-            fetch('/admin/api/pm-changes')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('사장 변경 요청을 불러오지 못했습니다.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.pmChanges = data;
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-
-        }
-    }).mount('#workspace-app');
-</script>
+	
 
 <!-- Quill editor -->
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/quill.js}"></script>
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/resize.js}"></script>
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/posts/qeditor.js}"></script>
-<script th:if="${activeSection == 'noticeWrite'}">
-	document.getElementById('noticeWriteForm')
-		.addEventListener('submit', function() {
-			
-			document.getElementById('content').value = document.querySelector('#editor .ql-editor').innerHTML;
-		});
-</script>
 
-	<script th:if="${activeSection == 'noticeEdit'}">
-
-    const originalContent = document.getElementById('originalContent').value;
-
-    quill.clipboard.dangerouslyPasteHTML(originalContent);
-
-    document.getElementById('noticeEditForm').addEventListener('submit', function() {
-
-            document.getElementById('content').value = quill.root.innerHTML;
-        });
-    
-    document.querySelectorAll('.delete-file').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const fileNum = this.getAttribute('data-fileNum');
-            if (!confirm('첨부파일을 삭제하시겠습니까?')) {
-                return;
-            }
-
-            fetch('/admin/notice/deleteFile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'notice_file_id=' + fileNum
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('파일 삭제 실패');
-                }
-                this.closest('.notice-edit-file').remove();
-            })
-            .catch(error => {
-                console.error(error);
-                alert('파일 삭제 중 오류가 발생했습니다.');
-            });
-        });
-    });
-    
-    const noticeNewFiles = document.getElementById('noticeNewFiles');
-    const noticeNewFileList = document.getElementById('noticeNewFileList');
-
-    noticeNewFiles.addEventListener('change', function() {
-        noticeNewFileList.innerHTML = '';
-
-        const selectedFiles = Array.from(this.files);
-        
-        selectedFiles.forEach(function(file, index) {
-        	noticeNewFileList.innerHTML += '<div>' + file.name + ' <button type="button" class="notice-new-delete" data-index="' + index + '">삭제</button></div>';
-        });
-        
-        document.querySelectorAll('.notice-new-delete').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const index = Number(this.getAttribute('data-index'));
-                
-                selectedFiles.splice(index, 1);
-
-                document.querySelectorAll('.notice-new-delete').forEach(function(button, i) {
-                    button.setAttribute('data-index', i);
-                });
-
-                const dataTransfer = new DataTransfer();
-                
-                this.parentElement.remove();
-
-                selectedFiles.forEach(function(file) {
-                    dataTransfer.items.add(file);
-                });
-
-                noticeNewFiles.files = dataTransfer.files;
-            });
-        });
-    });
-</script>
-
+<th:block th:if="${activeSection == 'noticeWrite'}" th:replace="~{admin/fragments/notice-write :: script}"></th:block>
+<th:block th:if="${activeSection == 'noticeEdit'}" th:replace="~{admin/fragments/notice-edit :: script}"></th:block>	
+<th:block th:if="${activeSection == 'domain'}" th:replace="~{admin/fragments/domain :: script}"></th:block>
+<script th:if="${activeSection == 'inquiryDetail'}" th:replace="~{admin/fragments/inquiry-detail :: script}"></script>
+<th:block th:if="${activeSection == 'inquiry'}" th:replace="~{admin/fragments/inquiry :: script}"></th:block>
+<th:block th:if="${activeSection == 'faqWrite'}" th:replace="~{admin/fragments/faq-write :: script}"></th:block>
+<th:block th:if="${activeSection == 'faqEdit'}" th:replace="~{admin/fragments/faq-edit :: script}"></th:block>
 </body>
 </html>

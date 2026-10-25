@@ -23,36 +23,36 @@
 					th:text="${detail.status == 1 ? '공개' : '비공개'}"> </span>
 			</div>
 			<div class="ql-editor notice-body" th:utext="${detail.content}"></div>
+			
 			<div class="notice-files" th:if="${fileList != null and !fileList.isEmpty()}">
-
-				<strong>첨부파일</strong>
-				<a th:href="@{/admin/notice/{notice_id}/downloadAll(notice_id=${detail.notice_id})}">전체 다운로드</a>
-
-				<div class="notice-file-item" th:each="file : ${fileList}">
-					<a class="notice-file-link"
-						th:href="@{/admin/notice/file/{notice_file_id}/download(notice_file_id=${file.notice_file_id})}"
-						th:title="${file.original_name}"> <span
-						class="notice-file-icon">📎</span> <span class="notice-file-name"
-						th:text="${file.original_name}"></span> <span
-						class="notice-download-icon">↓</span>
-					</a>
+			    <div class="notice-files-header">
+			        <strong>📎 첨부파일 <span th:text="${fileList.size()}"></span>개</strong>
+			
+			        <a class="notice-download-all" th:href="@{/admin/notice/{notice_id}/downloadAll(notice_id=${detail.notice_id})}">
+			            전체 다운로드 ↓
+			        </a>
+			    </div>
+			
+			    <div class="notice-file-item" th:each="file : ${fileList}">
+				    <span class="notice-file-icon">📄</span>
+				    <a class="notice-file-link"
+				       th:href="@{/admin/notice/file/{notice_file_id}/download(notice_file_id=${file.notice_file_id})}"
+				       th:text="${file.original_name}"></a>
 				</div>
+			
 			</div>
-
+			
 			<div class="notice-actions">
-				<a th:href="@{/admin/notice}" class="notice-list-btn"> 목록으로 </a>
-
-				<div class="notice-action-right">
-					<a th:href="@{/admin/notice/{id}/edit(id=${detail.notice_id})}"
-						class="btn-sage"> 수정하기 </a>
-
-					<form th:action="@{/admin/notice/delete}" method="post">
-						<input type="hidden" name="notice_id"
-							th:value="${detail.notice_id}">
-						<button type="submit" class="notice-delete-btn"
-							onclick="return confirm('정말 삭제하시겠습니까?');">삭제하기</button>
-					</form>
-				</div>
+			    <a th:href="@{/admin/notice}" class="notice-list-btn">목록으로</a>
+			
+			    <div class="notice-action-right">
+			        <a th:href="@{/admin/notice/{id}/edit(id=${detail.notice_id})}" class="btn-sage">수정하기</a>
+			
+			        <form th:action="@{/admin/notice/delete}" method="post">
+			            <input type="hidden" name="notice_id" th:value="${detail.notice_id}">
+			            <button type="submit" class="notice-delete-btn" onclick="return confirm('정말 삭제하시겠습니까?');">삭제하기</button>
+			        </form>
+			    </div>
 			</div>
 
 		</div>

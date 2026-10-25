@@ -3,8 +3,11 @@ package com.tk.app.admin.controller;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +38,9 @@ public class SiteNoticeController {
 	private final SiteNoticeService siteNoticeService;
 	private final PaginateUtil paginateUtil;
 	private final StorageService storageService;
+	
+	@Value("${user.home}/taskwaka/uploads/admin/notice")
+	private String uploadPath;
 
 	@GetMapping("/notice")
 	public String noticeList(Model model,
@@ -168,21 +174,19 @@ public class SiteNoticeController {
 			}
 			
 			if(files != null) {
-				String directoryPath = Paths.get(
-				        System.getProperty("user.home"),
-				        "taskwaka", "uploads", "admin", "notice").toString();
+
 				for(MultipartFile file : files) {
 					if(file.isEmpty()) {
 						continue;
 					}
-					String storName = storageService.uploadFileToServer(file, directoryPath);
+					String storName = storageService.uploadFileToServer(file, uploadPath);
 					
 					SiteNoticeFileDto fileDto = new SiteNoticeFileDto();
 					
 					fileDto.setNotice_id(dto.getNotice_id());
 					fileDto.setOriginal_name(file.getOriginalFilename());
 					fileDto.setStored_name(storName);
-					fileDto.setFile_path(directoryPath);
+					fileDto.setFile_path(uploadPath);
 					fileDto.setFile_size(file.getSize());
 					
 					siteNoticeService.insertNoticeFile(fileDto);
@@ -279,12 +283,26 @@ public class SiteNoticeController {
 			}
 			String[] sources = new String[fileList.size()];
 			String[] originals = new String[fileList.size()];
+			Set<String> usedNames = new HashSet<>();
 			
 			for(int i = 0; i < fileList.size(); i++) {
 				SiteNoticeFileDto fileDto = fileList.get(i);
 				
 				sources[i] = Paths.get(fileDto.getFile_path(), fileDto.getStored_name()).toString();
-				originals[i] = fileDto.getOriginal_name();
+				String originalName = fileDto.getOriginal_name();
+				String filename = originalName;
+				int dot = originalName.lastIndexOf(".");
+				String name = dot > 0 ? originalName.substring(0, dot) : originalName;
+				String ext = dot > 0 ? originalName.substring(dot) : "";
+				int number = 2;
+
+				while (usedNames.contains(filename)) {
+				    filename = name + " (" + number + ")" + ext;
+				    number++;
+				}
+
+				usedNames.add(filename);
+				originals[i] = filename;
 			}
 			return storageService.downloadZipFile(sources, originals, "notice_" + notice_id + ".zip");
 		} catch (Exception e) {

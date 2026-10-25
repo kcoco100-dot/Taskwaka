@@ -211,3 +211,194 @@
         justify-content: stretch;
     }
 }
+
+.site-inquiry-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-inquiry-actions .site-inquiry-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    min-width: 100px;
+    padding: 0 20px;
+    border: 1px solid #dce1e9;
+    border-radius: 7px;
+    background: #fff;
+    color: #4b5563;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.site-inquiry-actions .site-inquiry-help:hover {
+    background: #f2f4f8;
+}
+
+.site-inquiry-file-list {
+    margin-top: 12px;
+}
+
+.site-inquiry-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: #f8f9fc;
+    border: 1px solid #e5e8ee;
+    border-radius: 8px;
+}
+
+.site-inquiry-file-name {
+    color: #303846;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.site-inquiry-file-remove {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border: 1px solid #f0c9c9;
+    border-radius: 6px;
+    background: #fff5f5;
+    color: #c24141;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.site-inquiry-file-remove:hover {
+    background: #ffeaea;
+}
+
+/* 첨부파일 선택 버튼 */
+.site-inquiry-form input[type="file"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e8ee;
+    border-radius: 8px;
+    background: #f8f9fc;
+    color: #737b89;
+    font-size: 13px;
+}
+
+.site-inquiry-form input[type="file"]::file-selector-button {
+    padding: 8px 16px;
+    margin-right: 14px;
+    border: none;
+    border-radius: 6px;
+    background: #315fc4;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.site-inquiry-form input[type="file"]::file-selector-button:hover {
+    background: #254fa9;
+}
+
+/* 문의 내용 입력창 크기 고정 */
+.site-inquiry-form textarea {
+    resize: none;
+}
+
+
+/* 문의 수정 - 첨부파일 목록 */
+.site-inquiry-existing-files,
+.site-inquiry-edit-file-list {
+    margin-top: 12px;
+}
+
+.site-inquiry-existing-files > label {
+    display: block;
+    margin-bottom: 14px;
+}
+
+.site-inquiry-edit-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: #f8f9fc;
+    border: 1px solid #e5e8ee;
+    border-radius: 8px;
+}
+
+.site-inquiry-edit-file-name {
+    color: #303846;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.site-inquiry-edit-file-remove {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border: 1px solid #f0c9c9;
+    border-radius: 6px;
+    background: #fff5f5;
+    color: #c24141;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.site-inquiry-edit-file-remove:hover {
+    background: #ffeaea;
+}
+
+/* 문의 수정 - 입력창 크기 조절 제거 */
+.site-inquiry-form textarea {
+    resize: none;
+}
+
+/* 문의 수정 - 하단 버튼 높이 통일 */
+.site-inquiry-edit-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.site-inquiry-edit-actions a,
+.site-inquiry-edit-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    min-width: 110px;
+    box-sizing: border-box;
+    padding: 0 20px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.site-inquiry-edit-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.site-inquiry-edit-actions a,
+.site-inquiry-edit-actions button {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 20px !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    vertical-align: middle;
+}

@@ -203,5 +203,221 @@
 
 	</div>
 
+<th:block th:fragment="script">
+
+    <script th:if="${activeSection == 'domain'}">
+	    const { createApp } = Vue;
+	
+	    createApp({
+	    	data: function() {
+	    	    return {
+	    	        workspaces: [],
+	    	        pmChanges: [],
+	    	        workspacePage: 1,
+	    	        workspacePageSize: 5,
+	    	        pmPage: 1,
+	    	        pmPageSize: 5,
+	    	        keyword: '',
+	    	        status: '',
+	    	        selectedWorkspace: null,
+	    	        stopReason: ''
+	    	    };
+	    	},
+	    	
+	    	computed: {
+	    	    filteredWorkspaces: function() {
+	    	        return this.workspaces.filter(workspace => {
+	    	        	const keywordMatch =
+	    	        	    (workspace.subject || '').toLowerCase().includes(this.keyword.toLowerCase())
+	    	        	    || (workspace.domain_key || '').toLowerCase().includes(this.keyword.toLowerCase())
+	    	        	    || (workspace.pm_name || '').toLowerCase().includes(this.keyword.toLowerCase());
+	
+	    	            const statusMatch =
+	    	                this.status === '' || workspace.active === this.status;
+	
+	    	            return keywordMatch && statusMatch;
+	    	        });
+	    	    },
+	    	    pagedWorkspaces: function() {
+	    	        const start = (this.workspacePage - 1) * this.workspacePageSize;
+	
+	    	        return this.filteredWorkspaces.slice(
+	    	            start,
+	    	            start + this.workspacePageSize
+	    	        );
+	    	    },
+	
+	    	    workspaceTotalPages: function() {
+	    	        return Math.ceil(
+	    	            this.filteredWorkspaces.length / this.workspacePageSize
+	    	        );
+	    	    },
+	    	    pagedPmChanges: function() {
+	    	        const start = (this.pmPage - 1) * this.pmPageSize;
+	
+	    	        return this.pmChanges.slice(
+	    	            start,
+	    	            start + this.pmPageSize
+	    	        );
+	    	    },
+	
+	    	    pmTotalPages: function() {
+	    	        return Math.ceil(
+	    	            this.pmChanges.length / this.pmPageSize
+	    	        );
+	    	    }
+	    	},
+	    	
+	    	watch: {
+	    	    keyword: function() {
+	    	        this.workspacePage = 1;
+	    	    },
+	
+	    	    status: function() {
+	    	        this.workspacePage = 1;
+	    	    }
+	    	},
+	    	
+	    	methods: {
+	    	    showDetail: function(workspace) {
+	    	        this.selectedWorkspace = workspace;
+	    	    },
+	
+	    	    closeDetail: function() {
+	    	        this.selectedWorkspace = null;
+	    	    },
+	    	    
+	    	    changeWorkspaceStatus: function(active) {
+	
+	    	        if (active === 'N' && !this.stopReason.trim()) {
+	    	            alert('정지 사유를 입력해주세요.');
+	    	            return;
+	    	        }
+	
+	    	        if (!confirm(active === 'N'
+	    	                ? '이 워크를 정지하시겠습니까?'
+	    	                : '이 워크의 정지를 해제하시겠습니까?')) {
+	    	            return;
+	    	        }
+	
+	    	        const dto = {
+	    	            workspace_id: this.selectedWorkspace.workspace_id,
+	    	            active: active,
+	    	            reason: active === 'N' ? this.stopReason.trim() : null
+	    	        };
+	
+	    	        fetch('/admin/api/workspaces/status', {
+	    	            method: 'POST',
+	    	            headers: {
+	    	                'Content-Type': 'application/json'
+	    	            },
+	    	            body: JSON.stringify(dto)
+	    	        })
+	    	        .then(response => {
+	    	            if (!response.ok) {
+	    	                throw new Error('워크 상태 변경 실패');
+	    	            }
+	    	            return response.text();
+	    	        })
+	    	        .then(data => {
+	    	            alert(data);
+	    	            location.reload();
+	    	        })
+	    	        .catch(error => {
+	    	            console.error(error);
+	    	            alert('워크 상태 변경 중 오류가 발생했습니다.');
+	    	        });
+	    	    },
+	    	    
+	
+	    	    processPmChange: function(pm, status) {
+	
+	    	        let rejectReason = null;
+	
+	    	        if (status === 2) {
+	    	            rejectReason = prompt('거절 사유를 입력하세요.');
+	
+	    	            if (rejectReason === null) {
+	    	                return;
+	    	            }
+	
+	    	            if (!rejectReason.trim()) {
+	    	                alert('거절 사유를 입력해주세요.');
+	    	                return;
+	    	            }
+	    	        }
+	
+	    	        if (!confirm(status === 1 ? '사장 변경 요청을 승인하시겠습니까?' : '사장 변경 요청을 거절하시겠습니까?')) {
+	    	            return;
+	    	        }
+	
+	    	        const dto = {
+	    	            pm_change_id: pm.pm_change_id,
+	    	            status: status,
+	    	            reject_reason: rejectReason
+	    	        };
+	
+	    	        fetch('/admin/api/pm-changes/process', {
+	    	            method: 'POST',
+	    	            headers: {
+	    	                'Content-Type': 'application/json'
+	    	            },
+	    	            body: JSON.stringify(dto)
+	    	        })
+	    	        .then(async response => {
+				    const message = await response.text();
+				
+				    if (!response.ok) {
+				        throw new Error(message);
+				    }
+				    return message;
+				})
+	    	        .then(data => {
+	    	            alert(data);
+	    	            location.reload();
+	    	        })
+	    	        .catch(error => {
+	    	            console.error(error);
+	    	            alert(error.message);
+	    	        });
+	    	    }
+	
+	    	},
+	
+	        mounted: function() {
+	            fetch('/admin/api/workspaces')
+	                .then(response => {
+	                    if (!response.ok) {
+	                        throw new Error('워크 목록 조회 실패');
+	                    }
+	                    return response.json();
+	                })
+	                .then(data => {
+	                    this.workspaces = data;
+	                })
+	                .catch(error => {
+	                    console.error(error);
+	                });
+	
+	            fetch('/admin/api/pm-changes')
+	                .then(response => {
+	                    if (!response.ok) {
+	                        throw new Error('사장 변경 요청을 불러오지 못했습니다.');
+	                    }
+	                    return response.json();
+	                })
+	                .then(data => {
+	                    this.pmChanges = data;
+	                })
+	                .catch(error => {
+	                    console.error(error);
+	                });
+	
+	        }
+	    }).mount('#workspace-app');
+	</script>
+
+</th:block>
+
 </body>
 </html>

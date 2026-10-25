@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="content">
+    <div class="panel-card">
+        <div class="panel-card-title">FAQ 관리</div>
+
+        <table class="warm-table">
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>질문</th>
+                    <th>답변</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="faq : ${faqList}">
+                    <td th:text="${faq.faqId}"></td>
+                    <td th:text="${faq.question}"></td>
+                    <td th:text="${faq.answer}"></td>
+                    <td>
+					    <a th:href="@{/admin/faq/edit(faqId=${faq.faqId})}" class="btn-sage">수정</a>
+					</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

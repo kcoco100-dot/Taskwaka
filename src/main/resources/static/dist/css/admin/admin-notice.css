@@ -348,3 +348,187 @@ a.notice-list-btn:hover {
     color: white;
     border-color: #654b37;
 }
+
+/* 공지사항 등록 첨부파일 */
+.notice-form-page .notice-upload-box {
+    padding: 18px;
+    border: 1px solid #e4e0d9;
+    border-radius: 10px;
+    background: #faf9f7;
+}
+
+.notice-form-page .notice-upload-description {
+    margin-bottom: 12px;
+    color: #746f68;
+    font-size: 13px;
+}
+
+.notice-form-page .notice-upload input[type="file"] {
+    width: 100%;
+    font-size: 13px;
+    color: #746f68;
+}
+
+.notice-form-page .notice-upload input[type="file"]::file-selector-button {
+    padding: 9px 16px;
+    margin-right: 12px;
+    border: 1px solid #d6d9d1;
+    border-radius: 7px;
+    background: #fff;
+    color: #40553a;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.notice-form-page .notice-upload-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.notice-form-page .notice-upload-list:empty {
+    display: none;
+}
+
+.notice-form-page .notice-upload-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid #e2e7df;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.notice-form-page .notice-upload-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: #464e43;
+    font-size: 13px;
+}
+
+.notice-form-page .notice-upload-remove {
+    flex-shrink: 0;
+    padding: 5px 10px;
+    border: 1px solid #e7c9c9;
+    border-radius: 6px;
+    background: #fff;
+    color: #b34c4c;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* 등록 화면 하단 버튼 높이 통일 */
+.notice-form-page .notice-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.notice-form-page .notice-form-actions .notice-list-btn,
+.notice-form-page .notice-form-actions .btn-sage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 42px;
+    min-height: 42px;
+    padding: 0 18px;
+    margin: 0;
+    line-height: 1;
+    text-decoration: none;
+}
+
+
+/* 공지사항 수정 - 기존 첨부파일 */
+.notice-form-page .notice-edit-files {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid #e4e0d9;
+    border-radius: 10px;
+    background: #faf9f7;
+}
+
+.notice-form-page .notice-edit-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 14px;
+    border: 1px solid #e2e7df;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.notice-form-page .notice-empty-files {
+    padding: 14px;
+    color: #858077;
+    font-size: 13px;
+    background: #faf9f7;
+    border-radius: 8px;
+}
+
+/* 새로 선택한 첨부파일 목록 */
+.notice-form-page #noticeNewFileList > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid #e2e7df;
+    border-radius: 8px;
+    background: #fff;
+    color: #464e43;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.notice-form-page #noticeNewFileList .notice-new-delete {
+    flex-shrink: 0;
+    padding: 5px 10px;
+    border: 1px solid #e7c9c9;
+    border-radius: 6px;
+    background: #fff;
+    color: #b34c4c;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* 수정 화면 하단 */
+.notice-form-page .notice-edit-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.notice-form-page .notice-edit-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-size: 13px;
+    color: #625e58;
+}
+
+.notice-form-page .notice-edit-bottom .notice-form-actions {
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .notice-form-page .notice-edit-bottom {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .notice-form-page .notice-edit-bottom .notice-form-actions {
+        justify-content: flex-end;
+    }
+}
