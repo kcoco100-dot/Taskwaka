@@ -47,4 +47,21 @@ public class FaqServiceImpl implements FaqService {
 		}
 	}
 
+	@Override
+	public void updateFaq(Faq faq) {
+		try {
+			Faq oldFaq = faqRepository.findById(faq.getFaqId()).orElse(null);
+			
+			if(oldFaq == null) {
+				throw new IllegalArgumentException("FAQ를 찾을 수 없습니다.");
+			}
+			
+			oldFaq.setQuestion(faq.getQuestion());
+		} catch (Exception e) {
+			log.error("updateFaq : ", e);
+			throw e;
+		}
+		
+	}
+
 }

@@ -8,4 +8,5 @@ public interface FaqService {
 	public void insertFaq(Faq faq);
 	public List<Faq> listFaq();
 	public Faq getFaq(Long faqId);
+	public void updateFaq(Faq faq);
 }
