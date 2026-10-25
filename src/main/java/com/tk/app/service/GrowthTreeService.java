@@ -29,7 +29,7 @@ public class GrowthTreeService {
 		this.taskService = taskService;
 	}
 	
-    // 공통 로직 분리 시작
+    // 공통 로직 분리 시작 =============================================================================
 	
 	// 성장나무 잠금처리
 	// 여러 활동의 보상이 동시에 들어와도 누적 경험치가 덮어써지지 않게하기 위함
@@ -87,7 +87,7 @@ public class GrowthTreeService {
 	
 	// 경험치 계산
 	private long calculateTotalExpAfterRevoke(long currentTotalExp, long totalRevokeExp) {
-		// 현재 경험치가 5이고 회수 대상이 10이라면 결과는 0으로 만든다.
+		// 실제 지급 이력의 경험치를 회수
 		long newTotalExp = currentTotalExp - totalRevokeExp;
 		if(newTotalExp < 0) {
 			newTotalExp = 0;
@@ -134,13 +134,21 @@ public class GrowthTreeService {
 		saveGrowthTree(growthTree, "회수 후 성장나무 경험치와 단계를 저장할 수 없습니다.");
 	}
 	
-	// 로그인 회원 검증
+	// 로그인 조회와 NULL 검사, 로그인 여부를 확인하고 SessionInfo 를 반환
+	private SessionInfo requireLoginMember() {
+	    SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+	    if (loginMember == null) {
+	        throw new IllegalStateException("로그인이 필요합니다.");
+	    }
+
+	    return loginMember;
+	}
+	
+	// 로그인 회원 검증 = 회원 번호 일치 검사
 	private void validateLoginMember(long memberId) {
 		// 로그인 회원 검증
-		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-		if(loginMember == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
+		SessionInfo loginMember = requireLoginMember();
+		
 		if(memberId != loginMember.getMember_id()) {
 			throw new IllegalStateException("활동 회원과 로그인 회원이 일치하지 않습니다.");
 		}
@@ -156,7 +164,7 @@ public class GrowthTreeService {
         return reviewerRole == 70;
     }
     
-    // 공통 로직 분리 끝
+    // 공통 로직 분리 끝 =============================================================================
 	
 	// 성장나무 목록 조회
 	public List<GrowthLevelDto> findGrowthLevels() {
@@ -275,7 +283,7 @@ public class GrowthTreeService {
 		expLog.setExp(5);
 		expLog.setActionType("INVITE_ACCEPT");
 		
-		// 같은 공지에 이미 지급한 이력이 있으면 종료
+		// 같은 워크 회원의 초대 보상 지급 이력
 		int existingCount = growthTreeMapper.countInviteAcceptExpLog(expLog);
 		if(existingCount > 0) {
 			return;
@@ -408,10 +416,7 @@ public class GrowthTreeService {
 	public Map<String, Object> findDailyReportCreateContext(
 			Long subTaskId, Long projectId, String domainKey) {
 		
-		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-		if(loginMember == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
+		SessionInfo loginMember = requireLoginMember();
 		
 		Map<String, Object> params = new HashMap<>();
 		params.put("subTaskId", subTaskId);
@@ -434,10 +439,7 @@ public class GrowthTreeService {
 	public Map<String, Object> findDailyReportDeleteContext(
 			Long dailyReportId, Long projectId, String domainKey) {
 		
-		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-		if(loginMember == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
+		SessionInfo loginMember = requireLoginMember();
 		
 		Map<String, Object> params = new HashMap<>();
 		params.put("dailyReportId", dailyReportId);
@@ -522,10 +524,7 @@ public class GrowthTreeService {
 		public Map<String, Object> selectTeamReportDeleteContext(
 				Long teamReportId, Long projectId, String domainKey) {
 		
-		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-		if(loginMember == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
+		SessionInfo loginMember = requireLoginMember();
 		
 		Map<String, Object> params = new HashMap<>();
 		params.put("teamReportId", teamReportId);
@@ -553,11 +552,7 @@ public class GrowthTreeService {
 	public Map<String, Object> findTeamReportCreateContext(
 			Long teamReportId, Long projectId, String domainKey) {
 		
-		// 로그인 회원 검증
-		SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
-		if(loginMember == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
-		}
+		SessionInfo loginMember = requireLoginMember();
 		
 		// 조회 조건
 		Map<String, Object> params = new HashMap<>();
@@ -744,8 +739,16 @@ public class GrowthTreeService {
 		
 		expLog.setWorkspaceId(workspaceId);
 		expLog.setMemberId(memberId);
+		expLog.setProjectReportId(projectReportId);
 		expLog.setExp(30);
 		expLog.setActionType("PROJECT_REPORT_APPROVE");
+		
+		// 미회수 승인 보상이 있으면 지급 전에 리턴
+		int existingCount = growthTreeMapper.countProjectReportApproveExpLog(expLog);
+		if (existingCount > 0) {
+		    return;
+		}
+		
 		// 이력 저장, 누적 경험치 및 레벨 갱신
 		grantGrowthExp(growthTree, expLog);
 
@@ -765,4 +768,41 @@ public class GrowthTreeService {
 		selectProjectReportApproveContext(reviewId, projectReportId, memberId, reportCategory, reviewStatus);
 	}
 	
+	// 프로젝트 보고서 승인 보상 회수
+	@Transactional(rollbackFor = Exception.class)
+	public void revokeProjectReportApproveExp(
+			long workspaceId, long projectReportId) {
+		
+		// 나무 잠금
+		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
+		GrowthExpLogDto condition = new GrowthExpLogDto();
+		condition.setWorkspaceId(workspaceId);
+		condition.setProjectReportId(projectReportId);
+		
+		// 프로젝트 보고서의 미회수 승인 보상 이력 조회
+		List<GrowthExpLogDto> expLogs = 
+				growthTreeMapper.findUnrevokedProjectReportApproveExpLogs(condition);
+		// 경험치 목록이 비어있으면 리턴
+		if(expLogs.isEmpty()) {
+			return;
+		}
+		// 회수할 경험치 합계
+		long totalRevokeExp = 0;
+		// 미회수 승인 보상 이력 순회하면서 하나씩 처리
+		for(GrowthExpLogDto expLog : expLogs) {
+			// 해당 지급 이력에 회수 시간 기록
+			int revokeCount = 
+					growthTreeMapper.markProjectReportApproveExpLogRevoked(expLog);
+		
+			// 1행이 갱신되지 않으면 예외 처리
+			if(revokeCount != 1) {
+				throw new IllegalStateException("검토 보상 회수 시간을 기록할 수 없습니다.");
+			}
+		
+			// 회수 시간 기록에 성공한 이력 실제 지급액 더해주기
+			totalRevokeExp += expLog.getExp();
+		}
+		// 합산한 경험치 회수, 최소 0 적용, 성장 단계 재계산 및 저장
+		revokeGrowthExp(growthTree, totalRevokeExp);
+	}
 }

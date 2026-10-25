@@ -97,7 +97,7 @@ public interface GrowthTreeMapper {
 
 	// 업무 보고서 삭제 전 보고서 잠금
 	public Long lockTeamReportForDelete(Map<String, Object> params);
-
+	
 	// 업무 보고서 등록 시 보상에 사용할 실제 워크번호 조회
 	public Map<String, Object> selectTeamReportCreateContext(Map<String, Object> params);
 
@@ -110,6 +110,9 @@ public interface GrowthTreeMapper {
 	// 프로젝트 보고서 PM 이 최종 승인 시 +30
 	public Map<String, Object> selectProjectReportApproveContext(Map<String, Object> params);
 	
+	// 프로젝트 보고서 중복 지급 확인
+	public int countProjectReportApproveExpLog(GrowthExpLogDto dto);
+	
 	// 일일 보고서 승인 시 +10
 	public int countDailyReportApproveExpLog(GrowthExpLogDto dto);
 
@@ -121,9 +124,14 @@ public interface GrowthTreeMapper {
 	
 	// PM 이 업무 보고서 반려 시 경험치 실제 지급된 검토 보상 회수 시간 기록
 	public int markTeamReportApproveExpLogRevoked(GrowthExpLogDto dto);
+	
+	// 프로젝트 승인 보상의 미회수 이력 조회
+	public List<GrowthExpLogDto> findUnrevokedProjectReportApproveExpLogs(GrowthExpLogDto dto);
+	
+	// 프로젝트 승인 보상의 미회수 시간 기록
+	public int markProjectReportApproveExpLogRevoked(GrowthExpLogDto dto);
 
 	// 성장나무 페이지 활동기록
 	public List<GrowthExpLogDto> findRecentGrowthExpLogs(long workspaceId);
-	
 	
 }

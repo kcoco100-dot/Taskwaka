@@ -53,13 +53,14 @@
 		INSERT INTO growth_exp_logs(
 			exp_log_id, workspace_id, member_id, notice_id, 
 			exp, action_type, earned_at, invite_key, sub_task_id, 
-			daily_report_id, team_report_id)
+			daily_report_id, team_report_id, project_report_id)
 		VALUES(#{expLogId}, #{workspaceId}, #{memberId},
 			#{noticeId, jdbcType=NUMERIC}, #{exp}, 
 			#{actionType}, SYSDATE, #{inviteKey, jdbcType=VARCHAR},
 			#{subTaskId, jdbcType=NUMERIC},
 			#{dailyReportId, jdbcType=NUMERIC},
-			#{teamReportId, jdbcType=NUMERIC})
+			#{teamReportId, jdbcType=NUMERIC},
+			#{projectReportId, jdbcType=NUMERIC})
 	</insert>
 
 	<!-- 같은 공지의 등록 보상을 이미 지급했는지 확인 -->
@@ -516,6 +517,17 @@
 			AND authorWm.member_id != #{memberId}
 	</select>
 	
+	<!-- 프로젝트 보고서 중복지급 방지 -->
+	<select id="countProjectReportApproveExpLog" parameterType="com.tk.app.domain.dto.GrowthExpLogDto"
+	        resultType="int">
+	    SELECT COUNT(*)
+	    FROM growth_exp_logs
+	    WHERE workspace_id = #{workspaceId}
+	      AND project_report_id = #{projectReportId}
+	      AND action_type = #{actionType}
+	      AND deleted_at IS NULL
+	</select>
+	
 	<select id="countDailyReportApproveExpLog" resultType="int">
 		SELECT COUNT(*)
 		FROM growth_exp_logs
@@ -575,6 +587,33 @@
 	      AND workspace_id = #{workspaceId}
 	      AND team_report_id = #{teamReportId}
 	      AND action_type = 'TEAM_REPORT_APPROVE'
+	      AND exp > 0
+	      AND deleted_at IS NULL
+	</update>
+	
+	<!-- 프로젝트 보고서 미회수 승인 보상 조회 -->
+	<select id="findUnrevokedProjectReportApproveExpLogs" parameterType="com.tk.app.domain.dto.GrowthExpLogDto"
+        resultType="com.tk.app.domain.dto.GrowthExpLogDto">
+	    SELECT exp_log_id AS "expLogId",
+	           workspace_id AS "workspaceId",
+	           project_report_id AS "projectReportId",
+	           exp
+	    FROM growth_exp_logs
+	    WHERE workspace_id = #{workspaceId}
+	      AND project_report_id = #{projectReportId}
+	      AND action_type = 'PROJECT_REPORT_APPROVE'
+	      AND exp > 0
+	      AND deleted_at IS NULL
+	</select>
+	
+	<!-- 프로젝트 보고서 미회수 시간 기록 -->
+	<update id="markProjectReportApproveExpLogRevoked" parameterType="com.tk.app.domain.dto.GrowthExpLogDto">
+	    UPDATE growth_exp_logs
+	    SET deleted_at = SYSDATE
+	    WHERE exp_log_id = #{expLogId}
+	      AND workspace_id = #{workspaceId}
+	      AND project_report_id = #{projectReportId}
+	      AND action_type = 'PROJECT_REPORT_APPROVE'
 	      AND exp > 0
 	      AND deleted_at IS NULL
 	</update>
