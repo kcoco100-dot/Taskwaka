@@ -2,9 +2,7 @@ package com.tk.app.controller;
 
 
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -81,14 +79,10 @@ public class HomeNoticeController {
 			page = 1;
 		}
 		
-		kwd = myUtil.decodeUrl(kwd);
+		kwd = myUtil.isEmpty(kwd) ? "" : kwd;
 
-		// 전체 페이지 수
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("schType", schType);
-		map.put("kwd", kwd);
-
-		dataCount = noticeService.countWorkspaceNotice(workspace.getWorkspaceId());
+		dataCount = noticeService.countWorkspaceNotice(
+				workspace.getWorkspaceId(), schType, kwd);
 		if (dataCount != 0) {
 			totalPage = paginateUtil.pageCount(dataCount, size);
 		}
@@ -100,11 +94,9 @@ public class HomeNoticeController {
 		int offset = (page - 1) * size;
 		if(offset < 0) offset = 0;
 
-		map.put("offset", offset);
-		map.put("size", size);
-
 		// 글 리스트
-		List<NoticeDto> list = noticeService.findWorkspaceNotice(workspace.getWorkspaceId(), offset, size);
+		List<NoticeDto> list = noticeService.findWorkspaceNotice(
+				workspace.getWorkspaceId(), offset, size, schType, kwd);
 
 		String query = "";
 		// getRequestURI : 페이지 번호를 눌러도 현재 워크의 공지 목록으로 이동하도록 주소를 만든다

@@ -286,3 +286,89 @@ body:has(.notice-layout) > main {
 .notice-layout > .notice-section {
     overflow: visible;
 }
+
+.notice-section .notice-panel > form {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 16px;
+    padding: 20px 26px !important;
+    background: #FAFBF7;
+    border-bottom-color: #E8E2D9 !important;
+}
+
+.notice-section .notice-panel > form > div {
+    width: 100%;
+    min-width: 0;
+    margin-top: 0;
+    padding: 0;
+}
+
+.notice-section .notice-panel > form .form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #786B5E;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.notice-section .notice-panel > form :is(.form-select, .form-control) {
+    width: 100%;
+    height: 44px;
+    padding: 10px 14px;
+    border: 1px solid #E2E5DA;
+    border-radius: 10px;
+    background-color: #FFFFFF;
+    color: #594331;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.notice-section .notice-panel > form .form-select {
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.notice-section .notice-panel > form .form-control::placeholder {
+    color: #A49E93;
+    opacity: 1;
+}
+
+.notice-section .notice-panel > form :is(.form-select, .form-control):focus {
+    outline: none;
+    border-color: #71865B;
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.12);
+}
+
+.notice-section .notice-panel > form .shell-action {
+    flex-shrink: 0;
+    min-width: 76px;
+    height: 44px;
+    padding: 0 18px;
+    border-color: #E2E0D7;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #786B5E;
+    font-size: 13px;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.notice-section .notice-panel > form .shell-action:hover {
+    border-color: #CEC7BA;
+    background: #F4F1EB;
+}
+
+.notice-section .notice-panel > form .shell-action-primary {
+    border-color: #596D49;
+    background: #596D49;
+    color: #FFFFFF;
+}
+
+.notice-section .notice-panel > form .shell-action-primary:hover {
+    border-color: #485B39;
+    background: #485B39;
+}

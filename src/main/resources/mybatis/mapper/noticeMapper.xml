@@ -81,14 +81,35 @@
 	    )
 	</delete>
 	
+	<!-- 공지사항 검색 -->
+	<sql id="workspaceNoticeSearch">
+	<if test="kwd != null and kwd != ''">
+		<choose>
+			<when test="schType == 'title'">
+				AND INSTR(n.title, #{kwd}) &gt; 0
+			</when>
+			<when test="schType == 'content'">
+				AND DBMS_LOB.INSTR(n.content, #{kwd}) &gt; 0
+			</when>
+			<otherwise>
+				AND (
+					INSTR(n.title, #{kwd}) &gt; 0
+					OR DBMS_LOB.INSTR(n.content, #{kwd}) &gt; 0
+				)
+			</otherwise>
+		</choose>
+	</if>
+	</sql>
+	
 	<!-- 공지사항 페이징 처리 -->
 	<select id="countWorkspaceNotice" resultType="int">
 		SELECT COUNT(*)
-		FROM notice
-		WHERE workspace_id = #{workspaceId}
-			AND notice_type = 'WORKSPACE'
-			AND status = 1
-			AND deleted IS NULL
+		FROM notice n
+		WHERE n.workspace_id = #{workspaceId}
+			AND n.notice_type = 'WORKSPACE'
+			AND n.status = 1
+			AND n.deleted IS NULL
+			<include refid="workspaceNoticeSearch"/>
 	</select>
 
 	<!-- 공개된 워크 공지 목록 조회 -->
@@ -104,6 +125,7 @@
 		    AND n.notice_type = 'WORKSPACE'
 		    AND n.status = 1
 		    AND n.deleted IS NULL
+		    	<include refid="workspaceNoticeSearch"/>
 		ORDER BY n.created DESC, n.notice_id DESC
 		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>

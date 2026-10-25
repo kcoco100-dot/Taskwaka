@@ -51,11 +51,15 @@ public interface NoticeMapper {
 	public List<NoticeDto> findWorkspaceNotice(
 			@Param("workspaceId") long workspaceId,
 			@Param("offset") int offset,
-			@Param("size") int size);
+			@Param("size") int size,
+			@Param("schType") String schType,
+			@Param("kwd") String kwd);
 	
 	// 공지 목록 페이징처리
 	public int countWorkspaceNotice(
-			@Param("workspaceId") long workspaceId);
+			@Param("workspaceId") long workspaceId,
+			@Param("schType") String schType,
+			@Param("kwd") String kwd);
 	
 	// 공지사항 조회수 증가
 	public int incrementWorkspaceNoticeViewCount(
