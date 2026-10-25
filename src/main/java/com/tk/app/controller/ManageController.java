@@ -321,4 +321,30 @@ public class ManageController {
 		return "manage/pmDashboard";
 	}
 
+	// 간트차트 화면
+	@GetMapping("/gantt")
+	public String gantt(
+			@PathVariable("domainKey") String domainKey,
+			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "kwd", defaultValue = "") String kwd,
+			Model model) throws Exception {
+		try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			Long workspaceId = service.findByDomainKey(domainKey);
+			Map<String, Object> map = new HashMap<>();
+			map.put("workspaceId", workspaceId);
+			map.put("memberId", info.getMember_id());
+			Map<String, Object> calendarData = service.getManageCalendarData(map);
+
+			model.addAttribute("myProjects", calendarData.get("myProjects"));
+			model.addAttribute("myTasks", calendarData.get("myTasks"));
+			model.addAttribute("schType", schType);
+			model.addAttribute("kwd", kwd == null ? "" : kwd.trim());
+		} catch (Exception e) {
+			log.info("gantt : ", e);
+			throw e;
+		}
+
+		return "manage/manageGantt";
+	}
 }

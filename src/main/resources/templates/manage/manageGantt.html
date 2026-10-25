@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html
+    lang="ko"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout/layout3}">
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/manage/manageGantt.css}">
+</th:block>
+
+<th:block layout:fragment="content">
+    <div id="manageGanttPage" class="home-layout manage-layout mg-page">
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('gantt')}"></nav>
+        <section class="section manage-content mg-content" aria-labelledby="mgPageTitle">
+            <div class="page-heading mg-heading">
+                <div>
+                    <h1 id="mgPageTitle" class="page-title">프로젝트 간트차트</h1>
+                    <p class="page-description">프로젝트와 업무의 기간, 담당자, 진행 상황을 한눈에 확인하세요.</p>
+                </div>
+                <a class="mg-button" th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">
+                    프로젝트 목록 <span aria-hidden="true">↗</span>
+                </a>
+            </div>
+
+            <div class="mg-summary" aria-label="조회된 일정 현황">
+                <div class="mg-summary-item">
+                    <span>프로젝트</span><strong id="mgProjectCount">0<small>개</small></strong>
+                </div>
+                <div class="mg-summary-item">
+                    <span>업무</span><strong id="mgTaskCount">0<small>개</small></strong>
+                </div>
+                <div class="mg-summary-item">
+                    <span>완료 업무</span><strong id="mgDoneCount">0<small>개</small></strong>
+                </div>
+            </div>
+
+            <div class="mg-panel">
+                <form id="mgSearchForm" class="mg-filters" method="get"
+                      th:action="@{/{domainKey}/manage/gantt(domainKey=${domainKey})}">
+                    <div class="mg-field">
+                        <label for="mgProjectFilter">프로젝트</label>
+                        <select id="mgProjectFilter"><option value="all">전체 프로젝트</option></select>
+                    </div>
+                    <div class="mg-field">
+                        <label for="mgSchType">검색유형</label>
+                        <select id="mgSchType" name="schType">
+                            <option value="all">전체</option>
+                            <option value="project">프로젝트명</option>
+                            <option value="task">업무명</option>
+                            <option value="assignee">담당자</option>
+                        </select>
+                    </div>
+                    <div class="mg-field mg-keyword">
+                        <label for="mgKwd">검색어</label>
+                        <input id="mgKwd" name="kwd" type="search" maxlength="100"
+                               th:value="${kwd}" placeholder="프로젝트명, 업무명, 담당자 검색">
+                    </div>
+                    <div class="mg-filter-actions">
+                        <button class="mg-button mg-button-primary" type="submit">조회</button>
+                        <button id="mgReset" class="mg-button" type="button">초기화</button>
+                    </div>
+                </form>
+
+                <div class="mg-toolbar">
+                    <div class="mg-period-controls">
+                        <button id="mgPrev" class="mg-button mg-icon-button" type="button" aria-label="이전 기간">‹</button>
+                        <h2 id="mgRange" class="mg-range"></h2>
+                        <button id="mgNext" class="mg-button mg-icon-button" type="button" aria-label="다음 기간">›</button>
+                        <button id="mgToday" class="mg-button" type="button">오늘</button>
+                    </div>
+                    <div class="mg-view-controls">
+                        <div id="mgViews" class="mg-segment" role="group" aria-label="타임라인 표시 단위">
+                            <button type="button" data-view="day" aria-pressed="true">일</button>
+                            <button type="button" data-view="week" aria-pressed="false">주</button>
+                            <button type="button" data-view="month" aria-pressed="false">월</button>
+                        </div>
+                        <button id="mgExpand" class="mg-button" type="button">전체 펼치기</button>
+                        <button id="mgCollapse" class="mg-button" type="button">전체 접기</button>
+                    </div>
+                </div>
+
+                <div class="mg-board-heading">
+                    <p id="mgResult" role="status" aria-live="polite"></p>
+                    <div class="mg-legend" aria-label="차트 범례">
+                        <span><i class="mg-key-project"></i>프로젝트</span>
+                        <span><i class="mg-key-task"></i>업무</span>
+                        <span><i class="mg-key-progress"></i>진행률</span>
+                        <span><i class="mg-key-today"></i>오늘</span>
+                    </div>
+                </div>
+                <div id="mgScroll" class="mg-scroll" tabindex="0" role="region"
+                     aria-label="프로젝트와 업무 일정. 좌우로 스크롤하여 날짜를 확인하세요.">
+                    <div id="mgBoard" class="mg-board"></div>
+                </div>
+                <div id="mgEmpty" class="mg-empty" hidden>
+                    <span class="mg-empty-icon" aria-hidden="true">▤</span>
+                    <h2>조회된 일정이 없습니다.</h2>
+                    <p>프로젝트 선택이나 검색어를 변경해 보세요.</p>
+                </div>
+                <p id="mgHelp" class="mg-help">막대 길이는 기간을, 안쪽 색상은 진행률을 나타냅니다. 이름이나 막대를 누르면 상세 정보를 확인할 수 있습니다.</p>
+                <noscript><p class="mg-help">간트차트를 보려면 브라우저에서 JavaScript를 활성화해 주세요.</p></noscript>
+            </div>
+        </section>
+    </div>
+
+    <aside id="mgDetail" class="mg-detail" role="dialog" aria-modal="false"
+           aria-labelledby="mgDetailTitle" aria-hidden="true" inert>
+        <div class="mg-detail-head">
+            <div><span id="mgDetailType" class="mg-type"></span><h2 id="mgDetailTitle"></h2></div>
+            <button id="mgClose" class="mg-button mg-icon-button" type="button" aria-label="상세 정보 닫기">×</button>
+        </div>
+        <div class="mg-detail-body">
+            <p id="mgDetailProject" class="mg-detail-project"></p>
+            <dl id="mgDetailInfo" class="mg-detail-info"></dl>
+            <div class="mg-detail-progress"><span id="mgDetailPercent"></span><progress id="mgDetailProgress" max="100" aria-label="선택한 일정 진행률"></progress></div>
+            <section class="mg-description"><h3>상세 내용</h3><p id="mgDetailContent"></p></section>
+            <a id="mgProjectLink" class="mg-button mg-button-primary">프로젝트 상세 보기 <span aria-hidden="true">↗</span></a>
+        </div>
+    </aside>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        window.manageGanttData = {
+            projects: /*[[${myProjects}]]*/ [],
+            tasks: /*[[${myTasks}]]*/ [],
+            schType: /*[[${schType}]]*/ 'all',
+            kwd: /*[[${kwd}]]*/ '',
+            detailBase: /*[[@{/{domainKey}/manage/detail(domainKey=${domainKey})}]]*/ ''
+        };
+    </script>
+    <script th:src="@{/dist/manage/manageGantt.js}"></script>
+</th:block>
+</html>

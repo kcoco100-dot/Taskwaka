@@ -9,7 +9,11 @@
             </button>
             <ul id="dashboard-submenu" class="submenu">
                 <li><a th:href="@{/{domainKey}/manage/pmDashboard(domainKey=${domainKey})}" th:classappend="${activeMenu == 'pmDashboard' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'pmDashboard' ? 'page' : null}">PM 대시보드</a></li>
-                
+                <li>
+                    <a th:href="@{/{domainKey}/manage/gantt(domainKey=${domainKey})}"
+                       th:classappend="${activeMenu == 'gantt' ? 'active' : ''}"
+                       th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">프로젝트 간트차트</a>
+                </li>
             </ul>
         </li>
         <li class="menu-group">
