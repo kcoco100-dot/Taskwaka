@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="chatbot">
+
+    <button type="button" class="faq-chatbot-toggle" onclick="toggleFaqChatbot()" aria-label="FAQ 챗봇 열기">
+	    <img id="faqBearIcon" th:src="@{/dist/images/faq-bear.png}" alt="FAQ 챗봇">
+	    <span id="faqCloseIcon">×</span>
+	</button>
+    
+    <div id="faqChatbotPanel" class="faq-chatbot-panel" hidden>
+        <div class="faq-chatbot-header">
+            <strong>Taskwaka 도우미</strong>
+            <button type="button" onclick="toggleFaqChatbot()">×</button>
+        </div>
+        <div class="faq-chatbot-content">
+            안녕하세요! 무엇을 도와드릴까요?
+            <div id="faqCategoryList"></div>
+        </div>
+        
+    </div>
+</div>
+
+<th:block th:fragment="script">
+	<script type="text/javascript">
+		function toggleFaqChatbot() {
+		    const panel = document.getElementById('faqChatbotPanel');
+		    const bear = document.getElementById('faqBearIcon');
+		    const close = document.getElementById('faqCloseIcon');
+	
+		    panel.hidden = !panel.hidden;
+		    
+		    if(!panel.hidden) {
+		    	loadFaq();
+		    }
+	
+		    if (panel.hidden) {
+		        bear.style.display = 'block';
+		        close.style.display = 'none';
+		    } else {
+		        bear.style.display = 'none';
+		        close.style.display = 'block';
+		    }
+		}
+	</script>
+
+	<script type="text/javascript">
+		
+	</script>
+	
+</th:block>
+
+</html>
