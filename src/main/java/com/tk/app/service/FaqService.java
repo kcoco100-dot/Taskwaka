@@ -9,4 +9,5 @@ public interface FaqService {
 	public List<Faq> listFaq();
 	public Faq getFaq(Long faqId);
 	public void updateFaq(Faq faq);
+	public void deleteFaq(Long faqId);
 }

@@ -36,26 +36,62 @@ public class AdminFaqController {
 	
 	@GetMapping("")
 	public String listFaq(Model model) {
-		List<Faq> list = faqService.listFaq();
-		
-		model.addAttribute("faqList", list);
-		model.addAttribute("activeSection", "faq");
-		
+		try {
+			List<Faq> list = faqService.listFaq();
+			
+			model.addAttribute("faqList", list);
+			model.addAttribute("activeSection", "faq");
+		} catch (Exception e) {
+			log.error("listFaq : ", e);
+			throw e;
+		}
 		return "admin/admin_layout";
 	}
 	
 	@GetMapping("/write")
 	public String writeFaq(Model model) {
-		model.addAttribute("activeSection", "faqWrite");
+		try {
+			model.addAttribute("activeSection", "faqWrite");
+		} catch (Exception e) {
+			log.error("writeFaq : ", e);
+			throw e;
+		}
 		return "admin/admin_layout";
 	}
 	
 	@GetMapping("/edit")
 	public String editFaq(@RequestParam("faqId") Long faqId, Model model) {
-		Faq faq = faqService.getFaq(faqId);
-		
-		model.addAttribute("faq", faq);
-		model.addAttribute("activeSection", "faqEdit");
+		try {
+			Faq faq = faqService.getFaq(faqId);
+			
+			model.addAttribute("faq", faq);
+			model.addAttribute("activeSection", "faqEdit");
+		} catch (Exception e) {
+			log.error("editFaq : ", e);
+			throw e;
+		}
 		return "admin/admin_layout";
-	}	
+	}
+	
+	@PostMapping("/update")
+	public String updateFaq(Faq faq) {
+		try {
+			faqService.updateFaq(faq);
+		} catch (Exception e) {
+			log.error("updateFaq : ", e);
+			throw e;
+		}
+		return "redirect:/admin/faq";
+	}
+	
+	@PostMapping("/delete")
+	public String deleteFaq(@RequestParam("faqId") Long faqId) {
+		try {
+			faqService.deleteFaq(faqId);
+		} catch (Exception e) {
+			log.error("deleteFaq : ", e);
+			throw e;
+		}
+		return "redirect:/admin/faq";
+	}
 }

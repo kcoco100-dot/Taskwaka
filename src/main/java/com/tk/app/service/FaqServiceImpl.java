@@ -57,8 +57,24 @@ public class FaqServiceImpl implements FaqService {
 			}
 			
 			oldFaq.setQuestion(faq.getQuestion());
+			oldFaq.setAnswer(faq.getAnswer());
+			oldFaq.setCategory(faq.getCategory());
+			oldFaq.setSubcategory(faq.getSubcategory());
+			
+			faqRepository.save(oldFaq);
 		} catch (Exception e) {
 			log.error("updateFaq : ", e);
+			throw e;
+		}
+		
+	}
+
+	@Override
+	public void deleteFaq(Long faqId) {
+		try {
+			faqRepository.deleteById(faqId);
+		} catch (Exception e) {
+			log.error("deleteFaq : ", e);
 			throw e;
 		}
 		

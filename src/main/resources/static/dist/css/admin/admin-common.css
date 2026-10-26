@@ -767,3 +767,52 @@ body {
     box-sizing: border-box;
     resize: none;
 }
+
+.btn-faq-delete {
+    height: 40px;
+    padding: 0 18px;
+    background: #fff1f0;
+    color: #c34d4d;
+    border: 1px solid #efcaca;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-faq-delete:hover {
+    background: #fce2e0;
+}
+
+/* FAQ 관리 버튼 정렬 */
+.warm-table td:last-child {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.warm-table td:last-child .btn-sage,
+.warm-table td:last-child .btn-faq-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 40px;
+    padding: 0;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+.warm-table td:last-child form {
+    display: inline-block !important;
+    margin: 0 0 0 5px;
+}
+
+/* FAQ 관리 버튼 위치 조정 */
+.faq-table td:last-child .btn-sage {
+    margin-left: 25px;
+}
+
+.faq-list-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}

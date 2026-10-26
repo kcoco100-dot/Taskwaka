@@ -1,0 +1,90 @@
+@charset "UTF-8";
+
+/* FAQ 챗봇 버튼 */
+.faq-chatbot-toggle {
+    position: fixed;
+    right: 20px;
+	bottom: 50px;
+    width: 65px;
+    height: 65px;
+    padding: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #a58d72, #826b55);
+    box-shadow: 0 5px 18px rgba(83, 65, 45, 0.25);
+    cursor: pointer;
+    z-index: 9999;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.faq-chatbot-toggle img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.faq-chatbot-toggle:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(83, 65, 45, 0.3);
+}
+
+/* FAQ 챗봇 창 */
+.faq-chatbot-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 130px;
+    width: 400px;
+    height: 500px;
+    background: #ffffff;
+    border: 1px solid #e5ded4;
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 9998;
+}
+
+/* 닫힌 상태 */
+.faq-chatbot-panel[hidden] {
+    display: none;
+}
+
+/* 챗봇 상단 제목 */
+.faq-chatbot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #f4eee6;
+    color: #514536;
+}
+
+.faq-chatbot-header button {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* 챗봇 본문 */
+.faq-chatbot-content {
+    padding: 20px;
+}
+
+.faq-chatbot-toggle [hidden] {
+    display: none;
+}
+
+#faqCloseIcon {
+    width: 100%;
+    height: 80%;
+    font-size: 32px;
+    color: white;
+    line-height: 1;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
