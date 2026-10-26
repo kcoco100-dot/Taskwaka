@@ -448,9 +448,50 @@
 }
 
 .growth-content > .growth-stages > ol > li {
-    padding: 18px 10px;
-    border-color: #E5E9DF;
+    position: relative;
+    gap: 8px;
+    padding: 40px 12px 20px;
+    border: 1px solid #E2E8DC;
+    border-radius: 16px;
     background: #FFFFFF;
+    box-shadow: 0 3px 12px rgba(65, 85, 45, 0.04);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.growth-content > .growth-stages > ol > li > span:first-of-type {
+    margin-top: 6px;
+    color: #46563B;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.growth-content > .growth-stages > ol > li > span:nth-of-type(2) {
+    color: #737D69;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+.growth-content > .growth-stages > ol > li:has(> [aria-current="step"]) {
+    border-color: #D7A36A;
+    background: #FFF2DF;
+    box-shadow: 0 0 0 2px rgba(215, 163, 106, 0.18);
+}
+
+.growth-content > .growth-stages > ol > li > [aria-current="step"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #946039;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
 }
 
 .growth-content > .growth-history > h2 {

@@ -49,7 +49,30 @@ public class HomeGrowthTreeController {
 		// 나무 생성
 		GrowthTreeDto growthTree = growthTreeService.findGrowthTree(workspace.getWorkspaceId());
 		
+		// 다음 단계까지 00 EXP와 최고 단계 달성 표시
+		GrowthLevelDto nextGrowthLevel = null;
+		// 단계 번호순으로 조회된 목록 확인
+		for(GrowthLevelDto level : growthLevels) {
+			// 확인 중인 단계가 현재 나무 단계보다 높은지
+			if(level.getLevelNo() > growthTree.getLevelNo()) {
+				// 처음 찾은 높은 단계를 다음 단계로 저장
+				nextGrowthLevel = level;
+				break;
+			}
+		}
+		
+		// 남은 경험치를 담을 변수
+		long remainingGrowthExp = 0L;
+		// 다음 단계가 있을때
+		if(nextGrowthLevel != null) {
+			// 최소 경험치 - 현재 경험치
+			remainingGrowthExp = Math.max(
+					0L, nextGrowthLevel.getMinExp() - growthTree.getTotalExp());
+		}
+		
 		model.addAttribute("growthLevels", growthLevels);
+		model.addAttribute("remainingGrowthExp", remainingGrowthExp);
+		model.addAttribute("nextGrowthLevel", nextGrowthLevel);
 		model.addAttribute("growthTree", growthTree);
 		model.addAttribute("recentGrowthExpLogs", 
 				growthTreeService.findRecentGrowthExpLogs(workspace.getWorkspaceId()));

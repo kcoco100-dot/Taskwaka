@@ -27,7 +27,13 @@
                 <div class="growth-summary">
                     <div>현재 단계 <strong th:text="${growthTree.levelName}">—</strong></div>
                     <div>누적 경험치 <strong th:text="|${growthTree.totalExp} EXP|">— EXP</strong></div>
-                    <div>구매 가능 경험치 <strong>— EXP</strong></div>
+                    <div th:if="${nextGrowthLevel != null}">
+                    		다음 단계까지 <strong th:text="|${remainingGrowthExp} EXP|">— EXP</strong>
+                    </div>
+                    <div th:if="${nextGrowthLevel == null}">
+					    <strong>최고 단계 달성</strong>
+					</div>
+                    <div>나무 상점 <strong>구매 기능 준비 중</strong></div>
                 </div>
 
                 <!-- 나무 이미지와 커스텀 아이템 -->
@@ -54,7 +60,7 @@
                             <span class="tree-shop-preview-badge">미리보기</span>
                         </div>
                         <p>우리 팀의 정원을 꾸며보세요.</p>
-                        <div class="tree-shop-wallet"><span>구매 가능 경험치</span><strong>— EXP</strong></div>
+                        <div class="tree-shop-wallet"><span>상품·가격 안내</span><strong>미리보기</strong></div>
                     </div>
 
                     <div class="tree-shop-categories" role="group" aria-label="상점 아이템 분류">
@@ -201,7 +207,7 @@
                         </section>
                     </div>
 
-                    <div class="tree-shop-footer"><span>5단계부터 아이템을 구매할 수 있어요.</span><small>상점 구매 기능은 준비 중입니다.</small></div>
+                   <div class="tree-shop-footer"><span>꾸미기 상품과 가격을 미리 살펴보세요.</span><small>상품 구매와 나무 적용 기능은 준비 중입니다.</small></div>
                 </aside>
                 </div>
 
@@ -215,6 +221,9 @@
                                 	    th:src="@{${level.treeImagePath}}" alt="" loading="lazy">
                             </div>
                             <span th:text="${level.levelName}">씨앗</span>
+                            <span th:text="|누적 ${level.minExp} EXP부터|">누적 0 EXP부터</span>
+                            <span th:if="${level.growthLevelId == growthTree.growthLevelId}"
+      							aria-current="step">현재 단계</span>
                         </li>
                     </ol>
 
