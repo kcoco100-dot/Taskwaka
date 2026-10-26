@@ -30,4 +30,9 @@ public class WorkChatMemberDto {
 	private String lastMessage;
 	private String lastSent;
 	private Integer unreadCount;
+	
+	private String roomName;
+	private Integer groupCount;
+
+	private Integer canManage;
 }

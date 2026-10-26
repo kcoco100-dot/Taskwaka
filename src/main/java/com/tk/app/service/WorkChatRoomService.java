@@ -2,6 +2,7 @@ package com.tk.app.service;
 
 import java.util.List;
 
+import com.tk.app.domain.dto.WorkChatGroupDto;
 import com.tk.app.domain.dto.WorkChatMemberDto;
 import com.tk.app.domain.dto.WorkChatMessageDto;
 
@@ -13,4 +14,13 @@ public interface WorkChatRoomService {
 	
 	public void sendMessage(WorkChatMessageDto dto) throws Exception;
 	public void markRoomAsRead(WorkChatMessageDto dto) throws Exception;
+	
+	public Long createGroupRoom(WorkChatGroupDto dto) throws Exception;
+
+	public List<WorkChatMemberDto> findMyGroupRooms(WorkChatMemberDto dto) throws Exception;
+	
+	public String renameGroupRoom(WorkChatGroupDto dto) throws Exception;
+	
+	
+	
 }

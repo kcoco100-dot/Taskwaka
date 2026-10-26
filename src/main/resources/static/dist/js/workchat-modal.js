@@ -55,8 +55,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     const personCounter = document.getElementById("workchatPersonCounter");
     const personChips = document.getElementById("workchatPersonChips");
+	const groupNameWrap = document.getElementById("workchatGroupNameWrap");
+	const groupNameInput = document.getElementById("workchatGroupRoomName");
+	const pickerConfirm = document.getElementById("workchatPickerConfirm");
+	const pickerHint = document.getElementById("workchatPickerFooterHint");
     let chatKind = "team";
 	let activeChatRoomId = null;
+	let activeChatKind = null;
+	let activeRoomOwner = false;
+
+	const renameToggle = document.getElementById("workchatRenameToggle");
+	const renamePanel = document.getElementById("workchatRenamePanel");
+	const renameInput = document.getElementById("workchatRenameInput");
+	const renameSave = document.getElementById("workchatRenameSave");
+	const renameCancel = document.getElementById("workchatRenameCancel");
 
     if (!openButton || !closeButton || !createButton || !typeMenu ||
         !personList || !personSearch || !personCounter || !personChips) return;
@@ -173,6 +185,98 @@ document.addEventListener("DOMContentLoaded", function () {
 		
 	}
 	
+
+	function renderPickerMembers(members) {
+
+	    personList.replaceChildren();
+
+	    const groups = [];
+
+	    members.forEach((member) => {
+
+	        const roleName = member.roleName || "기타";
+
+	        let group = groups.find((item) => {
+	            return item.roleName === roleName;
+	        });
+
+	        if (! group) {
+	            group = {
+	                roleName: roleName,
+	                members: []
+	            };
+
+	            groups.push(group);
+	        }
+
+	        group.members.push(member);
+	    });
+
+	    groups.forEach((group) =>  {
+
+	        const groupDiv = document.createElement("div");
+	        groupDiv.className = "workchat-picker-group";
+
+	        const heading = document.createElement("div");
+	        heading.className = "workchat-picker-heading";
+
+	        const roleTitle = document.createElement("strong");
+	        roleTitle.textContent = group.roleName;
+
+	        const count = document.createElement("small");
+	        count.textContent = group.members.length + "명";
+
+	        heading.append(roleTitle, count);
+	        groupDiv.appendChild(heading);
+
+	        group.members.forEach(function(member) {
+
+	            const label = document.createElement("label");
+	            label.className = "workchat-picker-person";
+
+	            label.setAttribute("data-workchat-person-row", "");
+	            label.dataset.name = member.name;
+	            label.dataset.role = member.roleName || "";
+
+	            const avatar = document.createElement("span");
+	            avatar.className =
+	                "workchat-avatar workchat-avatar--sand workchat-avatar--mini";
+	            avatar.textContent = member.name.slice(-2);
+
+	            const name = document.createElement("span");
+	            name.className = "workchat-picker-person-label";
+
+	            const strong = document.createElement("strong");
+	            strong.textContent = member.name;
+
+	            const small = document.createElement("small");
+	            small.textContent = member.roleName || "";
+
+	            name.append(strong, small);
+
+	            const checkbox = document.createElement("input");
+	            checkbox.type = "checkbox";
+
+	            checkbox.setAttribute("data-workchat-participant", "");
+
+	            // 화면에는 이름을 표시하고 서버에는 회원번호를 전달
+	            checkbox.value = member.name;
+	            checkbox.dataset.memberId = member.memberId;
+
+	            const checkMark = document.createElement("span");
+	            checkMark.className = "workchat-picker-check";
+	            checkMark.textContent = "✓";
+	            checkMark.setAttribute("aria-hidden", "true");
+
+	            label.append(avatar, name, checkbox, checkMark);
+	            groupDiv.appendChild(label);
+	        });
+
+	        personList.appendChild(groupDiv);
+	    });
+	}
+
+	
 	
 	function searchMembers() {
 		const kwd = searchInput.value.trim().toLowerCase();
@@ -238,68 +342,213 @@ document.addEventListener("DOMContentLoaded", function () {
 	       }
 	
 	
-	function showDirectRoom(chatRoomId, targetName) {
 
-	    activeChatRoomId = chatRoomId;
+		   function showChatRoom(chatRoomId, roomName, kind, groupCount, canManage = false) {
 
-	    document.getElementById("workchatActiveRoomTitle")
-	        .textContent = targetName;
+		       activeChatRoomId = chatRoomId;
+		       activeChatKind = kind;
+		       activeRoomOwner = kind === "GROUP" && canManage;
 
-	    document.getElementById("workchatActiveRoomSubtitle")
-	        .textContent = "1:1 채팅 · 방 번호 " + chatRoomId;
+		       document.getElementById("workchatActiveRoomTitle")
+		           .textContent = roomName;
 
-	    document.getElementById("workchatActiveRoomAvatar")
-	        .textContent = targetName.slice(-2);
+		       const subtitle = kind === "GROUP" ? "그룹 채팅 · " + groupCount + "명" : "1:1 채팅 · 방 번호 " + chatRoomId;
 
-	    views.forEach(function(view) {
-	        view.hidden =
-	            view.dataset.workchatView !== "chats";
-	    });
+		       document.getElementById("workchatActiveRoomSubtitle")
+		           .textContent = subtitle;
 
-	    createViews.forEach(function(view) {
-	        view.hidden = true;
-	    });
-		
-		loadMessages(chatRoomId, true);
+		       document.getElementById("workchatActiveRoomAvatar")
+		           .textContent = roomName.slice(-2);
 
-	}
+		       renameToggle.hidden = ! activeRoomOwner;
 
-	function openRoom(room) {showDirectRoom(room.chatRoomId, room.targetName);}
-	
-	let roomListVersion = 0;
+		       renamePanel.hidden = true;
 
-	async function loadMyDirectRooms() {
-	    const domainKey = window.location.pathname.split("/")[1];
-	    // 가장 최근에 시작한 조회 요청인지 구분
-	    const version = ++roomListVersion;
+		       views.forEach((view) => {
+		           view.hidden = view.dataset.workchatView !== "chats";
+		       });
 
-	    try {
-	        const res = await axios.get(
-	            "/" + domainKey + "/api/workchat/rooms/direct"
-	        );
+		       createViews.forEach((view) => {
+		           view.hidden = true;
+		       });
 
-	        if (version !== roomListVersion) return;
+		       loadMessages(chatRoomId);
+		   }
 
 
-			const roomList = res.data;
-
-			roomList.forEach((room) => {
-			    if (isReadingRoom(room.chatRoomId)) {
-			        room.unreadCount = 0;
-			    }
-			});
-
-			roomsVm.rooms = roomList;
+	   function showDirectRoom(chatRoomId, targetName) {
+	       showChatRoom(chatRoomId, targetName, "PERSONAL", 2);
+	   }
 
 
-	    } catch (e) {
-			
-	        console.error("채팅방 목록 조회 실패:", e);
-	    }
-	}
+	   function openRoom(room) {
 
-	
-	
+	       const roomName = room.chatKind === "GROUP"
+	           ? (room.roomName || "그룹 채팅")
+	           : (room.targetName || "1:1 채팅");
+
+	       showChatRoom(
+	           room.chatRoomId,
+	           roomName,
+	           room.chatKind,
+	           room.groupCount,
+			   room.canManage === 1
+	       );
+	   }
+	   
+
+	   renameToggle.addEventListener("click", function() {
+
+	       if (activeChatKind !== "GROUP" || ! activeRoomOwner) {
+	           return;
+	       }
+
+	       renameInput.value = document.getElementById("workchatActiveRoomTitle").textContent;
+	       renamePanel.hidden = false;
+	       renameInput.focus();
+	   	});
+
+
+	   renameCancel.addEventListener("click", () => {
+	       renamePanel.hidden = true;
+	   });
+
+
+	   renameSave.addEventListener("click", async () => {
+
+	       if (activeChatKind !== "GROUP" || ! activeRoomOwner || activeChatRoomId == null) {
+	           return;
+	       }
+
+	       const roomName = renameInput.value.trim();
+
+	       if (roomName.length === 0 || roomName.length > 15) {
+	           alert("그룹 이름은 1~15자로 입력해 주세요.");
+	           return;
+	       }
+
+	       const chatRoomId = activeChatRoomId;
+	       const domainKey = window.location.pathname.split("/")[1];
+
+	       try {
+	           renameSave.disabled = true;
+
+	           const res = await axios.put(
+	               "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/name",
+	               {
+	                   roomName: roomName
+	               }
+	           );
+
+	           if (Number(activeChatRoomId) === Number(chatRoomId)) {
+
+	               const newRoomName = res.data;
+
+	               document.getElementById("workchatActiveRoomTitle")
+	                   .textContent = newRoomName;
+
+	               document.getElementById("workchatActiveRoomAvatar")
+	                   .textContent = newRoomName.slice(-2);
+
+	               renamePanel.hidden = true;
+	           }
+
+	           await loadMyDirectRooms();
+
+	       } catch (e) {
+	           console.error("그룹 이름 변경 실패:", e);
+
+	           alert(e.response?.data || "그룹 이름을 변경하지 못했습니다.");
+	       } finally {
+	           renameSave.disabled = false;
+	       }
+	   });
+	   
+	   
+ 	 	let roomListVersion = 0;
+
+	   async function loadMyDirectRooms() {
+
+	       const domainKey = window.location.pathname.split("/")[1];
+	       const version = ++roomListVersion;
+
+	       try {
+
+	           const [directRes, groupRes] = await Promise.all([
+	               axios.get("/" + domainKey + "/api/workchat/rooms/direct"),
+	               axios.get("/" + domainKey + "/api/workchat/rooms/group")
+	           ]);
+
+	           // 이전 요청 결과가 뒤늦게 도착하면 무시
+	           if (version !== roomListVersion) return;
+
+	           const directRooms = directRes.data.map((room) => {
+	               return {
+	                   ...room,
+	                   chatKind: "PERSONAL"
+	               };
+	           });
+
+	           const groupRooms = groupRes.data.map((room) => {
+	               return {
+	                   ...room,
+	                   chatKind: "GROUP"
+	               };
+	           });
+				
+			   const rooms = [...directRooms, ...groupRooms];
+
+			   // 1:1과 그룹 채팅방을 합친 후 전체 최신순 정렬
+			   rooms.sort((a, b) => {
+
+			       const dateA = a.lastSent;
+			       const dateB = b.lastSent;
+
+			       if (dateA == null && dateB == null) return 0;
+			       if (dateA == null) return 1;
+			       if (dateB == null) return -1;
+
+			       return dateB.localeCompare(dateA);
+			   });
+			   
+	           // 현재 보고 있는 채팅방의 읽지 않음 마크 숨기기
+	           rooms.forEach((room) => {
+	               if (isReadingRoom(room.chatRoomId)) {
+	                   room.unreadCount = 0;
+	               }
+	           });
+
+	           roomsVm.rooms = rooms;
+			   
+			   // 현재 열어둔 그룹 채팅방 정보도 갱신
+			   if (activeChatKind === "GROUP" && activeChatRoomId != null) {
+
+			       const activeRoom = rooms.find((room) => {
+			           return Number(room.chatRoomId) === Number(activeChatRoomId)
+			               && room.chatKind === "GROUP";
+			       });
+
+			       if (activeRoom) {
+			           document.getElementById("workchatActiveRoomTitle")
+			               .textContent = activeRoom.roomName;
+
+			           document.getElementById("workchatActiveRoomAvatar")
+			               .textContent = activeRoom.roomName.slice(-2);
+
+			           activeRoomOwner = activeRoom.canManage === 1;
+			           renameToggle.hidden = ! activeRoomOwner;
+			       }
+			   }
+
+	           const roomCount = modal.querySelector('[data-workchat-panel="chats"] .workchat-room-count');
+
+	           if (roomCount) {roomCount.textContent = rooms.length + "개";}
+	       } catch (e) {
+	           console.error("채팅방 목록 조회 실패:", e);
+	       }
+	   }
+
+
 	const messageList = document.querySelector('.workchat-messages')
 	const messageVm = Vue.createApp({
 
@@ -369,7 +618,12 @@ document.addEventListener("DOMContentLoaded", function () {
 	        loadedMessages = res.data;
 
 	    } catch (e) {
-
+			
+			if (version !== messageLoadVersion ||
+			    Number(activeChatRoomId) !== Number(chatRoomId)) {
+			    return;
+			}
+			
 	        console.error("메시지 조회 실패:", e);
 	        messageVm.failed = true;
 
@@ -453,7 +707,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	        if (activeChatRoomId === chatRoomId) {
 	            messageInput.value = "";
 
-	            await loadMessages(chatRoomId);
+	            await loadMessages(chatRoomId, true);
 	        }
 	
 			await loadMyDirectRooms();
@@ -558,17 +812,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function showCreateView(name) {
-        views.forEach(function (view) { view.hidden = true; });
-        createViews.forEach(function (view) {
+        views.forEach((view) => { view.hidden = true; });
+        createViews.forEach((view) => {
             view.hidden = view.dataset.workchatCreateView !== name;
         });
     }
+	
+
+	function updatePickerConfirm() {
+
+	    const selectedCount = getPersonChecks().filter((check) => {
+	        return check.checked;}).length;
+
+	    if (chatKind === "team") {
+
+	        pickerConfirm.disabled =
+	            selectedCount < 2 || groupNameInput.value.trim() === "";
+	    } else {
+	        // 일반채팅은 상대방 1명만 선택
+	        pickerConfirm.disabled = selectedCount !== 1;
+	    }
+	}
+
 
 
     function updateSelectedPeople() {
         const selected = getPersonChecks().filter(function (check) { return check.checked; });
         personCounter.textContent = selected.length + "명";
+		
+		updatePickerConfirm();
+		
         personChips.replaceChildren();
+		
         if (!selected.length) {
             const empty = document.createElement("span");
             empty.className = "workchat-picker-empty";
@@ -576,31 +851,40 @@ document.addEventListener("DOMContentLoaded", function () {
             personChips.appendChild(empty);
             return;
         }
-        selected.forEach(function (check) {
+		
+        selected.forEach((check) => {
             const chip = document.createElement("span");
             chip.className = "workchat-picker-chip";
             chip.textContent = check.value;
             personChips.appendChild(chip);
         });
-        // 이름표가 길어져도 여러 줄로 내려오지 않고 오른쪽으로 스크롤
         personChips.scrollLeft = personChips.scrollWidth;
     }
 
-    function openKind(kind) {
+	groupNameInput.addEventListener("input", updatePickerConfirm);
+	
+    async function openKind(kind) {
         showTypeMenu(false);
+		
         if (kind === "meeting") {
             changeTab("meetings");
             showCreateView("meetings");
             document.getElementById("workchatMeetingName").focus();
             return;
         }
+		
         chatKind = kind;
         changeTab("chats");
         showCreateView("chats");
-        getPersonChecks().forEach(function (check) { check.checked = false; });
+		
+        getPersonChecks().forEach((check) => { check.checked = false; });
+		
         personSearch.value = "";
+		
         filterPeople();
+		
         updateSelectedPeople();
+		
         document.getElementById("workchatPickerSubtitle").textContent = kind === "general"
             ? "일반채팅 · 한 명만 선택" : "팀채팅 · 여러 명 선택";
         document.getElementById("workchatPickerHeading").textContent = kind === "general"
@@ -608,6 +892,37 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("workchatPickerDescription").textContent = kind === "general"
             ? "워크 멤버 중 한 명을 선택할 수 있어요." : "워크 멤버를 여러 명 선택할 수 있어요.";
         document.getElementById("workchatPickerTitle").textContent = "대화상대 선택";
+		
+
+		groupNameWrap.hidden = kind !== "team";
+		groupNameInput.value = "";
+
+		pickerConfirm.textContent =
+		    kind === "team" ? "그룹 채팅방 만들기" : "1:1 채팅 시작";
+
+		pickerHint.textContent =
+		    kind === "team"
+		        ? "본인 외 2명 이상을 선택해 주세요."
+		        : "대화할 회원 1명을 선택해 주세요.";
+
+		updatePickerConfirm();
+
+		// 회원 데이터를 불러오는 동안 기존 선택 목록 초기화
+		personList.replaceChildren();
+
+		// 기존 회원 조회 함수 재사용
+		await loadMembers();
+
+		// 사용자가 다른 화면으로 이동하지 않았을 때만 표시
+		const pickerView = modal.querySelector(
+		    '[data-workchat-create-view="chats"]'
+		);
+
+		if (chatKind === kind && pickerView && !pickerView.hidden) {
+		    renderPickerMembers(memberVm.members);
+		}
+
+		
         personSearch.focus();
     }
 
@@ -752,6 +1067,94 @@ document.addEventListener("DOMContentLoaded", function () {
 	        directChatButton.disabled = false;
 	    }
 	});
+	
+
+	pickerConfirm.addEventListener("click", async function() {
+
+	    const selectedIds = getPersonChecks()
+	        .filter(function(check) {
+	            return check.checked;
+	        })
+	        .map(function(check) {
+	            return Number(check.dataset.memberId);
+	        });
+
+	    const domainKey = window.location.pathname.split("/")[1];
+
+	    try {
+
+	        pickerConfirm.disabled = true;
+
+	        if (chatKind === "team") {
+
+	            const roomName = groupNameInput.value.trim();
+
+	            if (!roomName || selectedIds.length < 2) {
+	                alert("그룹 이름과 참여자 2명 이상을 선택해 주세요.");
+	                return;
+	            }
+
+	            // 그룹 채팅방 생성
+	            const res = await axios.post(
+	                "/" + domainKey + "/api/workchat/rooms/group",
+	                {
+	                    roomName: roomName,
+	                    memberIds: selectedIds
+	                }
+	            );
+
+	            const chatRoomId = res.data;
+
+	            showChatRoom(
+	                chatRoomId,
+	                roomName,
+	                "GROUP",
+	                selectedIds.length + 1,
+					true
+	            );
+
+	        } else {
+
+	            if (selectedIds.length !== 1) {
+	                alert("대화할 회원 1명을 선택해 주세요.");
+	                return;
+	            }
+
+	            const member = memberVm.members.find(function(item) {
+	                return Number(item.memberId) === selectedIds[0];
+	            });
+
+	            if (!member || member.workId == null) {
+	                alert("회원 정보를 확인할 수 없습니다.");
+	                return;
+	            }
+
+	            // 기존 1:1 채팅방 생성 또는 재사용
+	            const res = await axios.post(
+	                "/" + domainKey + "/api/workchat/rooms/direct",
+	                {
+	                    memberId: member.memberId,
+	                    workId: member.workId
+	                }
+	            );
+
+	            showDirectRoom(res.data, member.name);
+	        }
+
+	        // 생성된 채팅방을 목록에 반영
+	        await loadMyDirectRooms();
+
+	    } catch (e) {
+
+	        console.error("채팅방 생성 실패:", e);
+	        alert("채팅방을 만들지 못했습니다.");
+
+	    } finally {
+
+	        updatePickerConfirm();
+	    }
+	});
+
 
 		
     openButton.addEventListener("click", openWorkchat);

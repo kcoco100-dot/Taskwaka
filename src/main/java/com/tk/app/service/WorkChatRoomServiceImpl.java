@@ -1,6 +1,9 @@
 package com.tk.app.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -9,8 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.tk.app.chat.WorkChatMessageSavedEvent;
+import com.tk.app.domain.dto.WorkChatGroupDto;
 import com.tk.app.domain.dto.WorkChatMemberDto;
 import com.tk.app.domain.dto.WorkChatMessageDto;
+import com.tk.app.mapper.WorkChatGroupMapper;
 import com.tk.app.mapper.WorkChatRoomMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	private final WorkChatRoomMapper mapper;
+	private final WorkChatGroupMapper groupmapper;
 	private final ApplicationEventPublisher eventPublisher;
 	
 	@Transactional
@@ -307,6 +313,169 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 		}
 		
 	}
+	
+	@Override
+	@Transactional
+	public Long createGroupRoom(WorkChatGroupDto dto) throws Exception {
+		try {
+		    if (dto == null || dto.getDomainKey() == null || dto.getLoginMemberId() == null
+		            || dto.getRoomName() == null || dto.getRoomName().isBlank()
+		            || dto.getRoomName().length() > 100 || dto.getMemberIds() == null) {
+		        throw new ResponseStatusException(
+		                HttpStatus.BAD_REQUEST, "그룹 채팅방 정보가 올바르지 않습니다.");
+		    }
+		
+		    Long workId = groupmapper.findWorkIdByDomain(dto.getDomainKey());
+		
+		    if (workId == null) {
+		        throw new ResponseStatusException(
+		                HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
+		    }
+		
+		    WorkChatMemberDto memberDto = new WorkChatMemberDto();
+		    memberDto.setWorkId(workId);
+		    memberDto.setMemberId(dto.getLoginMemberId());
+		
+		    Long myWorkId = mapper.findWorkMemberId(memberDto);
+		
+		    if (myWorkId == null) {
+		        throw new ResponseStatusException(
+		                HttpStatus.FORBIDDEN, "워크스페이스에 참여한 회원이 아닙니다.");
+		    }
+		
+		    // 초대할 회원 중 중복 제거 (중복 없는 Long형 집합)
+		    Set<Long> memberIds = new LinkedHashSet<>(dto.getMemberIds());
+		
+		    memberIds.remove(dto.getLoginMemberId());
+		
+		    if (memberIds.contains(null) || memberIds.size() < 2) {
+		        throw new ResponseStatusException(
+		                HttpStatus.BAD_REQUEST, "그룹 채팅에는 본인 외에 2명 이상 필요합니다.");
+		    }
+		
+		    List<Long> workMemberIds = new ArrayList<>();
+		
+		    workMemberIds.add(myWorkId);
+		
+		    for (Long memberId : memberIds) {
+		        memberDto.setMemberId(memberId);
+		        Long workMemberId = mapper.findWorkMemberId(memberDto);
+		        if (workMemberId == null) {
+		            throw new ResponseStatusException(
+		                    HttpStatus.BAD_REQUEST, "초대할 수 없는 회원이 포함되어 있습니다.");
+		        }
+		
+		        workMemberIds.add(workMemberId);
+		    }
+		
+		    Long chatRoomId = mapper.nextRoomId();
+		
+		    dto.setChatRoomId(chatRoomId);
+		    dto.setWorkId(workId);
+		    dto.setMyWorkId(myWorkId);
+		
+		    groupmapper.insertGroupRoom(dto);
+		
+		    for (Long workMemberId : workMemberIds) {
+		        WorkChatMemberDto roomMemberDto = new WorkChatMemberDto();
+		
+		        roomMemberDto.setChatRoomId(chatRoomId);
+		        roomMemberDto.setWorkMemberId(workMemberId);
+		
+		        mapper.insertRoomMember(roomMemberDto);
+		    }
+		    
+		    eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
+		            chatRoomId,
+		            dto.getLoginMemberId(),
+		            new ArrayList<>(memberIds)
+		    ));
+		
+		    return chatRoomId;
+			
+		} catch (Exception e) {
+			throw e;
+		}
+
+	}
+
+
+
+	@Override
+	public List<WorkChatMemberDto> findMyGroupRooms(WorkChatMemberDto dto) throws Exception {
+		try {
+		    List<WorkChatMemberDto> rooms = groupmapper.findMyGroupRooms(dto);
+			
+		    for (WorkChatMemberDto room : rooms) {
+		
+		        WorkChatMessageDto last = mapper.findLatestRoomMessage(room);
+		
+		        if (last != null) {
+		            room.setLastMessage(last.getContent());
+		            room.setLastSent(last.getSent());
+		        }
+		
+		        room.setLoginMemberId(dto.getLoginMemberId());
+		
+		        int unreadCount = mapper.countUnreadMessages(room);
+		
+		        room.setUnreadCount(unreadCount);
+		    }
+		
+		    return rooms;
+		    
+		} catch (Exception e) {
+			throw e;
+		}
+		
+	}
+
+
+	@Override
+	@Transactional
+	public String renameGroupRoom(WorkChatGroupDto dto) throws Exception {
+	
+	    // 1. 기본 요청 정보 검증
+	    if (dto == null || dto.getChatRoomId() == null || dto.getChatRoomId() <= 0
+	            || dto.getDomainKey() == null || dto.getDomainKey().isBlank()
+	            || dto.getLoginMemberId() == null || dto.getRoomName() == null) {	
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "그룹 채팅방 정보가 올바르지 않습니다.");
+	    }
+	
+	    String roomName = dto.getRoomName().trim();
+	
+	    if (roomName.isEmpty() || roomName.length() > 15) {
+	
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "그룹 이름은 1~15자로 입력해 주세요.");
+	    }
+	
+	    dto.setRoomName(roomName);
+	
+	    int result = groupmapper.updateGroupRoomName(dto);
+	
+	    if (result != 1) {
+	
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "그룹 이름을 변경할 권한이 없습니다.");
+	    }
+	
+	    WorkChatMessageDto messageDto = new WorkChatMessageDto();
+	    messageDto.setChatRoomId(dto.getChatRoomId());
+	
+	    List<Long> memberIds = mapper.findActiveRoomMemberIds(messageDto);
+	
+	    eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
+	            dto.getChatRoomId(),
+	            dto.getLoginMemberId(),
+	            memberIds
+	    ));
+	
+	    return roomName;
+	}
+
+
 }
 	
 	

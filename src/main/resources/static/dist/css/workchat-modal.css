@@ -1333,3 +1333,19 @@ body > .workchat-overlay .workchat-create-body { overscroll-behavior: contain; }
   }
 }
 }
+
+.workchat-rename-panel {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.workchat-rename-panel[hidden] {
+    display: none;
+}
+
+.workchat-rename-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
