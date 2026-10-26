@@ -133,11 +133,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public DailyReportDto createDailyReport(DailyReportDto dto) {
-        if (dto.getProgress() == null) dto.setProgress(0.0);
         taskMapper.insertDailyReport(dto);
         // 일일보고서 진행률을 하위업무 진행률에도 동기화 반영
-        taskMapper.updateSubTaskField(dto.getSubTaskId(), "progress", dto.getProgress());
+        SubTaskDto subTaskDto = taskMapper.selectSubTaskById(dto.getSubTaskId());
+        Long projectMemberId = subTaskDto.getProjectMemberId();
+        dto.setProjectMemberId(projectMemberId);
+        Double subTaskProgress = subTaskDto.getProgress();
+        Double sumProgress = dto.getProgress() + subTaskProgress;
+        if (sumProgress >=100) return null;
+        taskMapper.updateSubTaskField(dto.getSubTaskId(), "progress", sumProgress);
         return taskMapper.selectDailyReportById(dto.getDailyReportId());
     }
 
@@ -265,7 +271,10 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public void createTeamReport(TeamReportDto dto) {
     	Long taskId = dto.getTaskId();
-    	Double currentProgress = taskMapper.selectTaskById(taskId).getProgress();
+    	TaskDto taskDto = taskMapper.selectTaskById(taskId);
+    	Long projectMemberId = taskDto.getProjectMemberId();
+    	dto.setProjectMemberId(projectMemberId);
+    	Double currentProgress = taskDto.getProgress();
     	Double addProgress = dto.getProgress();
     	taskMapper.insertTeamReport(dto);
     	taskMapper.updateTaskField(taskId, "progress", currentProgress + addProgress);

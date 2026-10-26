@@ -207,7 +207,7 @@ function toggleSubTasks(btn) {
 }
 
 // 3. 보고서 등록 모달 오픈
-async function requestCreateReport(taskId) {
+async function requestCreateReport(taskId, isTask) {
 	
   const modal = document.getElementById('reportCreateModal');
   const titleInput = document.getElementById('createReportTitleInput');
@@ -215,7 +215,9 @@ async function requestCreateReport(taskId) {
   const progressInput = document.getElementById('createReportProgressInput');
   const contentInput = document.getElementById('createReportContentInput');
   const taskIdInput = document.getElementById('taskIdInput');
+  const isTaskInput = document.getElementById('isTaskInput');
   taskIdInput.value = taskId;
+  isTaskInput.value = isTask;
   titleInput.value = '';
   contentInput.value = '';
   progressInput.value = '';
@@ -241,35 +243,40 @@ function handleCreateBackdropClick(e) {
 }
 
 // 4. 보고서 submit
-async function submitCreateReportModal(isTask) {
+async function submitCreateReportModal() {
 
   const titleInput = document.getElementById('createReportTitleInput');
   const contentInput = document.getElementById('createReportContentInput');
   const memberIdInput = document.getElementById('createReportWriter');
   const progress = document.getElementById('createReportProgressInput').value;
   const taskId = document.getElementById('taskIdInput').value
+  const writerName = document.getElementById('createReportWriterName').value;
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
   const projectMemberId = memberIdInput.value;
+    const isTask = document.getElementById('isTaskInput');
+  
 
   if (!title) { alert('보고서 제목을 입력해 주세요.'); titleInput.focus(); return; }
   if (!content) { alert('상세 내용을 입력해 주세요.'); contentInput.focus(); return; }
-
-  const payload = {
-  	taskId: Number(taskId),
-  	projectMemberId: Number(projectMemberId),
-  	projectId: Number(currentProjectId),
-  	reportType: 'REPORT',
-  	title: title,
-  	content: content,
-  	progress: Number(progress)
-  };
   
-  console.log(payload);
   
 
   try {
 	if(isTask === 'task'){
+		
+        const payload = {
+            taskId: Number(taskId),
+            projectMemberId: Number(projectMemberId),
+            projectId: Number(currentProjectId),
+            reportType: 'REPORT',
+            title: title,
+            content: content,
+            progress: Number(progress)
+        };
+		
+		console.log(payload);
+
 		const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${taskId}/reports`, 
 		{
 		  method: 'POST',
@@ -279,12 +286,22 @@ async function submitCreateReportModal(isTask) {
 		
 		if (!res.ok) throw new Error('보고서 작성 실패');
 	}else{
-		console.log('subtask 보고서 제출');
-		const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/tasks/${taskId}/reports`, 
+		
+		const payload = {
+		    subTaskId: Number(taskId),
+		    projectMemberId: Number(projectMemberId),
+			writerName: writerName,
+		    title: title,
+		    content: content,
+		    progress: Number(progress)
+		};
+		
+		console.log('subtask 보고서 제출', payload);
+		const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/subtasks/${taskId}/daily-reports`, 
 		{
 		  method: 'POST',
 		  headers: { 'Content-Type': 'application/json' },
-		  body: formData
+		  body: JSON.stringify(payload)
 		});
 
 		if (!res.ok) throw new Error('보고서 작성 실패');

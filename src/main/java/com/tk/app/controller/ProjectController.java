@@ -111,6 +111,7 @@ public class ProjectController {
         dto.setEndAt((endAt != null && !endAt.isBlank()) ? endAt : null);
 
         SubTaskDto created = taskService.createSubTask(dto);
+        model.addAttribute("projectMemberId", projectMemberId);
         model.addAttribute("subTask", created);
         model.addAttribute("currentProjectMemberId", currentProjectMemberId);
 

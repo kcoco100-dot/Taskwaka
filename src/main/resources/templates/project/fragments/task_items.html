@@ -27,7 +27,7 @@
 					th:if="${task.assigneeMemberId == currentProjectMemberId}"
 					onclick="event.stopPropagation();">
 					<button type="button" class="btn-action-tool btn-action-add"
-						th:onclick="|requestCreateReport(${task.taskId})|" title="업무 보고서 작성">📋</button>
+						th:onclick="|requestCreateReport(${task.taskId}, 'task')|" title="업무 보고서 작성">📋</button>
 					<button type="button" class="btn-action-tool btn-action-add"
 						th:onclick="|requestCreateSubTask(${task.taskId})|"
 						title="하위업무 추가">＋</button>
@@ -87,8 +87,8 @@
 				<span class="inline-action-bundle"
 					onclick="event.stopPropagation();">
 					<button type="button" class="btn-action-tool btn action-del"
-						th:onclick="|requestCreateReport(${task.taskId},'subtask')|"
-						title="하위업무 보고서 작성">📋</button> <!-- 클릭하면 보고서 작성 모달 -->
+						th:onclick="|requestCreateReport(${subTask.subTaskId}, 'subTask')|"
+						title="하위업무 보고서 작성">📋</button>
 					<button type="button" class="btn-action-tool btn-action-del"
 						th:onclick="|openDeleteModal('subtask', ${subTask.subTaskId}, this)|"
 						title="하위업무 삭제">
@@ -231,7 +231,7 @@
 
 				<div class="modal-prop-row">
 					<span class="modal-prop-label">담당자: <span
-						th:text="${currentProjectMemberName}"></span></span>
+						th:text="${currentProjectMemberName}" ></span></span>
 				</div>
 
 				<div class="modal-prop-row">
@@ -255,6 +255,8 @@
 					<textarea class="modal-form-textarea" id="createReportContentInput"
 						placeholder="보고서의 내용을 입력해 주세요..."></textarea>
 					<input type="hidden" value="" id="taskIdInput">
+					<input type="hidden" value="" id="isTaskInput">
+					<input type="hidden" th:value="${currentProjectMemberName}" id="createReportWriterName">
 					<input
 						type="hidden" th:value="${currentProjectMemberId}"
 						id="createReportWriter">
@@ -267,7 +269,7 @@
 				<button type="button" class="btn-modal-cancel"
 					onclick="closeCreateReportModal()">취소</button>
 				<button type="button" class="btn-modal-submit"
-					th:onclick="|submitCreateReportModal('task')|">보고서
+					th:onclick="|submitCreateReportModal()|">보고서
 					등록</button>
 			</div>
 		</div>
