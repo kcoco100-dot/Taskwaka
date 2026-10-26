@@ -272,3 +272,38 @@
     line-height: 1.5;
     white-space: nowrap;
 }
+
+.mainHome.myHome-page .team-card-create {
+    min-height: 132px;
+    padding: 28px;
+    border: 1px dashed #D4BD9C;
+    background: #FFF9F0;
+    box-shadow: none;
+}
+
+.mainHome.myHome-page .team-card-create .team-card-icon {
+    background: #F3E6D2;
+    color: #8B643D;
+}
+
+.mainHome.myHome-page .team-card-create .team-card-title {
+    color: #654B32;
+    font-size: 17px;
+}
+
+.mainHome.myHome-page .team-card-create .team-card-description {
+    color: #85735E;
+}
+
+.mainHome.myHome-page .team-card-create .team-card-action {
+    padding: 10px 16px;
+    background: #5C7348;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.mainHome.myHome-page .team-card-create:hover {
+    border-color: #B39369;
+    background: #FFF5E5;
+    box-shadow: 0 5px 16px rgba(101, 75, 50, 0.06);
+}

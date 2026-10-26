@@ -18,6 +18,17 @@
         </div>
 		
 		<div class="mainHome-menu">
+			<a th:if="${#lists.isEmpty(workLists)}" th:href="@{/work}" class="team-card team-card-create">
+			    <span class="team-card-icon" aria-hidden="true">
+			        <i class="bi bi-plus-lg"></i>
+			    </span>
+			    <span class="team-card-title">참여 중인 워크가 없습니다.</span>
+			    <span class="team-card-description">
+			        새 워크를 만들거나 초대를 받아 참여해보세요.
+			    </span>
+			    <span class="team-card-action">새 워크 만들기 →</span>
+			</a>
+		
 			<a th:each="work : ${workLists}" th:href="@{/{domainKey}/home/dashboard(domainKey=${work.domainKey})}" class="team-card team-card-list">
 				<span class="team-card-icon" aria-hidden="true">
 					<i class="bi bi-people"></i>
