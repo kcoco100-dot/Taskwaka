@@ -3,14 +3,49 @@
 <body>
 
 <div th:fragment="content">
+
+	<link rel="stylesheet" th:href="@{/dist/css/admin-faq.css}">
+    
     <div class="panel-card">
         <div class="panel-card-title">FAQ 관리</div>
-        
+
         <div class="faq-list-actions">
-		    <a th:href="@{/admin/faq/write}" class="btn-sage">FAQ 등록</a>
-		</div>
+            <a th:href="@{/admin/faq/write}" class="btn-sage">FAQ 등록</a>
+        </div>
+
+        <form class="faq-search-form" th:action="@{/admin/faq}" method="get">
+
+            <select id="faqSearchCategory" name="category" onchange="changeFaqSearchCategory()">
+                <option value="">전체 대분류</option>
+                <option value="워크스페이스 관리" th:selected="${category == '워크스페이스 관리'}">워크스페이스 관리</option>
+                <option value="프로젝트 관리" th:selected="${category == '프로젝트 관리'}">프로젝트 관리</option>
+                <option value="업무 관리" th:selected="${category == '업무 관리'}">업무 관리</option>
+                <option value="일정 및 협업" th:selected="${category == '일정 및 협업'}">일정 및 협업</option>
+                <option value="고객 지원" th:selected="${category == '고객 지원'}">고객 지원</option>
+            </select>
+
+            <select id="faqSearchSubcategory" name="subcategory" th:attr="data-selected=${subcategory}">
+                <option value="">전체 소분류</option>
+            </select>
+
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="질문 검색">
+
+            <button type="submit" class="faq-search-btn">검색</button>
+            <a th:href="@{/admin/faq}" class="faq-reset-btn">초기화</a>
+        </form>
+
+        <div class="faq-count">
+            검색 결과 <strong th:text="${totalCount}">0</strong>건
+        </div>
 
         <table class="warm-table faq-table">
+            <colgroup>
+                <col style="width: 9%;">
+                <col style="width: 36%;">
+                <col style="width: 37%;">
+                <col style="width: 18%;">
+            </colgroup>
+
             <thead>
                 <tr>
                     <th>번호</th>
@@ -19,23 +54,97 @@
                     <th>관리</th>
                 </tr>
             </thead>
+
             <tbody>
-			    <tr th:each="faq : ${faqList}">
-			        <td th:text="${faq.faqId}"></td>
-			        <td th:text="${faq.question}"></td>
-			        <td th:text="${faq.answer}"></td>
-			        <td>
-			            <a th:href="@{/admin/faq/edit(faqId=${faq.faqId})}" class="btn-sage">수정</a>
-			
-			            <form th:action="@{/admin/faq/delete}" method="post" style="display:inline;">
-			                <input type="hidden" name="faqId" th:value="${faq.faqId}">
-			                <button type="submit" class="btn-faq-delete" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
-			            </form>
-			        </td>
-			    </tr>
-			</tbody>
+                <tr th:each="faq : ${faqList}">
+                    <td th:text="${faq.faqId}"></td>
+
+                    <td>
+                        <span class="faq-preview" th:text="${faq.question}" th:title="${faq.question}"></span>
+                        <span class="faq-category-text" th:text="|${faq.category} / ${faq.subcategory}|"></span>
+                    </td>
+
+                    <td>
+                        <span class="faq-preview" th:text="${faq.answer}" th:title="${faq.answer}"></span>
+                    </td>
+
+                    <td class="faq-manage-cell">
+                        <a th:href="@{/admin/faq/edit(faqId=${faq.faqId})}" class="btn-sage">수정</a>
+
+                        <form th:action="@{/admin/faq/delete}" method="post" style="display:inline;">
+                            <input type="hidden" name="faqId" th:value="${faq.faqId}">
+                            <button type="submit" class="btn-faq-delete" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(faqList)}">
+                    <td colspan="4" class="faq-empty">검색 결과가 없습니다.</td>
+                </tr>
+            </tbody>
         </table>
+
+        <div class="faq-pagination" th:if="${totalPages > 1}">
+
+            <a th:if="${page > 1}"
+               th:href="@{/admin/faq(page=${page - 1},category=${category},subcategory=${subcategory},keyword=${keyword})}">이전</a>
+
+            <span th:if="${page <= 1}" class="disabled">이전</span>
+
+            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <span th:if="${i == page}" class="active" th:text="${i}"></span>
+
+                <a th:unless="${i == page}"
+                   th:href="@{/admin/faq(page=${i},category=${category},subcategory=${subcategory},keyword=${keyword})}"
+                   th:text="${i}"></a>
+            </th:block>
+
+            <a th:if="${page < totalPages}"
+               th:href="@{/admin/faq(page=${page + 1},category=${category},subcategory=${subcategory},keyword=${keyword})}">다음</a>
+
+            <span th:if="${page >= totalPages}" class="disabled">다음</span>
+        </div>
+
     </div>
+
+    <script type="text/javascript">
+        function changeFaqSearchCategory() {
+            const category = document.getElementById('faqSearchCategory').value;
+            const subcategory = document.getElementById('faqSearchSubcategory');
+
+            subcategory.innerHTML = '<option value="">전체 소분류</option>';
+
+            let items = [];
+
+            if (category === '워크스페이스 관리') {
+                items = ['워크스페이스 생성·참여', 'PM 변경·권한'];
+            } else if (category === '프로젝트 관리') {
+                items = ['프로젝트 생성·설정', '프로젝트 멤버 관리'];
+            } else if (category === '업무 관리') {
+                items = ['업무 등록·담당자', '진행 상태·우선순위'];
+            } else if (category === '일정 및 협업') {
+                items = ['캘린더·일정', '채팅·회의'];
+            } else if (category === '고객 지원') {
+                items = ['공지사항', '1:1 문의'];
+            }
+
+            items.forEach(function(item) {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                subcategory.appendChild(option);
+            });
+        }
+
+        changeFaqSearchCategory();
+
+        const selectedSubcategory = document.getElementById('faqSearchSubcategory').getAttribute('data-selected');
+
+        if (selectedSubcategory) {
+            document.getElementById('faqSearchSubcategory').value = selectedSubcategory;
+        }
+    </script>
+
 </div>
 
 </body>

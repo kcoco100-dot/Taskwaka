@@ -2,6 +2,10 @@ package com.tk.app.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.tk.app.domain.entity.Faq;
@@ -78,6 +82,26 @@ public class FaqServiceImpl implements FaqService {
 			throw e;
 		}
 		
+	}
+
+	@Override
+	public Page<Faq> listPage(String category, String subcategory, String keyword, int page) {
+	    try {
+	        Pageable pageable = PageRequest.of(page - 1, 5, Sort.by(Sort.Direction.DESC, "faqId"));
+
+	        if (!category.isBlank() && !subcategory.isBlank()) {
+	            return faqRepository.findByCategoryAndSubcategoryAndQuestionContaining(category, subcategory, keyword, pageable);
+	        } else if (!category.isBlank()) {
+	            return faqRepository.findByCategoryAndQuestionContaining(category, keyword, pageable);
+	        } else if (!keyword.isBlank()) {
+	            return faqRepository.findByQuestionContaining(keyword, pageable);
+	        }
+
+	        return faqRepository.findAll(pageable);
+	    } catch (Exception e) {
+	        log.error("listPage : ", e);
+	        throw e;
+	    }
 	}
 
 }

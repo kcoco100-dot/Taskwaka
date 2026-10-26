@@ -4,6 +4,8 @@
 <body>
 
 <div th:fragment="content" class="notice-form-page">
+
+	<link rel="stylesheet" th:href="@{/dist/css/admin-faq.css}">
     <div class="panel-card">
         <div class="panel-card-title">FAQ 수정</div>
 
@@ -30,7 +32,7 @@
             		
             <div>
                 <label>질문</label>
-                <input type="text" name="question" class="warm-input" th:value="${faq.question}" placeholder="자주 묻는 질문을 입력하세요." maxlength="300" required>
+                <textarea name="question" class="faq-question-input" rows="2" maxlength="300" th:text="${faq.question}" required></textarea>
             </div>
 
             <div class="notice-field">

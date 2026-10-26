@@ -4,6 +4,21 @@
 <body>
 
 <div th:fragment="content" class="notice-form-page">
+
+	<style>
+	.faq-question-input {
+	    display: block;
+	    width: 100%;
+	    min-height: 65px;
+	    padding: 12px 15px;
+	    box-sizing: border-box;
+	    border: 1px solid #d9d2c8;
+	    border-radius: 8px;
+	    font-size: 14px;
+	    resize: none;
+	}
+	</style>
+
     <div class="panel-card">
         <div class="panel-card-title">FAQ 등록</div>
 
@@ -29,7 +44,7 @@
             		
             <div>
                 <label>질문</label>
-                <input type="text" name="question" class="warm-input" placeholder="자주 묻는 질문을 입력하세요." maxlength="300" required>
+                <textarea name="question" class="faq-question-input" rows="2" maxlength="300" placeholder="FAQ 질문을 입력하세요." required></textarea>
             </div>
 
             <div class="notice-field">

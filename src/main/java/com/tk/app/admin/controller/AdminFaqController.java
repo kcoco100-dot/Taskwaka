@@ -2,6 +2,7 @@ package com.tk.app.admin.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,17 +36,30 @@ public class AdminFaqController {
 	}
 	
 	@GetMapping("")
-	public String listFaq(Model model) {
-		try {
-			List<Faq> list = faqService.listFaq();
-			
-			model.addAttribute("faqList", list);
-			model.addAttribute("activeSection", "faq");
-		} catch (Exception e) {
-			log.error("listFaq : ", e);
-			throw e;
-		}
-		return "admin/admin_layout";
+	public String listFaq(
+	        @RequestParam(value = "page", defaultValue = "1") int page,
+	        @RequestParam(value = "category", defaultValue = "") String category,
+	        @RequestParam(value = "subcategory", defaultValue = "") String subcategory,
+	        @RequestParam(value = "keyword", defaultValue = "") String keyword,
+	        Model model) {
+	    try {
+	        if (page < 1) page = 1;
+
+	        Page<Faq> result = faqService.listPage(category, subcategory, keyword, page);
+
+	        model.addAttribute("faqList", result.getContent());
+	        model.addAttribute("page", page);
+	        model.addAttribute("totalPages", result.getTotalPages());
+	        model.addAttribute("category", category);
+	        model.addAttribute("subcategory", subcategory);
+	        model.addAttribute("keyword", keyword);
+	        model.addAttribute("activeSection", "faq");
+	        model.addAttribute("totalCount", result.getTotalElements());
+	    } catch (Exception e) {
+	        log.error("listFaq : ", e);
+	        throw e;
+	    }
+	    return "admin/admin_layout";
 	}
 	
 	@GetMapping("/write")

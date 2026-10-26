@@ -1,0 +1,146 @@
+@charset "UTF-8";
+
+.faq-list-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin: 15px 0;
+}
+
+.faq-search-form {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 20px 0;
+	flex-wrap: wrap;
+}
+
+.faq-search-form select, .faq-search-form input {
+	height: 40px;
+	padding: 0 12px;
+	border: 1px solid #ded6cb;
+	border-radius: 8px;
+	background: white;
+	box-sizing: border-box;
+	font-size: 14px;
+}
+
+.faq-search-form select {
+	min-width: 165px;
+}
+
+.faq-search-form input {
+	flex: 1;
+	min-width: 180px;
+}
+
+.faq-search-btn {
+	height: 40px;
+	padding: 0 20px;
+	background: #637254;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.faq-reset-btn {
+	height: 40px;
+	padding: 0 15px;
+	line-height: 40px;
+	color: #665b4d;
+	background: #f5f1eb;
+	border: 1px solid #ddd5ca;
+	border-radius: 8px;
+	text-decoration: none;
+	box-sizing: border-box;
+}
+
+.faq-count {
+	margin: 12px 0;
+	color: #777;
+	font-size: 13px;
+}
+
+.faq-table {
+	width: 100%;
+	table-layout: fixed;
+}
+
+.faq-table th, .faq-table td {
+	padding: 14px 10px;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.faq-preview {
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	text-align: left;
+}
+
+.faq-category-text {
+	display: block;
+	margin-top: 6px;
+	font-size: 12px;
+	color: #94877a;
+	text-align: left;
+}
+
+.faq-manage-cell {
+	white-space: nowrap;
+}
+
+.faq-manage-cell a, .faq-manage-cell button {
+	display: inline-block;
+	margin: 2px;
+}
+
+.faq-pagination {
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+	margin: 25px 0 5px;
+}
+
+.faq-pagination a, .faq-pagination span {
+	min-width: 34px;
+	padding: 8px 10px;
+	text-align: center;
+	border: 1px solid #ded6cb;
+	border-radius: 7px;
+	color: #625949;
+	text-decoration: none;
+	background: #fff;
+	box-sizing: border-box;
+}
+
+.faq-pagination .active {
+	background: #637254;
+	border-color: #637254;
+	color: white;
+}
+
+.faq-pagination .disabled {
+	color: #bbb;
+	background: #f8f8f8;
+}
+
+.faq-empty {
+	padding: 35px 10px !important;
+	color: #888;
+	text-align: center;
+}
+
+.faq-question-input {
+    display: block;
+    width: 100%;
+    min-height: 65px;
+    padding: 12px 15px;
+    box-sizing: border-box;
+    border: 1px solid #d9d2c8;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: none;
+}

@@ -7,17 +7,41 @@
 	    <span id="faqCloseIcon">×</span>
 	</button>
     
-    <div id="faqChatbotPanel" class="faq-chatbot-panel" hidden>
-        <div class="faq-chatbot-header">
-            <strong>Taskwaka 도우미</strong>
-            <button type="button" onclick="toggleFaqChatbot()">×</button>
-        </div>
-        <div class="faq-chatbot-content">
-            안녕하세요! 무엇을 도와드릴까요?
-            <div id="faqCategoryList"></div>
-        </div>
-        
-    </div>
+    
+	<div id="faqChatbotPanel" class="faq-chatbot-panel" hidden>
+	
+	    <div class="faq-chatbot-header">
+	        <div class="faq-chatbot-profile">
+	            <img th:src="@{/dist/images/faq-bear.png}" alt="Taskwaka">
+	            <div class="faq-chatbot-title-wrap">
+	                <strong>Taskwaka 도우미</strong>
+	                <span>FAQ 안내 챗봇</span>
+	            </div>
+	        </div>
+	    </div>
+	
+	    <div class="faq-chatbot-content">
+	
+	        <div class="faq-welcome-message">
+	            <img th:src="@{/dist/images/faq-bear.png}" alt="도우미">
+	            <div class="faq-bot-message">
+	                안녕하세요! Taskwaka 도우미예요. 😊<br>
+	                궁금한 내용을 선택하거나 아래에 검색해 주세요.
+	            </div>
+	        </div>
+	
+	        <div id="faqChatHistory"></div>
+			<div id="faqCategoryList"></div>
+	
+	    </div>
+	
+	    <div class="faq-chatbot-input-area">
+	        <input type="text" id="faqSearchInput" placeholder="궁금한 내용을 입력해 주세요.">
+	        <button type="button" id="faqSearchButton" aria-label="검색">➤</button>
+	    </div>
+	
+	</div>
+
 </div>
 
 <th:block th:fragment="script">
@@ -43,9 +67,244 @@
 		}
 	</script>
 
-	<script type="text/javascript">
-		
-	</script>
+
+<script type="text/javascript">
+
+    // 서버에서 FAQ 전체 목록 가져오기
+    function loadFaq() {
+	    fetch('/faq/list')
+	        .then(response => response.json())
+	        .then(data => {
+	            showCategories(data);
+	
+	            const searchInput = document.getElementById('faqSearchInput');
+	            const searchButton = document.getElementById('faqSearchButton');
+	
+	            searchButton.onclick = function() {
+	                searchFaq(data);
+	            };
+	
+	            searchInput.onkeydown = function(event) {
+	                if (event.key === 'Enter') {
+	                    event.preventDefault();
+	                    searchFaq(data);
+	                }
+	            };
+	        })
+	        .catch(error => console.log(error));
+	}
+
+    // 1. 대분류 목록
+    function showCategories(data) {
+        const categoryList = document.getElementById('faqCategoryList');
+        categoryList.innerHTML = '';
+
+        const categories = [];
+
+        data.forEach(function(faq) {
+            if (!categories.includes(faq.category)) {
+                categories.push(faq.category);
+            }
+        });
+
+        categories.forEach(function(category) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'faq-category-btn';
+            button.textContent = category;
+
+            button.onclick = function() {
+                showSubcategories(data, category);
+            };
+
+            categoryList.appendChild(button);
+        });
+    }
+
+    // 2. 소분류 목록
+    function showSubcategories(data, category) {
+        const categoryList = document.getElementById('faqCategoryList');
+        categoryList.innerHTML = '';
+
+        const backButton = document.createElement('button');
+        backButton.type = 'button';
+        backButton.className = 'faq-back-btn';
+        backButton.textContent = '← 대분류 목록으로';
+
+        backButton.onclick = function() {
+            showCategories(data);
+        };
+
+        categoryList.appendChild(backButton);
+
+        const subcategories = [];
+
+        data.forEach(function(faq) {
+            if (faq.category === category && !subcategories.includes(faq.subcategory)) {
+                subcategories.push(faq.subcategory);
+            }
+        });
+
+        subcategories.forEach(function(subcategory) {
+            const subButton = document.createElement('button');
+            subButton.type = 'button';
+            subButton.className = 'faq-category-btn';
+            subButton.textContent = subcategory;
+
+            subButton.onclick = function() {
+                showQuestions(data, category, subcategory);
+            };
+
+            categoryList.appendChild(subButton);
+        });
+    }
+
+    // 3. 질문 목록
+    function showQuestions(data, category, subcategory) {
+        const categoryList = document.getElementById('faqCategoryList');
+        categoryList.innerHTML = '';
+
+        const backButton = document.createElement('button');
+        backButton.type = 'button';
+        backButton.className = 'faq-back-btn';
+        backButton.textContent = '← 소분류 목록으로';
+
+        backButton.onclick = function() {
+            showSubcategories(data, category);
+        };
+
+        categoryList.appendChild(backButton);
+
+        data.forEach(function(faq) {
+            if (faq.category === category && faq.subcategory === subcategory) {
+                const questionButton = document.createElement('button');
+                questionButton.type = 'button';
+                questionButton.className = 'faq-category-btn';
+                questionButton.textContent = faq.question;
+
+                questionButton.onclick = function() {
+                    showAnswer(data, category, subcategory, faq);
+                };
+
+                categoryList.appendChild(questionButton);
+            }
+        });
+    }
+
+    // 4. 질문과 답변 표시
+    function showAnswer(data, category, subcategory, faq) {
+	    const categoryList = document.getElementById('faqCategoryList');
+	    const chatHistory = document.getElementById('faqChatHistory');
+	
+	    const question = document.createElement('div');
+	    question.className = 'faq-question-bubble';
+	    question.textContent = faq.question;
+	    chatHistory.appendChild(question);
+	    
+	    const questionTime = document.createElement('div');
+	    questionTime.className = 'faq-question-time';
+	    questionTime.textContent = new Date().toLocaleTimeString('ko-KR', {hour: 'numeric', minute: '2-digit'});
+	    chatHistory.appendChild(questionTime);
+	
+	    const answerBox = document.createElement('div');
+	    answerBox.className = 'faq-answer-row';
+	
+	    const bear = document.createElement('img');
+	    bear.src = '/dist/images/faq-bear.png';
+	    bear.className = 'faq-answer-avatar';
+	    answerBox.appendChild(bear);
+	
+	    const answer = document.createElement('div');
+	    answer.className = 'faq-answer-bubble';
+	    answerBox.appendChild(answer);
+	
+	    chatHistory.appendChild(answerBox);
+	    
+	    const answerTime = document.createElement('div');
+	    answerTime.className = 'faq-answer-time';
+	    answerTime.textContent = new Date().toLocaleTimeString('ko-KR', {hour: 'numeric', minute: '2-digit'});
+	    chatHistory.appendChild(answerTime);
+	
+	    showQuestions(data, category, subcategory);
+	
+	    const content = document.querySelector('.faq-chatbot-content');
+	    content.scrollTop = content.scrollHeight;
+	    
+	    let index = 0;
+	    const answerText = faq.answer;
+
+	    const typing = setInterval(function() {
+	        answer.textContent += answerText.charAt(index);
+	        index++;
+
+	        content.scrollTop = content.scrollHeight;
+
+	        if (index >= answerText.length) {
+	            clearInterval(typing);
+	        }
+	    }, 20);
+	}
+    
+
+    function searchFaq(data) {
+        const searchInput = document.getElementById('faqSearchInput');
+        const keyword = searchInput.value.trim().toLowerCase();
+        const categoryList = document.getElementById('faqCategoryList');
+        const chatHistory = document.getElementById('faqChatHistory');
+
+        if (keyword === '') {
+            alert('검색어를 입력해 주세요.');
+            return;
+        }
+
+        categoryList.innerHTML = '';
+
+        const backButton = document.createElement('button');
+        backButton.type = 'button';
+        backButton.className = 'faq-back-btn';
+        backButton.textContent = '← 대분류 목록으로';
+
+        backButton.onclick = function() {
+            showCategories(data);
+        };
+
+        categoryList.appendChild(backButton);
+
+        let count = 0;
+
+        data.forEach(function(faq) {
+            if (faq.question.toLowerCase().includes(keyword)) {
+                count++;
+
+                const questionButton = document.createElement('button');
+                questionButton.type = 'button';
+                questionButton.className = 'faq-category-btn';
+                questionButton.textContent = faq.question;
+
+                questionButton.onclick = function() {
+                    showAnswer(data, faq.category, faq.subcategory, faq);
+                };
+
+                categoryList.appendChild(questionButton);
+            }
+        });
+
+        if (count === 0) {
+            const chatHistory = document.getElementById('faqChatHistory');
+
+            const message = document.createElement('div');
+            message.className = 'faq-answer-bubble';
+            message.textContent = '검색 결과가 없습니다. 다른 검색어를 입력해 주세요.';
+
+            chatHistory.appendChild(message);
+        }
+
+        searchInput.value = '';
+    }
+
+
+</script>
+
 	
 </th:block>
 
