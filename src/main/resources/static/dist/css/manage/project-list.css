@@ -368,21 +368,115 @@
 	border: 0;
 }
 
-/* PaginateUtil 결과용 공통 페이지 번호 스타일 */
-.project-list-page .project-pagination .paginate {display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
-.project-list-page .project-pagination .paginate a,.project-list-page .project-pagination .paginate span {display:inline-flex;min-width:32px;min-height:32px;align-items:center;justify-content:center;border:1px solid #e8e2d9;border-radius:6px;padding:4px 8px;text-decoration:none;color:#594331;}
-.project-list-page .project-pagination .paginate .active {background:#eef3e8;font-weight:700;}
+/* 프로젝트 목록 하단 페이지네이션 래퍼 */
+.project-list-page .project-pagination .paginate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* 프로젝트 목록 페이지네이션의 개별 번호 및 텍스트 (링크 및 span) */
+.project-list-page .project-pagination .paginate a,
+.project-list-page .project-pagination .paginate span {
+    display: inline-flex;
+    min-width: 32px;
+    min-height: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e8e2d9;
+    border-radius: 6px;
+    padding: 4px 8px;
+    text-decoration: none;
+    color: #594331;
+}
+
+/* 프로젝트 목록 페이지네이션 중 현재 페이지 번호 강조 */
+.project-list-page .project-pagination .paginate .active {
+    background: #eef3e8;
+    font-weight: 700;
+}
 
 /* 팀원 조회도 기존 프로젝트 목록과 동일한 페이지 번호 스타일 사용 */
-.manage-member-footer .project-pagination .paginate {display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
-.manage-member-footer .project-pagination .paginate a,.manage-member-footer .project-pagination .paginate span {display:inline-flex;min-width:32px;min-height:32px;align-items:center;justify-content:center;border:1px solid #e8e2d9;border-radius:6px;padding:4px 8px;text-decoration:none;color:#594331;}
-.manage-member-footer .project-pagination .paginate .active {background:#eef3e8;font-weight:700;}
+/* 팀원 관리 하단 페이지네이션 래퍼 */
+.manage-member-footer .project-pagination .paginate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* 팀원 관리 페이지네이션의 개별 번호 및 텍스트 */
+.manage-member-footer .project-pagination .paginate a,
+.manage-member-footer .project-pagination .paginate span {
+    display: inline-flex;
+    min-width: 32px;
+    min-height: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e8e2d9;
+    border-radius: 6px;
+    padding: 4px 8px;
+    text-decoration: none;
+    color: #594331;
+}
+
+/* 팀원 관리 페이지네이션 중 현재 페이지 번호 강조 */
+.manage-member-footer .project-pagination .paginate .active {
+    background: #eef3e8;
+    font-weight: 700;
+}
+
 /* Manage 목록 공통 이전/다음 링크 */
-.project-pagination, .approval-pagination {display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
-.project-pagination .manage-page-arrow, .approval-pagination .manage-page-arrow {display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:5px 12px;border:1px solid #e8e2d9;border-radius:6px;color:#594331;text-decoration:none;background:#fff;}
-.project-pagination .manage-page-arrow.disabled, .approval-pagination .manage-page-arrow.disabled {opacity:.4;pointer-events:none;}
-.manage-member-footer {margin-top:20px;display:flex;justify-content:center;align-items:center;gap:15px;flex-wrap:wrap;}
-.manage-member-footer p {position:static;margin:0;}
+/* 프로젝트 및 결재 목록 공통 페이지네이션 래퍼 */
+.project-pagination,
+.approval-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* 프로젝트 및 결재 목록 페이지네이션의 이전/다음 화살표 버튼 */
+.project-pagination .manage-page-arrow,
+.approval-pagination .manage-page-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 5px 12px;
+    border: 1px solid #e8e2d9;
+    border-radius: 6px;
+    color: #594331;
+    text-decoration: none;
+    background: #fff;
+}
+
+/* 이전/다음 페이지가 없을 때 비활성화된 화살표 버튼 */
+.project-pagination .manage-page-arrow.disabled,
+.approval-pagination .manage-page-arrow.disabled {
+    opacity: .4;
+    pointer-events: none;
+}
+
+/* 팀원 관리 하단 푸터(footer) 전체 영역 (버튼, 페이지네이션 등 포함) */
+.manage-member-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* 팀원 관리 하단 푸터 내 텍스트 요소 */
+.manage-member-footer p {
+    position: static;
+    margin: 0;
+}
 
 /* 프로젝트 검색: 데스크톱은 진행상태·검색유형·검색어·버튼을 한 줄에 배치 */
 .project-list-page .project-filter-actions {

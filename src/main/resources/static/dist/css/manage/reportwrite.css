@@ -1,0 +1,185 @@
+@charset "UTF-8";
+
+/* 페이지 상단 헤더 (제목 및 버튼 등의 영역) */
+.report-write-page .page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* 보고서 작성 폼을 감싸는 메인 패널 컨테이너 */
+.report-write-page .report-write-panel {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px;
+    border: 1px solid #e8e2d9;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(89, 67, 49, .035);
+}
+
+/* 보고서 작성 안내 및 인트로 영역 */
+.report-write-page .report-write-intro {
+    margin: 0 0 26px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee8e0;
+}
+
+/* 인트로 영역 메인 제목 */
+.report-write-page .report-write-intro h2 {
+    margin: 0 0 8px;
+    color: #594331;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* 인트로 영역 부가 설명 텍스트 */
+.report-write-page .report-write-intro p {
+    margin: 0;
+    color: #8b7d6e;
+    font-size: 13px;
+}
+
+/* 폼 입력 항목들을 2단으로 배치하는 그리드 레이아웃 */
+.report-write-page .report-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 20px;
+}
+
+/* 개별 폼 입력 항목 래퍼 */
+.report-write-page .report-form-field {
+    min-width: 0;
+}
+
+/* 전체 너비를 차지해야 하는 입력 필드 (예: 제목, 내용 등) */
+.report-write-page .report-form-field.full {
+    grid-column: 1 / -1;
+}
+
+/* 폼 입력 필드 상단의 라벨 텍스트 */
+.report-write-page .report-form-field label {
+    display: block;
+    margin-bottom: 9px;
+    color: #665747;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* 파일 입력창을 제외한 모든 인풋, 셀렉트, 텍스트에어리어 공통 스타일 */
+.report-write-page .report-form-field input:not([type=file]),
+.report-write-page .report-form-field select,
+.report-write-page .report-form-field textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid #ddd5ca;
+    border-radius: 9px;
+    background: #fff;
+    color: #594331;
+    font: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* 단일 텍스트 입력창 및 셀렉트 박스의 최소 높이 */
+.report-write-page .report-form-field input:not([type=file]),
+.report-write-page .report-form-field select {
+    min-height: 44px;
+}
+
+/* 본문 작성용 다중 텍스트 입력창 설정 */
+.report-write-page .report-form-field textarea {
+    min-height: 260px;
+    resize: vertical; /* 세로로만 크기 조절 허용 */
+    line-height: 1.7;
+}
+
+/* 입력 필드 클릭(포커스) 시 아웃라인 강조 테두리 */
+.report-write-page .report-form-field input:focus,
+.report-write-page .report-form-field select:focus,
+.report-write-page .report-form-field textarea:focus {
+    outline: 2px solid #71865b;
+    outline-offset: 1px;
+}
+
+/* 폼 입력칸 하단 도움말(가이드) 텍스트 */
+.report-write-page .report-helper {
+    margin: 8px 0 0;
+    color: #8b7d6e;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* 첨부파일 업로드 영역을 감싸는 박스 스타일 */
+.report-write-page .report-file-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 18px;
+    border: 1px dashed #cfc4b6;
+    border-radius: 10px;
+    background: #faf9f7;
+}
+
+/* 실제 파일 업로드 인풋 요소 */
+.report-write-page .report-file-box input[type=file] {
+    max-width: 100%;
+    font-size: 13px;
+    color: #665747;
+}
+
+/* 업로드된 첨부파일 리스트 표시 영역 */
+.report-write-page .report-file-list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    color: #665747;
+    font-size: 13px;
+}
+
+/* 등록/취소 등의 하단 액션 버튼 그룹 영역 */
+.report-write-page .report-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 1px solid #eee8e0;
+}
+
+/* 제출(결재) 버튼 기본 스타일 레이아웃 */
+.report-write-page .report-actions .approval-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    text-decoration: none;
+}
+
+/* 폼 입력 유효성 검사 실패 시 나타나는 에러 메시지 */
+.report-write-page .report-error {
+    margin: 0 0 18px;
+    color: #b42318;
+    font-size: 13px;
+}
+
+/* 화면 너비 700px 이하 모바일 환경 대응 미디어 쿼리 */
+@media (max-width: 700px) {
+    /* 모바일 환경에서는 여백 축소 */
+    .report-write-page .report-write-panel {
+        padding: 20px;
+    }
+
+    /* 2단이었던 그리드를 1단(전체 너비)으로 변경 */
+    .report-write-page .report-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* 1단 레이아웃이므로 full 클래스의 강제 확장을 기본 상태로 원복 */
+    .report-write-page .report-form-field.full {
+        grid-column: 1;
+    }
+}

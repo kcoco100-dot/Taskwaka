@@ -5,36 +5,9 @@
 
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
-    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
-    <link rel="stylesheet" th:href="@{/dist/manage/approval.css}">
-    <style>
-        .report-write-page .page-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-        .report-write-page .report-write-panel {max-width:1000px;margin:0 auto;padding:32px;border:1px solid #e8e2d9;border-radius:16px;background:#fff;box-shadow:0 4px 16px rgba(89,67,49,.035);}
-        .report-write-page .report-write-intro {margin:0 0 26px;padding-bottom:20px;border-bottom:1px solid #eee8e0;}
-        .report-write-page .report-write-intro h2 {margin:0 0 8px;color:#594331;font-size:18px;font-weight:700;}
-        .report-write-page .report-write-intro p {margin:0;color:#8b7d6e;font-size:13px;}
-        .report-write-page .report-form-grid {display:grid;grid-template-columns:1fr 1fr;gap:22px 20px;}
-        .report-write-page .report-form-field {min-width:0;}
-        .report-write-page .report-form-field.full {grid-column:1/-1;}
-        .report-write-page .report-form-field label {display:block;margin-bottom:9px;color:#665747;font-size:13px;font-weight:600;}
-        .report-write-page .report-form-field input:not([type=file]),
-        .report-write-page .report-form-field select,
-        .report-write-page .report-form-field textarea {width:100%;padding:11px 13px;border:1px solid #ddd5ca;border-radius:9px;background:#fff;color:#594331;font:inherit;font-size:14px;box-sizing:border-box;}
-        .report-write-page .report-form-field input:not([type=file]),
-        .report-write-page .report-form-field select {min-height:44px;}
-        .report-write-page .report-form-field textarea {min-height:260px;resize:vertical;line-height:1.7;}
-        .report-write-page .report-form-field input:focus,
-        .report-write-page .report-form-field select:focus,
-        .report-write-page .report-form-field textarea:focus {outline:2px solid #71865b;outline-offset:1px;}
-        .report-write-page .report-helper {margin:8px 0 0;color:#8b7d6e;font-size:12px;line-height:1.6;}
-        .report-write-page .report-file-box {display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px;border:1px dashed #cfc4b6;border-radius:10px;background:#faf9f7;}
-        .report-write-page .report-file-box input[type=file] {max-width:100%;font-size:13px;color:#665747;}
-        .report-write-page .report-file-list {margin:8px 0 0;padding-left:18px;color:#665747;font-size:13px;}
-        .report-write-page .report-actions {display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:30px;padding-top:24px;border-top:1px solid #eee8e0;}
-        .report-write-page .report-actions .approval-button {display:inline-flex;align-items:center;justify-content:center;min-height:42px;text-decoration:none;}
-        .report-write-page .report-error {margin:0 0 18px;color:#b42318;font-size:13px;}
-        @media (max-width:700px) {.report-write-page .report-write-panel{padding:20px}.report-write-page .report-form-grid{grid-template-columns:1fr}.report-write-page .report-form-field.full{grid-column:1}}
-    </style>
+    <link rel="stylesheet" th:href="@{/dist/css/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/manage/approval.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/manage/reportwrite.css}">
 </th:block>
 
 <th:block layout:fragment="content">
@@ -54,8 +27,6 @@
                     <h2>보고서 작성</h2>
                     <p>프로젝트, 제목, 진행률, 내용 입력 후 등록완료를 눌러 주세요.</p>
                 </div>
-
-                
 
                 <form id="reportForm" name="reportForm" method="post" enctype="multipart/form-data"
                       th:action="${mode == 'write'} ? @{/{domainKey}/manage/approval/write(domainKey=${domainKey})} : @{/{domainKey}/manage/approval/update/{id}(domainKey=${domainKey},id=${dto.reportId})}"

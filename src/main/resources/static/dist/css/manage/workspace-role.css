@@ -91,10 +91,30 @@
     font-size: 12px;
     font-weight: 700;
 }
-.workspace-role-badge.boss { background: #EBF1E5; color: #4F6242; }
-.workspace-role-badge.manager { background: #F5EEDA; color: #886B30; }
-.workspace-role-badge.assistant { background: #E9EEF6; color: #52668B; }
-.workspace-role-badge.staff { background: #FCEDE8; color: #A66351; }
+/* 워크스페이스 최고 관리자(boss) 역할 배지 스타일 */
+.workspace-role-badge.boss {
+    background: #EBF1E5;
+    color: #4F6242;
+}
+
+/* 워크스페이스 중간 관리자(manager) 역할 배지 스타일 */
+.workspace-role-badge.manager {
+    background: #F5EEDA;
+    color: #886B30;
+}
+
+/* 워크스페이스 부관리자/어시스턴트(assistant) 역할 배지 스타일 */
+.workspace-role-badge.assistant {
+    background: #E9EEF6;
+    color: #52668B;
+}
+
+/* 워크스페이스 일반 사원/팀원(staff) 역할 배지 스타일 */
+.workspace-role-badge.staff {
+    background: #FCEDE8;
+    color: #A66351;
+}
+
 .workspace-role-locked {
     color: #9B9186;
     font-size: 12px;
@@ -105,19 +125,31 @@
     border-radius: 8px;
     font-size: 13px;
 }
-.workspace-role-alert.success { background: #EEF4E6; color: #4F6242; }
-.workspace-role-alert.error { background: #FCEDE8; color: #AD6551; }
+/* 워크스페이스 권한/역할 설정 성공 알림 스타일 */
+.workspace-role-alert.success {
+    background: #EEF4E6;
+    color: #4F6242;
+}
+
+/* 워크스페이스 권한/역할 설정 오류 알림 스타일 */
+.workspace-role-alert.error {
+    background: #FCEDE8;
+    color: #AD6551;
+}
+
 .workspace-role-page .workspace-role-footer {
     margin-top: 20px;
     gap: 10px;
     flex-wrap: wrap;
 }
+
 .workspace-role-page .workspace-role-footer .project-pagination {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
 }
+
 .workspace-role-page .workspace-role-note {
     margin: 20px 0 0;
     color: #8B7D6E;

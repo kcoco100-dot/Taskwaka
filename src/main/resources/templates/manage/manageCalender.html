@@ -4,8 +4,8 @@
       layout:decorate="~{layout/layout3}">
 <th:block layout:fragment="css">
     <link rel="stylesheet" th:href="@{/dist/css/home.css}">
-    <link rel="stylesheet" th:href="@{/dist/manage/manage.css}">
-    <link rel="stylesheet" th:href="@{/dist/manage/manageCalender.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/manage/manage.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/manage/manageCalender.css}">
 </th:block>
 <th:block layout:fragment="content">
     <div class="home-layout manage-layout manage-calendar-page">
@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <!-- Manage 전용 우측 상세 조회 패널 (프로젝트 및 업무만) -->
+
     <aside id="mcDetailPanel" class="mc-detail-panel" role="dialog" aria-modal="false"
            aria-labelledby="mcPanelTitle" aria-hidden="true" inert>
         <div class="mc-panel-head">
@@ -38,7 +38,7 @@
         </div>
         <div class="mc-panel-scroll">
             <div class="mc-panel-section mc-info-grid" id="mcPanelInfo"></div>
-            <!-- 프로젝트 기본 정보 바로 아래에 담당 업무 목록 표시 -->
+
             <section class="mc-panel-section" id="mcRelatedSection">
                 <div class="mc-related-heading">
                     <h3 id="mcRelatedTitle">프로젝트 업무 목록</h3>

@@ -1,0 +1,36 @@
+@charset "UTF-8";
+
+/* 프로젝트 폼 입력 그룹 (입력창과 라벨을 감싸는 래퍼) */
+.project-form-group {
+    margin-bottom: 20px;
+}
+
+/* 폼 입력 항목 상단의 라벨 텍스트 폰트 및 여백 설정 */
+.project-form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* 공통 폼 입력 요소 (input, select 등) 뼈대 스타일 */
+.project-form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 다중 텍스트 입력 영역(textarea) 높이 및 크기 조절 설정 */
+.project-textarea {
+    height: 150px;
+    resize: vertical; /* 세로로만 크기 조절 허용 */
+}
+
+/* 등록, 취소 등의 하단 액션 버튼 배치 영역 */
+.form-actions {
+    margin-top: 30px;
+    text-align: center;
+    gap: 10px;
+    display: flex;
+    justify-content: center;
+}

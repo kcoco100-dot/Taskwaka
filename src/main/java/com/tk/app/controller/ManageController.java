@@ -1,14 +1,15 @@
 package com.tk.app.controller;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,18 +18,26 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.tk.app.common.PaginateUtil;
 import com.tk.app.common.MyUtil;
+import com.tk.app.common.PaginateUtil;
 import com.tk.app.common.RequestUtils;
+import com.tk.app.domain.dto.HomeDashboardDataDto;
 import com.tk.app.domain.dto.ManageDto;
+import com.tk.app.domain.dto.ManageNoticeDto;
+import com.tk.app.domain.dto.MyTaskDto;
+import com.tk.app.domain.dto.ParticipatingProjectDto;
 import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.domain.dto.WorkspaceMemberGroupDto;
 import com.tk.app.domain.dto.WorkspaceMemberGroupDto.ProjectParticipation;
 import com.tk.app.repository.ProjectMemberRepository;
 import com.tk.app.repository.ProjectTeamView;
 import com.tk.app.security.LoginMemberUtil;
+import com.tk.app.service.ManageNoticeService;
 import com.tk.app.service.ManageService;
+import com.tk.app.service.MyTaskService;
+import com.tk.app.service.ParticipatingProjectService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,19 +52,17 @@ public class ManageController {
 	private final ManageService service;
 	private final PaginateUtil paginateUtil;
 	private final MyUtil myUtil;
-
+	
+	private final ParticipatingProjectService participatingProjectService;
+	private final MyTaskService myTaskService;
+	private final ManageNoticeService manageNoticeService;
+	
 	// 도메인키 설정
 	@ModelAttribute("domainKey")
 	public String setDomainKey(
 			@PathVariable("domainKey") String domainKey) {
 
 		return domainKey;
-	}
-
-	// 대시보드 화면
-	@GetMapping
-	public String dashBoard(@PathVariable("domainKey") String domainKey) throws Exception {
-		return "manage/pmDashboard";
 	}
 
 	// 팀원 목록 조회
@@ -270,19 +277,20 @@ public class ManageController {
 		if (info == null) {
 			throw new IllegalStateException("로그인 정보가 없습니다.");
 		}
-		Long workspaceId = service.findByDomainKey(domainKey);
 		return "manage/invitation";
 	}
 
     // 캘린더 조회
     @GetMapping("/calender")
-    public String calender(@PathVariable("domainKey") String domainKey, Model model) throws Exception {
+    public String calender(@PathVariable("domainKey") String domainKey,
+    		Model model) throws Exception {
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             Long workspaceId = service.findByDomainKey(domainKey);
             Map<String, Object> map = new HashMap<>();
             map.put("workspaceId", workspaceId);
             map.put("memberId", info.getMember_id());
+            
             Map<String, Object> calendarData = service.getManageCalendarData(map);
             model.addAttribute("myProjects", calendarData.get("myProjects"));
             model.addAttribute("myTasks", calendarData.get("myTasks"));
@@ -295,7 +303,8 @@ public class ManageController {
 
 	// 회의록 화면
 	@GetMapping("/meetings")
-	public String meetingsForm(@PathVariable("domainKey") String domainKey) throws Exception {
+	public String meetingsForm(@PathVariable("domainKey") String domainKey,
+				Model model) throws Exception {
 		SessionInfo info = LoginMemberUtil.getSessionInfo();
 		if (info == null) {
 			throw new IllegalStateException("로그인 정보가 없습니다.");
@@ -307,19 +316,6 @@ public class ManageController {
 		return "manage/meeting";
 	}
 
-	// 대시보드 화면
-	@GetMapping("/pmDashboard")
-	public String pmDashboardForm(@PathVariable("domainKey") String domainKey) throws Exception {
-		SessionInfo info = LoginMemberUtil.getSessionInfo();
-		if (info == null) {
-			throw new IllegalStateException("로그인 정보가 없습니다.");
-		}
-		Long workspaceId = service.findByDomainKey(domainKey);
-		if (workspaceId == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
-		}
-		return "manage/pmDashboard";
-	}
 
 	// 간트차트 화면
 	@GetMapping("/gantt")
@@ -346,5 +342,113 @@ public class ManageController {
 		}
 
 		return "manage/manageGantt";
+	}
+	
+	// 대시보드 화면
+	@GetMapping("/pmDashboard")
+	public String pmDashboardForm(@PathVariable("domainKey") String domainKey,
+			Model model) throws Exception {
+		try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			Long workspaceId = service.findByDomainKey(domainKey);
+			Map<String, Object> map = new HashMap<>();
+			map.put("workspace_id", workspaceId);
+			map.put("memberId", info.getMember_id());
+			
+			List<ManageDto> projectList = service.listProjectManage(map);
+			int totalProjectCount = projectList.size();
+			int plannedProjectCount = 0;
+			int inProgressProjectCount = 0;
+			int completedProjectCount = 0;
+			for (ManageDto p : projectList) {
+				if (p.getStatus() == 0) {
+					plannedProjectCount++;
+				} else if (p.getStatus() == 1) {
+					inProgressProjectCount++;
+				} else if (p.getStatus() == 2) {
+					completedProjectCount++;
+				}
+			}
+			
+			List<ParticipatingProjectDto> myProjectList = participatingProjectService.findParticipatingProjects(workspaceId, info.getMember_id());
+			int myProjectCount = myProjectList.size();
+			
+			List<MyTaskDto> myTasks = myTaskService.findTasksList(workspaceId, info.getMember_id());
+			HomeDashboardDataDto dashboardData = myTaskService.calculateHomeDashboardData(myTasks);
+			
+			LocalDate today = dashboardData.getToday();
+			LocalDate dueSoonDate = today.plusDays(7);
+			int dueSoonCount = 0;
+			for (MyTaskDto task : myTasks) {
+				if (task.getStatus() == null || task.getStatus() == 3) {
+					continue;
+				}
+				if (task.getEndAt() == null || task.getEndAt().isBlank()) {
+					continue;
+				}
+				LocalDate endDate = LocalDate.parse(task.getEndAt());
+				if (!endDate.isBefore(today) && !endDate.isAfter(dueSoonDate)) {
+					dueSoonCount++;
+				}
+			}
+			
+			List<ManageDto> upcomingProjects = new ArrayList<>();
+			for (ManageDto project : projectList) {
+				if (project.getStatus() != 0 && project.getStatus() != 1) {
+					continue;
+				}
+				if (project.getEnd_date() == null || project.getEnd_date().isBlank()) {
+					continue;
+				}
+				LocalDate endDate = LocalDate.parse(project.getEnd_date());
+				if (!endDate.isBefore(today)) {
+					upcomingProjects.add(project);
+				}
+			}
+			upcomingProjects.sort(Comparator.comparing(ManageDto::getEnd_date));
+			if (upcomingProjects.size() > 2) {
+				upcomingProjects = new ArrayList<>(upcomingProjects.subList(0, 2));
+			}
+			
+			Map<String, Object> noticeMap = new HashMap<>();
+			noticeMap.put("domainKey", domainKey);
+			noticeMap.put("memberId", info.getMember_id());
+			noticeMap.put("noticeType", "all");
+			noticeMap.put("schType", "all");
+			noticeMap.put("kwd", "");
+			noticeMap.put("offset", 0);
+			noticeMap.put("size", 5);
+			List<ManageNoticeDto> noticeList = manageNoticeService.selectNoticeList(noticeMap);
+			
+			
+			model.addAttribute("projectList", projectList);
+			model.addAttribute("totalProjectCount", totalProjectCount);
+			model.addAttribute("plannedProjectCount", plannedProjectCount);
+			model.addAttribute("inProgressProjectCount", inProgressProjectCount);
+			model.addAttribute("completedProjectCount", completedProjectCount);
+			
+			model.addAttribute("myProjectList", myProjectList);
+			model.addAttribute("myProjectCount", myProjectCount);
+			
+			model.addAttribute("myTasks", myTasks);
+			model.addAttribute("remainingCount", dashboardData.getRemainingCount());
+			model.addAttribute("view", dashboardData.getView());
+			model.addAttribute("working", dashboardData.getWorking());
+			model.addAttribute("preview", dashboardData.getPreview());
+			
+			model.addAttribute("dueSoonCount", dueSoonCount);
+			model.addAttribute("today", today);
+			
+			model.addAttribute("upcomingProjects", upcomingProjects);
+			
+			model.addAttribute("noticeList", noticeList);
+			
+		} catch (Exception e) {
+			log.info("pmDashboardForm : ", e);
+			
+			throw e;
+		}
+		return "manage/pmDashboard";
+		
 	}
 }

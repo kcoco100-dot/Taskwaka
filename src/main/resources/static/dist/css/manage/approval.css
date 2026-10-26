@@ -535,15 +535,94 @@
 }
 
 
-/* 보고서 유형 선택: 전체 / 프로젝트 보고서 / 업무 보고서 */
-.approval-page .approval-category-tabs {display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 18px;}
-.approval-page .approval-category-tabs a {display:inline-flex;align-items:center;padding:9px 17px;border:1px solid #e8e2d9;border-radius:8px;background:#fff;color:#594331;text-decoration:none;font-size:14px;}
-.approval-page .approval-category-tabs a.is-active {background:#eef3e8;border-color:#dbe5d3;font-weight:700;}
-.approval-page .approval-category-tabs a:hover {border-color:#8da479;}
-.approval-page .approval-pagination .paginate {display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;}
-.approval-page .approval-pagination .paginate a,.approval-page .approval-pagination .paginate span {display:inline-flex;min-width:32px;min-height:32px;align-items:center;justify-content:center;padding:3px 8px;border:1px solid #e8e2d9;border-radius:6px;text-decoration:none;color:#594331;}
-.approval-page .approval-pagination .paginate .active {background:#eef3e8;font-weight:700;}
+/* 결재 페이지 상단의 카테고리 탭 목록 컨테이너 */
+.approval-page .approval-category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 18px 0 18px;
+}
 
-.approval-pagination {display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
-.approval-pagination .manage-page-arrow {display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:5px 12px;border:1px solid #e8e2d9;border-radius:6px;color:#594331;text-decoration:none;background:#fff;}
-.approval-pagination .manage-page-arrow.disabled {opacity:.4;pointer-events:none;}
+/* 카테고리 탭 내 개별 링크(버튼) 기본 스타일 */
+.approval-page .approval-category-tabs a {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 17px;
+    border: 1px solid #e8e2d9;
+    border-radius: 8px;
+    background: #fff;
+    color: #594331;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* 현재 선택되어 활성화된 카테고리 탭 스타일 */
+.approval-page .approval-category-tabs a.is-active {
+    background: #eef3e8;
+    border-color: #dbe5d3;
+    font-weight: 700;
+}
+
+/* 카테고리 탭에 마우스를 올렸을 때(hover) 테두리 강조 */
+.approval-page .approval-category-tabs a:hover {
+    border-color: #8da479;
+}
+
+/* 결재 페이지 내 하단 페이지네이션 번호 목록 래퍼 */
+.approval-page .approval-pagination .paginate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* 페이지네이션의 개별 페이지 번호 및 텍스트 (링크 및 span 공통) */
+.approval-page .approval-pagination .paginate a,
+.approval-page .approval-pagination .paginate span {
+    display: inline-flex;
+    min-width: 32px;
+    min-height: 32px;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    border: 1px solid #e8e2d9;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #594331;
+}
+
+/* 페이지네이션 중 현재 머물고 있는 페이지 번호 강조 */
+.approval-page .approval-pagination .paginate .active {
+    background: #eef3e8;
+    font-weight: 700;
+}
+
+/* 범용 페이지네이션 래퍼 레이아웃 (이전/다음 버튼 등을 포함하는 상위 요소) */
+.approval-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* 페이지네이션 내 화살표(이전 페이지/다음 페이지) 버튼 요소 */
+.approval-pagination .manage-page-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 5px 12px;
+    border: 1px solid #e8e2d9;
+    border-radius: 6px;
+    color: #594331;
+    text-decoration: none;
+    background: #fff;
+}
+
+/* 첫 페이지나 마지막 페이지에 도달하여 비활성화된 화살표 버튼 */
+.approval-pagination .manage-page-arrow.disabled {
+    opacity: .4;
+    pointer-events: none; /* 클릭 불가 처리 */
+}
