@@ -10,7 +10,7 @@
         <li><a th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}">📝회의록</a></li>
         <li><a th:href="@{/{domainKey}/home/projects(domainKey=${domainKey})}" th:classappend="${activeMenu == 'projects' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projects' ? 'page' : null}">📃참여 프로젝트</a></li>
         <li><a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}" th:classappend="${activeMenu == 'notice' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'notice' ? 'page' : null}">📢공지사항</a></li>
-    		<li><a th:href="@{/{domainKey}/manage/pmDashboard(domainKey=${domainKey})}">🎏관리페이지</a></li>
+    		<li th:if="${manageWorkspaceRole == 50 or manageWorkspaceRole == 70}"><a th:href="@{/{domainKey}/manage/pmDashboard(domainKey=${domainKey})}">🎏관리페이지</a></li>
     </ul>
 </nav>
 </body>
