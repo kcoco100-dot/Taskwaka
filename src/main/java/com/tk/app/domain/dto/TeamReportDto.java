@@ -17,7 +17,7 @@ public class TeamReportDto {
 	private String reportType;
 	private String title;
 	private String content;
-	private Long progress;
+	private Double progress;
 	private Long status;
 	private String created;
 	private String updated;

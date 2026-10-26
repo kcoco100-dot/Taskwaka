@@ -262,8 +262,13 @@ public class TaskServiceImpl implements TaskService {
     }
     
     @Override
+    @Transactional
     public void createTeamReport(TeamReportDto dto) {
+    	Long taskId = dto.getTaskId();
+    	Double currentProgress = taskMapper.selectTaskById(taskId).getProgress();
+    	Double addProgress = dto.getProgress();
     	taskMapper.insertTeamReport(dto);
+    	taskMapper.updateTaskField(taskId, "progress", currentProgress + addProgress);
     }
     
     public void updateTeamReport(TeamReportDto dto) { 

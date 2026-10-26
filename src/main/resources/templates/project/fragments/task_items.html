@@ -27,6 +27,8 @@
 					th:if="${task.assigneeMemberId == currentProjectMemberId}"
 					onclick="event.stopPropagation();">
 					<button type="button" class="btn-action-tool btn-action-add"
+						th:onclick="|requestCreateReport(${task.taskId})|" title="업무 보고서 작성">📋</button>
+					<button type="button" class="btn-action-tool btn-action-add"
 						th:onclick="|requestCreateSubTask(${task.taskId})|"
 						title="하위업무 추가">＋</button>
 				</span>
@@ -79,20 +81,23 @@
 		th:onclick="|openSubTaskDetailPanel(${subTask.subTaskId}, this)|">
 
 		<div class="col-task-name indent-sub">
-			<span style="color: var(--text-muted); font-size: 12px;">ㄴ</span> 
-			<span class="task-title-text" th:text="${subTask.title}">하위업무명</span> 
+			<span style="color: var(--text-muted); font-size: 12px;">ㄴ</span> <span
+				class="task-title-text" th:text="${subTask.title}">하위업무명</span>
 			<div th:if="${subTask.assigneeMemberId == currentProjectMemberId}">
-			<span class="inline-action-bundle"
-				onclick="event.stopPropagation();">
-				<button type="button" class="btn-action-tool btn-action-del"
-					th:onclick="|openDeleteModal('subtask', ${subTask.subTaskId}, this)|"
-					title="하위업무 삭제">
-					<svg viewBox="0 0 24 24">
+				<span class="inline-action-bundle"
+					onclick="event.stopPropagation();">
+					<button type="button" class="btn-action-tool btn action-del"
+						th:onclick="|requestCreateReport(${task.taskId},'subtask')|"
+						title="하위업무 보고서 작성">📋</button> <!-- 클릭하면 보고서 작성 모달 -->
+					<button type="button" class="btn-action-tool btn-action-del"
+						th:onclick="|openDeleteModal('subtask', ${subTask.subTaskId}, this)|"
+						title="하위업무 삭제">
+						<svg viewBox="0 0 24 24">
 						<polyline points="3 6 5 6 21 6"></polyline>
 						<path
-							d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-				</button>
-			</span>			
+								d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+					</button>
+				</span>
 			</div>
 		</div>
 
@@ -125,79 +130,148 @@
 		<div style="font-size: 11.5px; color: var(--text-muted);"
 			th:text="${subTask.updated != null ? subTask.updated : '-'}">-</div>
 	</li>
-	
-<!-- 하위업무 등록 모달 -->
-<div 
-	th:fragment="taskCreateModal"
-	class="custom-modal-backdrop" 
-	id="taskCreateModal" 
-	onclick="handleCreateBackdropClick(event)">
-	<div class="task-create-modal-card">
-		<!-- 모달 헤더 -->
-		<div class="modal-card-header">
-			<div class="modal-header-title-box">
-				<span>🌿</span>
-				<span id="createModalHeaderTitle">새 하위업무 등록</span>
-			</div>
-			<button type="button" class="modal-close-btn" onclick="closeCreateTaskModal()" title="닫기 (ESC)">✕</button>
-		</div>
 
-		<!-- 모달 본문 -->
-		<div class="create-modal-body">
-			<!-- 제목 입력 영역 -->
-			<div class="modal-title-row">
-				<input type="text" class="modal-title-input" id="createTaskTitleInput" placeholder="하위업무 제목을 입력하세요 *">
+	<!-- 하위업무 등록 모달 -->
+	<div th:fragment="taskCreateModal" class="custom-modal-backdrop"
+		id="taskCreateModal" onclick="handleCreateBackdropClick(event)">
+		<div class="task-create-modal-card">
+			<!-- 모달 헤더 -->
+			<div class="modal-card-header">
+				<div class="modal-header-title-box">
+					<span id="createModalHeaderTitle">새 하위업무 등록</span>
+				</div>
+				<button type="button" class="modal-close-btn"
+					onclick="closeCreateTaskModal()" title="닫기 (ESC)">✕</button>
 			</div>
 
-			<!-- 속성 카드 (상태, 담당자, 시작일, 마감일) -->
-			<div class="modal-props-card">
-				<div class="modal-prop-row">
-					<span class="modal-prop-label">상태</span>
-					<div class="modal-prop-control">
-						<span class="badge-status badge-req" id="createStatusBadge" onclick="cycleCreateModalStatus()">
-							<span id="createStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
-						</span>
+			<!-- 모달 본문 -->
+			<div class="create-modal-body">
+				<!-- 제목 입력 영역 -->
+				<div class="modal-title-row">
+					<input type="text" class="modal-title-input"
+						id="createTaskTitleInput" placeholder="하위업무 제목을 입력하세요 *">
+				</div>
+
+				<!-- 속성 카드 (상태, 담당자, 시작일, 마감일) -->
+				<div class="modal-props-card">
+					<div class="modal-prop-row">
+						<span class="modal-prop-label">상태</span>
+						<div class="modal-prop-control">
+							<span class="badge-status badge-req" id="createStatusBadge"
+								onclick="cycleCreateModalStatus()"> <span
+								id="createStatusText">● 요청</span> <span style="font-size: 9px;">▾</span>
+							</span>
+						</div>
+					</div>
+
+					<div class="modal-prop-row">
+						<span class="modal-prop-label">담당자<span class="req-star">*</span></span>
+						<div class="modal-prop-control">
+							<select class="modal-form-select" id="createAssigneeSelect"></select>
+						</div>
+					</div>
+
+					<div class="modal-prop-row">
+						<span class="modal-prop-label">시작일</span>
+						<div class="modal-prop-control">
+							<input type="date" class="modal-form-date"
+								id="createStartDateInput">
+						</div>
+					</div>
+
+					<div class="modal-prop-row">
+						<span class="modal-prop-label">마감일</span>
+						<div class="modal-prop-control">
+							<input type="date" class="modal-form-date"
+								id="createEndDateInput">
+						</div>
 					</div>
 				</div>
 
-				<div class="modal-prop-row">
-					<span class="modal-prop-label">담당자<span class="req-star">*</span></span>
-					<div class="modal-prop-control">
-						<select class="modal-form-select" id="createAssigneeSelect"></select>
-					</div>
-				</div>
-
-				<div class="modal-prop-row">
-					<span class="modal-prop-label">시작일</span>
-					<div class="modal-prop-control">
-						<input type="date" class="modal-form-date" id="createStartDateInput">
-					</div>
-				</div>
-
-				<div class="modal-prop-row">
-					<span class="modal-prop-label">마감일</span>
-					<div class="modal-prop-control">
-						<input type="date" class="modal-form-date" id="createEndDateInput">
-					</div>
+				<!-- 상세 내용 입력 영역 -->
+				<div class="modal-section-block">
+					<label class="modal-section-label" for="createTaskContentInput">
+						<span>📄 상세 내용<span class="req-star">*</span></span>
+					</label>
+					<textarea class="modal-form-textarea" id="createTaskContentInput"
+						placeholder="하위업무에 대한 상세 설명을 입력해 주세요..."></textarea>
 				</div>
 			</div>
 
-			<!-- 상세 내용 입력 영역 -->
-			<div class="modal-section-block">
-				<label class="modal-section-label" for="createTaskContentInput">
-					<span>📄 상세 내용<span class="req-star">*</span></span>
-				</label>
-				<textarea class="modal-form-textarea" id="createTaskContentInput" placeholder="하위업무에 대한 상세 설명을 입력해 주세요..."></textarea>
+			<!-- 모달 푸터 (버튼) -->
+			<div class="create-modal-footer">
+				<button type="button" class="btn-modal-cancel"
+					onclick="closeCreateTaskModal()">취소</button>
+				<button type="button" class="btn-modal-submit"
+					onclick="submitCreateSubTaskModal()">하위업무 등록</button>
 			</div>
-		</div>
-
-		<!-- 모달 푸터 (버튼) -->
-		<div class="create-modal-footer">
-			<button type="button" class="btn-modal-cancel" onclick="closeCreateTaskModal()">취소</button>
-			<button type="button" class="btn-modal-submit" onclick="submitCreateSubTaskModal()">하위업무 등록</button>
 		</div>
 	</div>
-</div>
+
+	<!-- 보고서 등록 모달 -->
+	<div th:fragment="reportSubmitModal" class="custom-modal-backdrop"
+		id="reportCreateModal" onclick="handleCreateBackdropClick(event)">
+		<div class="task-create-modal-card">
+			<!-- 모달 헤더 -->
+			<div class="modal-card-header">
+				<div class="modal-header-title-box">
+					<span id="createModalHeaderTitle">새 업무 보고서 작성</span>
+				</div>
+				<button type="button" class="modal-close-btn"
+					onclick="closeCreateReportModal()" title="닫기 (ESC)">✕</button>
+			</div>
+
+			<!-- 모달 본문 -->
+			<div class="create-modal-body">
+				<!-- 제목 입력 영역 -->
+				<div class="modal-title-row">
+					<input type="text" class="modal-title-input"
+						id="createReportTitleInput" placeholder="보고서 제목을 입력하세요 *">
+				</div>
+
+				<div class="modal-prop-row">
+					<span class="modal-prop-label">담당자: <span
+						th:text="${currentProjectMemberName}"></span></span>
+				</div>
+
+				<div class="modal-prop-row">
+					<span class="modal-prop-label">진행률: </span> <input type="text"
+						id="createReportProgressInput" placeholder="진행률을 입력하세요...">
+				</div>
+
+				<div class="modal-prop-row">
+					<span class="modal-prop-label">작성일</span>
+					<div class="modal-prop-control">
+						<input type="date" class="modal-form-date"
+							id="createReportDateInput" readonly>
+					</div>
+				</div>
+
+				<!-- 상세 내용 입력 영역 -->
+				<div class="modal-section-block">
+					<label class="modal-section-label" for="createReportContentInput">
+						<span>📄 상세 내용<span class="req-star">*</span></span>
+					</label>
+					<textarea class="modal-form-textarea" id="createReportContentInput"
+						placeholder="보고서의 내용을 입력해 주세요..."></textarea>
+					<input type="hidden" value="" id="taskIdInput">
+					<input
+						type="hidden" th:value="${currentProjectMemberId}"
+						id="createReportWriter">
+				</div>
+			</div>
+
+
+			<!-- 모달 푸터 (버튼) -->
+			<div class="create-modal-footer">
+				<button type="button" class="btn-modal-cancel"
+					onclick="closeCreateReportModal()">취소</button>
+				<button type="button" class="btn-modal-submit"
+					th:onclick="|submitCreateReportModal('task')|">보고서
+					등록</button>
+			</div>
+		</div>
+	</div>
 
 </body>
 </html>

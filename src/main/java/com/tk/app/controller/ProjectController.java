@@ -32,6 +32,7 @@ public class ProjectController {
     	SessionInfo currentProjectMember = userDetails.getMember();
     	
     	Long currentProjectMemberId = currentProjectMember.getMember_id();
+    	String currentProjectMemberName = currentProjectMember.getName();
     	
     	log.info("currentProjectMemberId: " + currentProjectMemberId);
     	
@@ -48,6 +49,7 @@ public class ProjectController {
         model.addAttribute("activeTab", tab);
         model.addAttribute("projectName", pDto.getSubject());
         model.addAttribute("currentProjectMemberId", currentProjectMemberId);
+        model.addAttribute("currentProjectMemberName", currentProjectMemberName);
         model.addAttribute("tasks", taskService.getTaskList(projectId));
         
         switch(tab) {

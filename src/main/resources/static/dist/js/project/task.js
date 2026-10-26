@@ -206,8 +206,100 @@ function toggleSubTasks(btn) {
   }
 }
 
+// 3. 보고서 등록 모달 오픈
+async function requestCreateReport(taskId) {
+	
+  const modal = document.getElementById('reportCreateModal');
+  const titleInput = document.getElementById('createReportTitleInput');
+  const dateInput = document.getElementById('createReportDateInput');
+  const progressInput = document.getElementById('createReportProgressInput');
+  const contentInput = document.getElementById('createReportContentInput');
+  const taskIdInput = document.getElementById('taskIdInput');
+  taskIdInput.value = taskId;
+  titleInput.value = '';
+  contentInput.value = '';
+  progressInput.value = '';
+
+  const today = new Date();
+  dateInput.value = today.toISOString().split('T')[0];
+
+  modal.classList.add('show');
+  setTimeout(() => titleInput.focus(), 50);
+}
+
+function closeCreateReportModal() {
+  const modal = document.getElementById('reportCreateModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function handleCreateBackdropClick(e) {
+  if (e.target === document.getElementById('taskCreateModal')) {
+    closeCreateTaskModal();
+  }else if(e.target === document.getElementById('reportCreateModal')){
+	closeCreateReportModal();
+  }
+}
+
+// 4. 보고서 submit
+async function submitCreateReportModal(isTask) {
+
+  const titleInput = document.getElementById('createReportTitleInput');
+  const contentInput = document.getElementById('createReportContentInput');
+  const memberIdInput = document.getElementById('createReportWriter');
+  const progress = document.getElementById('createReportProgressInput').value;
+  const taskId = document.getElementById('taskIdInput').value
+  const title = titleInput.value.trim();
+  const content = contentInput.value.trim();
+  const projectMemberId = memberIdInput.value;
+
+  if (!title) { alert('보고서 제목을 입력해 주세요.'); titleInput.focus(); return; }
+  if (!content) { alert('상세 내용을 입력해 주세요.'); contentInput.focus(); return; }
+
+  const payload = {
+  	taskId: Number(taskId),
+  	projectMemberId: Number(projectMemberId),
+  	projectId: Number(currentProjectId),
+  	reportType: 'REPORT',
+  	title: title,
+  	content: content,
+  	progress: Number(progress)
+  };
+  
+  console.log(payload);
+  
+
+  try {
+	if(isTask === 'task'){
+		const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${taskId}/reports`, 
+		{
+		  method: 'POST',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: JSON.stringify(payload)
+		});
+		
+		if (!res.ok) throw new Error('보고서 작성 실패');
+	}else{
+		console.log('subtask 보고서 제출');
+		const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/tasks/${taskId}/reports`, 
+		{
+		  method: 'POST',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: formData
+		});
+
+		if (!res.ok) throw new Error('보고서 작성 실패');
+	}
+
+    closeCreateReportModal();
+  } catch (err) {
+    console.error('보고서 작성 실패:', err);
+    alert('보고서 작성 중 오류가 발생했습니다.');
+  }
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+	closeCreateReportModal();
     closeCreateTaskModal();
     closeDeleteModal();
     closeDetailPanel();
