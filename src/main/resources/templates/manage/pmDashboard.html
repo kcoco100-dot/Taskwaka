@@ -87,49 +87,27 @@
 
             <div class="pmd-grid">
 
-                <!-- 나의 업무 -->
-                <section class="pmd-card" aria-labelledby="pmd-work-title">
+				<!-- 공지사항 -->
+                <section class="pmd-card" aria-labelledby="pmd-notice-title">
                     <div class="pmd-card-head">
                         <div>
-                            <h2 id="pmd-work-title" class="pmd-card-title">나의 업무</h2>
-                            <p class="pmd-card-description">지금 확인해야 할 담당 업무를 모았어요.</p>
+                            <h2 id="pmd-notice-title" class="pmd-card-title">공지사항</h2>
+                            <p class="pmd-card-description">팀과 프로젝트의 새로운 소식을 확인하세요.</p>
                         </div>
-                        <a class="pmd-more" th:href="@{/{domainKey}/home/gantt(domainKey=${domainKey})}">전체 보기 <span aria-hidden="true">→</span></a>
+                        <a class="pmd-more" th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}">전체 보기 <span aria-hidden="true">→</span></a>
                     </div>
-                    <div class="pmd-work-summary">
-                        <span th:if="${dueSoonCount > 0}"><strong th:text="|${dueSoonCount}건|">0건</strong>의 업무가 곧 마감돼요.</span>
-                        <span th:unless="${dueSoonCount > 0}">7일 이내에 마감되는 미완료 업무가 없어요.</span>
-                        <small>마감일 순</small>
-                    </div>
-                    <p class="pmd-empty" th:if="${remainingCount == 0}">진행할 담당 업무가 없습니다.</p>
-                    <ul class="pmd-work-list">
-                        <li class="pmd-work-item" th:each="task : ${myTasks}" th:if="${task.status != null and task.status >= 0 and task.status < 3}">
-                            <span th:if="${task.status == 0}" class="pmd-work-marker pmd-marker-gray" aria-hidden="true"></span>
-                            <span th:if="${task.status == 1}" class="pmd-work-marker" aria-hidden="true"></span>
-                            <span th:if="${task.status == 2}" class="pmd-work-marker pmd-marker-sand" aria-hidden="true"></span>
-                            <div class="pmd-work-info">
-                                <a class="pmd-work-title" th:text="${task.title}" th:href="@{/{domainKey}/manage/detail/{projectId}(domainKey=${domainKey},projectId=${task.projectId})}">업무명</a>
-                                <div class="pmd-work-meta">
-                                    <span th:text="${task.subject}">프로젝트명</span>
-                                    <span class="pmd-meta-divider" aria-hidden="true"></span>
-                                    <span th:if="${task.endAt != null and task.endAt != ''}"><time th:datetime="${task.endAt}" th:text="${task.endAt}">마감일</time> 마감</span>
-                                    <span th:if="${task.endAt == null or task.endAt == ''}">마감일 미정</span>
-                                </div>
-                            </div>
-                            <div class="pmd-work-side">
-                                <th:block th:switch="${task.status}">
-                                    <span th:case="0" class="pmd-badge">할 일</span>
-                                    <span th:case="1" class="pmd-badge pmd-badge-green">진행 중</span>
-                                    <span th:case="2" class="pmd-badge pmd-badge-lilac">검토 중</span>
-                                </th:block>
-                                <th:block th:if="${task.endAt != null and task.endAt != ''}" th:with="daysLeft=${#temporals.createDate(task.endAt).toEpochDay() - today.toEpochDay()}">
-                                    <span th:if="${daysLeft == 0}" class="pmd-deadline pmd-deadline-soon">D-day</span>
-                                    <span th:if="${daysLeft > 0 and daysLeft <= 7}" class="pmd-deadline pmd-deadline-soon" th:text="|D-${daysLeft}|"></span>
-                                    <span th:if="${daysLeft > 7}" class="pmd-deadline" th:text="|D-${daysLeft}|"></span>
-                                    <span th:if="${daysLeft < 0}" class="pmd-deadline pmd-deadline-soon" th:text="|지연 ${0 - daysLeft}일|"></span>
-                                </th:block>
-                                <span th:if="${task.endAt == null or task.endAt == ''}" class="pmd-deadline">-</span>
-                            </div>
+                    <p class="pmd-empty" th:if="${#lists.isEmpty(noticeList)}">등록된 공지사항이 없습니다.</p>
+                    <ul class="pmd-notice-list">
+                        <li class="pmd-notice-item" th:each="notice : ${noticeList}">
+                            <th:block th:switch="${notice.notice_type}">
+                                <span th:case="'WORKSPACE'" class="pmd-notice-type">워크</span>
+                                <span th:case="'PROJECT'" class="pmd-notice-type pmd-notice-type-normal">프로젝트</span>
+                                <span th:case="'TASK'" class="pmd-notice-type pmd-notice-type-normal">업무</span>
+                                <span th:case="*" class="pmd-notice-type">공지</span>
+                            </th:block>
+                            <a class="pmd-notice-title" th:text="${notice.title}" th:href="@{/{domainKey}/manage/noticeDetail/{notice_id}(domainKey=${domainKey},notice_id=${notice.notice_id})}">공지 제목</a>
+                            <span class="pmd-new" aria-label="오늘 등록된 공지" th:if="${notice.created != null and #strings.substring(notice.created, 0, 10) == today.toString()}">NEW</span>
+                            <time class="pmd-notice-date" th:datetime="${notice.created != null ? #strings.substring(notice.created, 0, 10) : null}" th:text="${notice.created != null ? #strings.substring(notice.created, 0, 10) : '-'}">작성일</time>
                         </li>
                     </ul>
                 </section>
@@ -220,31 +198,54 @@
                         <span>현재 참여 중인 프로젝트 <strong th:text="|${myProjectCount}개|">0개</strong></span>
                     </div>
                 </section>
-
-                <!-- 공지사항 -->
-                <section class="pmd-card" aria-labelledby="pmd-notice-title">
+                
+                <!-- 나의 업무 -->
+                <section class="pmd-card" aria-labelledby="pmd-work-title">
                     <div class="pmd-card-head">
                         <div>
-                            <h2 id="pmd-notice-title" class="pmd-card-title">공지사항</h2>
-                            <p class="pmd-card-description">팀과 프로젝트의 새로운 소식을 확인하세요.</p>
+                            <h2 id="pmd-work-title" class="pmd-card-title">나의 업무</h2>
+                            <p class="pmd-card-description">지금 확인해야 할 담당 업무를 모았어요.</p>
                         </div>
-                        <a class="pmd-more" th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}">전체 보기 <span aria-hidden="true">→</span></a>
+                        <a class="pmd-more" th:href="@{/{domainKey}/home/gantt(domainKey=${domainKey})}">전체 보기 <span aria-hidden="true">→</span></a>
                     </div>
-                    <p class="pmd-empty" th:if="${#lists.isEmpty(noticeList)}">등록된 공지사항이 없습니다.</p>
-                    <ul class="pmd-notice-list">
-                        <li class="pmd-notice-item" th:each="notice : ${noticeList}">
-                            <th:block th:switch="${notice.notice_type}">
-                                <span th:case="'WORKSPACE'" class="pmd-notice-type">워크</span>
-                                <span th:case="'PROJECT'" class="pmd-notice-type pmd-notice-type-normal">프로젝트</span>
-                                <span th:case="'TASK'" class="pmd-notice-type pmd-notice-type-normal">업무</span>
-                                <span th:case="*" class="pmd-notice-type">공지</span>
-                            </th:block>
-                            <a class="pmd-notice-title" th:text="${notice.title}" th:href="@{/{domainKey}/manage/noticeDetail/{notice_id}(domainKey=${domainKey},notice_id=${notice.notice_id})}">공지 제목</a>
-                            <span class="pmd-new" aria-label="오늘 등록된 공지" th:if="${notice.created != null and #strings.substring(notice.created, 0, 10) == today.toString()}">NEW</span>
-                            <time class="pmd-notice-date" th:datetime="${notice.created != null ? #strings.substring(notice.created, 0, 10) : null}" th:text="${notice.created != null ? #strings.substring(notice.created, 0, 10) : '-'}">작성일</time>
+                    <div class="pmd-work-summary">
+                        <span th:if="${dueSoonCount > 0}"><strong th:text="|${dueSoonCount}건|">0건</strong>의 업무가 곧 마감돼요.</span>
+                        <span th:unless="${dueSoonCount > 0}">7일 이내에 마감되는 미완료 업무가 없어요.</span>
+                        <small>마감일 순</small>
+                    </div>
+                    <p class="pmd-empty" th:if="${remainingCount == 0}">진행할 담당 업무가 없습니다.</p>
+                    <ul class="pmd-work-list">
+                        <li class="pmd-work-item" th:each="task : ${myTasks}" th:if="${task.status != null and task.status >= 0 and task.status < 3}">
+                            <span th:if="${task.status == 0}" class="pmd-work-marker pmd-marker-gray" aria-hidden="true"></span>
+                            <span th:if="${task.status == 1}" class="pmd-work-marker" aria-hidden="true"></span>
+                            <span th:if="${task.status == 2}" class="pmd-work-marker pmd-marker-sand" aria-hidden="true"></span>
+                            <div class="pmd-work-info">
+                                <a class="pmd-work-title" th:text="${task.title}" th:href="@{/{domainKey}/manage/detail/{projectId}(domainKey=${domainKey},projectId=${task.projectId})}">업무명</a>
+                                <div class="pmd-work-meta">
+                                    <span th:text="${task.subject}">프로젝트명</span>
+                                    <span class="pmd-meta-divider" aria-hidden="true"></span>
+                                    <span th:if="${task.endAt != null and task.endAt != ''}"><time th:datetime="${task.endAt}" th:text="${task.endAt}">마감일</time> 마감</span>
+                                    <span th:if="${task.endAt == null or task.endAt == ''}">마감일 미정</span>
+                                </div>
+                            </div>
+                            <div class="pmd-work-side">
+                                <th:block th:switch="${task.status}">
+                                    <span th:case="0" class="pmd-badge">할 일</span>
+                                    <span th:case="1" class="pmd-badge pmd-badge-green">진행 중</span>
+                                    <span th:case="2" class="pmd-badge pmd-badge-lilac">검토 중</span>
+                                </th:block>
+                                <th:block th:if="${task.endAt != null and task.endAt != ''}" th:with="daysLeft=${#temporals.createDate(task.endAt).toEpochDay() - today.toEpochDay()}">
+                                    <span th:if="${daysLeft == 0}" class="pmd-deadline pmd-deadline-soon">D-day</span>
+                                    <span th:if="${daysLeft > 0 and daysLeft <= 7}" class="pmd-deadline pmd-deadline-soon" th:text="|D-${daysLeft}|"></span>
+                                    <span th:if="${daysLeft > 7}" class="pmd-deadline" th:text="|D-${daysLeft}|"></span>
+                                    <span th:if="${daysLeft < 0}" class="pmd-deadline pmd-deadline-soon" th:text="|지연 ${0 - daysLeft}일|"></span>
+                                </th:block>
+                                <span th:if="${task.endAt == null or task.endAt == ''}" class="pmd-deadline">-</span>
+                            </div>
                         </li>
                     </ul>
                 </section>
+  
             </div>
         </section>
     </div>
