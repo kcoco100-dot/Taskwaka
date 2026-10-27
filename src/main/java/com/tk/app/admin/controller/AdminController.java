@@ -2,6 +2,7 @@ package com.tk.app.admin.controller;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -166,9 +167,24 @@ public class AdminController {
     		int memberCount = loginHistoryService.countDistinctMembers();
     		int dailyLoginCount = loginHistoryService.countDailyLoginHistory();
     		int dailyMemberCount = loginHistoryService.countDailyDistinctMembers();
-    		LocalDate today = LocalDate.now();
     		int weekLoginCount = loginHistoryService.countWeekLogin();
     		int weekMemberCount	= loginHistoryService.countWeekMember();
+    		int monthLoginCount = loginHistoryService.countMonthLogin();
+    		int monthMemberCount = loginHistoryService.countMonthMember();
+    		int yearLoginCount = loginHistoryService.countYearLogin();
+    		int yearMemberCount = loginHistoryService.countYearMember();
+    		
+    		
+    		LocalDate today = LocalDate.now();
+    		LocalDate weekStart = today.with(DayOfWeek.MONDAY);
+    		LocalDate weekEnd = weekStart.plusDays(6);
+    		String weekPeriod = weekStart + " ~ " + weekEnd;
+    		LocalDate monthStart = today.withDayOfMonth(1);
+    		LocalDate monthEnd = today.withDayOfMonth(today.lengthOfMonth());
+    		String monthPeriod = monthStart + " ~ " + monthEnd;
+    		LocalDate yearStart = today.withDayOfYear(1);
+    		LocalDate yearEnd = today.withDayOfYear(today.lengthOfYear());
+    		String yearPeriod = yearStart + " ~ " + yearEnd;
     		
     		System.out.println("선택한 기간 = " + period);
 
@@ -176,17 +192,33 @@ public class AdminController {
     		    loginCount = dailyLoginCount;
     		    memberCount = dailyMemberCount;
     		} else if ("weekly".equals(period)) {
-    			weekLoginCount = weekMemberCount;
+    			loginCount = weekLoginCount;
+    		    memberCount = weekMemberCount;
+    		} else if ("monthly".equals(period)) {
+    			loginCount = monthLoginCount;
+    		    memberCount = monthMemberCount;
+    		} else if ("yearly".equals(period)) {
+    		    loginCount = yearLoginCount;
+    		    memberCount = yearMemberCount;
     		}
     		
     		model.addAttribute("loginCount", loginCount);
     		model.addAttribute("memberCount", memberCount);
     		model.addAttribute("dailyLoginCount", dailyLoginCount);
     		model.addAttribute("dailyMemberCount", dailyMemberCount);
-    		model.addAttribute("today", today);
-    		model.addAttribute("period", period);
     		model.addAttribute("weekLoginCount", weekLoginCount);
     		model.addAttribute("weekMemberCount", weekMemberCount);
+    		model.addAttribute("monthLoginCount", monthLoginCount);
+    		model.addAttribute("monthMemberCount", monthMemberCount);
+    		model.addAttribute("yearLoginCount", yearLoginCount);
+    		model.addAttribute("yearMemberCount", yearMemberCount);
+    		
+    		
+    		model.addAttribute("today", today);
+    		model.addAttribute("period", period);
+    		model.addAttribute("weekPeriod", weekPeriod);
+    		model.addAttribute("monthPeriod", monthPeriod);
+    		model.addAttribute("yearPeriod", yearPeriod);
 		} catch (Exception e) {
 			log.error("stats : ", e);
 			throw e;

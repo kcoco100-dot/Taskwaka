@@ -83,5 +83,45 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
 			throw e;
 		}
 	}
+
+	@Override
+	public int countMonthLogin() {
+		try {
+			return loginHistoryMapper.countMonthLogin();
+		} catch (Exception e) {
+			log.error("countMonthLogin : ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public int countMonthMember() {
+		try {
+			return loginHistoryMapper.countMonthMember();
+		} catch (Exception e) {
+			log.error("countMonthMember : ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public int countYearLogin() {
+	    try {
+	        return loginHistoryMapper.countYearLogin();
+	    } catch (Exception e) {
+	        log.error("countYearLogin : ", e);
+	        throw e;
+	    }
+	}
+
+	@Override
+	public int countYearMember() {
+	    try {
+	        return loginHistoryMapper.countYearMember();
+	    } catch (Exception e) {
+	        log.error("countYearMember : ", e);
+	        throw e;
+	    }
+	}
 	
 }

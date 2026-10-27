@@ -42,4 +42,32 @@
 		WHERE login_at >= TRUNC(SYSDATE, 'IW')
 		  AND login_at &lt; TRUNC(SYSDATE, 'IW') + 7
 	</select>
+	
+	<select id="countMonthLogin" resultType="int">
+		SELECT COUNT(*) AS login_count
+		FROM login_history
+		WHERE login_at >= TRUNC(SYSDATE, 'MM')
+		AND login_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	</select>
+	
+	<select id="countMonthMember" resultType="int">
+		SELECT COUNT(DISTINCT member_id) AS member_count
+		FROM login_history
+		WHERE login_at >= TRUNC(SYSDATE, 'MM')
+		AND login_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	</select>
+	
+	<select id="countYearLogin" resultType="int">
+	    SELECT COUNT(*) AS login_count
+	    FROM login_history
+	    WHERE login_at >= TRUNC(SYSDATE, 'YYYY')
+	      AND login_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), 12)
+	</select>
+	
+	<select id="countYearMember" resultType="int">
+	    SELECT COUNT(DISTINCT member_id) AS member_count
+	    FROM login_history
+	    WHERE login_at >= TRUNC(SYSDATE, 'YYYY')
+	      AND login_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), 12)
+	</select>
 </mapper>

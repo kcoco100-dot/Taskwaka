@@ -13,4 +13,8 @@ public interface LoginHistoryMapper {
 	public int countDailyDistinctMembers();
 	public int countWeekLogin();
 	public int countWeekMember();
+	public int countMonthLogin();
+	public int countMonthMember();
+	public int countYearLogin();
+	public int countYearMember();
 }

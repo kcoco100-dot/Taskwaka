@@ -67,9 +67,7 @@
 	    AND STATUS = 0
 	</select>
 	
-	<select id="findDtProjectIds"
-	        parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto"
-	        resultType="long">
+	<select id="findDtProjectIds" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto" resultType="long">
 	    SELECT pm.PROJECT_ID
 	    FROM PROJECT_MEMBERS pm
 	    JOIN WORKSPACE_MEMBERS wm
@@ -78,13 +76,24 @@
 	    AND wm.MEMBER_ID = #{new_member_id}
 	    AND wm.ROLE = 50
 	    AND wm.STATUS = 0
-	    AND pm.ROLE = 50
 	    AND pm.STATUS = 0
 	</select>
 	
 	<update id="updateOldPmProjectRole" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
-	    UPDATE PROJECT_MEMBERS
-	    SET ROLE = 50
+	    UPDATE PROJECT_MEMBERS oldPm
+		SET ROLE = (
+		    SELECT pm.ROLE
+		    FROM PROJECT_MEMBERS pm
+		    JOIN WORKSPACE_MEMBERS wm
+		    ON pm.WORKSPACE_MEMBER_ID = wm.WORKSPACE_MEMBER_ID
+		    WHERE wm.WORKSPACE_ID = #{workspace_id}
+		    AND wm.MEMBER_ID = #{new_member_id}
+		    AND wm.STATUS = 0
+		    AND pm.PROJECT_ID = oldPm.PROJECT_ID
+		    AND pm.STATUS = 0
+		),
+		STATUS = 0,
+		LEFT = NULL
 	    WHERE WORKSPACE_MEMBER_ID IN (
 	        SELECT WORKSPACE_MEMBER_ID
 	        FROM WORKSPACE_MEMBERS
@@ -101,11 +110,8 @@
 	        AND wm.MEMBER_ID = #{new_member_id}
 	        AND wm.ROLE = 50
 	        AND wm.STATUS = 0
-	        AND pm.ROLE = 50
 	        AND pm.STATUS = 0
 	    )
-	    AND ROLE = 70
-	    AND STATUS = 0
 	</update>
 	
 	
@@ -209,6 +215,30 @@
 	        AND wm.STATUS = 0
 	    )
 	</update>
+	
+	<insert id="insertOldPmProjects" parameterType="com.tk.app.admin.domain.dto.AdminPmChangeDto">
+	    INSERT INTO PROJECT_MEMBERS
+	        (PROJECT_MEMBER_ID, PROJECT_ID, WORKSPACE_MEMBER_ID, ROLE, STATUS, JOINED)
+	    SELECT seq_project_members.NEXTVAL, pm.PROJECT_ID,
+	           oldWm.WORKSPACE_MEMBER_ID, pm.ROLE, 0, SYSDATE
+	    FROM PROJECT_MEMBERS pm
+	    JOIN WORKSPACE_MEMBERS newWm
+	      ON pm.WORKSPACE_MEMBER_ID = newWm.WORKSPACE_MEMBER_ID
+	    JOIN WORKSPACE_MEMBERS oldWm
+	      ON newWm.WORKSPACE_ID = oldWm.WORKSPACE_ID
+	    WHERE newWm.WORKSPACE_ID = #{workspace_id}
+	      AND newWm.MEMBER_ID = #{new_member_id}
+	      AND newWm.STATUS = 0
+	      AND oldWm.MEMBER_ID = #{old_member_id}
+	      AND oldWm.STATUS = 0
+	      AND pm.STATUS = 0
+	      AND NOT EXISTS (
+	          SELECT 1
+	          FROM PROJECT_MEMBERS oldPm
+	          WHERE oldPm.PROJECT_ID = pm.PROJECT_ID
+	            AND oldPm.WORKSPACE_MEMBER_ID = oldWm.WORKSPACE_MEMBER_ID
+	      )
+	</insert>
 	
 	
 	

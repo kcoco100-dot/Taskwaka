@@ -26,4 +26,6 @@ public interface AdminPmChangeMapper {
 	 public int countAllProjects(AdminPmChangeDto dto);
 	 public int countNewPmProjects(AdminPmChangeDto dto);
 	 public int reactivateNewPmProjects(AdminPmChangeDto dto);
+	 
+	 int insertOldPmProjects(AdminPmChangeDto dto);
 }

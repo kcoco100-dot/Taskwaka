@@ -73,14 +73,15 @@ public class AdminPmChangeServiceImpl implements AdminPmChangeService {
 		        	
 		        	// 1. 기존 PM에게 새 PM 후보가 담당하던 프로젝트 인계
 		        	int projectCount = mapper.findDtProjectIds(savedDto).size();
+		        	System.out.println("실제 인계 프로젝트 번호 = " + mapper.findDtProjectIds(savedDto)); 	
 
 		        	if (projectCount == 0) {
 		        	    throw new IllegalStateException("인계할 과장 담당 프로젝트가 없습니다.");
 		        	}
 
-		        	if (mapper.updateOldPmProjectRole(savedDto) != projectCount) {
-		        	    throw new IllegalStateException("프로젝트 인계 실패");
-		        	}
+		        	mapper.updateOldPmProjectRole(savedDto);
+		        	
+		        	mapper.insertOldPmProjects(savedDto);
 
 		        	// 2. 기존 PM의 남은 프로젝트 PM 권한 정리
 		        	mapper.deactivateOldPmProjects(savedDto);

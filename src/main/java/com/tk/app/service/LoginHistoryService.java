@@ -15,6 +15,14 @@ public interface LoginHistoryService {
 	public int countWeekLogin();
 	// 주간 접속 회원 수(중복 제외)
 	public int countWeekMember();
+	// 월별 로그인 성공 횟수
+	public int countMonthLogin();
+	// 월별 접속 회원 수(중복 제외)
+	public int countMonthMember();
+	// 연간 로그인 성공 횟수
+	public int countYearLogin();
+	// 연간 접속 회원 수(중복 제외)
+	public int countYearMember();
 
 
 
