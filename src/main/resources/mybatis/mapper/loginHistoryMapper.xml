@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.LoginHistoryMapper">
+	<insert id="insertLoginHistory" parameterType="long">
+		INSERT INTO login_history(login_history_id, member_id, login_at)
+		VALUES (seq_login_history.NEXTVAL, #{member_id}, SYSDATE)
+	</insert>
+	
+	<select id="countLoginHistory" resultType="int">
+		SELECT COUNT(*) AS login_count
+		FROM login_history
+	</select>
+	
+	<select id="countDistinctMembers" resultType="int">
+		SELECT COUNT(DISTINCT member_id) AS member_count
+		FROM login_history
+	</select>
+	
+	<select id="countDailyLoginHistory" resultType="int">
+		SELECT COUNT(*) AS login_count
+		FROM login_history
+		WHERE TRUNC(login_at) = TRUNC(SYSDATE)	
+	</select>
+	
+	<select id="countDailyDistinctMembers" resultType="int">
+		SELECT COUNT(DISTINCT member_id) AS member_count
+		FROM login_history
+		WHERE TRUNC(login_at) = TRUNC(SYSDATE)
+	</select>
+	
+	<select id="countWeekLogin" resultType="int">
+		SELECT COUNT(*) AS login_count
+		FROM login_history
+		WHERE login_at >= TRUNC(SYSDATE, 'IW')
+		  AND login_at &lt; TRUNC(SYSDATE, 'IW') + 7
+	</select>
+	
+	<select id="countWeekMember" resultType="int">
+		SELECT COUNT(DISTINCT member_id) AS member_count
+		FROM login_history
+		WHERE login_at >= TRUNC(SYSDATE, 'IW')
+		  AND login_at &lt; TRUNC(SYSDATE, 'IW') + 7
+	</select>
+</mapper>

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.tk.app.domain.dto.MemberDto;
+import com.tk.app.service.LoginHistoryService;
 import com.tk.app.service.MemberService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +42,7 @@ public class KakaoController {
     private final KakaoAuthService kakaoAuthService;
     private final MemberService memberService;
     private final UserDetailsService userDetailsService;
+    private final LoginHistoryService loginHistoryService;
 
     @Value("${kakao.rest-api-key}")
     private String restApiKey;
@@ -210,6 +212,10 @@ public class KakaoController {
 
             memberService.updateLastLogin(member.getLogin_id());
 
+            Long member_id = memberService.getMemberId(member.getLogin_id());
+            
+            loginHistoryService.insertLoginHistory(member_id);
+            
             request.changeSessionId();
 
             SecurityContext context =
