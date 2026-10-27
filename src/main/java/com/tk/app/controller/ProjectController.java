@@ -8,6 +8,9 @@ import com.tk.app.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +29,8 @@ public class ProjectController {
             @PathVariable("domainKey") String domainKey,
             @PathVariable("projectId") Long projectId,
             @RequestParam(name = "tab", defaultValue = "dashboard") String tab,
+            @RequestParam(name="page", defaultValue = "1") int page,
+            // @RequestParam(name="kwd", defaultValue = "") String kwd,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         
@@ -72,10 +77,17 @@ public class ProjectController {
 	        	//model.addAttribute();
 	        }
 	        case "notice" -> {
-	        	model.addAttribute("taskNotices", taskService.getTaskNoticeList(projectId, isTeamLeader));
+	        	int pageSize = 10;
+	        	int currentPage = (page < 1) ? 1 : page;
+	        	int offset = (currentPage - 1) * pageSize;
+	        	
+	        	int dataCount = taskService.getTaskNoticeCount(projectId, isTeamLeader);
+	        	List<Map<String, Object>> taskNotices = taskService.getTaskNoticeList(projectId, isTeamLeader,offset, pageSize);
+	        	model.addAttribute("dataCount", dataCount);
+	        	model.addAttribute("page", currentPage);
+	        	model.addAttribute("taskNotices",taskNotices );
 	        }
         }
-
         return "project/project_layout";
     }
 

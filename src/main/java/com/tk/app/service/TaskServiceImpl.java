@@ -229,8 +229,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader) {
-        return taskMapper.selectTaskNoticesByProject(projectId, isLeader);
+    public List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader, int offset, int pageSize) {
+        return taskMapper.selectTaskNoticesByProject(projectId, isLeader, offset, pageSize);
+    }
+    
+    @Override
+    public int getTaskNoticeCount(Long projectId, boolean isTeamLeader) {
+    	return taskMapper.countTaskNoticesByProject(projectId, isTeamLeader);
     }
 
     @Override

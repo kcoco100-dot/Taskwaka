@@ -3,6 +3,7 @@
 <body>
 	<div th:fragment="content">
 		<link rel="stylesheet" th:href="@{/dist/css/project/task_notice.css}">
+		<link rel="stylesheet" th:href="@{/dist/css/paginate.css}">
 
 		<div class="notice-split-wrapper" id="noticeSplitWrapper">
 
@@ -20,7 +21,8 @@
 						</div>
 
 						<div class="notice-search-box">
-							<input type="text" id="noticeSearchInput" placeholder="공지 제목 또는 작성자 검색..." oninput="applyNoticeFilterAndSearch()">
+							<input type="text" id="noticeSearchInput" placeholder="공지 제목 또는 작성자 검색...">
+							<button type="button" class="btn-open-notice-write" onclick="applyNoticeFilterAndSearch()">검색</button>
 						</div>
 					</div>
 
@@ -92,6 +94,7 @@
 					</ul>
 				</div>
 
+			<div class="page-navigation"></div>
 			</div>
 
 			<!-- ==========================================================================
@@ -218,8 +221,8 @@
 			</aside>
 
 		</div>
-
-		<!-- Thymeleaf 전역 변수 바인딩 -->
+		
+		<script type="text/javascript" th:src="@{/dist/posts/renderPaging.js}"></script>
 		<script th:inline="javascript">
 			/*<![CDATA[*/
 			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
@@ -227,8 +230,52 @@
 			const currentProjectMemberId = /*[[${currentProjectMemberId}]]*/ 1;
 			const isTeamLeader = /*[[${isTeamLeader != null ? isTeamLeader : false}]]*/ false;
 			/*]]>*/
+			
+			document.addEventListener('DOMContentLoaded', function(){
+			let page = Number('[[${page}]]') || 0;
+			let pageSize = Number('10');
+			let dataCount = Number('[[${dataCount}]]') || 0;
+	
+			let url = `/${currentDomainKey}/project/${currentProjectId}?tab=notice`;
+			let search = '[[${not #strings.isEmpty(kwd)}]]' === 'true';
+			if( search ) {
+				url = '[(@{/bbs/list(schType=${schType}, kwd=${kwd})})]';
+			}
+		
+			let totalPage = getPageCount(dataCount, pageSize);
+			let paging = renderPaging(page, totalPage, url);
+		
+			/*document.querySelector('span.dataCount').textContent = 
+				dataCount + '개 (' + page + '/' + totalPage + ' 페이지)';*/
+			document.querySelector('div.page-navigation').innerHTML = 
+				dataCount === 0 ? '등록된 게시물이 없습니다.' : paging;
+		});
+			
+		document.addEventListener('DOMContentLoaded', () => {
+				const inputEL = document.querySelector('input[name=kwd]'); 
+				inputEL.addEventListener('keydown', function (ev) {
+					if(ev.key === 'Enter') {
+						ev.preventDefault();
+						
+						searchList();
+					}
+				});
+			});
+
+			function searchList() {
+				const f = document.searchForm;
+				if(! f.kwd.value.trim()) {
+					return;
+				}
+				
+				const formData = new FormData(f);
+				let params = new URLSearchParams(formData).toString();
+				
+				let url = '[(@{/bbs/list})]';
+				location.href = url + '?' + params;
+			}
 		</script>
-		<script th:src="@{/dist/js/project/task_notice.js}"></script>
+		<script type="text/javascript" th:src="@{/dist/js/project/task_notice.js}"></script>
 	</div>
 </body>
 </html>

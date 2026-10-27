@@ -50,7 +50,8 @@ public interface TaskService {
     // 업무공지 탭 전용
     boolean isTeamLeaderOrAbove(Long projectMemberId);
     Long getMemberIdByProjectMemberId(Long projectMemberId);
-    List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader);
+    List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader, int offset, int pageSize);
+    int getTaskNoticeCount(Long projectId, boolean isTeamLeader);
     Map<String, Object> getTaskNoticeDetail(Long noticeId, boolean incrementView);
     Map<String, Object> createTaskNotice(java.util.Map<String, Object> param);
     void updateTaskNotice(java.util.Map<String, Object> param);

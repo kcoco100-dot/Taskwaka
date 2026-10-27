@@ -628,6 +628,29 @@
         ORDER BY
             CASE WHEN n.notice_type = 'WORKSPACE' THEN 0 ELSE 1 END ASC,
             n.notice_id DESC
+            OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+    
+    <select id="countTaskNoticesByProject" resultType="int">
+        SELECT COUNT(*)
+        FROM notice n
+        WHERE (
+            n.project_id = #{projectId}
+            OR (
+                n.notice_type = 'WORKSPACE'
+                AND (
+                    n.workspace_id = (SELECT workspace_id FROM projects WHERE project_id = #{projectId})
+                    OR n.workspace_id IS NULL
+                )
+            )
+            OR (
+                n.task_id IN (SELECT task_id FROM tasks WHERE project_id = #{projectId})
+            )
+        )
+          AND n.deleted IS NULL
+          <if test="!isLeader">
+              AND (n.status = 1 OR n.notice_type = 'WORKSPACE')
+          </if>
     </select>
 
     <!-- 공지사항 단건 상세 조회 -->

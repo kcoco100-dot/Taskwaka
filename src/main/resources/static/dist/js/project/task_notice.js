@@ -1,6 +1,8 @@
 /* ==========================================================================
    [JS] 업무공지 탭 제어 (조회 드로어 & 팀 리더 전용 작성/수정/삭제 드로어 전환)
    ========================================================================== */
+import {fetchRequest} from '../util-async.js';
+   
 let currentNoticeFilter = 'ALL';
 let activeNoticeData = null;
 let activeNoticeRow = null;
@@ -17,8 +19,16 @@ function filterNoticeList(filterType, btnElem) {
   applyNoticeFilterAndSearch();
 }
 
-function applyNoticeFilterAndSearch() {
+async function applyNoticeFilterAndSearch() {
   const keyword = (document.getElementById('noticeSearchInput')?.value || '').trim().toLowerCase();
+  const url = `/${currentDomainKey}/project/${currentProjectId}?tab=notice`;
+  const params ={
+	kwd: keyword,
+	
+  }
+  
+  fetchRequest(url, 'GET', JSON.stringify(params), 'json');
+  
   const rows = document.querySelectorAll('.notice-item-row');
   let visibleCount = 0;
 

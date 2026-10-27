@@ -134,45 +134,6 @@
 				</div>
 				<div class="detail-subtask-box" id="detailSubtaskBox"></div>
 			</div>
-
-			<!-- ==========================================================================
-			     [하위업무 선택 시 노출] 일일 보고서 (Daily Report) 섹션
-			     ========================================================================== -->
-			<div class="detail-daily-report-section" id="detailDailyReportSection" style="display:none;">
-				<div class="detail-section-Header-line">
-					<div class="detail-section-title">
-						<span>📝 일일 업무 보고서</span>
-						<span style="color:var(--text-muted); font-size:12px;" id="dailyReportCount">(0)</span>
-					</div>
-				</div>
-
-				<!-- 하위업무 담당자 전용 작성/수정 폼 -->
-				<div class="daily-report-form-card" id="dailyReportWriteFormBox" style="display:none;">
-					<div class="report-form-header">
-						<span id="dailyReportFormTitle">새 일일 보고서 작성</span>
-						<button type="button" class="btn-cancel-edit-report" id="btnCancelReportEdit" style="display:none;" onclick="resetDailyReportForm()">작성 취소</button>
-					</div>
-					<input type="hidden" id="editingDailyReportId" value="">
-					<div class="report-form-row">
-						<div class="report-field-item">
-							<label>보고일자</label>
-							<input type="date" class="report-form-date" id="dailyReportDateInput">
-						</div>
-						<div class="report-field-item">
-							<label>달성 진척도(%)</label>
-							<input type="number" class="report-form-input" id="dailyReportProgressInput" min="0" max="100" step="5" value="0" style="width:75px;">
-						</div>
-					</div>
-					<textarea class="report-form-textarea" id="dailyReportContentInput" style="min-height:80px;" placeholder="오늘 진행한 하위업무 내용과 특이사항을 보고해 주세요..."></textarea>
-					<div style="display:flex; justify-content:flex-end;">
-						<button type="button" class="btn-submit-daily-report" id="btnSubmitDailyReport" onclick="submitDailyReportForm()">보고서 등록</button>
-					</div>
-				</div>
-
-				<!-- 등록된 일일 보고서 목록 -->
-				<div class="daily-report-list-box" id="dailyReportListBox"></div>
-			</div>
-
 		</div>
 
 		<script th:src="@{/dist/js/project/detail_panel.js}"></script>
