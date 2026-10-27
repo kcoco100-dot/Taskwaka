@@ -20,13 +20,14 @@
 			    <p class="page-description"></p>
 			</div>
         
-            <form method="get" class="project-search-form" th:action="@{/{domainKey}/manage/manage(domainKey=${domainKey})}" style="display:flex;gap:8px;margin-bottom:20px;">
-                    <input type="hidden" name="schType" th:value="${schType}">
-                <input type="search" name="kwd" th:value="${kwd}" placeholder="이름 검색" aria-label="이름 검색">
-                <button class="project-button" type="submit">검색</button>
-            </form>
-            <div class="member-content">
-                <div class="member-table-wrap">
+		    <form method="get" class="manage-member-search" th:action="@{/{domainKey}/manage/manage(domainKey=${domainKey})}">
+		        <input type="hidden" name="schType" th:value="${schType}">
+		        <label for="manageMemberKeyword">팀원 검색</label>
+		        <input type="search" id="manageMemberKeyword" name="kwd" th:value="${kwd}" placeholder="팀원 이름을 입력하세요">
+		        <button type="submit" class="manage-member-search-button primary">검색</button>
+		        <a class="manage-member-search-button" th:href="@{/{domainKey}/manage/manage(domainKey=${domainKey})}">초기화</a>
+		    </form>
+		    <div class="member-table-wrap">
                 <table class="project-list-table">
                     <thead>
                         <tr>
@@ -70,7 +71,7 @@
                                         <span th:if="${p.role == 30}" class="project-status project-status-completed">TL</span>
                                         <span th:if="${p.role == 10}" class="project-status project-status-paused">AA</span>
                                         
-                                        <button th:if="${currentRole == 70 or (currentRole == 50 and p.role == 30)}" type="button" class="btn-exclude-project" th:data-id="${p.projectMemberId}"
+                                        <button th:if="${currentRole == 70 or (currentRole == 50 and (p.role == 30 or p.role == 10))}" type="button" class="btn-exclude-project" th:data-id="${p.projectMemberId}"
                                                 style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px;">제외</button>
                                     </div>
                                 </div>
@@ -99,7 +100,7 @@
                                         <option th:if="${currentRole == 70 and ownWorkspaceMemberId != null and member.workspaceMemberId == ownWorkspaceMemberId}" value="70">PM</option>
                                         <option th:if="${currentRole == 70}" value="50">DT</option>
                                         <option value="30">TL</option>
-                                        <option th:if="${currentRole == 70}" value="10">AA</option>
+                                        <option value="10">AA</option>
                                     </select>
                                     
                                     <button type="button" 

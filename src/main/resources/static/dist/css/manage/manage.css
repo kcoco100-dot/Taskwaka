@@ -187,3 +187,83 @@
     gap: 8px;
     flex-wrap: wrap;
 }
+
+/* 팀원 정보 조회: 검색 영역 */
+.manage-member-page .manage-member-search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+}
+
+.manage-member-search label {
+    margin: 0;
+    color: #665747;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.manage-member-search input[type="search"] {
+    box-sizing: border-box;
+    flex: 1 1 220px;
+    width: 100%;
+    max-width: 380px;
+    min-width: 0;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #DDD5CA;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+    font-size: 13px;
+}
+
+.manage-member-search input::placeholder {
+    color: #9B9186;
+}
+
+.manage-member-search input:focus {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}
+
+.manage-member-search .manage-member-search-button {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid #DDD5CA;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #665747;
+    font: inherit;
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.manage-member-search-button:hover {
+    background: #F7F3EE;
+}
+
+.manage-member-search .manage-member-search-button.primary {
+    border-color: #71865B;
+    background: #71865B;
+    color: #FFFFFF;
+}
+
+.manage-member-search .manage-member-search-button.primary:hover {
+    border-color: #5E724A;
+    background: #5E724A;
+}
+
+.manage-member-search-button:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: 2px;
+}

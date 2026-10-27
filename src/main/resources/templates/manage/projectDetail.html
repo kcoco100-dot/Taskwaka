@@ -145,14 +145,15 @@
                                             <input type="date" name="end_date" th:value="${task.end_date}" required>
                                         </div>
 
-                                        <div class="pd-form-group">
-                                            <label>진행단계 *</label>
-                                            <input type="number" name="task_level" min="0" max="9" th:value="${task.task_level}" placeholder="예: 1" required>
-                                        </div>
-                                        
-                                        <div class="pd-form-group">
+										<div class="pd-form-group">
+										    <label>진행단계 *</label>
+										    <input type="number" name="task_level" min="0" max="9" th:value="${task.task_level}" placeholder="예: 1" required>
+										</div>
+										
+										<!-- 프로젝트 전체에서 이 업무가 차지하는 비중 -->
+										<div class="pd-form-group">
 										    <label>배정 비중 (%) *</label>
-										    <input type="number" name="progress_weight" min="0.01" max="100" step="0.01" th:value="${task.progress_weight}" placeholder="예: 20" required>
+										    <input type="number" name="progress_weight" min="0.01" max="100" step="0.01" th:value="${task.progress_weight}" placeholder="예: 25" required>
 										</div>
                                         
                                     </div>

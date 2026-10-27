@@ -273,6 +273,7 @@
             initialView: 'dayGridMonth',
             locale: 'ko',
             height: 'auto',
+			stickyHeaderDates: false,
             fixedWeekCount: false,
             expandRows: false,
             dayMaxEvents: false, // 일정이 5개를 넘어도 '+n개'로 숨기지 않는다.
