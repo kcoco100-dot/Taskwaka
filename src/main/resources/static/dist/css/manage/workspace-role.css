@@ -183,3 +183,193 @@
     justify-content: center;
     gap: 5px;
 }
+
+.workspace-role-page .page-heading {
+    height: auto;
+    min-height: 0;
+    margin-bottom: 20px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+}
+
+.workspace-role-page .page-title {
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 24px;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.workspace-role-page .workspace-role-table {
+    min-width: 860px;
+}
+
+.workspace-role-page .workspace-role-table th:last-child,
+.workspace-role-page .workspace-role-table td:last-child {
+    width: 340px;
+    white-space: nowrap;
+}
+
+.workspace-role-page .workspace-role-table td {
+    vertical-align: middle;
+}
+
+.workspace-role-table td:last-child .workspace-role-edit {
+    display: inline-flex;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.workspace-role-table .workspace-role-edit select {
+    width: 110px;
+    min-width: 110px;
+}
+
+.workspace-role-button.pm-change-open {
+    margin-left: 8px;
+    border-color: #D7DFC9;
+    background: #F2F5EC;
+    color: #536844;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.workspace-role-button.pm-change-open:hover {
+    background: #E7EEDC;
+}
+
+.pm-change-dialog {
+    box-sizing: border-box;
+    width: min(460px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    margin: auto;
+    padding: 0;
+    overflow: auto;
+    border: 1px solid #E5DED3;
+    border-radius: 16px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+    box-shadow: 0 20px 60px rgba(49, 39, 29, .2);
+}
+
+.pm-change-dialog::backdrop {
+    background: rgba(37, 33, 28, .38);
+}
+
+.pm-change-dialog form {
+    margin: 0;
+    padding: 24px;
+}
+
+.pm-change-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.pm-change-heading h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.pm-change-heading p {
+    margin: 8px 0 0;
+    color: #8B7D6E;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.pm-change-close {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #F5F2EC;
+    color: #786B5E;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.pm-change-target {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 14px;
+    border: 1px solid #E1E8D8;
+    border-radius: 10px;
+    background: #F5F7F1;
+    font-size: 13px;
+}
+
+.pm-change-target > span:first-child {
+    color: #8B7D6E;
+    font-size: 12px;
+}
+
+.pm-change-role {
+    margin-left: auto;
+    color: #71865B;
+    font-size: 12px;
+}
+
+.pm-change-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pm-change-dialog textarea {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-height: 112px;
+    padding: 12px;
+    resize: vertical;
+    border: 1px solid #DDD5CA;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.pm-change-dialog textarea:focus {
+    outline: 0;
+    border-color: #71865B;
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, .12);
+}
+
+.pm-change-dialog textarea::placeholder {
+    color: #A39A90;
+}
+
+.pm-change-note {
+    margin: 8px 0 0;
+    color: #948779;
+    font-size: 12px;
+}
+
+.pm-change-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+}

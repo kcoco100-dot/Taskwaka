@@ -134,4 +134,10 @@ public interface GrowthTreeMapper {
 	// 성장나무 페이지 활동기록
 	public List<GrowthExpLogDto> findRecentGrowthExpLogs(long workspaceId);
 	
+	// 프로젝트 진행률 확인 
+	public Map<String, Object> findProjectCompleteContext(long projectId);
+	
+	// 프로젝트 진행률 완료된 것
+	public int countProjectCompleteExpLog(long projectId);
+	
 }

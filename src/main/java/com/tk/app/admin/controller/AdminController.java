@@ -2,6 +2,7 @@ package com.tk.app.admin.controller;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,15 +18,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.tk.app.admin.domain.dto.AdminMemberDto;
 import com.tk.app.admin.service.AdminMemberService;
 import com.tk.app.common.PaginateUtil;
+import com.tk.app.service.LoginHistoryService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/admin")
 public class AdminController {
 	private final AdminMemberService service;
 	private final PaginateUtil paginateUtil;
+	private final LoginHistoryService loginHistoryService;
 
     @GetMapping
     public String adminMain() {
@@ -154,7 +159,38 @@ public class AdminController {
 //    }
 
     @GetMapping("/stats")
-    public String stats(Model model) {
+    public String stats(Model model,
+    		@RequestParam(value = "period", defaultValue = "all") String period) {
+    	try {
+    		int loginCount = loginHistoryService.countLoginHistory();
+    		int memberCount = loginHistoryService.countDistinctMembers();
+    		int dailyLoginCount = loginHistoryService.countDailyLoginHistory();
+    		int dailyMemberCount = loginHistoryService.countDailyDistinctMembers();
+    		LocalDate today = LocalDate.now();
+    		int weekLoginCount = loginHistoryService.countWeekLogin();
+    		int weekMemberCount	= loginHistoryService.countWeekMember();
+    		
+    		System.out.println("선택한 기간 = " + period);
+
+    		if ("daily".equals(period)) {
+    		    loginCount = dailyLoginCount;
+    		    memberCount = dailyMemberCount;
+    		} else if ("weekly".equals(period)) {
+    			weekLoginCount = weekMemberCount;
+    		}
+    		
+    		model.addAttribute("loginCount", loginCount);
+    		model.addAttribute("memberCount", memberCount);
+    		model.addAttribute("dailyLoginCount", dailyLoginCount);
+    		model.addAttribute("dailyMemberCount", dailyMemberCount);
+    		model.addAttribute("today", today);
+    		model.addAttribute("period", period);
+    		model.addAttribute("weekLoginCount", weekLoginCount);
+    		model.addAttribute("weekMemberCount", weekMemberCount);
+		} catch (Exception e) {
+			log.error("stats : ", e);
+			throw e;
+		}
         return adminPage("stats", model);
     }
 

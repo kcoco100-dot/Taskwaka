@@ -129,3 +129,37 @@
     color: #A69B8F;
     font-weight: 400;
 }
+
+.meeting-detail-page #meetingEditor {
+    height: 320px;
+}
+
+#meetingsCreateForm .form-label {
+    margin-bottom: 8px;
+    color: #594331;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#meetingsCreateForm :is(.form-control, .form-select) {
+    height: 46px;
+    padding: 10px 14px;
+    border: 1px solid #E4E1D9;
+    border-radius: 10px;
+    background-color: #FCFCFA;
+    color: #493B2F;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+#meetingsCreateForm .form-select {
+    padding-right: 38px;
+}
+
+#meetingsCreateForm :is(.form-control, .form-select):focus {
+    outline: none;
+    border-color: #71865B;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.12);
+}

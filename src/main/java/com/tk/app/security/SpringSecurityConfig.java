@@ -10,6 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
+import com.tk.app.service.LoginHistoryService;
 import com.tk.app.service.MemberService;
 
 import jakarta.servlet.ServletException;
@@ -73,6 +74,7 @@ import lombok.RequiredArgsConstructor;
 public class SpringSecurityConfig {
 	private final MemberService memberService;
 	private final MemberStatusFilter memberStatusFilter;
+	private final LoginHistoryService loginHistoryService;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -106,6 +108,10 @@ public class SpringSecurityConfig {
 						        String loginId = authentication.getName();
 
 						        memberService.updateLastLogin(loginId);
+						        
+						        Long member_id = memberService.getMemberId(loginId);
+						        
+						        loginHistoryService.insertLoginHistory(member_id);
 
 						    } catch (Exception e) {
 						        throw new ServletException(

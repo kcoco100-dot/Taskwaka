@@ -10,6 +10,7 @@
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user-detail.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-domain.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-stats.css}">
 	<!-- Quill editor -->
 	<link rel="stylesheet" th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeDetail' or activeSection == 'noticeEdit'}"
 	 	th:href="@{/dist/vendor/quill/css/quill.snow.css}">
@@ -184,12 +185,12 @@
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/resize.js}"></script>
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/posts/qeditor.js}"></script>
 
-<th:block th:if="${activeSection == 'noticeWrite'}" th:replace="~{admin/fragments/notice-write :: script}"></th:block>
+<th:block th:if="${activeSection == 'noticeWrite'}"><th:block th:replace="~{admin/fragments/notice-write :: script}"></th:block></th:block>
 <th:block th:if="${activeSection == 'noticeEdit'}" th:replace="~{admin/fragments/notice-edit :: script}"></th:block>	
 <th:block th:if="${activeSection == 'domain'}" th:replace="~{admin/fragments/domain :: script}"></th:block>
 <script th:if="${activeSection == 'inquiryDetail'}" th:replace="~{admin/fragments/inquiry-detail :: script}"></script>
 <th:block th:if="${activeSection == 'inquiry'}" th:replace="~{admin/fragments/inquiry :: script}"></th:block>
-<th:block th:if="${activeSection == 'faqWrite'}" th:replace="~{admin/fragments/faq-write :: script}"></th:block>
-<th:block th:if="${activeSection == 'faqEdit'}" th:replace="~{admin/fragments/faq-edit :: script}"></th:block>
+<th:block th:if="${activeSection == 'faqWrite'}"><th:block th:replace="~{admin/fragments/faq-write :: script}"></th:block></th:block>
+<th:block th:if="${activeSection == 'faqEdit'}"><th:block th:replace="~{admin/fragments/faq-edit :: script}"></th:block></th:block>
 </body>
 </html>

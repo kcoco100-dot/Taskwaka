@@ -23,11 +23,13 @@ public class ManageWorkController {
     private final ManageWorkService service;
     private final PaginateUtil paginateUtil;
     private final MyUtil myUtil;
+    
     // 도메인키 설정
     @ModelAttribute("domainKey")
     public String setDomainKey(@PathVariable("domainKey") String domainKey) {
         return domainKey;
     }
+    
     // 워크 팀원 목록 조회
     @GetMapping("/workspaceRoles")
     public String listWorkMember(@PathVariable("domainKey") String domainKey,
@@ -58,6 +60,7 @@ public class ManageWorkController {
         }
         return "manage/workspaceRoles";
     }
+    
     // 워크 직위 변경
     @PostMapping("/workspaceRoles/update")
     public String updateWorkRole(@PathVariable("domainKey") String domainKey,
@@ -79,4 +82,34 @@ public class ManageWorkController {
         }
         return "redirect:/" + domainKey + "/manage/workspaceRoles";
     }
+    
+    // 사장 교체 신청
+    @PostMapping("/workspaceRoles/requestChange")
+    public String manageChage(@PathVariable("domainKey") String domainKey,
+    		@RequestParam("newMemberId") Long newMemberId,
+    		@RequestParam("reason") String reason,
+    		@RequestParam(value = "page", defaultValue = "1") int page,
+    		RedirectAttributes ra) throws Exception {
+    	try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			if(info == null) {
+				throw new IllegalAccessException("로그인 정보가 없습니다.");
+			}
+			
+			Long workspaceId = manageService.findByDomainKey(domainKey);
+			service.requestChange(workspaceId, info.getMember_id(), newMemberId, reason);
+			
+			ra.addAttribute("page", page);
+			
+		} catch (Exception e) {
+			log.info("manageChage : ", e);
+			
+			throw e;
+		}
+    	
+    	return "redirect:/" + domainKey + "/manage/workspaceRoles";
+    }
+    		
+    		
+    
 }

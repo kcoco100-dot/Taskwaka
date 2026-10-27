@@ -17,6 +17,8 @@
 		WHERE p.workspace_id = #{workspaceId}
 		    AND wm.member_id = #{memberId}
 		    AND wm.status = 0
+		    AND p.deleted IS NULL
+		    AND pm.status = 0
 		    AND pm.left IS NULL
 		ORDER BY p.project_id
 	</select>

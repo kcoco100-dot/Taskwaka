@@ -103,4 +103,54 @@ public class ManageWorkServiceImpl implements ManageWorkService {
 			throw e;
 		}
 	}
+
+	// 워크 사장 직위 변경
+	@Transactional(rollbackFor = Exception.class)
+	@Override
+	public int requestChange(Long workspaceId, Long memberId, Long newMemberId, String reason) throws Exception {
+		int result = 0;
+		try {
+			
+			if (workspaceId == null || workspaceId <= 0 || memberId == null || memberId <= 0 || newMemberId == null || newMemberId <= 0) {
+	            throw new IllegalArgumentException("워크 또는 회원 정보가 올바르지 않습니다.");
+	        }
+			
+	        if (memberId.equals(newMemberId)) {
+	            throw new IllegalArgumentException("자기 자신을 교체 대상으로 선택할 수 없습니다.");
+	        }
+	        
+	        if (reason == null || reason.isBlank()) {
+	            throw new IllegalArgumentException("교체 신청 사유를 입력해주세요.");
+	        }
+	        
+	        reason = reason.trim();
+	        
+	        Long lockedWorkspaceId = repository.lockWorkspaceForChange(workspaceId);
+	        
+	        if (lockedWorkspaceId == null) {
+	            throw new IllegalArgumentException("워크스페이스를 찾을 수 없습니다.");
+	        }
+	        
+	        if (repository.countValidChangeMembers(workspaceId, memberId, newMemberId) != 1) {
+	            throw new IllegalArgumentException("현재 사장만 같은 워크의 활성 과장을 대상으로 신청할 수 있습니다.");
+	        }
+	        
+	        if (repository.countpendingRequests(workspaceId) > 0) {
+	            throw new IllegalStateException("이미 승인 대기 중인 사장 교체 신청이 있습니다.");
+	        }
+
+	        result = repository.insertChangeRequest(workspaceId, memberId, newMemberId, reason);
+	        if (result != 1) {
+	            throw new IllegalStateException("사장 교체 신청을 저장하지 못했습니다.");
+	        }
+	        
+		} catch (Exception e) {
+			log.info("requestChange : ", e);
+			
+			throw e;
+		}
+		
+		
+		return result;
+	}
 }

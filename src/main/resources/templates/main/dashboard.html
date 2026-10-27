@@ -152,7 +152,11 @@
 						
 						        <div class="overview-project-copy">
 						            <div class="overview-project-title">
-						                <h3 th:text="${project.subject}">프로젝트명</h3>
+						                <h3>
+										    <a class="text-reset"
+										       th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${project.projectId})}"
+										       th:text="${project.subject}">프로젝트명</a>
+										</h3>
 						            </div>
 						
 						            <p th:text="|${project.startAt} ~ ${project.endAt}|">프로젝트 기간</p>

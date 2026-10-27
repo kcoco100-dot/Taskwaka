@@ -1,0 +1,62 @@
+@charset "UTF-8";
+
+/* 통계 기간 선택 버튼 */
+.stats-period-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.stats-period-active {
+    background: var(--primary-green-light);
+    color: var(--primary-green);
+    font-weight: 700;
+}
+
+/* 접속자 통계 요약 */
+.stats-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.stats-summary-card {
+    padding: 16px;
+    border: 1px solid var(--border-main);
+    border-radius: 10px;
+    background: var(--bg-card-sub);
+}
+
+.stats-summary-label {
+    font-size: 12px;
+    color: var(--text-sub);
+    font-weight: 600;
+}
+
+.stats-summary-period {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-top: 6px;
+}
+
+.stats-summary-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-top: 4px;
+}
+
+.stats-member-count {
+    color: var(--primary-green);
+}
+
+/* 수익 통계 */
+.stats-revenue-note {
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+.stats-net-revenue {
+    color: var(--primary-green);
+}

@@ -805,4 +805,57 @@ public class GrowthTreeService {
 		// 합산한 경험치 회수, 최소 0 적용, 성장 단계 재계산 및 저장
 		revokeGrowthExp(growthTree, totalRevokeExp);
 	}
+	
+	// 프로젝트 진행률 완료된 것 카운트
+	@Transactional(rollbackFor = Exception.class)
+	public void grantProjectCompleteExp(long projectId) {
+		
+		// 유효한 프로젝트인지 확인
+		if(projectId <= 0) {
+			throw new IllegalStateException("프로젝트를 찾을 수 없습니다.");
+		}
+		
+		// 로그인 회원 검증
+		SessionInfo loginMember = requireLoginMember();
+		
+		// 프로젝트 확인, context 에 담기
+		Map<String, Object> context = 
+				growthTreeMapper.findProjectCompleteContext(projectId);
+		
+		if(context == null) {
+			throw new IllegalStateException("프로젝트 정보를 찾을 수 없습니다.");
+		}
+		
+		// 진행률 값을 꺼내 숫자 변수에 담기
+		Number progress = (Number) context.get("progress");
+		
+		if(progress == null) {
+			throw new IllegalStateException("프로젝트 진행률 정보를 찾을 수 없습니다.");
+		}
+		
+		// 진행률이 100% 가 아니면
+		if(progress.doubleValue() != 100.0) {
+			return;
+		}
+		
+		// 이 프로젝트에 보상을 지급했다면 다시 지급하지 않고 종료한다.
+		if(growthTreeMapper.countProjectCompleteExpLog(projectId) > 0) {
+			return;
+		}
+		
+		// 워크 번호 형변환
+		long workspaceId = ((Number) context.get("workspaceId")).longValue();
+		
+		// 워크의 성장나무를 조회하고 잠금처리
+		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
+		// 지급 이력 조회 및 저장
+		GrowthExpLogDto expLog = new GrowthExpLogDto();
+		expLog.setWorkspaceId(workspaceId);
+		expLog.setMemberId(loginMember.getMember_id());
+		expLog.setProjectId(projectId);
+		expLog.setExp(50);
+		expLog.setActionType("PROJECT_COMPLETE");
+		
+		grantGrowthExp(growthTree, expLog);
+	}
 }

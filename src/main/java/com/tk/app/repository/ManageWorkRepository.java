@@ -76,5 +76,55 @@ public interface ManageWorkRepository extends JpaRepository<ManageWorkspaceMembe
         @Param("role") int role
     );
 	
+    // 워크의 사장개수
+	@Query("""
+			SELECT COUNT(c)
+			FROM ManageChange c
+			WHERE c.workspace_id = :workspaceId AND c.status = 0
+			""")
+	long countpendingRequests(@Param("workspaceId") Long workspace_id);
+    
+	// 워크 사장 교체 신청
+	@Modifying
+	@Query(value = """
+			INSERT INTO pm_change (pm_change_id, workspace_id, old_member_id, new_member_id, reason, status, requested)
+			VALUES (seq_pm_change.NEXTVAL, :workspaceId, :memberId, :newMemberId, :reason, 0, SYSDATE)
+			""", nativeQuery = true)
+	int insertChangeRequest(
+			@Param("workspaceId") Long workspaceId,
+			@Param("memberId") Long memberId,
+			@Param("newMemberId") Long newMemberId,
+			@Param("reason") String reason);
+	
+	// 사장 확인 및 교체 대상자 확인
+	@Query(value = """
+			SELECT COUNT(*)
+			FROM workspace_members actor
+			JOIN workspaces w ON w.workspace_id = actor.workspace_id
+			JOIN workspace_members target ON target.workspace_id = actor.workspace_id
+			WHERE actor.workspace_id = :workspaceId
+				AND actor.member_id = :memberId
+				AND actor.role = 70
+				AND actor.status = 0
+				AND w.member_id = actor.member_id
+				AND target.member_id = :newMemberId
+				AND target.role = 50
+				AND target.status = 0
+				AND actor.member_id <> target.member_id
+			""", nativeQuery = true)
+			int countValidChangeMembers(
+				@Param("workspaceId") Long workspaceId,
+				@Param("memberId") Long memberId,
+				@Param("newMemberId") Long newMemberId);
+	
+	// 워크 직위교체 중복 제거
+	@Query(value = """
+			SELECT workspace_id
+			FROM workspaces
+			WHERE workspace_id = :workspaceId
+			FOR UPDATE
+			""", nativeQuery = true)
+	Long lockWorkspaceForChange(@Param("workspaceId") Long workspaceId);
+	
 	
 }
