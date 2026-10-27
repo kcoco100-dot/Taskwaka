@@ -27,7 +27,7 @@
 					       		회의록 검색어
 					    		</label>
 					    		
-					    		<input type="search" id="meetingSearchKeyword" name="kwd" placeholder="회의록 검색">
+					    		<input type="search" id="meetingSearchKeyword" name="kwd" th:value="${kwd}" placeholder="회의록 검색">
 					    		
 						    <button type="submit" class="meetings-search-button">
 						        검색
@@ -57,12 +57,23 @@
 								            meetingMinuteId=${meeting.meetingMinuteId})}" th:text="${meeting.title}">
 								        </a>
 							        </p>
-									<p class="meeting-summary" th:text="${meeting.summary}"></p>
+							        <!-- th:with : 임시 변수 -->
+									<p class="meeting-summary" 
+									   th:with="summaryText=${#strings.trim(#strings.replace(@myUtil.removeHtmlTag(meeting.summary), '&amp;nbsp;', ' '))}"
+							           th:text="${#strings.isEmpty(summaryText) ? '본문은 상세 화면에서 확인해 주세요.' : summaryText}"></p>
 								</td>
 								
 								<td class="meeting-date" th:text="${meeting.meetingDate}"></td>
 								<td class="meeting-writer" th:text="${meeting.authorName}"></td>
 							</tr>
+							
+							<tr th:if="${#lists.isEmpty(meetingMinutes)}">
+							    <td colspan="3">
+							        <p class="meeting-summary"
+							           th:text="${#strings.isEmpty(kwd) ? '등록된 회의록이 없습니다.' : '검색 결과가 없습니다.'}"></p>
+							    </td>
+							</tr>
+							
 						</tbody>
 						
 					</table>
