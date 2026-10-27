@@ -16,5 +16,15 @@ public interface WorkChatGroupMapper {
 	
 	public List<WorkChatMemberDto> findMyGroupRooms(WorkChatMemberDto dto);
 	
+	public List<WorkChatMemberDto> findGroupRoomMembers(Long chatRoomId);
+	
+
+	public Integer findRoomMemberStatus(WorkChatMemberDto dto);
+
+
+	public int reactivateRoomMember(WorkChatMemberDto dto);
+	
+	public int leaveGroupRoom(WorkChatMemberDto dto);
+	
 
 }

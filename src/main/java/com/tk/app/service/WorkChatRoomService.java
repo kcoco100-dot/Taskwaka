@@ -21,6 +21,11 @@ public interface WorkChatRoomService {
 	
 	public String renameGroupRoom(WorkChatGroupDto dto) throws Exception;
 	
+	public List<WorkChatMemberDto> findGroupRoomMembers(WorkChatMemberDto dto) throws Exception;
+	
+	public void inviteGroupMembers(WorkChatGroupDto dto) throws Exception;
+	
+	public void leaveGroupRoom(WorkChatMemberDto dto) throws Exception;
 	
 	
 }

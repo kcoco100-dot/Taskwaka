@@ -21,4 +21,6 @@ public class WorkChatMessageDto {
     private Long loginMemberId;
     private Long chatRoomMemberId;
     private Integer mine;
+    
+    private String messageType;
 }

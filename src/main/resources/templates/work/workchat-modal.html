@@ -218,6 +218,9 @@
           <div class="workchat-chat-heading">
             <strong id="workchatActiveRoomTitle">채팅방</strong>
             <small id="workchatActiveRoomSubtitle">채팅방을 선택해 주세요.</small>
+            <button type="button" id="workchatMembersToggle" class="workchat-back-button" hidden>
+				참여자
+			</button>
             <button type="button" id="workchatRenameToggle" class="workchat-back-button" hidden>
 				이름 변경
 			</button>
@@ -230,7 +233,7 @@
 		    </label>
 		
 		    <input type="text" id="workchatRenameInput" class="workchat-form-input"
-		           maxlength="100" placeholder="변경할 그룹 이름을 입력하세요">
+		           maxlength="15" placeholder="변경할 그룹 이름을 입력하세요">
 		    <div class="workchat-rename-actions">
 		        <button type="button" id="workchatRenameSave" class="workchat-confirm-button">
 		            저장
@@ -241,6 +244,47 @@
 		        </button>
 		    </div>
 		</div>
+		
+		<div id="workchatMembersPanel" class="workchat-rename-panel" hidden>
+		
+		    <div class="workchat-rename-actions">
+		        <strong>그룹 참여자</strong>
+		        <button type="button" id="workchatInviteToggle" class="workchat-back-button" hidden>
+				    회원 초대
+				</button>
+				<button type="button" id="workchatLeaveToggle" class="workchat-back-button" hidden>
+				    그룹 나가기
+				</button>
+		        <button type="button" id="workchatMembersClose" class="workchat-back-button">
+		            닫기
+		        </button>
+		    </div>
+		    
+		    
+			<div id="workchatMembersList" class="workchat-group-members"></div>
+			
+			<div id="workchatInvitePanel" class="workchat-group-invite-panel"hidden>
+			    <label for="workchatInviteSearch" class="workchat-form-label">
+			        초대할 워크 회원
+			    </label>
+			
+			    <input type="text" id="workchatInviteSearch" class="workchat-form-input"
+			           placeholder="이름 또는 직급 검색" autocomplete="off">
+			
+			    <div id="workchatInviteCandidates" class="workchat-group-invite-list"></div>
+			
+			    <div class="workchat-group-invite-actions">
+			        <button type="button" id="workchatInviteSubmit" class="workchat-confirm-button" disabled>
+			            선택한 회원 초대
+			        </button>
+			
+			        <button type="button" id="workchatInviteCancel" class="workchat-back-button">
+			            취소
+			        </button>
+			    </div>
+			</div>
+		</div>
+		
         
         
 		<div class="workchat-messages">
@@ -323,7 +367,7 @@
            id="workchatGroupRoomName"
            class="workchat-form-input"
            placeholder="예: 프로젝트 개발팀"
-           maxlength="100">
+           maxlength="15">
 </div>
 
 <div class="workchat-picker-footer">

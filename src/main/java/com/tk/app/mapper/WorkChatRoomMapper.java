@@ -32,6 +32,9 @@ public interface WorkChatRoomMapper {
 	public int countUnreadMessages(WorkChatMemberDto dto);
 	public int updateLastReadMessage(WorkChatMessageDto dto);
 	
+	public Long findLatestRoomMessageId(WorkChatMemberDto dto);
+	
+	public Long lockChatRoom(Long chatRoomId);
 	
 	
 }

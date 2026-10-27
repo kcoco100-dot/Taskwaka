@@ -69,6 +69,27 @@ document.addEventListener("DOMContentLoaded", function () {
 	const renameInput = document.getElementById("workchatRenameInput");
 	const renameSave = document.getElementById("workchatRenameSave");
 	const renameCancel = document.getElementById("workchatRenameCancel");
+	
+	const membersToggle = document.getElementById("workchatMembersToggle");
+
+	const membersPanel = document.getElementById("workchatMembersPanel");
+
+	const membersList = document.getElementById("workchatMembersList");
+
+	const membersClose = document.getElementById("workchatMembersClose");
+	
+	const inviteToggle = document.getElementById("workchatInviteToggle");
+	const invitePanel = document.getElementById("workchatInvitePanel");
+	const inviteSearch = document.getElementById("workchatInviteSearch");
+	const inviteCandidates = document.getElementById("workchatInviteCandidates");
+	const inviteSubmit = document.getElementById("workchatInviteSubmit");
+	const inviteCancel = document.getElementById("workchatInviteCancel");
+	
+	const leaveToggle = document.getElementById("workchatLeaveToggle");
+
+	let inviteLoadVersion = 0;
+	
+	let membersLoadVersion = 0;
 
     if (!openButton || !closeButton || !createButton || !typeMenu ||
         !personList || !personSearch || !personCounter || !personChips) return;
@@ -340,40 +361,91 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	           return sentDate;
 	       }
-	
-	
+		   
+	   function closeInvitePanel() {
 
-		   function showChatRoom(chatRoomId, roomName, kind, groupCount, canManage = false) {
+	       invitePanel.hidden = true;
+	       inviteLoadVersion++;
 
-		       activeChatRoomId = chatRoomId;
-		       activeChatKind = kind;
-		       activeRoomOwner = kind === "GROUP" && canManage;
+	       inviteSearch.value = "";
+	       inviteSubmit.disabled = true;
+	   }
+	   
 
-		       document.getElementById("workchatActiveRoomTitle")
-		           .textContent = roomName;
+	   function resetActiveChatRoom() {
 
-		       const subtitle = kind === "GROUP" ? "그룹 채팅 · " + groupCount + "명" : "1:1 채팅 · 방 번호 " + chatRoomId;
+	       messageLoadVersion++;
+	       membersLoadVersion++;
 
-		       document.getElementById("workchatActiveRoomSubtitle")
-		           .textContent = subtitle;
+	       closeInvitePanel();
 
-		       document.getElementById("workchatActiveRoomAvatar")
-		           .textContent = roomName.slice(-2);
+	       renamePanel.hidden = true;
+	       membersPanel.hidden = true;
 
-		       renameToggle.hidden = ! activeRoomOwner;
+	       renameToggle.hidden = true;
+	       membersToggle.hidden = true;
+	       leaveToggle.hidden = true;
 
-		       renamePanel.hidden = true;
+	       activeChatRoomId = null;
+	       activeChatKind = null;
+	       activeRoomOwner = false;
 
-		       views.forEach((view) => {
-		           view.hidden = view.dataset.workchatView !== "chats";
-		       });
+	       messageVm.messages = [];
+	       messageVm.loading = false;
+	       messageVm.failed = false;
 
-		       createViews.forEach((view) => {
-		           view.hidden = true;
-		       });
+	       const chatsPanel = modal.querySelector('[data-workchat-panel="chats"]');
 
-		       loadMessages(chatRoomId);
-		   }
+	       if (chatsPanel && !chatsPanel.hidden) {
+	           views.forEach((view) => {
+	               view.hidden = view.dataset.workchatView !== "chats-empty";
+	           });
+
+	           createViews.forEach((view) => {
+	               view.hidden = true;
+	           });
+	       }
+	   }
+
+	   function showChatRoom(chatRoomId, roomName, kind, groupCount, canManage = false) {
+
+	       activeChatRoomId = chatRoomId;
+	       activeChatKind = kind;
+	       activeRoomOwner = kind === "GROUP" && canManage;
+
+	       document.getElementById("workchatActiveRoomTitle")
+	           .textContent = roomName;
+
+	       const subtitle = kind === "GROUP" ? "그룹 채팅 · " + groupCount + "명" : "1:1 채팅 · 방 번호 " + chatRoomId;
+
+	       document.getElementById("workchatActiveRoomSubtitle")
+	           .textContent = subtitle;
+
+	       document.getElementById("workchatActiveRoomAvatar")
+	           .textContent = roomName.slice(-2);
+
+	       renameToggle.hidden = ! activeRoomOwner;
+		   membersToggle.hidden = kind !== "GROUP";
+		   inviteToggle.hidden = ! activeRoomOwner;
+		   leaveToggle.hidden = kind !== "GROUP" || activeRoomOwner;
+		   
+		   closeInvitePanel();
+
+	       renamePanel.hidden = true;
+		   membersPanel.hidden = true;
+		   
+		   membersLoadVersion++;
+
+	       views.forEach((view) => {
+	           view.hidden = view.dataset.workchatView !== "chats";
+	       });
+
+	       createViews.forEach((view) => {
+	           view.hidden = true;
+	       });
+
+	       loadMessages(chatRoomId);
+	   }
 
 
 	   function showDirectRoom(chatRoomId, targetName) {
@@ -391,19 +463,332 @@ document.addEventListener("DOMContentLoaded", function () {
 	           room.chatRoomId,
 	           roomName,
 	           room.chatKind,
-	           room.groupCount,
+           room.groupCount,
 			   room.canManage === 1
 	       );
 	   }
 	   
 
-	   renameToggle.addEventListener("click", function() {
+	   async function loadGroupMembers(chatRoomId) {
+
+	       const version = ++membersLoadVersion;
+
+	       const domainKey = window.location.pathname.split("/")[1];
+
+	       membersList.textContent = "참여자를 불러오는 중입니다.";
+
+	       try {
+	           const res = await axios.get(
+	               "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/members"
+	           );
+
+	           if (version !== membersLoadVersion || Number(activeChatRoomId) !== Number(chatRoomId)
+	                   || membersPanel.hidden) {
+	               return;
+	           }
+
+	           membersList.replaceChildren();
+
+	           res.data.forEach(function(member) {
+
+	               const row = document.createElement("div");
+	               row.className = "workchat-group-member";
+
+	               const name = document.createElement("strong");
+	               name.textContent = member.name;
+
+	               const role = document.createElement("span");
+
+	               role.textContent = Number(member.canManage) === 1 ? "생성자 · " + member.roleName
+				   : member.roleName;
+
+	               row.append(name, role);
+	               membersList.appendChild(row);
+	           });
+
+	       } catch (e) {
+	           if (version !== membersLoadVersion) return;
+
+	           console.error("그룹 참여자 조회 실패:", e);
+
+	           membersList.textContent = "참여자 목록을 불러오지 못했습니다.";
+	       }
+	   }
+	   
+
+	   async function loadInviteCandidates(chatRoomId) {
+
+	       const version = ++inviteLoadVersion;
+	       const domainKey = window.location.pathname.split("/")[1];
+
+	       inviteCandidates.textContent = "초대 가능한 회원을 불러오는 중입니다.";
+	       inviteSubmit.disabled = true;
+
+	       try {
+	           const [allRes, groupRes] = await Promise.all([
+	               axios.get("/" + domainKey + "/api/workchat/members"),
+	               axios.get("/" + domainKey + "/api/workchat/rooms/"+ chatRoomId + "/members")
+	           ]);
+
+	           if (version !== inviteLoadVersion || Number(activeChatRoomId) !== Number(chatRoomId)
+	                   || invitePanel.hidden) {
+	               return;
+	           }
+
+	           const allMembers = allRes.data;
+	           const groupMembers = groupRes.data;
+
+	           if (!Array.isArray(allMembers) || !Array.isArray(groupMembers)) {
+	               throw new Error("회원 목록 응답 형식이 올바르지 않습니다.");
+	           }
+
+	           const activeMemberIds = new Set(groupMembers.map(member => Number(member.memberId)));
+
+	           const availableMembers = allMembers.filter(member => member.memberId != null
+	               && !activeMemberIds.has(Number(member.memberId))
+	           );
+
+	           inviteCandidates.replaceChildren();
+
+	           if (availableMembers.length === 0) {
+	               inviteCandidates.textContent = "초대 가능한 회원이 없습니다.";
+	               return;
+	           }
+
+	           availableMembers.forEach((member) => {
+
+	               const label = document.createElement("label");
+	               label.className = "workchat-invite-person";
+	               label.setAttribute("data-workchat-invite-row", "");
+
+	               label.dataset.search = ((member.name || "") + " " + (member.roleName || "")).toLowerCase();
+
+	               const checkbox = document.createElement("input");
+	               checkbox.type = "checkbox";
+	               checkbox.dataset.workchatInviteMember = "";
+	               checkbox.value = String(member.memberId);
+
+	               const avatar = document.createElement("span");
+	               avatar.className = "workchat-avatar workchat-avatar--sand workchat-avatar--mini";
+	               avatar.textContent = (member.name || "회원").slice(-2);
+
+	               const info = document.createElement("span");
+	               info.className = "workchat-invite-text";
+
+	               const name = document.createElement("strong");
+	               name.textContent = member.name || "이름 없음";
+
+	               const role = document.createElement("small");
+	               role.textContent = member.roleName || "회원";
+
+	               info.append(name, role);
+
+	               const check = document.createElement("span");
+	               check.className = "workchat-invite-check";
+	               check.textContent = "✓";
+	               check.setAttribute("aria-hidden", "true");
+
+	               label.append(checkbox, avatar, info, check);
+
+	               inviteCandidates.appendChild(label);
+	           });
+
+	           filterInviteCandidates();
+
+	       } catch (e) {
+
+	           if (version !== inviteLoadVersion) return;
+
+	           console.error("초대 후보 조회 실패:", e);
+
+	           inviteCandidates.textContent =
+	               "초대 가능한 회원을 불러오지 못했습니다.";
+	       }
+	   }
+	   
+	   function filterInviteCandidates() {
+
+	       const kwd = inviteSearch.value.trim().toLowerCase();
+
+	       inviteCandidates
+	           .querySelectorAll("[data-workchat-invite-row]")
+	           .forEach((row) => {
+	               row.hidden = ! row.dataset.search.includes(kwd);
+	           });
+	   }
+
+	   function updateInviteSubmit() {
+
+	       const selected = inviteCandidates.querySelectorAll("[data-workchat-invite-member]:checked");
+	       inviteSubmit.disabled = selected.length === 0;
+	   }
+
+	   inviteSearch.addEventListener("input", filterInviteCandidates);
+
+	   inviteCandidates.addEventListener("change", (e) => {
+
+	       if (! e.target.matches("[data-workchat-invite-member]")) {
+	           return;
+	       }
+
+	       updateInviteSubmit();
+	   });
+	   
+	   inviteToggle.addEventListener("click", () => {
+
+	       if (activeChatKind !== "GROUP" || !activeRoomOwner || activeChatRoomId == null || membersPanel.hidden) {
+	           return;
+	       }
+
+	       if (!invitePanel.hidden) {
+	           closeInvitePanel();
+	           return;
+	       }
+
+	       invitePanel.hidden = false;
+	       inviteSearch.value = "";
+
+	       loadInviteCandidates(activeChatRoomId);
+	       inviteSearch.focus();
+	   });
+
+	   inviteCancel.addEventListener("click", closeInvitePanel);
+	   
+
+	   inviteSubmit.addEventListener("click", async () => {
+
+	       if (activeChatKind !== "GROUP" || !activeRoomOwner || activeChatRoomId == null || invitePanel.hidden) {
+	           return;
+	       }
+
+	       const memberIds = Array.from(
+			inviteCandidates.querySelectorAll("[data-workchat-invite-member]:checked"))
+			.map(check => Number(check.value));
+
+	       if (memberIds.length === 0) {
+	           alert("초대할 회원을 선택해 주세요.");
+	           return;
+	       }
+
+	       const chatRoomId = activeChatRoomId;
+	       const domainKey = window.location.pathname.split("/")[1];
+
+	       try {
+	           inviteSubmit.disabled = true;
+
+	           await axios.post(
+	               "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/members",
+	               {
+	                   memberIds: memberIds
+	               }
+	           );
+
+	           if (Number(activeChatRoomId) === Number(chatRoomId)) {
+	               closeInvitePanel();
+
+	               await loadMyDirectRooms();
+	           }
+
+	       } catch (e) {
+
+	           console.error("그룹 회원 초대 실패:", e);
+
+	           alert(
+	               typeof e.response?.data === "string" ? e.response.data : "그룹 회원을 초대하지 못했습니다."
+	           );
+
+	       } finally {
+
+	           if (!invitePanel.hidden && Number(activeChatRoomId) === Number(chatRoomId)) {
+	               updateInviteSubmit();
+	           }
+	       }
+	   });
+
+
+
+	   membersToggle.addEventListener("click", () => {
+	       if (activeChatKind !== "GROUP" || activeChatRoomId == null) {
+	           return;
+	       }
+
+	       renamePanel.hidden = true;
+
+	       membersPanel.hidden = ! membersPanel.hidden;
+
+	       if (! membersPanel.hidden) { 
+				loadGroupMembers(activeChatRoomId);
+	       } else {
+	           membersLoadVersion++;
+			   closeInvitePanel();
+	       }
+	   });
+
+	   membersClose.addEventListener("click", () => {
+
+	       membersPanel.hidden = true;
+	       membersLoadVersion++;
+		   closeInvitePanel();
+	   });
+	   
+
+	   leaveToggle.addEventListener("click", async function() {
+
+	       if (activeChatKind !== "GROUP" || activeRoomOwner || activeChatRoomId == null) {
+	           return;
+	       }
+
+	       const confirmed = confirm(
+	           "그룹 채팅방에서 나가시겠습니까?\n" +
+	           "나간 후에는 채팅방과 메시지를 조회할 수 없습니다."
+	       );
+
+	       if (! confirmed) return;
+
+	       const chatRoomId = activeChatRoomId;
+	       const domainKey = window.location.pathname.split("/")[1];
+
+	       try {
+	           leaveToggle.disabled = true;
+
+	           await axios.delete(
+	               "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/members/out"
+	           );
+
+	           if (Number(activeChatRoomId) === Number(chatRoomId)) {
+	               resetActiveChatRoom();
+	           }
+
+	           await loadMyDirectRooms();
+
+	       } catch (e) {
+
+	           console.error("그룹 채팅방 나가기 실패:", e);
+
+	           alert(
+	               typeof e.response?.data === "string"
+	                   ? e.response.data
+	                   : "그룹 채팅방에서 나가지 못했습니다."
+	           );
+
+	       } finally {
+	           leaveToggle.disabled = false;
+	       }
+	   });
+
+
+	   renameToggle.addEventListener("click", () => {
 
 	       if (activeChatKind !== "GROUP" || ! activeRoomOwner) {
 	           return;
 	       }
+		   
+		   membersPanel.hidden = true;
+		   membersLoadVersion++;
+		   closeInvitePanel();
 
 	       renameInput.value = document.getElementById("workchatActiveRoomTitle").textContent;
+		   
 	       renamePanel.hidden = false;
 	       renameInput.focus();
 	   	});
@@ -534,10 +919,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			           document.getElementById("workchatActiveRoomAvatar")
 			               .textContent = activeRoom.roomName.slice(-2);
+						   
+					   document.getElementById("workchatActiveRoomSubtitle")
+					       .textContent = "그룹 채팅 · " + activeRoom.groupCount + "명";
+						   
+						   if (!membersPanel.hidden) {
+						       loadGroupMembers(activeChatRoomId);
+						   }
 
-			           activeRoomOwner = activeRoom.canManage === 1;
-			           renameToggle.hidden = ! activeRoomOwner;
-			       }
+						   activeRoomOwner = activeRoom.canManage === 1;
+
+						   renameToggle.hidden = ! activeRoomOwner;
+						   inviteToggle.hidden = ! activeRoomOwner;
+						   leaveToggle.hidden = activeRoomOwner;
+
+						   if (! activeRoomOwner) {
+						       renamePanel.hidden = true;
+						       closeInvitePanel();
+						   }
+			       } else {
+						resetActiveChatRoom();
+				   }
 			   }
 
 	           const roomCount = modal.querySelector('[data-workchat-panel="chats"] .workchat-room-count');

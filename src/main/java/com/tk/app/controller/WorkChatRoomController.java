@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +18,6 @@ import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.domain.dto.WorkChatGroupDto;
 import com.tk.app.domain.dto.WorkChatMemberDto;
 import com.tk.app.domain.dto.WorkChatMessageDto;
-import com.tk.app.security.CustomUserDetails;
 import com.tk.app.security.LoginMemberUtil;
 import com.tk.app.service.WorkChatRoomService;
 
@@ -35,8 +34,7 @@ public class WorkChatRoomController {
 	
 	@GetMapping("direct")
 	public ResponseEntity<?> findDirectRoom(
-			@PathVariable("domainKey") String domainKey,
-			@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+			@PathVariable("domainKey") String domainKey) {
 		
 		try {
 			SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
@@ -91,7 +89,7 @@ public class WorkChatRoomController {
 			
 			Long workId = dto.getWorkId();
 			Long targetMemberId = dto.getMemberId();
-			Long chatRoomId = service.startDirectRoom(domainKey,workId, loginMemberId, targetMemberId);
+			Long chatRoomId = service.startDirectRoom(domainKey, workId, loginMemberId, targetMemberId);
 			
 			return ResponseEntity.ok(chatRoomId);
 			
@@ -201,6 +199,7 @@ public class WorkChatRoomController {
 		
 		try {
 			SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+			
 			if (loginMember == null) {
 		        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		    }
@@ -329,6 +328,133 @@ public class WorkChatRoomController {
 	                .body("그룹 이름 변경 중 오류가 발생했습니다.");
 	    }
 	}
+	
+	@GetMapping("{chatRoomId}/members")
+	public ResponseEntity<?> findGroupRoomMembers(
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId) {
+
+	    try {
+	        SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+
+	        if (loginMember == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.UNAUTHORIZED)
+	                    .build();
+	        }
+
+	        WorkChatMemberDto dto = new WorkChatMemberDto();
+
+	        dto.setDomainKey(domainKey);
+	        dto.setChatRoomId(chatRoomId);
+	        dto.setLoginMemberId(loginMember.getMember_id());
+
+	        return ResponseEntity.ok(service.findGroupRoomMembers(dto));
+
+	    } catch (ResponseStatusException e) {
+
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+
+	    } catch (Exception e) {
+
+	        log.error("findGroupRoomMembers : ", e);
+
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("그룹 참여자 조회 중 오류가 발생했습니다.");
+	    }
+	}
+	
+
+	@PostMapping("{chatRoomId}/members")
+	public ResponseEntity<?> inviteGroupMembers(
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId,
+	        @RequestBody WorkChatGroupDto dto) {
+	
+	    try {
+	        SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+	
+	        if (loginMember == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.UNAUTHORIZED)
+	                    .build();
+	        }
+	
+	        if (dto == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.BAD_REQUEST)
+	                    .body("초대할 회원 정보가 없습니다.");
+	        }
+	
+	        dto.setDomainKey(domainKey);
+	        dto.setChatRoomId(chatRoomId);
+	        dto.setLoginMemberId(loginMember.getMember_id());
+	
+	        service.inviteGroupMembers(dto);
+	
+	        return ResponseEntity.noContent().build();
+	
+	    } catch (ResponseStatusException e) {
+	
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+	
+	    } catch (Exception e) {
+	
+	        log.error("inviteGroupMembers : ", e);
+	
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("그룹 회원 초대 중 오류가 발생했습니다.");
+	    }
+	}
+	
+
+	@DeleteMapping("{chatRoomId}/members/out")
+	public ResponseEntity<?> leaveGroupRoom(
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId) {
+	
+	    try {
+	        SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+	
+	        if (loginMember == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.UNAUTHORIZED)
+	                    .build();
+	        }
+	
+	        WorkChatMemberDto dto = new WorkChatMemberDto();
+	
+	        dto.setDomainKey(domainKey);
+	        dto.setChatRoomId(chatRoomId);
+	        dto.setLoginMemberId(loginMember.getMember_id());
+	
+	        service.leaveGroupRoom(dto);
+	
+	        return ResponseEntity.noContent().build();
+	
+	    } catch (ResponseStatusException e) {
+	
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+	
+	    } catch (Exception e) {
+	
+	        log.error("leaveGroupRoom : ", e);
+	
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("채팅방 나가기 중 오류가 발생했습니다.");
+	    }
+	}
+
+
 
 	
 

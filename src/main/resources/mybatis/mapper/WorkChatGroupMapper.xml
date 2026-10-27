@@ -18,7 +18,7 @@
 	
 	
 	<select id="findMyGroupRooms" parameterType="WorkChatMemberDto" resultType="WorkChatMemberDto">
-	    SELECT cr.chat_room_id chatRoomId, cr.room_name roomName,
+	    SELECT cr.chat_room_id chatRoomId, cr.room_name roomName, cr.workspace_member_id ownerWorkMemberId,
 	        (
 	            SELECT COUNT(*)
 	            FROM chat_room_members crm
@@ -27,13 +27,7 @@
 	              AND crm.status = 0
 	              AND wm.status = 0
 	        ) groupCount
-	        
-	     	CASE
-            	WHEN cr.workspace_member_id = my_wm.workspace_member_id
-            	THEN 1
-            	ELSE 0
-        	END canManage
-	        
+        	 
 	    FROM chat_rooms cr
 	
 	    JOIN workspace_members w_wm ON cr.workspace_member_id = w_wm.workspace_member_id
@@ -56,27 +50,61 @@
 	</select>
 	
 	
-<update id="updateGroupRoomName" parameterType="WorkChatGroupDto">
-    UPDATE chat_rooms cr SET room_name = #{roomName}
-    WHERE cr.chat_room_id = #{chatRoomId}
-      AND cr.chat = 'GROUP'
-      AND EXISTS (
-          SELECT 1
-          FROM chat_room_members crm
-          JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
-          JOIN workspace_domains wd ON wm.workspace_id = wd.workspace_id
-          
-          WHERE crm.chat_room_id = cr.chat_room_id
-            AND crm.workspace_member_id = cr.workspace_member_id
-            AND wm.member_id = #{loginMemberId}
-            AND wd.domain_key = #{domainKey}
-            AND wd.active = 'Y'
-            AND crm.status = 0
-            AND wm.status = 0
-      	)
-
-</update>
+	<update id="updateGroupRoomName"
+	        parameterType="WorkChatGroupDto">
 	
+	    UPDATE chat_rooms SET room_name = #{roomName}
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND workspace_member_id = #{myWorkId}
+	      AND chat = 'GROUP'
+	
+	</update>
+	
+	<select id="findGroupRoomMembers" parameterType="Long" resultType="WorkChatMemberDto">
+	    SELECT wm.workspace_member_id workMemberId, wm.member_id memberId,
+	        md.name name, wm.role role, md.profile profilePhoto
+	    FROM chat_room_members crm
+	
+	    JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
+	
+	    JOIN members m ON wm.member_id = m.member_id
+	
+	    JOIN member_details md ON wm.member_id = md.member_id
+	
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND crm.status = 0
+	      AND wm.status = 0
+	      AND m.status = 0
+	    ORDER BY md.name ASC
+	
+	</select>
+	
+
+	<select id="findRoomMemberStatus" parameterType="WorkChatMemberDto" resultType="Integer">
+	    SELECT status
+	    FROM chat_room_members
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND workspace_member_id = #{workMemberId}
+	</select>
+	
+
+	<update id="reactivateRoomMember" parameterType="WorkChatMemberDto">
+	    UPDATE chat_room_members
+	    SET status = 0, joined = SYSDATE, left = NULL,
+	        visible_after_message_id = #{visibleAfterMessageId},
+	        last_read_message_id = #{visibleAfterMessageId}
+	
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND workspace_member_id = #{workMemberId}
+	      AND status = 1
+	</update>
+	
+	<update id="leaveGroupRoom" parameterType="WorkChatMemberDto">
+    UPDATE chat_room_members SET status = 1
+    WHERE chat_room_id = #{chatRoomId}
+      AND workspace_member_id = #{workMemberId}
+      AND status = 0
+	</update>
 	
 
 </mapper>

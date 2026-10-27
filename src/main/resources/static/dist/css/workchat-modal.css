@@ -1349,3 +1349,95 @@ body > .workchat-overlay .workchat-create-body { overscroll-behavior: contain; }
     gap: 8px;
     margin-top: 10px;
 }
+
+.workchat-group-members {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.workchat-group-member {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    background: #faf9f6;
+}
+
+.workchat-group-member strong {
+    font-size: 12px;
+    color: #51483d;
+}
+
+.workchat-group-member span {
+    font-size: 11px;
+    color: #94877b;
+}
+#workchatMembersToggle[hidden],
+#workchatRenameToggle[hidden] {
+    display: none !important;
+}
+
+/* 그룹 회원 초대 */
+#workchatInviteToggle[hidden],
+#workchatInvitePanel[hidden],
+.workchat-group-invite-list [hidden] {
+    display: none !important;
+}
+
+.workchat-group-invite-panel {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee8e1;
+}
+
+.workchat-group-invite-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-height: 190px;
+    overflow-y: auto;
+    margin-top: 12px;
+}
+
+.workchat-group-invite-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.workchat-group-invite-actions .workchat-confirm-button {
+    flex: 1;
+    min-width: 0;
+}
+
+.workchat-group-invite-actions
+.workchat-confirm-button:not(:disabled) {
+    cursor: pointer;
+    background: #e7eee1;
+    color: #597348;
+}
+
+#workchatLeaveToggle[hidden] {
+    display: none !important;
+}
+
+#workchatLeaveToggle {
+    color: #aa655a;
+    border-color: #ead7d3;
+}
+
+#workchatLeaveToggle:hover {
+    background: #fcf0ee;
+}
+
+#workchatLeaveToggle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

@@ -35,4 +35,8 @@ public class WorkChatMemberDto {
 	private Integer groupCount;
 
 	private Integer canManage;
+	
+	private Long ownerWorkMemberId;
+	
+	private Long visibleAfterMessageId;
 }

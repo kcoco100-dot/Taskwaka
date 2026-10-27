@@ -44,11 +44,12 @@
         VALUES (#{chatRoomId}, #{myWorkId}, 'PERSONAL', NULL, SYSDATE)
     </insert>
 
-    <insert id="insertRoomMember" parameterType="WorkChatMemberDto">
-        INSERT INTO chat_room_members (chat_room_member_id, chat_room_id, workspace_member_id, status,
-            joined)
-        VALUES (seq_chat_room_members.NEXTVAL, #{chatRoomId}, #{workMemberId}, 0, SYSDATE)
-    </insert>
+<insert id="insertRoomMember" parameterType="WorkChatMemberDto">
+	INSERT INTO chat_room_members (chat_room_member_id, chat_room_id, workspace_member_id,
+        status, joined, visible_after_message_id, last_read_message_id)
+    VALUES (seq_chat_room_members.NEXTVAL, #{chatRoomId}, #{workMemberId}, 0, SYSDATE,
+        NVL(#{visibleAfterMessageId,jdbcType=NUMERIC}, 0), NVL(#{visibleAfterMessageId,jdbcType=NUMERIC}, 0))
+</insert>
     
     <select id="matchDomain" parameterType="WorkChatMemberDto" resultType="int">
 		SELECT COUNT(*)
@@ -123,26 +124,36 @@
 	
 	
 	<select id="findRoomMessages" parameterType="WorkChatMessageDto" resultType="WorkChatMessageDto">
-	
-	    SELECT m.message_id "messageId", m.chat_room_id "chatRoomId", wm.member_id "senderMemberId",
-	        md.name "senderName", m.content "content",
-	        TO_CHAR(m.sent, 'YYYY-MM-DD HH24:MI:SS') "sent",
-	        CASE
+	    SELECT m.message_id messageId, m.chat_room_id chatRoomId, wm.member_id senderMemberId,
+	        md.name senderName, m.content content, m.message_type messageType,
+	        TO_CHAR(m.sent, 'YYYY-MM-DD HH24:MI:SS') sent,
+	        (CASE
 	            WHEN wm.member_id = #{loginMemberId}
 	            THEN 1
 	            ELSE 0
-	        END "mine"
+	        END) mine
+	
 	    FROM chat_messages m
 	
-	    JOIN chat_room_members crm ON m.chat_room_member_id = crm.chat_room_member_id
-	     AND m.chat_room_id = crm.chat_room_id
+	    JOIN chat_room_members snd_crm ON m.chat_room_member_id = snd_crm.chat_room_member_id
+	     AND m.chat_room_id = snd_crm.chat_room_id
 	
-	    JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
+	    JOIN workspace_members wm ON snd_crm.workspace_member_id = wm.workspace_member_id
 	
 	    JOIN member_details md ON wm.member_id = md.member_id
 	
-	    WHERE m.chat_room_id = #{chatRoomId} AND m.deleted IS NULL
-	    ORDER BY m.sent ASC, m.message_id ASC	
+	    JOIN chat_room_members vew_crm ON m.chat_room_id = vew_crm.chat_room_id
+	     AND vew_crm.status = 0
+	
+	    JOIN workspace_members vew_wm ON vew_crm.workspace_member_id = vew_wm.workspace_member_id
+	     AND vew_wm.member_id = #{loginMemberId}
+	     AND vew_wm.status = 0
+	
+	    WHERE m.chat_room_id = #{chatRoomId}
+	      AND m.deleted IS NULL
+	      AND m.message_id > NVL(vew_crm.visible_after_message_id, 0)
+	
+	    ORDER BY m.sent ASC, m.message_id ASC
 	</select>
 	
 	
@@ -175,19 +186,27 @@
 	</select>
 	
 	<select id="findLatestRoomMessage" parameterType="WorkChatMemberDto" resultType="WorkChatMessageDto">
-	    SELECT cm.content,
-	           TO_CHAR(cm.sent, 'YYYY-MM-DD HH24:MI:SS') sent
+	    SELECT cm.content content, TO_CHAR(cm.sent, 'YYYY-MM-DD HH24:MI:SS') sent
 	    FROM chat_messages cm
-	    JOIN chat_room_members crm ON cm.chat_room_member_id = crm.chat_room_member_id
-	    WHERE crm.chat_room_id = #{chatRoomId}
+	
+	    JOIN chat_room_members vew_crm ON cm.chat_room_id = vew_crm.chat_room_id
+	     AND vew_crm.status = 0
+	
+	    JOIN workspace_members vew_wm ON vew_crm.workspace_member_id = vew_wm.workspace_member_id
+	     AND vew_wm.member_id = #{loginMemberId}
+	     AND vew_wm.status = 0
+	
+	    WHERE cm.chat_room_id = #{chatRoomId}
+	      AND cm.deleted IS NULL
+	      AND cm.message_id > NVL(vew_crm.visible_after_message_id, 0)
+	
 	    ORDER BY cm.sent DESC, cm.message_id DESC
 	    FETCH FIRST 1 ROW ONLY
-
 	</select>
 	
 	
 	<select id="countUnreadMessages" parameterType="WorkChatMemberDto" resultType="int">
-		SELECT COUNT(*)
+	    SELECT COUNT(*)
 	    FROM chat_messages m
 	
 	    JOIN chat_room_members crm ON m.chat_room_id = crm.chat_room_id
@@ -199,7 +218,13 @@
 	      AND crm.status = 0
 	      AND wm.status = 0
 	      AND m.deleted IS NULL
-	      AND m.message_id > NVL(crm.last_read_message_id, 0)
+	      AND m.message_type = 'GENERAL'
+	
+	      AND m.message_id > GREATEST(
+	          NVL(crm.last_read_message_id, 0),
+	          NVL(crm.visible_after_message_id, 0)
+	      )
+	
 	      AND m.chat_room_member_id != crm.chat_room_member_id
 	
 	</select>
@@ -211,6 +236,7 @@
 	    WHERE chat_room_member_id = #{chatRoomMemberId}
 	      AND chat_room_id = #{chatRoomId}
 	      AND status = 0
+	      AND #{messageId} > NVL(visible_after_message_id, 0)
 	      AND (last_read_message_id IS NULL
 	           OR last_read_message_id &lt; #{messageId})
 	      AND EXISTS (
@@ -220,8 +246,20 @@
 	            AND message_id = #{messageId}
 	            AND deleted IS NULL
 	      )
-	
 	</update>
+	
+	<select id="findLatestRoomMessageId" parameterType="WorkChatMemberDto" resultType="Long">
+	    SELECT NVL(MAX(message_id), 0)
+	    FROM chat_messages
+	    WHERE chat_room_id = #{chatRoomId}
+	</select>
+	
+	<select id="lockChatRoom" parameterType="long" resultType="long">
+	    SELECT chat_room_id
+	    FROM chat_rooms
+	    WHERE chat_room_id = #{chatRoomId}
+	    FOR UPDATE
+	</select>
 	
 	
 	
