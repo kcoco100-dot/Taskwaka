@@ -53,14 +53,14 @@
 		INSERT INTO growth_exp_logs(
 			exp_log_id, workspace_id, member_id, notice_id, 
 			exp, action_type, earned_at, invite_key, sub_task_id, 
-			daily_report_id, team_report_id, project_report_id)
+			daily_report_id, team_report_id, project_report_id, project_id)
 		VALUES(#{expLogId}, #{workspaceId}, #{memberId},
 			#{noticeId, jdbcType=NUMERIC}, #{exp}, 
 			#{actionType}, SYSDATE, #{inviteKey, jdbcType=VARCHAR},
 			#{subTaskId, jdbcType=NUMERIC},
 			#{dailyReportId, jdbcType=NUMERIC},
 			#{teamReportId, jdbcType=NUMERIC},
-			#{projectReportId, jdbcType=NUMERIC})
+			#{projectReportId, jdbcType=NUMERIC}, #{projectId, jdbcType=NUMERIC})
 	</insert>
 
 	<!-- 같은 공지의 등록 보상을 이미 지급했는지 확인 -->
@@ -634,6 +634,7 @@
 				WHEN 'TEAM_REPORT_APPROVE' THEN '업무 보고서 승인'
 				WHEN 'DAILY_REPORT_APPROVE' THEN '일일 보고서 승인'
 				WHEN 'PROJECT_REPORT_APPROVE' THEN '프로젝트 보고서 승인'
+				WHEN 'PROJECT_COMPLETE' THEN '프로젝트 완료'
 				ELSE '팀 활동'
 			END AS "actionName",
 			TO_CHAR(gel.earned_at, 'YYYY-MM-DD HH24:MI') AS "earnedAt",
@@ -648,5 +649,25 @@
 		FETCH FIRST 5 ROWS ONLY
 	</select>
 
+	<!-- 프로젝트 진행률 확인 -->
+	<select id="findProjectCompleteContext" parameterType="long" resultType="map">
+		SELECT project_id AS "projectId",
+			workspace_id AS "workspaceId",
+			progress AS "progress"
+		FROM projects
+		WHERE project_id = #{projectId}
+			AND deleted IS NULL
+		FOR UPDATE
+	</select>
+	
+	<!-- 프로젝트 진행률 완료된 것 -->
+	<select id="countProjectCompleteExpLog" parameterType="long" resultType="int">
+		SELECT COUNT(*)
+		FROM growth_exp_logs
+		WHERE 
+			CASE action_type
+				WHEN 'PROJECT_COMPLETE' THEN project_id
+			END = #{projectId}
+	</select>
 	
 </mapper>

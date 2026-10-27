@@ -53,8 +53,8 @@
 		                        <th:block th:text="${date.monthValue + '/' + date.dayOfMonth}">
 		                        		10/12
 		                        </th:block>
-		                        <!-- 1은 일요일, 요일 목록의 인덱스는 0부터 시작하므로 -1 해줘야 함 -->
-		                        <small th:text="${{'일', '월', '화', '수', '목', '금', '토'}[date.dayOfWeek.value - 1]}">
+
+		                        <small th:text="${{'일', '월', '화', '수', '목', '금', '토'}[date.dayOfWeek.value % 7]}">
 		                        		일
 		                        </small>
 		                        

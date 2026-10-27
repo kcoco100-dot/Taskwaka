@@ -108,17 +108,17 @@ public class MyTaskService {
 		
 		LocalDate today = LocalDate.now();
 		
-		// 오늘이 속한 주의 월요일 구하기
+		// 오늘이 속한 주의 일요일 구하기
 		// 주를 구할 변수 선언
 		List<LocalDate> weekDates = new ArrayList<>();
 		
-		// 월요일 날짜를 담을 변수 선언
-		// 월요일 계산 = 오늘의 요일 숫자 - 1
-		LocalDate monday = today.minusDays(today.getDayOfWeek().getValue() - 1);
+		// 일요일 날짜를 담을 변수 선언
+		// 일요일의 요일 값 7을 0으로 바꿔 오늘이 일요일이면 오늘부터 시작
+		LocalDate sunday = today.minusDays(today.getDayOfWeek().getValue() % 7);
 				
-		// 실제 월요일을 구하는 로직
+		// 실제 일요일 구하는 로직
 		for(int i = 0; i < 7; i++) {
-			weekDates.add(monday.plusDays(i));
+			weekDates.add(sunday.plusDays(i));
 		}
 		
 		dashboardData.setToday(today);

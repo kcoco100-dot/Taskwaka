@@ -20,7 +20,8 @@
 			
 			<!-- 콘텐츠 영역 -->
 			<div class="page-content">
-				<div id="myTaskCalendar"></div>
+				<div id="myTaskCalendar" 
+					th:data-project-base-url="@{/{domainKey}/project/(domainKey=${domainKey})}"></div>
 			</div>
 		</div>
 		
@@ -47,6 +48,7 @@
 				return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
 			}
 			
+			// 업무 일정을 클릭하면 해당 프로젝트로 이동하도록 연결
 			const taskEvents = tasks.map(function (task){
 				return {
 					id: String(task.taskId),
@@ -54,7 +56,8 @@
 					title: `${task.title} (${task.progress}%)`,
 					start: task.startAt,
 					end: nextDate(task.endAt),
-					allDay: true
+					allDay: true,
+					url: calendarEl.dataset.projectBaseUrl + task.projectId
 				};
 			});
 			
