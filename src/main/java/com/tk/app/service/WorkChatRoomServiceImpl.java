@@ -30,6 +30,7 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	private final WorkChatGroupMapper groupmapper;
 	private final ApplicationEventPublisher eventPublisher;
 	
+	
 	private String getRoleName(Integer role) {
 
 	    if (role == null) return "MEMBER";
@@ -95,6 +96,37 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	    room.setMyWorkId(myWorkId);
 	
 	    return room;
+	}
+	
+	private void saveSystemMessage(
+			Long chatRoomId,
+	        Long authorRoomMemberId,
+	        String content) {
+
+	    WorkChatMessageDto dto = new WorkChatMessageDto();
+
+	    dto.setChatRoomId(chatRoomId);
+	    dto.setChatRoomMemberId(authorRoomMemberId);
+	    dto.setContent(content);
+
+	    int result = mapper.insertSystemRoomMessage(dto);
+
+	    if (result != 1) {
+	        throw new IllegalStateException(
+	                "시스템 메시지를 저장하지 못했습니다.");
+	    }
+	}
+	
+	private String findGroupMemberName(
+	        List<WorkChatMemberDto> members,
+	        Long memberId) {
+
+	    return members.stream()
+	            .filter(member -> memberId.equals(member.getMemberId()))
+	            .map(WorkChatMemberDto::getName)
+	            .filter(name -> name != null && !name.isBlank())
+	            .findFirst()
+	            .orElse("회원");
 	}
 
 	
@@ -688,7 +720,32 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	            }
 	        }
 	    }
-	
+	    
+	    WorkChatMessageDto authorDto = new WorkChatMessageDto();
+
+	    authorDto.setChatRoomId(dto.getChatRoomId());
+	    authorDto.setLoginMemberId(dto.getLoginMemberId());
+
+	    Long authorRoomMemberId = mapper.findSenderRoomMemberId(authorDto);
+
+	    if (authorRoomMemberId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "시스템 메시지 작성자 정보를 찾을 수 없습니다.");
+	    }
+
+	    List<WorkChatMemberDto> groupMembers = groupmapper.findGroupRoomMembers(dto.getChatRoomId());
+
+	    String inviterName = findGroupMemberName(groupMembers, dto.getLoginMemberId());
+
+	    for (Long memberId : memberIds) {
+	        String invitedName = findGroupMemberName(groupMembers, memberId);
+	        saveSystemMessage(
+	                dto.getChatRoomId(),
+	                authorRoomMemberId,
+	                inviterName + "님이 " + invitedName + "님을 초대했습니다."
+	        );
+	    }
+	    
 	    WorkChatMessageDto messageDto = new WorkChatMessageDto();
 	    messageDto.setChatRoomId(dto.getChatRoomId());
 	
@@ -723,6 +780,22 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	        throw new ResponseStatusException(
 	                HttpStatus.FORBIDDEN, "그룹 생성자는 채팅방을 나갈 수 없습니다.");
 	    }
+	    
+	    WorkChatMessageDto authorDto = new WorkChatMessageDto();
+
+	    authorDto.setChatRoomId(dto.getChatRoomId());
+	    authorDto.setLoginMemberId(dto.getLoginMemberId());
+
+	    Long authorRoomMemberId = mapper.findSenderRoomMemberId(authorDto);
+
+	    if (authorRoomMemberId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "채팅방 참여 정보를 찾을 수 없습니다.");
+	    }
+
+	    List<WorkChatMemberDto> groupMembers = groupmapper.findGroupRoomMembers(dto.getChatRoomId());
+
+	    String leavingName = findGroupMemberName(groupMembers, dto.getLoginMemberId());
 	
 	    WorkChatMessageDto messageDto = new WorkChatMessageDto();
 	    messageDto.setChatRoomId(dto.getChatRoomId());
@@ -737,7 +810,106 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	        throw new ResponseStatusException(
 	                HttpStatus.CONFLICT, "채팅방 나가기 처리에 실패했습니다.");
 	    }
+
+	    saveSystemMessage(
+	            dto.getChatRoomId(),
+	            authorRoomMemberId,
+	            leavingName + "님이 채팅방을 나갔습니다."
+	    );
+	    
+	    eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
+	                    dto.getChatRoomId(),
+	                    dto.getLoginMemberId(),
+	                    memberIds
+	            )
+	    );
+	}
 	
+	@Override
+	@Transactional
+	public void transferGroupMaster(WorkChatMemberDto dto) throws Exception {
+
+	    if (dto == null || dto.getDomainKey() == null || dto.getDomainKey().isBlank()
+	        || dto.getChatRoomId() == null || dto.getChatRoomId() <= 0 || dto.getLoginMemberId() == null
+	        || dto.getTargetMemberId() == null || dto.getTargetMemberId() <= 0) {
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "마스터 위임 정보가 올바르지 않습니다.");
+	    }
+
+	    if (dto.getLoginMemberId().equals(dto.getTargetMemberId())) {
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "자기 자신에게 마스터 권한을 위임할 수 없습니다.");
+	    }
+
+	    lockChatRoom(dto.getChatRoomId());
+
+	    WorkChatMemberDto room = checkGroupRoomAccess(dto);
+
+	    if (!room.getMyWorkId().equals(room.getOwnerWorkMemberId())) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "현재 마스터만 권한을 위임할 수 있습니다.");
+	    }
+
+	    Long workId = groupmapper.findWorkIdByDomain(dto.getDomainKey());
+
+	    if (workId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
+	    }
+
+	    WorkChatMemberDto targetDto = new WorkChatMemberDto();
+
+	    targetDto.setWorkId(workId);
+	    targetDto.setMemberId(dto.getTargetMemberId());
+
+	    Long targetWorkId = mapper.findWorkMemberId(targetDto);
+
+	    if (targetWorkId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "위임 대상이 워크스페이스에 참여 중이지 않습니다.");
+	    }
+
+	    dto.setMyWorkId(room.getMyWorkId());
+	    dto.setTargetWorkId(targetWorkId);
+
+	    int result = groupmapper.transferGroupMaster(dto);
+
+	    if (result != 1) {
+	        throw new ResponseStatusException(
+	                HttpStatus.CONFLICT, "마스터 권한 위임에 실패했습니다. 대상 회원의 참여 상태를 확인해 주세요.");
+	    }
+	    
+	 // 시스템 메시지 작성자 조회
+	    WorkChatMessageDto authorDto = new WorkChatMessageDto();
+
+	    authorDto.setChatRoomId(dto.getChatRoomId());
+	    authorDto.setLoginMemberId(dto.getLoginMemberId());
+
+	    Long authorRoomMemberId =
+	            mapper.findSenderRoomMemberId(authorDto);
+
+	    if (authorRoomMemberId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN,
+	                "채팅방 참여 정보를 찾을 수 없습니다.");
+	    }
+
+	    List<WorkChatMemberDto> groupMembers = groupmapper.findGroupRoomMembers(dto.getChatRoomId());
+
+	    String previousMasterName = findGroupMemberName(groupMembers, dto.getLoginMemberId());
+
+	    String newMasterName = findGroupMemberName(groupMembers, dto.getTargetMemberId());
+
+	    saveSystemMessage(
+	            dto.getChatRoomId(),
+	            authorRoomMemberId,
+	            previousMasterName + "님이 " + newMasterName + "님에게 마스터 권한을 위임했습니다.");
+
+	    WorkChatMessageDto messageDto = new WorkChatMessageDto();
+	    messageDto.setChatRoomId(dto.getChatRoomId());
+
+	    List<Long> memberIds = mapper.findActiveRoomMemberIds(messageDto);
+
 	    eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
 	                    dto.getChatRoomId(),
 	                    dto.getLoginMemberId(),

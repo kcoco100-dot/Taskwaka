@@ -35,6 +35,7 @@ public interface WorkChatRoomMapper {
 	public Long findLatestRoomMessageId(WorkChatMemberDto dto);
 	
 	public Long lockChatRoom(Long chatRoomId);
+	public int insertSystemRoomMessage(WorkChatMessageDto dto);
 	
 	
 }

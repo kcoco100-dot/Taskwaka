@@ -193,8 +193,8 @@ public class WorkChatRoomController {
 
 	@PostMapping("{chatRoomId}/read")
 	public ResponseEntity<?> markRoomAsRead(
-	        @PathVariable String domainKey,
-	        @PathVariable Long chatRoomId,
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId,
 	        @RequestBody WorkChatMessageDto dto){
 		
 		try {
@@ -233,7 +233,7 @@ public class WorkChatRoomController {
 	
 	@GetMapping("group")
 	public ResponseEntity<?> findMyGroupRooms(
-	        @PathVariable String domainKey) {
+	        @PathVariable("domainKey") String domainKey) {
 
 	    try {
 	    	SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
@@ -454,6 +454,52 @@ public class WorkChatRoomController {
 	    }
 	}
 
+	@PutMapping("{chatRoomId}/master")
+	public ResponseEntity<?> transferGroupMaster(
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId,
+	        @RequestBody WorkChatMemberDto dto) {
+
+	    try {
+	        SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+
+	        if (loginMember == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.UNAUTHORIZED)
+	                    .body("로그인이 필요합니다.");
+	        }
+
+	        if (dto == null || dto.getTargetMemberId() == null || dto.getTargetMemberId() <= 0) {
+	            return ResponseEntity
+	                    .status(HttpStatus.BAD_REQUEST)
+	                    .body("마스터 위임 대상이 올바르지 않습니다.");
+	        }
+
+	        dto.setDomainKey(domainKey);
+	        dto.setChatRoomId(chatRoomId);
+	        dto.setLoginMemberId(loginMember.getMember_id());
+
+	        service.transferGroupMaster(dto);
+
+	        return ResponseEntity.noContent().build();
+
+	    } catch (ResponseStatusException e) {
+
+	        log.warn("transferGroupMaster : ", e);
+
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+
+	    } catch (Exception e) {
+
+	        log.error("transferGroupMaster : ", e);
+
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("마스터 권한 위임 중 오류가 발생했습니다.");
+	    }
+	}
 
 
 	

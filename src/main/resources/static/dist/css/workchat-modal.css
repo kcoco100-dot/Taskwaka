@@ -233,6 +233,38 @@
   background: #e6eedf;
 }
 .workchat-message-time { color: #aa9f94; font-size: 10px; white-space: nowrap; }
+
+/* 시스템 메시지 영역 */
+.workchat-system-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+    gap: 5px;
+    width: 100%;
+    margin: 4px 0;
+    text-align: center;
+}
+
+/* 시스템 메시지 내용 */
+.workchat-system-message-text {
+    display: inline-block;
+    max-width: 90%;
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: #eeece7;
+    color: #81786d;
+    font-size: 11px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+/* 시스템 메시지 시간 */
+.workchat-system-message-time {
+    color: #aaa197;
+    font-size: 10px;
+}
 .workchat-composer { padding: 16px 21px 13px; border-top: 1px solid #f0ece6; background: #fff; }
 .workchat-composer-row { display: flex; align-items: center; gap: 9px; }
 .workchat-attach {

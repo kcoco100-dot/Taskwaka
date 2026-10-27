@@ -27,5 +27,6 @@ public interface WorkChatRoomService {
 	
 	public void leaveGroupRoom(WorkChatMemberDto dto) throws Exception;
 	
+	public void transferGroupMaster(WorkChatMemberDto dto) throws Exception;
 	
 }

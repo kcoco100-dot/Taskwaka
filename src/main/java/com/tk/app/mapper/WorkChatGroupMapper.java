@@ -26,5 +26,7 @@ public interface WorkChatGroupMapper {
 	
 	public int leaveGroupRoom(WorkChatMemberDto dto);
 	
+	public int transferGroupMaster(WorkChatMemberDto dto);
+	
 
 }

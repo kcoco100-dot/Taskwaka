@@ -489,7 +489,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	           membersList.replaceChildren();
 
-	           res.data.forEach(function(member) {
+	           res.data.forEach((member) => {
 
 	               const row = document.createElement("div");
 	               row.className = "workchat-group-member";
@@ -498,12 +498,70 @@ document.addEventListener("DOMContentLoaded", function () {
 	               name.textContent = member.name;
 
 	               const role = document.createElement("span");
+				   
+				   
+				   role.textContent = Number(member.canManage) === 1
+				       ? "마스터 · " + member.roleName
+				       : member.roleName;
 
-	               role.textContent = Number(member.canManage) === 1 ? "생성자 · " + member.roleName
-				   : member.roleName;
+				   row.append(name, role);
 
-	               row.append(name, role);
-	               membersList.appendChild(row);
+				   if (activeRoomOwner && Number(member.canManage) !== 1) {
+
+				       const transferButton = document.createElement("button");
+
+				       transferButton.type = "button";
+				       transferButton.className = "workchat-master-transfer";
+				       transferButton.textContent = "마스터 위임";
+
+				       transferButton.addEventListener("click", async () => {
+
+				           if (!activeRoomOwner || activeChatKind !== "GROUP"
+				               || Number(activeChatRoomId) !== Number(chatRoomId)) {
+				               return;
+				           }
+
+				           const confirmed = confirm(member.name + "님에게 마스터 권한을 넘기시겠습니까?\n"
+							 + "위임 후에는 그룹 관리 권한이 이전됩니다."
+				           );
+
+				           if (!confirmed) return;
+
+				           const domainKey = window.location.pathname.split("/")[1];
+
+				           try {
+				               transferButton.disabled = true;
+
+				               await axios.put(
+				                   "/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/master",
+				                   {
+				                       targetMemberId: member.memberId
+				                   }
+				               );
+
+				               await loadMyDirectRooms();
+
+				               if (Number(activeChatRoomId) === Number(chatRoomId) && !membersPanel.hidden) {
+				                   await loadGroupMembers(chatRoomId);
+				               }
+
+				           } catch (e) {
+
+				               console.error("마스터 권한 위임 실패:", e);
+
+				               alert(
+				                   typeof e.response?.data === "string"
+				                       ? e.response.data
+				                       : "마스터 권한을 위임하지 못했습니다."
+				               );
+
+				           } finally {
+				               transferButton.disabled = false;
+				           }
+				       });
+				       row.appendChild(transferButton);
+				   }
+				   membersList.appendChild(row);
 	           });
 
 	       } catch (e) {

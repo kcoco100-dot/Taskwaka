@@ -292,29 +292,40 @@
 			<p v-else-if="failed">메시지 조회에 실패했습니다.</p>
 		    <p v-else-if="messages.length === 0">아직 메시지가 없습니다. </p>
 		
-		    <template v-else>
-		        <div v-for="message in messages" :key="message.messageId"
-		             class="workchat-message"
-		             :class="{'workchat-message--mine': message.mine === 1}">
-		
-		            <div class="workchat-message-content">
-		                <span v-if="message.mine !== 1" class="workchat-sender">
-		                    {{ message.senderName }}
-		                </span>
-		
-		                <div class="workchat-bubble-row">
-		                    <div class="workchat-bubble" style="white-space: pre-wrap;">
-		                        {{ message.content }}
-		                    </div>
-		
-		                    <span class="workchat-message-time">
-		                        {{ message.sent.slice(11, 16) }}
-		                    </span>
-		
-		                </div>
-		            </div>
-		        </div>
-		    </template>
+			<template v-else>
+			    <template v-for="message in messages" :key="message.messageId">
+			        <div v-if="message.messageType === 'SYSTEM'" class="workchat-system-message">
+			            <span class="workchat-system-message-text">
+			                {{ message.content }}
+			            </span>
+			            <small v-if="message.sent" class="workchat-system-message-time">
+			                {{ message.sent.slice(11, 16) }}
+			            </small>
+			        </div>
+
+			        <div v-else class="workchat-message"
+			             :class="{'workchat-message--mine': message.mine === 1}">
+			            <div class="workchat-message-content">
+			            
+			                <span v-if="message.mine !== 1" class="workchat-sender">
+			                    {{ message.senderName }}
+			                </span>
+			
+			                <div class="workchat-bubble-row">
+			                    <div class="workchat-bubble" style="white-space: pre-wrap;">
+			                        {{ message.content }}
+			                    </div>
+			
+			                    <span class="workchat-message-time">
+			                        {{ message.sent.slice(11, 16) }}
+			                    </span>
+			
+			                </div>
+			            </div>
+			        </div>
+			
+			    </template>
+			</template>
 		</div>
 
         <div class="workchat-composer">

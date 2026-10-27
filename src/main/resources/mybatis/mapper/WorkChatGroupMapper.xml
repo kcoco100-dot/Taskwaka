@@ -106,5 +106,29 @@
       AND status = 0
 	</update>
 	
+	<update id="transferGroupMaster" parameterType="WorkChatMemberDto">
+	    UPDATE chat_rooms cr SET workspace_member_id = #{targetWorkId}
+	    WHERE cr.chat_room_id = #{chatRoomId}
+	      AND cr.chat = 'GROUP'
+	      AND cr.workspace_member_id = #{myWorkId}
+	      AND #{targetWorkId} != #{myWorkId}
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_room_members crm
+	
+	          JOIN workspace_members t_wm ON crm.workspace_member_id = t_wm.workspace_member_id
+	
+	          JOIN workspace_members c_wm ON c_wm.workspace_member_id = cr.workspace_member_id
+	
+	          WHERE crm.chat_room_id = cr.chat_room_id
+	            AND crm.workspace_member_id = #{targetWorkId}
+	            AND crm.status = 0
+	            AND t_wm.status = 0
+	            AND c_wm.status = 0
+	
+	            AND t_wm.workspace_id = c_wm.workspace_id
+	      )
+	</update>
+	
 
 </mapper>
