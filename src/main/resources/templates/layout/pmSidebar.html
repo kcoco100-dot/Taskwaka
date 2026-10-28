@@ -32,6 +32,7 @@
             </button>
             <ul id="project-submenu" class="submenu">
                 <li><a th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}" th:classappend="${activeMenu == 'view' or activeMenu == 'projectView' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'view' or activeMenu == 'projectView' ? 'page' : null}">프로젝트 조회</a></li>
+                <li><a th:href="@{/{domainKey}/manage/projectMembers(domainKey=${domainKey})}" th:classappend="${activeMenu == 'projectMembers' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projectMembers' ? 'page' : null}">프로젝트 인원관리</a></li>
                 <li><a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}" th:classappend="${activeMenu == 'approval' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'approval' ? 'page' : null}">보고서 결재</a></li>
                 <li><a th:href="@{/{domainKey}/manage/meetings(domainKey=${domainKey})}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'meetings' ? 'page' : null}">회의록</a></li>
             </ul>
@@ -62,6 +63,13 @@
                 <li><a th:href="@{/planPayment}" th:classappend="${activeMenu == 'planPayment' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'planPayment' ? 'page' : null}">요금제 결제</a></li>
             </ul>
         </li>
+        
+		<div class="menu-group">
+			<div class="return-home">
+				<a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}"> 홈으로 돌아가기 </a>
+			</div>
+		</div>
+        
     </ul>
 </nav>
 </body>

@@ -46,9 +46,6 @@
 			    </a>
 			</nav>
 
-            
-            
-
             <div class="project-list-panel">
                 <form id="project-search-form" class="project-filters"
                       method="get" th:action="@{|/${domainKey}/manage/noticeList|}">
@@ -113,13 +110,11 @@
                             </tr>
                         </thead>
                         <tbody id="project-list-body">
-                            <tr th:if="${#lists.isEmpty(list)}"
-                                class="project-list-row text-center">
+                            <tr th:if="${#lists.isEmpty(list)}" class="project-list-row text-center">
                                 <td colspan="7">등록된 공지사항이 없습니다.</td>
                             </tr>
                             <tr th:each="dto, status : ${list}" class="project-list-row">
-                                <td class="project-number"
-                                    th:text="${dataCount - (page - 1) * size - status.index}"></td>
+                                <td class="project-number" th:text="${dataCount - (page - 1) * size - status.index}"></td>
 								<td th:switch="${dto.notice_type}">
 								    <span th:case="'WORKSPACE'">워크</span>
 								    <span th:case="'PROJECT'">프로젝트</span>

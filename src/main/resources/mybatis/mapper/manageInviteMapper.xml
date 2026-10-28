@@ -20,11 +20,13 @@
         FROM members m
         JOIN member_details md ON m.member_id = md.member_id
         WHERE m.status = 0
-          AND m.member_id NOT IN (
-              SELECT member_id 
-              FROM workspace_members 
-              WHERE workspace_id = #{workspaceId}
-          )
+        	AND NOT EXISTS (
+		    SELECT 1
+		    FROM workspace_members wm
+		    WHERE wm.workspace_id = #{workspaceId}
+		      AND wm.member_id = m.member_id
+		      AND (wm.status IS NULL OR wm.status &lt;&gt; 1)
+		)
         <if test="kwd != null and kwd != ''">
           AND (
               md.name LIKE '%' || #{kwd} || '%' 
@@ -66,26 +68,33 @@
             invite_status AS inviteStatus
         FROM workspace_invites
         WHERE invite_key = #{inviteKey}
+        FOR UPDATE
     </select>
 
     <!-- 초대 수락 상태 변경 -->
     <update id="updateManageInviteAccept" parameterType="com.tk.app.domain.dto.ManageInviteDto">
         UPDATE workspace_invites
-        SET
-            accepted_member_id = #{acceptedMemberId},
-            accepted = SYSDATE,
-            invite_status = #{inviteStatus}
+        SET accepted_member_id = #{acceptedMemberId}, accepted = SYSDATE, invite_status = #{inviteStatus}
         WHERE invite_key = #{inviteKey} AND invite_status = 0 AND status = 0 AND expires &gt; SYSDATE
     </update>
 
-    <!-- 초대 수락 팀원 등록 -->
+    <!-- 초대 수락시 워크멤버 등록 -->
     <insert id="insertManageInviteMember" parameterType="com.tk.app.domain.dto.ManageInviteDto">
-        INSERT INTO workspace_members (
-            workspace_member_id, workspace_id, member_id, status, joined, role
-        ) VALUES (
-            seq_workspace_members.NEXTVAL, #{workspaceId}, #{memberId}, #{status}, SYSDATE, #{role}
-        )
-    </insert>
+		MERGE INTO workspace_members wm
+		    USING (
+		    	SELECT #{workspaceId} AS workspace_id, #{memberId} AS member_id
+		        FROM dual) src
+		    ON (wm.workspace_id = src.workspace_id AND wm.member_id = src.member_id)
+		    WHEN MATCHED THEN
+		        UPDATE SET wm.status = 0,
+		            wm.role = #{role},
+		            wm.joined = SYSDATE,
+		            wm."LEFT" = NULL
+		        WHERE wm.status = 1
+		    WHEN NOT MATCHED THEN
+		        INSERT (workspace_member_id, workspace_id, member_id, status, joined, role)
+		        VALUES (seq_workspace_members.NEXTVAL, src.workspace_id, src.member_id, 0, SYSDATE, #{role})
+		</insert>
 
     <!-- 초대 대상 검색 -->
     <select id="selectSearchEligibleMembers" parameterType="map" resultType="com.tk.app.domain.dto.ManageInviteDto">
@@ -96,11 +105,13 @@
         FROM members m
         JOIN member_details md ON m.member_id = md.member_id
         WHERE m.status = 0
-          AND m.member_id NOT IN (
-              SELECT member_id 
-              FROM workspace_members 
-              WHERE workspace_id = #{workspaceId}
-          )
+          AND NOT EXISTS (
+		    SELECT 1
+		    FROM workspace_members wm
+		    WHERE wm.workspace_id = #{workspaceId}
+		      AND wm.member_id = m.member_id
+		      AND (wm.status IS NULL OR wm.status &lt;&gt; 1)
+		)
         <if test="kwd != null and kwd != ''">
           AND (
               md.name LIKE '%' || #{kwd} || '%' 
@@ -110,4 +121,26 @@
         ORDER BY md.name ASC
     </select>
 
+	<!-- 초대된 워크 주소 조회 -->
+	<select id="selectInviteDomainByWorkspaceId" parameterType="long" resultType="String">
+	    SELECT MIN(domain_key)
+	    FROM workspace_domains
+	    WHERE workspace_id = #{workspaceId} AND active = 'Y'
+	</select>
+	
+	<!-- 같은 회원의 동시 가입 처리 잠금 -->
+	<select id="lockActiveInviteMember" parameterType="long" resultType="Long">
+	    SELECT member_id
+	    FROM members
+	    WHERE member_id = #{memberId} AND status = 0
+	    FOR UPDATE
+	</select>
+	
+	<!-- 기존 워크 참여 상태 조회 -->
+	<select id="selectInviteWorkspaceMember" parameterType="map" resultType="com.tk.app.domain.dto.ManageInviteDto">
+	    SELECT workspace_member_id AS workspaceMemberId, workspace_id AS workspaceId, member_id AS memberId, status, role
+	    FROM workspace_members
+	    WHERE workspace_id = #{workspaceId} AND member_id = #{memberId}
+	</select>
+	
 </mapper>

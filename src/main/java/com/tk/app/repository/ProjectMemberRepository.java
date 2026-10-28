@@ -193,6 +193,7 @@ public interface ProjectMemberRepository extends JpaRepository<ManageProjectMemb
     int countAssignedTasks(@Param("workspaceId") Long workspaceId,
             @Param("projectMemberId") Long projectMemberId);
 
+    
     @Query(value = """
         SELECT COUNT(*) FROM tasks t
         JOIN projects p ON p.project_id = t.project_id
@@ -202,4 +203,49 @@ public interface ProjectMemberRepository extends JpaRepository<ManageProjectMemb
         """, nativeQuery = true)
     int countWorkspaceAssignedTasks(@Param("workspaceId") Long workspaceId,
             @Param("workspaceMemberId") Long workspaceMemberId);
+    
+    // 프로젝트 팀원 관리
+    @Query(value = """
+    	SELECT  workspace_id
+	    FROM workspace_domains
+	    WHERE domain_key = :domainKey
+	      AND active = 'Y'
+	    """, nativeQuery = true)
+	Long findWorkspaceIdForTeam(@Param("domainKey") String domainKey);
+    
+    // 현재 로그인 회원이 관리할 수 있는 프로젝트 목록
+    @Query(value = """
+        SELECT p.project_id, p.subject
+        FROM projects p
+        WHERE p.workspace_id = :workspaceId
+          AND p.deleted IS NULL
+          AND EXISTS (
+              SELECT 1
+              FROM workspace_members actor
+              WHERE actor.workspace_id = p.workspace_id
+                AND actor.member_id = :actorId
+                AND actor.status = 0
+                AND actor."LEFT" IS NULL
+                AND (
+                    actor.role = 70
+                    OR (
+                        actor.role = 50
+                        AND EXISTS (
+                            SELECT 1
+                            FROM project_members mine
+                            WHERE mine.project_id = p.project_id
+                              AND mine.workspace_member_id = actor.workspace_member_id
+                              AND mine.status = 0
+                              AND mine."LEFT" IS NULL
+                        )
+                    )
+                )
+          )
+        ORDER BY p.project_id DESC
+        """, nativeQuery = true)
+    List<Object[]> findProjectsForTeamManagement(
+            @Param("workspaceId") Long workspaceId,
+            @Param("actorId") Long actorId);
+    
+    
 }

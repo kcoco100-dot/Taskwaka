@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout3}">
+<head>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/dist/css/home.css}">
+        <link rel="stylesheet" th:href="@{/dist/css/manage/manage.css}">
+        <link rel="stylesheet" th:href="@{/dist/css/manage/projectTeam.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div class="home-layout manage-layout">
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('projectMembers')}"></nav>
+        <section class="section pt-page">
+            <div class="page-heading">
+                <div>
+                    <h1 id="project-list-heading" class="page-title">프로젝트 팀원 관리</h1>
+                </div>
+            </div>
+
+            <div class="pt-project-bar">
+                <label for="pt-project">프로젝트 선택</label>
+                <select id="pt-project"
+                        th:attr="data-current-id=${selectedProjectId}"
+                        th:disabled="${#lists.isEmpty(projectList)}">
+                    <option th:if="${#lists.isEmpty(projectList)}" value="">
+                        선택 가능한 프로젝트가 없습니다.
+                    </option>
+                    <option th:each="project : ${projectList}"
+                            th:value="${project.project_id}"
+                            th:text="${project.subject}"
+                            th:selected="${project.project_id == selectedProjectId}">
+                    </option>
+                </select>
+                <p id="pt-pm">PM: 등록된 인원 없음</p>
+            </div>
+
+            <div class="pt-board" th:if="${selectedProject == null}">
+                <p class="pt-empty">관리할 수 있는 프로젝트가 없습니다.</p>
+            </div>
+
+            <div id="pt-editor" class="pt-board" th:if="${selectedProject != null}">
+                <div class="pt-board-head">
+                    <div>
+                        <h2 th:text="${selectedProject.subject}">프로젝트명</h2>
+                        <p class="pt-caption">드래그하거나 인원을 선택한 뒤 이동 버튼을 누르세요.</p>
+                    </div>
+                    <div class="pt-target">
+                        <label for="pt-target">배정할 직위</label>
+                        <select id="pt-target">
+                            <option th:if="${manageWorkspaceRole == 70}" value="50">DT</option>
+                            <option value="30">TL</option>
+                            <option value="10">AA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-toolbar">
+                    <span>선택한 인원 <strong id="pt-selected">0</strong>명</span>
+                    <span>
+                        배정 인원 <strong id="pt-assigned">0</strong>명
+                        <small>PM 제외</small>
+                    </span>
+                    <button type="button" id="pt-clear-selection" class="pt-text-button">
+                        선택 취소
+                    </button>
+                </div>
+
+                <div class="pt-workspace">
+                    <!-- 왼쪽: 프로젝트에 배정하지 않은 워크 멤버 -->
+                    <section class="pt-column pt-source" data-drop-role="">
+                        <h3>
+                            워크 멤버
+                            <span class="pt-count" data-count="">0</span>
+                        </h3>
+                        <input type="search" id="pt-search"
+                               placeholder="이름으로 검색"
+                               aria-label="워크 멤버 이름 검색">
+                        <label class="pt-select-all">
+                            <input type="checkbox" id="pt-select-all">
+                            검색된 인원 전체 선택
+                        </label>
+                        <ul class="pt-list" data-list=""></ul>
+                    </section>
+
+                    <!-- 가운데: 선택 인원 이동 -->
+                    <div class="pt-transfer">
+                        <button type="button" id="pt-move" class="pt-forward"
+                                aria-label="선택한 인원을 선택 직위로 배정">
+                            <span class="pt-arrow" aria-hidden="true">→</span>
+                            <span>배정</span>
+                        </button>
+                        <button type="button" id="pt-release"
+                                aria-label="선택한 인원의 프로젝트 배정 해제">
+                            <span class="pt-arrow" aria-hidden="true">←</span>
+                            <span>해제</span>
+                        </button>
+                    </div>
+
+                    <!-- 오른쪽: DT·TL·AA -->
+                    <div class="pt-role-grid"  th:classappend="${manageWorkspaceRole != 70 ? 'pt-two-columns' : ''}">
+                        <section th:if="${manageWorkspaceRole == 70}" class="pt-column pt-dt" data-drop-role="50">
+                            <div class="pt-role-head">
+                                <h3>
+                                    DT
+                                    <span class="pt-count" data-count="50">0</span>
+                                </h3>
+                                <p>DT 배정 인원</p>
+                            </div>
+                            <ul class="pt-list" data-list="50"></ul>
+                        </section>
+
+                        <section class="pt-column pt-tl" data-drop-role="30">
+                            <div class="pt-role-head">
+                                <h3>
+                                    TL
+                                    <span class="pt-count" data-count="30">0</span>
+                                </h3>
+                                <p>TL 배정 인원</p>
+                            </div>
+                            <ul class="pt-list" data-list="30"></ul>
+                        </section>
+
+                        <section class="pt-column pt-aa" data-drop-role="10">
+                            <div class="pt-role-head">
+                                <h3>
+                                    AA
+                                    <span class="pt-count" data-count="10">0</span>
+                                </h3>
+                                <p>AA 배정 인원</p>
+                            </div>
+                            <ul class="pt-list" data-list="10"></ul>
+                        </section>
+                    </div>
+                </div>
+
+                <p id="pt-message" class="pt-message"
+                   role="status" aria-live="polite"></p>
+
+                <div class="pt-actions">
+                    <p id="pt-changes">변경 사항이 없습니다.</p>
+                    <button type="button" id="pt-reset">변경 취소</button>
+                    <button type="button" id="pt-save" class="pt-primary">
+                        배정 저장
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+
+<th:block layout:fragment="script">
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", () => {
+    const root = document.getElementById("pt-editor");
+    if (!root) return;
+
+    const initialMembers = /*[[${teamMembers}]]*/ [];
+    const pageUrl = /*[[@{/{domainKey}/manage/projectMembers(domainKey=${domainKey})}]]*/ "";
+    const saveUrl = /*[[@{/{domainKey}/manage/projectMembers/save(domainKey=${domainKey})}]]*/ "";
+    const csrfToken = /*[[${_csrf != null ? _csrf.token : null}]]*/ null;
+    const csrfHeader = /*[[${_csrf != null ? _csrf.headerName : null}]]*/ null;
+
+    const members = new Map(initialMembers.map(row => [
+        String(row.id), {
+            id: String(row.id),
+            name: row.name || "이름 없음",
+            role: row.role == null ? null : Number(row.role)
+        }
+    ]));
+    const originalRoles = new Map(
+        [...members.values()].map(member => [member.id, member.role])
+    );
+    const selected = new Set();
+
+    const projectSelect = document.getElementById("pt-project");
+    const search = document.getElementById("pt-search");
+    const target = document.getElementById("pt-target");
+    const selectAll = document.getElementById("pt-select-all");
+    const saveButton = document.getElementById("pt-save");
+    const moveButton = document.getElementById("pt-move");
+    const releaseButton = document.getElementById("pt-release");
+    const resetButton = document.getElementById("pt-reset");
+    const clearButton = document.getElementById("pt-clear-selection");
+    const message = document.getElementById("pt-message");
+
+    let saving = false;
+    let allowLeave = false;
+
+    function notify(text, error = false) {
+        message.textContent = text;
+        message.classList.toggle("pt-error", error);
+    }
+
+    function changeCount() {
+        return [...members.values()]
+            .filter(member => member.role !== originalRoles.get(member.id))
+            .length;
+    }
+
+    function visibleAvailable() {
+        const keyword = search.value.trim().toLocaleLowerCase();
+        return [...members.values()].filter(member =>
+            member.role === null
+            && (!keyword || member.name.toLocaleLowerCase().includes(keyword))
+        );
+    }
+
+    // 서버에 보낼 배정 목록
+    function assignments(original = false) {
+        return [...members.values()].flatMap(member => {
+            const role = original ? originalRoles.get(member.id) : member.role;
+            if (role == null) return [];
+            const workspaceMemberId = Number(member.id);
+            if (!Number.isSafeInteger(workspaceMemberId) || workspaceMemberId <= 0) {
+                throw new Error("워크 멤버 번호를 확인하세요.");
+            }
+            return [{ workspaceMemberId, role }];
+        });
+    }
+
+    function refreshButtons() {
+        const visible = visibleAvailable();
+        const checked = visible.filter(member => selected.has(member.id)).length;
+
+        document.getElementById("pt-selected").textContent = selected.size;
+        document.getElementById("pt-changes").textContent = changeCount()
+            ? changeCount() + "명의 배정 변경이 저장 대기 중입니다."
+            : "변경 사항이 없습니다.";
+
+        selectAll.checked = visible.length > 0 && checked === visible.length;
+        selectAll.indeterminate = checked > 0 && checked < visible.length;
+        selectAll.disabled = saving || visible.length === 0;
+        saveButton.disabled = saving || changeCount() === 0;
+        saveButton.textContent = saving ? "저장 중..." : "배정 저장";
+        resetButton.disabled = saving || changeCount() === 0;
+        moveButton.disabled = saving || selected.size === 0;
+        releaseButton.disabled = saving
+            || ![...selected].some(id => members.get(id).role !== null);
+        clearButton.disabled = saving || selected.size === 0;
+        projectSelect.disabled = saving;
+        target.disabled = saving;
+        search.disabled = saving;
+    }
+
+    // 화면에서 인원 이동
+    function move(ids, role) {
+        if (saving) return;
+        const keys = [...new Set(ids.map(String))];
+        if (!keys.length) return;
+        if (![null, 50, 30, 10].includes(role)
+                || keys.some(id => !members.has(id) || members.get(id).role === 70)) {
+            notify("이동할 인원과 직위를 확인하세요. PM은 변경할 수 없습니다.", true);
+            return;
+        }
+        keys.forEach(id => {
+            members.get(id).role = role;
+        });
+        selected.clear();
+        notify("명단을 변경했습니다. 배정 저장을 누르면 반영됩니다.");
+        render();
+    }
+
+    // 현재 명단 표시
+    function render() {
+        const people = [...members.values()]
+            .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        const pm = people.filter(member => member.role === 70);
+
+        document.getElementById("pt-pm").textContent =
+            "PM: " + (pm.map(member => member.name).join(", ") || "등록된 인원 없음");
+        document.getElementById("pt-assigned").textContent =
+            people.filter(member => [50, 30, 10].includes(member.role)).length;
+
+        const visibleIds = new Set(
+            visibleAvailable().map(member => member.id)
+        );
+
+        root.querySelectorAll("[data-list]").forEach(list => {
+            const role = list.dataset.list === "" ? null : Number(list.dataset.list);
+            const rows = people.filter(member =>
+                member.role === role && (role !== null || visibleIds.has(member.id))
+            );
+            list.replaceChildren();
+
+            if (!rows.length) {
+                const empty = document.createElement("li");
+                empty.className = "pt-empty";
+                empty.textContent = role === null
+                    ? "배정 가능한 인원이 없거나 검색 결과가 없습니다."
+                    : "인원을 끌어 놓거나 선택해 배정하세요.";
+                list.append(empty);
+            }
+
+            rows.forEach(member => {
+                const row = document.createElement("li");
+                row.className = "pt-member";
+                row.classList.toggle("pt-picked", selected.has(member.id));
+                row.draggable = !saving;
+
+                const label = document.createElement("label");
+                label.className = "pt-person";
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = selected.has(member.id);
+                checkbox.disabled = saving;
+                checkbox.setAttribute("aria-label", member.name + " 선택");
+                checkbox.addEventListener("change", () => {
+                    if (checkbox.checked) selected.add(member.id);
+                    else selected.delete(member.id);
+                    row.classList.toggle("pt-picked", checkbox.checked);
+                    refreshButtons();
+                });
+
+                const avatar = document.createElement("span");
+                avatar.className = "pt-avatar";
+                avatar.textContent = [...member.name][0] || "?";
+                avatar.setAttribute("aria-hidden", "true");
+
+                const name = document.createElement("span");
+                name.className = "pt-name";
+                name.textContent = member.name;
+                name.title = member.name;
+
+                label.append(checkbox, avatar, name);
+
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "pt-small";
+                button.textContent = role === null ? "추가 →" : "← 해제";
+                button.disabled = saving;
+                button.addEventListener("click", () => {
+                    move([member.id], role === null ? Number(target.value) : null);
+                });
+
+                row.addEventListener("dragstart", event => {
+                    if (saving) {
+                        event.preventDefault();
+                        return;
+                    }
+                    const ids = selected.has(member.id)
+                        ? [...selected] : [member.id];
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", JSON.stringify(ids));
+                });
+
+                row.append(label, button);
+                list.append(row);
+            });
+        });
+
+        root.querySelectorAll("[data-count]").forEach(node => {
+            const role = node.dataset.count === ""
+                ? null : Number(node.dataset.count);
+            node.textContent = people.filter(member => member.role === role).length;
+        });
+
+        refreshButtons();
+    }
+
+    // 드래그한 인원 받기
+    root.querySelectorAll("[data-drop-role]").forEach(zone => {
+        zone.addEventListener("dragover", event => {
+            if (saving) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            zone.classList.add("pt-over");
+        });
+        zone.addEventListener("dragleave", () => {
+            zone.classList.remove("pt-over");
+        });
+        zone.addEventListener("drop", event => {
+            event.preventDefault();
+            zone.classList.remove("pt-over");
+            try {
+                const ids = JSON.parse(event.dataTransfer.getData("text/plain"));
+                if (!Array.isArray(ids)) throw new Error();
+                move(
+                    ids,
+                    zone.dataset.dropRole === ""
+                        ? null : Number(zone.dataset.dropRole)
+                );
+            } catch {
+                notify("명단에 있는 인원을 끌어 놓으세요.", true);
+            }
+        });
+    });
+
+    search.addEventListener("input", render);
+
+    selectAll.addEventListener("change", () => {
+        visibleAvailable().forEach(member => {
+            if (selectAll.checked) selected.add(member.id);
+            else selected.delete(member.id);
+        });
+        render();
+    });
+
+    clearButton.addEventListener("click", () => {
+        selected.clear();
+        render();
+    });
+
+    moveButton.addEventListener("click", () => {
+        move([...selected], Number(target.value));
+    });
+
+    releaseButton.addEventListener("click", () => {
+        move([...selected], null);
+    });
+
+    resetButton.addEventListener("click", () => {
+        if (saving) return;
+        members.forEach(member => {
+            member.role = originalRoles.get(member.id);
+        });
+        selected.clear();
+        notify("마지막 저장 상태로 되돌렸습니다.");
+        render();
+    });
+
+    // 프로젝트 변경
+    projectSelect.addEventListener("change", () => {
+        if (changeCount()
+                && !window.confirm("저장하지 않은 변경을 취소하고 프로젝트를 바꾸시겠습니까?")) {
+            projectSelect.value = projectSelect.dataset.currentId;
+            return;
+        }
+        allowLeave = true;
+        const url = new URL(pageUrl, window.location.origin);
+        url.searchParams.set("projectId", projectSelect.value);
+        window.location.assign(url.href);
+    });
+
+    // 변경 명단 일괄 저장
+    saveButton.addEventListener("click", async () => {
+        if (saving || !changeCount()) return;
+        try {
+            const projectId = Number(projectSelect.value);
+            if (!Number.isSafeInteger(projectId) || projectId <= 0) {
+                throw new Error("프로젝트를 선택하세요.");
+            }
+            const payload = {
+                projectId,
+                originalMembers: assignments(true),
+                members: assignments()
+            };
+
+            saving = true;
+            notify("배정 내용을 저장하고 있습니다.");
+            render();
+
+            const headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            };
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            const response = await fetch(saveUrl, {
+                method: "POST",
+                credentials: "same-origin",
+                headers,
+                body: JSON.stringify(payload)
+            });
+
+            if (response.redirected || response.status === 401) {
+                throw new Error("로그인 상태를 확인하세요.");
+            }
+            if (!(response.headers.get("content-type") || "").includes("application/json")) {
+                throw new Error("저장 응답을 확인할 수 없습니다. 잠시 후 다시 시도하세요.");
+            }
+
+            const data = await response.json();
+            if (!response.ok || data.status !== "success") {
+                throw new Error(data.message || "저장에 실패했습니다.");
+            }
+
+            members.forEach(member => {
+                originalRoles.set(member.id, member.role);
+            });
+            notify(data.message || "배정을 저장했습니다.");
+        } catch (error) {
+            notify(
+                error instanceof TypeError
+                    ? "서버에 연결할 수 없습니다. 다시 시도하세요."
+                    : error.message || "저장에 실패했습니다.",
+                true
+            );
+        } finally {
+            saving = false;
+            render();
+        }
+    });
+
+    window.addEventListener("beforeunload", event => {
+        if (!allowLeave && changeCount()) {
+            event.preventDefault();
+            event.returnValue = "";
+        }
+    });
+
+    render();
+});
+</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,439 @@
+@charset "UTF-8";
+
+.pt-page {
+    --pt-green: #71865b;
+    --pt-ink: #594331;
+    --pt-line: #e6ded2;
+    flex: 1;
+    min-width: 0;
+    color: var(--pt-ink);
+}
+
+.pt-page .pt-project-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 22px 0;
+    padding: 20px 22px;
+    border: 1px solid var(--pt-line);
+    border-radius: 16px;
+    background: #fff;
+}
+.pt-page .pt-project-bar label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.pt-page select,
+.pt-page input[type="search"] {
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #ddd5ca;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--pt-ink);
+    font: inherit;
+}
+
+.pt-page #pt-project {
+    flex: 1;
+    min-width: 200px;
+    max-width: 500px;
+}
+
+.pt-page #pt-pm {
+    margin: 0;
+    padding: 8px 13px;
+    border-radius: 20px;
+    background: #f2f4eb;
+    color: #687951;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.pt-page .pt-board {
+    padding: 22px;
+    border: 1px solid var(--pt-line);
+    border-radius: 18px;
+    background: #faf8f3;
+}
+
+.pt-page .pt-board-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.pt-page .pt-board-head h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+}
+
+.pt-page .pt-caption {
+    margin: 0;
+    color: #958878;
+    font-size: 12px;
+}
+
+.pt-page .pt-target {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+}
+
+.pt-page .pt-target select {
+    height: 36px;
+    min-width: 88px;
+}
+
+.pt-page .pt-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    color: #8a7e6f;
+    font-size: 13px;
+}
+
+.pt-page .pt-toolbar strong {
+    color: var(--pt-green);
+}
+
+.pt-page button {
+    border: 1px solid #ddd5ca;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--pt-ink);
+    font: inherit;
+    cursor: pointer;
+}
+
+.pt-page button:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+.pt-page .pt-text-button {
+    margin-left: auto;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.pt-page .pt-workspace {
+    display: grid;
+    grid-template-columns: minmax(230px, .95fr) 68px minmax(0, 2.05fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.pt-page .pt-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--pt-line);
+    border-radius: 13px;
+    background: #fff;
+    transition: background .15s, border-color .15s;
+}
+
+.pt-page .pt-column.pt-over {
+    border-color: var(--pt-green);
+    background: #edf3e6;
+}
+
+.pt-page .pt-column h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    font-size: 16px;
+}
+
+.pt-page .pt-count {
+    padding: 4px 9px;
+    border-radius: 14px;
+    background: #f1eee7;
+    color: #8c7d68;
+    font-size: 12px;
+}
+
+.pt-page .pt-source h3 {
+    margin-bottom: 14px;
+}
+
+.pt-page #pt-search {
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.pt-page .pt-select-all {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    color: #8a7e6f;
+    font-size: 12px;
+}
+
+.pt-page input[type="checkbox"] {
+    accent-color: var(--pt-green);
+}
+
+.pt-page .pt-role-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    min-width: 0;
+}
+
+.pt-page .pt-role-grid.pt-two-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pt-page .pt-role-head {
+    margin-bottom: 15px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid #eee8de;
+}
+.pt-page .pt-role-head p {
+    margin: 7px 0 0;
+    color: #a19484;
+    font-size: 11px;
+}
+
+.pt-page .pt-dt {
+    border-top: 4px solid #71865b;
+}
+
+.pt-page .pt-tl {
+    border-top: 4px solid #b59c73;
+}
+
+.pt-page .pt-aa {
+    border-top: 4px solid #aaa296;
+}
+
+.pt-page .pt-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-height: 360px;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.pt-page .pt-member {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 9px;
+    padding: 11px 8px;
+    border: 1px solid #e8e1d6;
+    border-radius: 10px;
+    background: #fcfaf6;
+    cursor: grab;
+}
+
+.pt-page .pt-member.pt-picked {
+    border-color: #93a77e;
+    background: #edf2e5;
+}
+
+.pt-page .pt-person {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    margin: 0;
+    font-size: 13px;
+}
+
+.pt-page .pt-person input {
+    flex-shrink: 0;
+}
+
+.pt-page .pt-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e9edde;
+    color: #74815e;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.pt-page .pt-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pt-page .pt-small {
+    flex-shrink: 0;
+    padding: 5px 6px;
+    font-size: 11px;
+}
+
+.pt-page .pt-transfer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+}
+
+.pt-page .pt-transfer button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 3px;
+    font-size: 11px;
+}
+
+.pt-page .pt-transfer .pt-arrow {
+    font-size: 22px;
+    line-height: 1;
+}
+.pt-page .pt-transfer .pt-forward {
+    background: #71865b;
+    border-color: #71865b;
+    color: #fff;
+}
+
+.pt-page .pt-empty {
+    padding: 30px 8px;
+    color: #a09485;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.pt-page .pt-message {
+    min-height: 22px;
+    margin: 16px 0 0;
+    color: #71865b;
+    font-size: 13px;
+}
+
+.pt-page .pt-message.pt-error {
+    color: #b64b40;
+}
+
+.pt-page .pt-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--pt-line);
+}
+
+.pt-page .pt-actions p {
+    flex: 1;
+    min-width: 180px;
+    margin: 0;
+    color: #948675;
+    font-size: 12px;
+}
+
+.pt-page .pt-actions button {
+    padding: 11px 18px;
+    font-size: 13px;
+}
+
+.pt-page .pt-primary {
+    background: #71865b;
+    border-color: #71865b;
+    color: #fff;
+}
+
+.pt-page :is(button, input, select):focus-visible {
+    outline: 2px solid #71865b;
+    outline-offset: 3px;
+}
+
+@media (max-width: 1300px) {
+    .pt-page .pt-workspace {
+        grid-template-columns: 1fr;
+    }
+    .pt-page .pt-transfer {
+        flex-direction: row;
+    }
+    .pt-page .pt-transfer button {
+        min-width: 90px;
+    }
+    .pt-page .pt-source .pt-list {
+        min-height: 180px;
+        max-height: 260px;
+    }
+}
+
+@media (max-width: 720px) {
+	.pt-page .pt-role-grid,
+	.pt-page .pt-role-grid.pt-two-columns {
+	    grid-template-columns: 1fr;
+	}
+    .pt-page .pt-list {
+        min-height: 160px;
+        max-height: 280px;
+    }
+    .pt-page .pt-board {
+        padding: 14px;
+    }
+    .pt-page .pt-project-bar {
+        padding: 16px;
+    }
+    .pt-page #pt-project {
+        max-width: 100%;
+        width: 100%;
+    }
+    .pt-page .pt-actions p {
+        flex-basis: 100%;
+    }
+}
+
+.manage-layout .pt-page > .page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: auto;
+    min-height: 0;
+    margin: 0 0 24px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    text-align: left;
+}
+
+.manage-layout .pt-page > .page-heading .page-title {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.manage-layout .pt-page > .page-heading .page-description {
+    margin: 6px 0 0;
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.6;
+}

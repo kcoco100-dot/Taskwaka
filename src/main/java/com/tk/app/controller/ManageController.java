@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -451,4 +453,54 @@ public class ManageController {
 		return "manage/pmDashboard";
 		
 	}
+	
+	// 프로젝트 팀원 관리 화면
+	@GetMapping("/projectMembers")
+	public String projectMembers(@PathVariable("domainKey") String domainKey,
+	        @RequestParam(value = "projectId", required = false) Long projectId,
+	        Model model) throws Exception {
+		
+	    try {
+	        SessionInfo info = LoginMemberUtil.getSessionInfo();
+	        
+	        Map<String, Object> data = service.getProjectMemberForm(domainKey, info.getMember_id(), projectId);
+	        model.addAllAttributes(data);
+
+	    } catch (Exception e) {
+	        log.info("projectMembers : ", e);
+	        
+	        throw e;
+	    }
+	    return "manage/projectTeam";
+	}
+	
+	// 프로젝트 팀원 일괄 저장
+	@PostMapping("/projectMembers/save")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> saveProjectMembers(
+	        @PathVariable("domainKey") String domainKey,
+	        @RequestBody Map<String, Object> map) {
+	    Map<String, Object> result = new HashMap<>();
+	    try {
+	        SessionInfo info = LoginMemberUtil.getSessionInfo();
+	        
+	        if (map == null) {
+	            throw new IllegalArgumentException("저장할 정보가 없습니다.");
+	        }
+	        
+	        int count = service.saveProjectMembers(domainKey, info.getMember_id(), map);
+	        result.put("status", "success");
+	        result.put("count", count);
+	        result.put("message", count + "명의 배정 변경을 저장했습니다.");
+	        
+	        return ResponseEntity.ok(result);
+	        
+	    } catch (Exception e) {
+	        log.info("saveProjectMembers : ", e);
+	        result.put("message", "저장에 실패했습니다. 배정 상태를 다시 확인하세요.");
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+	    }
+	}
+	
+	
 }

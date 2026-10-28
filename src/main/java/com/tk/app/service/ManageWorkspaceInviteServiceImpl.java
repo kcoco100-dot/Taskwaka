@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tk.app.domain.dto.ManageInviteDto;
-import com.tk.app.mapper.ManageInviteMapper;
 import com.tk.app.mail.Mail;
 import com.tk.app.mail.MailSender;
+import com.tk.app.mapper.ManageInviteMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -119,39 +118,71 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void acceptInvite(Map<String, Object> map) throws Exception {
-        String inviteKey = (String) map.get("inviteKey");
-        Long memberId = (Long) map.get("memberId");
-
-        ManageInviteDto inviteDto = mapper.selectManageInviteByKey(inviteKey);
-        String domainKey = (String) map.get("domainKey");
-        Long domainWorkspaceId = mapper.selectWorkspaceIdByDomainKey(domainKey);
-        if (inviteDto == null || domainWorkspaceId == null || !domainWorkspaceId.equals(inviteDto.getWorkspaceId())) {
-            throw new IllegalArgumentException("현재 도메인에서 유효하지 않은 초대 링크입니다.");
-        }
         try {
-            java.util.Date expiry = new SimpleDateFormat(DATE_FORMAT).parse(inviteDto.getExpires());
-            if (inviteDto.getStatus() == null || inviteDto.getStatus() != 0 || !expiry.after(new java.util.Date())) {
-                throw new IllegalArgumentException("기간이 만료된 초대 링크입니다.");
+            String inviteKey = (String) map.get("inviteKey");
+            Long memberId = (Long) map.get("memberId");
+            if (inviteKey == null || inviteKey.isBlank() || memberId == null) {
+                throw new IllegalArgumentException("초대 링크와 로그인 정보를 확인하세요.");
             }
-            growthTreeService.grantInviteAcceptExp(inviteDto.getWorkspaceId(), memberId, inviteKey);
-
-        } catch (java.text.ParseException e) {
-            throw new IllegalArgumentException("초대 만료일이 올바르지 않습니다.", e);
+            ManageInviteDto invite = mapper.selectManageInviteByKey(inviteKey);
+            if (invite == null || !Integer.valueOf(0).equals(invite.getStatus())) {
+                throw new IllegalArgumentException("유효하지 않거나 취소된 초대 링크입니다.");
+            }
+            if (mapper.lockActiveInviteMember(memberId) == null) {
+                throw new IllegalArgumentException("가입할 수 있는 회원이 아닙니다.");
+            }
+            ManageInviteDto member = mapper.selectMemberInfoForInvite(memberId);
+            if (member == null || member.getEmail() == null || member.getEmail().isBlank()
+                    || invite.getEmail() == null || invite.getEmail().isBlank()
+                    || !invite.getEmail().trim().equalsIgnoreCase(member.getEmail().trim())) {
+                throw new IllegalArgumentException("초대받은 이메일과 로그인한 회원 이메일이 다릅니다. 초대받은 계정으로 로그인하세요.");
+            }
+            String domainKey = (String) map.get("domainKey");
+            if (domainKey == null || domainKey.isBlank()) {
+                domainKey = mapper.selectInviteDomainByWorkspaceId(invite.getWorkspaceId());
+            }
+            if (domainKey == null || !domainKey.matches("[a-zA-Z0-9-]+")
+                    || !invite.getWorkspaceId().equals(mapper.selectWorkspaceIdByDomainKey(domainKey))) {
+                throw new IllegalArgumentException("초대된 워크의 주소가 올바르지 않습니다.");
+            }
+            Map<String, Object> memberMap = new java.util.HashMap<>();
+            memberMap.put("workspaceId", invite.getWorkspaceId());
+            memberMap.put("memberId", memberId);
+            ManageInviteDto existing = mapper.selectInviteWorkspaceMember(memberMap);
+            boolean active = existing != null && Integer.valueOf(0).equals(existing.getStatus());
+            if (Integer.valueOf(1).equals(invite.getInviteStatus())) {
+                if (memberId.equals(invite.getAcceptedMemberId()) && active) {
+                    map.put("domainKey", domainKey);
+                    return;
+                }
+                throw new IllegalArgumentException("이미 사용된 초대입니다. 워크에서 제외된 경우 새 초대를 받으세요.");
+            }
+            if (!Integer.valueOf(0).equals(invite.getInviteStatus())) {
+                throw new IllegalArgumentException("유효하지 않은 초대 상태입니다.");
+            }
+            if (existing != null && !active && !Integer.valueOf(1).equals(existing.getStatus())) {
+                throw new IllegalArgumentException("현재 워크 참여 상태에서는 초대를 수락할 수 없습니다.");
+            }
+            invite.setAcceptedMemberId(memberId);
+            invite.setInviteStatus(1);
+            if (mapper.updateManageInviteAccept(invite) != 1) {
+                throw new IllegalArgumentException("만료되었거나 이미 사용된 초대 링크입니다.");
+            }
+            invite.setMemberId(memberId);
+            invite.setRole(10);
+            invite.setStatus(0);
+            mapper.insertManageInviteMember(invite);
+            ManageInviteDto saved = mapper.selectInviteWorkspaceMember(memberMap);
+            if (saved == null || !Integer.valueOf(0).equals(saved.getStatus())) {
+                throw new IllegalStateException("워크 가입이 완료되지 않았습니다.");
+            }
+            if (!active) {
+                growthTreeService.grantInviteAcceptExp(invite.getWorkspaceId(), memberId, inviteKey);
+            }
+            map.put("domainKey", domainKey);
+        } catch (Exception e) {
+            log.info("acceptInvite : ", e);
+            throw e;
         }
-        if (inviteDto.getInviteStatus() != null && inviteDto.getInviteStatus() == 1) {
-            throw new IllegalArgumentException("이미 사용이 완료된 초대 링크입니다.");
-        }
-
-        inviteDto.setAcceptedMemberId(memberId);
-        inviteDto.setInviteStatus(1);
-        if (mapper.updateManageInviteAccept(inviteDto) != 1) {
-            throw new IllegalArgumentException("이미 사용되었거나 만료된 초대 링크입니다.");
-        }
-
-        inviteDto.setMemberId(memberId);
-        inviteDto.setRole(10);
-        inviteDto.setStatus(0);
-        
-        growthTreeService.grantInviteAcceptExp(inviteDto.getWorkspaceId(), memberId, inviteKey);
     }
 }

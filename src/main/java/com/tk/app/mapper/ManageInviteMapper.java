@@ -18,4 +18,8 @@ public interface ManageInviteMapper {
 	public int updateManageInviteAccept(ManageInviteDto dto);
 	public void insertManageInviteMember(ManageInviteDto dto);
 	public List<ManageInviteDto> selectSearchEligibleMembers(Map<String, Object> map);
+	
+	public String selectInviteDomainByWorkspaceId(Long workspaceId);
+	public Long lockActiveInviteMember(Long memberId);
+	public ManageInviteDto selectInviteWorkspaceMember(Map<String, Object> map);
 }

@@ -14,4 +14,7 @@ public interface ManageService {
 	public void assignOrUpdateProjectMember(Map<String, Object> map) throws Exception;
 	public void excludeProjectMember(Map<String, Object> map) throws Exception;
 	public void excludeWorkspaceMember(Map<String, Object> map) throws Exception;
+	
+	public Map<String, Object> getProjectMemberForm(String domainKey, Long actorId, Long projectId) throws Exception;
+	public int saveProjectMembers(String domainKey, Long actorId, Map<String, Object> map) throws Exception;
 }

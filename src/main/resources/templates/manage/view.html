@@ -21,64 +21,64 @@
             </div>
             <div class="project-list-panel">
             
-<form id="project-search-form"
-      class="project-filters"
-      method="get"
-      th:action="@{/{domainKey}/manage/view(domainKey=${domainKey})}">
-
-    <!-- 진행상태 -->
-    <div class="project-field project-status-field">
-        <label for="searchStatus">진행상태</label>
-        <select id="searchStatus" name="status">
-            <option value="all"
-                    th:selected="${status == null or status == 'all'}">전체</option>
-            <option value="0"
-                    th:selected="${status == '0'}">예정</option>
-            <option value="1"
-                    th:selected="${status == '1'}">진행 중</option>
-            <option value="2"
-                    th:selected="${status == '2'}">완료</option>
-        </select>
-    </div>
-
-    <!-- 검색유형 -->
-    <div class="project-field project-type-field">
-        <label for="schType">검색유형</label>
-        <select id="schType" name="schType">
-            <option value="all"
-                    th:selected="${schType == null or schType == 'all'}">전체</option>
-            <option value="subject"
-                    th:selected="${schType == 'subject'}">프로젝트명</option>
-            <option value="content"
-                    th:selected="${schType == 'content'}">프로젝트 내용</option>
-            <option value="manager"
-                    th:selected="${schType == 'manager'}">담당자</option>
-        </select>
-    </div>
-
-    <!-- 검색어 -->
-    <div class="project-field project-keyword-field">
-        <label for="searchKeyword">검색어</label>
-        <input type="search"
-               id="searchKeyword"
-               name="kwd"
-               maxlength="100"
-               th:value="${kwd}"
-               placeholder="검색어를 입력하세요">
-    </div>
-
-    <!-- 조회 / 초기화 -->
-    <div class="project-filter-actions">
-        <button type="submit"
-                class="project-button project-button-primary">
-            조회
-        </button>
-        <a class="project-button project-reset-button"
-           th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">
-            초기화
-        </a>
-    </div>
-</form>
+	<form id="project-search-form"
+	      class="project-filters"
+	      method="get"
+	      th:action="@{/{domainKey}/manage/view(domainKey=${domainKey})}">
+	
+	    <!-- 진행상태 -->
+	    <div class="project-field project-status-field">
+	        <label for="searchStatus">진행상태</label>
+	        <select id="searchStatus" name="status">
+	            <option value="all"
+	                    th:selected="${status == null or status == 'all'}">전체</option>
+	            <option value="0"
+	                    th:selected="${status == '0'}">예정</option>
+	            <option value="1"
+	                    th:selected="${status == '1'}">진행 중</option>
+	            <option value="2"
+	                    th:selected="${status == '2'}">완료</option>
+	        </select>
+	    </div>
+	
+	    <!-- 검색유형 -->
+	    <div class="project-field project-type-field">
+	        <label for="schType">검색유형</label>
+	        <select id="schType" name="schType">
+	            <option value="all"
+	                    th:selected="${schType == null or schType == 'all'}">전체</option>
+	            <option value="subject"
+	                    th:selected="${schType == 'subject'}">프로젝트명</option>
+	            <option value="content"
+	                    th:selected="${schType == 'content'}">프로젝트 내용</option>
+	            <option value="manager"
+	                    th:selected="${schType == 'manager'}">담당자</option>
+	        </select>
+	    </div>
+	
+	    <!-- 검색어 -->
+	    <div class="project-field project-keyword-field">
+	        <label for="searchKeyword">검색어</label>
+	        <input type="search"
+	               id="searchKeyword"
+	               name="kwd"
+	               maxlength="100"
+	               th:value="${kwd}"
+	               placeholder="검색어를 입력하세요">
+	    </div>
+	
+	    <!-- 조회 / 초기화 -->
+	    <div class="project-filter-actions">
+	        <button type="submit"
+	                class="project-button project-button-primary">
+	            조회
+	        </button>
+	        <a class="project-button project-reset-button"
+	           th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}">
+	            초기화
+	        </a>
+	    </div>
+	</form>
                 <div class="project-list-heading">
                     <h2>프로젝트 목록</h2>
                     <p role="status" aria-live="polite">총 <strong id="project-count" th:text=${dataCount}>6</strong>건</p>
@@ -96,8 +96,8 @@
                             <th scope="col">진행률</th>
                         </tr></thead>
                         <tbody id="project-list-body">
-                        <tr class="project-list-row" th:unless="${#lists.isEmpty(projectList)}" th:each="project : ${projectList}" data-status="progress">
-                            <td class="project-number" th:text="${project.project_id}">1</td>
+                        <tr class="project-list-row" th:unless="${#lists.isEmpty(projectList)}" th:each="project, loop : ${projectList}"data-status="progress">
+                            <td class="project-number" th:text="${dataCount - (page - 1) * size - loop.index}">1</td>
                             <td>
 	                            <a class="project-name" 
 	                            th:href="@{/{domainKey}/manage/detail/{projectId}(domainKey=${domainKey}, projectId=${project.project_id},status=${status},schType=${schType},kwd=${kwd},page=${page})}"
