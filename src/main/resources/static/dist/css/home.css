@@ -137,6 +137,75 @@ body:has(.home-layout) > main {
     flex-shrink: 0;
 }
 
+.home-layout .home-calendar-legend {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    border: 1px solid #E8E2D9;
+    border-radius: 12px;
+    background: #FCFBF8;
+}
+
+.home-layout .home-calendar-legend-title {
+    margin: 0 0 10px;
+    color: #594331;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.home-layout .home-calendar-legend-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.home-layout .home-calendar-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 6px 11px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.home-layout .home-calendar-legend-dot {
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.home-layout .home-calendar-personal-color,
+.home-layout #myTaskCalendar .fc-h-event.home-calendar-personal-color {
+    border-color: #CF8A57;
+    background: #FFF0E2;
+    color: #79451F;
+}
+
+.home-layout .home-calendar-personal-color .home-calendar-legend-dot {
+    border-radius: 3px;
+    background: #CF8A57;
+}
+
+.home-layout #myTaskCalendar .home-calendar-personal-color .fc-event-main {
+    color: #79451F;
+}
+
+.home-layout .home-calendar-legend-help {
+    margin: 10px 0 0;
+    color: #786B5E;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
 #myTaskCalendar .fc-toolbar-title {
     color: #594331;
     font-family: inherit;

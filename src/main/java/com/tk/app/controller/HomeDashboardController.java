@@ -160,4 +160,14 @@ public class HomeDashboardController {
 		return homePersonalScheduleService.findPersonalSchedules(
 				workspace.getWorkspaceId(), workspace.getMemberId());
 	}
+	
+	// 참여 프로젝트 조회 
+	@GetMapping("/participating-projects")
+	@ResponseBody
+	public List<ParticipatingProjectDto> findParticipatingProjects(
+			@RequestAttribute("workspace") WorkspaceDto workspace) {
+		
+		return participatingProjectService.findParticipatingProjects(
+				workspace.getWorkspaceId(), workspace.getMemberId());
+	}
 }

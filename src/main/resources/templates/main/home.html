@@ -23,8 +23,19 @@
 			
 			<!-- 콘텐츠 영역 -->
 			<div class="page-content">
+				<div class="home-calendar-legend" aria-label="일정 색상 안내">
+					<p class="home-calendar-legend-title">일정 색상 안내</p>
+					<ul id="homeCalendarLegend" class="home-calendar-legend-list">
+						<li class="home-calendar-legend-item home-calendar-personal-color">
+							<span class="home-calendar-legend-dot" aria-hidden="true"></span>
+							<span>개인 일정</span>
+						</li>
+					</ul>
+					<p class="home-calendar-legend-help">같은 프로젝트의 업무와 기간은 같은 색으로 표시됩니다.</p>
+				</div>
 				<div id="myTaskCalendar" 
-					th:data-project-base-url="@{/{domainKey}/project/(domainKey=${domainKey})}"></div>
+					th:data-project-base-url="@{/{domainKey}/project/(domainKey=${domainKey})}"
+					th:data-projects-url="@{/{domainKey}/home/participating-projects(domainKey=${domainKey})}"></div>
 			</div>
 		</div>
 		
@@ -138,7 +149,69 @@
 			}
 			
 			// 스크립트에서 참여 프로젝트 목록 받기
-			const participatingProjects = /*[[${participatingProjects}]]*/[];
+			let participatingProjects = []; 
+			
+			try {
+				const projects = await fetchRequest(
+						calendarEl.dataset.projectsUrl,
+						'GET'
+				);
+				
+				if(Array.isArray(projects) == true) {
+					participatingProjects = projects;
+				}
+			} catch(err) {
+				console.error(err);
+			}
+			
+			// 프로젝트 ID를 기준으로 색상을 고정하고, 개인 일정의 살구색과 구분한다.
+			function projectColors(projectId) {
+				const key = String(projectId);
+				let hash = 0;
+				for(let i = 0; i < key.length; i++) {
+					hash = (Math.imul(hash, 31) + key.charCodeAt(i)) | 0;
+				}
+				const hue = 120 + (((hash >>> 0) * 137.508) % 360) * 200 / 360;
+				return {
+					backgroundColor: `hsl(${hue}, 65%, 91%)`,
+					borderColor: `hsl(${hue}, 42%, 55%)`,
+					textColor: '#203548'
+				};
+			}
+			
+			// 조회된 업무의 프로젝트도 포함하되, 같은 프로젝트는 범례에 한 번만 표시한다.
+			const legendProjects = new Map();
+				tasks.forEach(function (task) {
+					legendProjects.set(String(task.projectId), task.subject || `프로젝트 ${task.projectId}`);
+				});
+				
+				participatingProjects.forEach(function (project) {
+					legendProjects.set(String(project.projectId), project.subject || `프로젝트 ${project.projectId}`);
+				});
+				
+			const legendEl = document.getElementById('homeCalendarLegend');
+			
+			legendProjects.forEach(function (subject, projectId) {
+				const colors = projectColors(projectId);
+				const item = document.createElement('li');
+				
+				item.className = 'home-calendar-legend-item';
+				item.style.backgroundColor = colors.backgroundColor;
+				item.style.borderColor = colors.borderColor;
+				item.style.color = colors.textColor;
+				
+				const dot = document.createElement('span');
+				
+				dot.className = 'home-calendar-legend-dot';
+				dot.style.backgroundColor = colors.borderColor;
+				dot.setAttribute('aria-hidden', 'true');
+				
+				const name = document.createElement('span');
+				
+				name.textContent = subject;
+				item.append(dot, name);
+				legendEl.append(item);
+			});
 			
 			// 업무 하나씩 FullCalendar 가 사용하는 일정 형태로 변환
 			function nextDate(dateString) {
@@ -156,6 +229,7 @@
 					start: task.startAt,
 					end: nextDate(task.endAt),
 					allDay: true,
+					...projectColors(task.projectId),
 					url: calendarEl.dataset.projectBaseUrl + task.projectId
 				};
 			});
@@ -168,7 +242,8 @@
 					title: `${schedule.title}`,
 					start: schedule.startAt,
 					end: nextDate(schedule.endAt),
-					allDay: true
+					allDay: true,
+					classNames: ['home-calendar-personal-color']
 				};
 				
 			});
@@ -186,6 +261,7 @@
 					start: project.startAt,
 					end: nextDate(project.endAt),
 					allDay: true,
+					...projectColors(project.projectId),
 					url: calendarEl.dataset.projectBaseUrl + project.projectId
 				};
 				
