@@ -130,84 +130,143 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	}
 
 	
+
 	@Transactional
 	@Override
-	public Long startDirectRoom(String domainKey,Long workId, Long loginMemberId, Long targetMemberId) throws Exception {
-		
-	        if (workId == null || loginMemberId == null || targetMemberId == null) {
+	public Long startDirectRoom(String domainKey, Long workId,
+	        Long loginMemberId, Long targetMemberId) throws Exception {
+	
+	    if (domainKey == null || domainKey.isBlank() || workId == null
+	            || loginMemberId == null || targetMemberId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "채팅방 정보가 올바르지 않습니다.");
+	    }
+	
+	    if (loginMemberId.equals(targetMemberId)) {
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "자기 자신과 채팅할 수 없습니다.");
+	    }
+	
+	    WorkChatMemberDto domainDto = new WorkChatMemberDto();
+	    domainDto.setDomainKey(domainKey);
+	    domainDto.setWorkId(workId);
+	
+	    if (mapper.matchDomain(domainDto) == 0) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "워크 정보가 일치하지 않습니다.");
+	    }
+	
+	    WorkChatMemberDto memberDto = new WorkChatMemberDto();
+	    memberDto.setWorkId(workId);
+	
+	    memberDto.setMemberId(loginMemberId);
+	    Long myWorkId = mapper.findWorkMemberId(memberDto);
+	
+	    memberDto.setMemberId(targetMemberId);
+	    Long targetWorkId = mapper.findWorkMemberId(memberDto);
+	
+	    if (myWorkId == null || targetWorkId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "활성 워크 멤버만 채팅할 수 있습니다.");
+	    }
+	
+	    // 4. 두 멤버 행을 항상 같은 순서로 잠금
+	    Long first = Math.min(myWorkId, targetWorkId);
+	    Long second = Math.max(myWorkId, targetWorkId);
+	
+	    if (mapper.lockActiveDirectWorkMember(first) == null 
+	    		|| mapper.lockActiveDirectWorkMember(second) == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.CONFLICT, "워크 멤버 상태가 변경되었습니다.");
+	    }
+	
+	    WorkChatMemberDto roomDto = new WorkChatMemberDto();
+	    roomDto.setWorkId(workId);
+	    roomDto.setMyWorkId(myWorkId);
+	    roomDto.setTargetWorkId(targetWorkId);
+	
+	    Long chatRoomId = mapper.findDirectRoom(roomDto);
+	
+	    if (chatRoomId != null) {
+	
+	        Long lockedRoomId = mapper.lockChatRoom(chatRoomId);
+	
+	        if (lockedRoomId == null) {
 	            throw new ResponseStatusException(
-	            		HttpStatus.BAD_REQUEST,"채팅방 생성에 필요한 정보가 없습니다.");
-	        }
-	        
-	        if (domainKey == null || domainKey.isBlank()) {
-	            throw new ResponseStatusException(
-	                HttpStatus.BAD_REQUEST, "워크 도메인 정보가 없습니다.");
+	                    HttpStatus.CONFLICT, "채팅방 상태가 변경되었습니다. 다시 시도해주세요.");
 	        }
 	
-	        if (loginMemberId.equals(targetMemberId)) {
-	            throw new ResponseStatusException(
-	                HttpStatus.BAD_REQUEST, "자기 자신과는 채팅할 수 없습니다.");
-	        }
-	        
-	        WorkChatMemberDto domaindto = new WorkChatMemberDto();
-	        domaindto.setDomainKey(domainKey);
-	        domaindto.setWorkId(workId);
-	        
-	        int count = mapper.matchDomain(domaindto);
-
-	        WorkChatMemberDto mydto = new WorkChatMemberDto();
-	        mydto.setWorkId(workId);
-	        mydto.setMemberId(loginMemberId);
+	        roomDto.setChatRoomId(chatRoomId);
+	        roomDto.setWorkMemberId(myWorkId);
 	
-	        Long myWorkId = mapper.findWorkMemberId(mydto);
-	        
-	        if (count == 0) {
-	            throw new ResponseStatusException(
-	                HttpStatus.FORBIDDEN, "요청한 워크 정보가 일치하지 않습니다.");
-	        }
+	        Integer status = mapper.findDirectRoomMemberStatus(roomDto);
 	
-	        
-	        WorkChatMemberDto targetDto = new WorkChatMemberDto();
-	        targetDto.setWorkId(workId);
-	        targetDto.setMemberId(targetMemberId);
-	
-	        Long targetWorkId = mapper.findWorkMemberId(targetDto);
-	
-	        
-	        if (myWorkId == null || targetWorkId == null) {
-	            throw new ResponseStatusException(
-	                HttpStatus.FORBIDDEN, "워크에 참여 중인 회원만 채팅할 수 있습니다.");
-	        }
-	
-
-	        WorkChatMemberDto roomdto = new WorkChatMemberDto();
-	        roomdto.setWorkId(workId);
-	        roomdto.setMyWorkId(myWorkId);
-	        roomdto.setTargetWorkId(targetWorkId);
-	        
-	        Long chatRoomId = mapper.findDirectRoom(roomdto);
-	
-	        if (chatRoomId != null) {
+	        if (Integer.valueOf(0).equals(status)) {
 	            return chatRoomId;
 	        }
 	
-	        chatRoomId = mapper.nextRoomId();
+	        if (! Integer.valueOf(1).equals(status)) {
+	            throw new ResponseStatusException(
+	                    HttpStatus.CONFLICT, "채팅방에 참여 하고있지 않습니다.");
+	        }
 	
-	        roomdto.setChatRoomId(chatRoomId);
+	        Long lastMessageId = mapper.findLatestRoomMessageId(roomDto);
 	
-	        mapper.insertDirectRoom(roomdto);
+	        roomDto.setVisibleAfterMessageId(lastMessageId == null ? 0L : lastMessageId);
 	
-	        roomdto.setWorkMemberId(myWorkId);
-	        
-	        mapper.insertRoomMember(roomdto);
+	        int updated = mapper.reactivateDirectRoomMember(roomDto);
 	
-	        roomdto.setWorkMemberId(targetWorkId);
+	        if (updated != 1) {
+	            throw new ResponseStatusException(
+	                    HttpStatus.CONFLICT, "채팅방 재참여에 실패했습니다.");
+	        }
 	
-	        mapper.insertRoomMember(roomdto);
+	        WorkChatMessageDto messageDto = new WorkChatMessageDto();
+	
+	        messageDto.setChatRoomId(chatRoomId);
+	        messageDto.setLoginMemberId(loginMemberId);
+	
+	        Long roomMemberId = mapper.findSenderRoomMemberId(messageDto);
+	
+	        if (roomMemberId == null) {
+	            throw new IllegalStateException("재참여 회원 정보를 찾을 수 없습니다.");
+	        }
+
+	        String memberName = mapper.findDirectRoomMemberName(roomDto);
+	
+	        saveSystemMessage(
+	                chatRoomId,
+	                roomMemberId,
+	                memberName + "님이 채팅방에 다시 참여했습니다."
+	        );
+	
+	        List<Long> activeMemberIds = mapper.findActiveRoomMemberIds(messageDto);
+	
+	        eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
+	                        chatRoomId,
+	                        loginMemberId,
+	                        activeMemberIds
+	                )
+	        );
 	
 	        return chatRoomId;
-	        
-	    	}
+	    }
+	
+	    chatRoomId = mapper.nextRoomId();
+	
+	    roomDto.setChatRoomId(chatRoomId);
+	
+	    mapper.insertDirectRoom(roomDto);
+	
+	    roomDto.setWorkMemberId(myWorkId);
+	    mapper.insertRoomMember(roomDto);
+	
+	    roomDto.setWorkMemberId(targetWorkId);
+	    mapper.insertRoomMember(roomDto);
+	
+	    return chatRoomId;
+	}
+
 
 	@Override
 	public List<WorkChatMemberDto> findMyDirectRooms(String domainKey, Long loginMemberId) throws Exception {
@@ -917,6 +976,104 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	            )
 	    );
 	}
+	
+	@Override
+	@Transactional
+	public void leaveDirectRoom(WorkChatMemberDto dto) throws Exception {
+	    if (dto == null || dto.getDomainKey() == null || dto.getDomainKey().isBlank()
+	        || dto.getChatRoomId() == null || dto.getChatRoomId() <= 0 || dto.getLoginMemberId() == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.BAD_REQUEST, "채팅방 정보가 올바르지 않습니다.");
+	    }
+	    Long chatRoomId = dto.getChatRoomId();
+
+	    Long workId = groupmapper.findWorkIdByDomain(dto.getDomainKey());
+	
+	    if (workId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.NOT_FOUND, "워크를 찾을 수 없습니다.");
+	    }
+	
+	    WorkChatMemberDto memberDto = new WorkChatMemberDto();
+	
+	    memberDto.setWorkId(workId);
+	    memberDto.setMemberId(dto.getLoginMemberId());
+	
+	    Long myWorkId = mapper.findWorkMemberId(memberDto);
+	
+	    if (myWorkId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "워크 접근 권한이 없습니다.");
+	    }
+
+	    lockChatRoom(chatRoomId);
+	
+	    dto.setWorkMemberId(myWorkId);
+
+	    Integer status = mapper.findDirectRoomMemberStatus(dto);
+	
+	    if (!Integer.valueOf(0).equals(status)) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "현재 참여 중인 1:1 채팅방이 아닙니다.");
+	    }
+	
+	    WorkChatMessageDto messageDto = new WorkChatMessageDto();
+	
+	    messageDto.setChatRoomId(chatRoomId);
+	    messageDto.setLoginMemberId(dto.getLoginMemberId());
+	
+	    Long roomMemberId = mapper.findSenderRoomMemberId(messageDto);
+	
+	    if (roomMemberId == null) {
+	        throw new ResponseStatusException(
+	                HttpStatus.CONFLICT, "채팅방 참여 정보를 찾을 수 없습니다.");
+	    }
+	
+	    String memberName = mapper.findDirectRoomMemberName(dto);
+	
+	    if (memberName == null || memberName.isBlank()) {
+	        memberName = "UNKNOWN";
+	    }
+
+	    int updated = mapper.leaveDirectRoomMember(dto);
+	
+	    if (updated != 1) {
+	        throw new ResponseStatusException(
+	                HttpStatus.CONFLICT, "채팅방 나가기 처리에 실패했습니다.");
+	    }
+
+	    int remaining = mapper.countActiveDirectRoomMembers(chatRoomId);
+
+	    if (remaining == 0) {
+	        mapper.deleteDirectRoomMessages(chatRoomId);
+	
+	        mapper.deleteDirectRoomMembers(chatRoomId);
+	
+	        int deleted = mapper.deleteDirectRoom(chatRoomId);
+	
+	        if (deleted != 1) {
+	            throw new IllegalStateException("채팅방 삭제에 실패했습니다.");
+	        }
+	
+	        return;
+	    }
+	
+	    saveSystemMessage(
+	            chatRoomId,
+	            roomMemberId,
+	            memberName + "님이 채팅방을 나갔습니다."
+	    );
+	
+	    List<Long> activeMemberIds = mapper.findActiveRoomMemberIds(messageDto);
+	
+	    eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
+	                    chatRoomId,
+	                    dto.getLoginMemberId(),
+	                    activeMemberIds
+	            )
+	    );
+	}
+
 
 }
 	

@@ -18,22 +18,72 @@
 		JOIN chat_room_members me ON cr.chat_room_id = me.chat_room_id
 		JOIN chat_room_members target ON cr.chat_room_id = target.chat_room_id
 		WHERE wm.workspace_id = #{workId} 
-		  AND cr.chat = 'PERSONAL'
-		  
-		  AND me.workspace_member_id = #{myWorkId}
-          AND me.status = 0
-          
+		  AND cr.chat = 'PERSONAL' 
+		  AND me.workspace_member_id = #{myWorkId} 
           AND target.workspace_member_id = #{targetWorkId}
-          AND target.status = 0
           
           AND (SELECT COUNT(*)
           	   FROM chat_room_members crm
           	   WHERE crm.chat_room_id = cr.chat_room_id
           ) = 2
           
+          ORDER BY cr.chat_room_id DESC
           FETCH FIRST 1 ROW ONLY
 	</select>
 	
+	
+
+	<select id="findDirectRoomMemberStatus" parameterType="WorkChatMemberDto" resultType="Integer">
+	
+	    SELECT crm.status
+	    FROM chat_room_members crm
+	
+	    JOIN chat_rooms cr ON crm.chat_room_id = cr.chat_room_id
+	
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND crm.workspace_member_id = #{workMemberId}
+	      AND cr.chat = 'PERSONAL'
+	
+	</select>
+
+	
+
+	<update id="reactivateDirectRoomMember" parameterType="WorkChatMemberDto">
+	    UPDATE chat_room_members
+	    SET status = 0, joined = SYSDATE, left = NULL,
+	        visible_after_message_id = #{visibleAfterMessageId},
+	        last_read_message_id = #{visibleAfterMessageId}
+	
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND workspace_member_id = #{workMemberId}
+	      AND status = 1
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_rooms
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND chat = 'PERSONAL'
+	      )
+	</update>
+	
+	
+	<select id="lockActiveDirectWorkMember" resultType="Long">
+	    SELECT workspace_member_id
+	    FROM workspace_members
+	    WHERE workspace_member_id = #{workMemberId}
+	      AND status = 0
+	    FOR UPDATE
+	</select>
+	
+	
+	<select id="findDirectRoomMemberName" parameterType="WorkChatMemberDto" resultType="String">
+		SELECT NVL(md.name, 'UNKNOWN') targetName
+	    FROM workspace_members wm
+	    LEFT JOIN member_details md ON wm.member_id = md.member_id
+	    WHERE wm.workspace_member_id = #{workMemberId}
+	</select>
+	
+
 	<select id="nextRoomId" resultType="Long">
         SELECT seq_chat_rooms.NEXTVAL
         FROM dual
@@ -62,7 +112,7 @@
 	
 	<select id="findMyDirectRooms" parameterType="WorkChatMemberDto" resultType="WorkChatMemberDto">
 	
-	    SELECT cr.chat_room_id "chatRoomId", t_wm.member_id "targetMemberId", md.name "targetName"
+	    SELECT cr.chat_room_id chatRoomId, t_wm.member_id targetMemberId, NVL(md.name, 'UNKNOWN') targetName
 	    FROM chat_rooms cr
 	    JOIN workspace_members wm ON cr.workspace_member_id = wm.workspace_member_id
 	    
@@ -76,15 +126,16 @@
 	     AND wd.domain_key = #{domainKey}
 	     AND wd.active = 'Y'
 	     
+
 		JOIN chat_room_members t_crm ON cr.chat_room_id = t_crm.chat_room_id
-	     AND t_crm.workspace_member_id != crm.workspace_member_id
-	     AND t_crm.status = 0
+		 AND t_crm.workspace_member_id != crm.workspace_member_id
+
 	
 	    JOIN workspace_members t_wm ON t_crm.workspace_member_id = t_wm.workspace_member_id
 	     AND t_wm.workspace_id = my_wm.workspace_id
 	     AND t_wm.status = 0
 	
-	    JOIN member_details md ON t_wm.member_id = md.member_id
+	    LEFT JOIN member_details md ON t_wm.member_id = md.member_id
 	
 	    WHERE cr.chat = 'PERSONAL'
 	      AND my_wm.member_id = #{loginMemberId}
@@ -125,7 +176,7 @@
 	
 	<select id="findRoomMessages" parameterType="WorkChatMessageDto" resultType="WorkChatMessageDto">
 	    SELECT m.message_id messageId, m.chat_room_id chatRoomId, wm.member_id senderMemberId,
-	        md.name senderName, m.content content, m.message_type messageType,
+	        NVL(md.name, 'UNKNOWN') senderName, m.content content, m.message_type messageType,
 	        TO_CHAR(m.sent, 'YYYY-MM-DD HH24:MI:SS') sent,
 	        (CASE
 	            WHEN wm.member_id = #{loginMemberId}
@@ -140,7 +191,7 @@
 	
 	    JOIN workspace_members wm ON snd_crm.workspace_member_id = wm.workspace_member_id
 	
-	    JOIN member_details md ON wm.member_id = md.member_id
+	    LEFT JOIN member_details md ON wm.member_id = md.member_id
 	
 	    JOIN chat_room_members vew_crm ON m.chat_room_id = vew_crm.chat_room_id
 	     AND vew_crm.status = 0
@@ -238,7 +289,6 @@
 	
 	
 	<update id="updateLastReadMessage" parameterType="WorkChatMessageDto">
-	
 	    UPDATE chat_room_members SET last_read_message_id = #{messageId}
 	    WHERE chat_room_member_id = #{chatRoomMemberId}
 	      AND chat_room_id = #{chatRoomId}
@@ -267,6 +317,67 @@
 	    WHERE chat_room_id = #{chatRoomId}
 	    FOR UPDATE
 	</select>
+	
+	
+	<update id="leaveDirectRoomMember" parameterType="WorkChatMemberDto">
+	    UPDATE chat_room_members SET status = 1, left = SYSDATE
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND workspace_member_id = #{workMemberId}
+	      AND status = 0
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_rooms
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND chat = 'PERSONAL'
+	      )
+	</update>
+	
+	<select id="countActiveDirectRoomMembers" resultType="int">
+	    SELECT COUNT(*)
+	    FROM chat_room_members crm
+	
+	    JOIN chat_rooms cr ON crm.chat_room_id = cr.chat_room_id
+	
+	    JOIN workspace_members wm ON crm.workspace_member_id = wm.workspace_member_id
+	
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND cr.chat = 'PERSONAL'
+	      AND crm.status = 0
+	      AND wm.status = 0
+	
+	</select>
+	
+	<delete id="deleteDirectRoomMessages">
+	    DELETE FROM chat_messages
+	    WHERE chat_room_id = #{chatRoomId}
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_rooms
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND chat = 'PERSONAL'
+	      )
+	</delete>
+	
+	<delete id="deleteDirectRoomMembers">
+	    DELETE FROM chat_room_members
+	    WHERE chat_room_id = #{chatRoomId}
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_rooms
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND chat = 'PERSONAL'
+	      )
+	</delete>
+	
+	<delete id="deleteDirectRoom">
+	    DELETE FROM chat_rooms
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND chat = 'PERSONAL'
+	</delete>
+	
 	
 	
 	

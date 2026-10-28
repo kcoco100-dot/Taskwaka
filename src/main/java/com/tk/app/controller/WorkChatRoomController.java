@@ -414,6 +414,50 @@ public class WorkChatRoomController {
 	}
 	
 
+	@DeleteMapping("{chatRoomId}/direct/out")
+	public ResponseEntity<?> leaveDirectRoom(
+	        @PathVariable("domainKey") String domainKey,
+	        @PathVariable("chatRoomId") Long chatRoomId) {
+	
+	    try {
+	        SessionInfo loginMember = LoginMemberUtil.getSessionInfo();
+	
+	        if (loginMember == null) {
+	            return ResponseEntity
+	                    .status(HttpStatus.UNAUTHORIZED)
+	                    .body("로그인이 필요합니다.");
+	        }
+
+	        WorkChatMemberDto dto = new WorkChatMemberDto();
+	
+	        dto.setDomainKey(domainKey);
+	        dto.setChatRoomId(chatRoomId);
+	        dto.setLoginMemberId(loginMember.getMember_id());
+	
+	        service.leaveDirectRoom(dto);
+	
+	        return ResponseEntity.noContent().build();
+	
+	    } catch (ResponseStatusException e) {
+	
+	        log.warn("leaveDirectRoom : ", e);
+	
+	        return ResponseEntity
+	                .status(e.getStatusCode())
+	                .body(e.getReason());
+	
+	    } catch (Exception e) {
+	
+	        log.error("leaveDirectRoom : ", e);
+	
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("1:1 채팅방 나가기 중 오류가 발생했습니다.");
+	    }
+	}
+
+	
+
 	@DeleteMapping("{chatRoomId}/members/out")
 	public ResponseEntity<?> leaveGroupRoom(
 	        @PathVariable("domainKey") String domainKey,

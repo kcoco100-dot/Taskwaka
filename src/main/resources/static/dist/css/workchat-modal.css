@@ -1456,20 +1456,25 @@ body > .workchat-overlay .workchat-create-body { overscroll-behavior: contain; }
     color: #597348;
 }
 
-#workchatLeaveToggle[hidden] {
+
+#workchatLeaveToggle[hidden],
+#workchatDirectLeaveToggle[hidden] {
     display: none !important;
 }
 
-#workchatLeaveToggle {
+#workchatLeaveToggle,
+#workchatDirectLeaveToggle {
     color: #aa655a;
     border-color: #ead7d3;
 }
 
-#workchatLeaveToggle:hover {
+#workchatLeaveToggle:hover,
+#workchatDirectLeaveToggle:hover {
     background: #fcf0ee;
 }
 
-#workchatLeaveToggle:disabled {
+#workchatLeaveToggle:disabled,
+#workchatDirectLeaveToggle:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }

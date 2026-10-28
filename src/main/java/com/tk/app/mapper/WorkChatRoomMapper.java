@@ -13,7 +13,19 @@ public interface WorkChatRoomMapper {
 
 	public Long findWorkMemberId(WorkChatMemberDto dto) throws SQLException;
 	public Long findDirectRoom(WorkChatMemberDto dto) throws SQLException;
+
+	public Integer findDirectRoomMemberStatus(WorkChatMemberDto dto) throws SQLException;
+	public int reactivateDirectRoomMember(WorkChatMemberDto dto) throws SQLException;
 	
+	public Long lockActiveDirectWorkMember(Long workMemberId);
+	public String findDirectRoomMemberName(WorkChatMemberDto dto);
+	
+	public int leaveDirectRoomMember(WorkChatMemberDto dto);
+	public int countActiveDirectRoomMembers(Long chatRoomId);
+	public int deleteDirectRoomMessages(Long chatRoomId);
+	public int deleteDirectRoomMembers(Long chatRoomId);
+	public int deleteDirectRoom(Long chatRoomId);
+
 	public Long nextRoomId() throws SQLException;
 	public void insertDirectRoom(WorkChatMemberDto dto) throws SQLException;
 	public void insertRoomMember(WorkChatMemberDto dto) throws SQLException;

@@ -86,6 +86,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	const inviteCancel = document.getElementById("workchatInviteCancel");
 	
 	const leaveToggle = document.getElementById("workchatLeaveToggle");
+	const directLeaveToggle = document.getElementById("workchatDirectLeaveToggle");
+
 
 	let inviteLoadVersion = 0;
 	
@@ -385,6 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	       renameToggle.hidden = true;
 	       membersToggle.hidden = true;
 	       leaveToggle.hidden = true;
+		   directLeaveToggle.hidden = true;
 
 	       activeChatRoomId = null;
 	       activeChatKind = null;
@@ -428,6 +431,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		   membersToggle.hidden = kind !== "GROUP";
 		   inviteToggle.hidden = ! activeRoomOwner;
 		   leaveToggle.hidden = kind !== "GROUP" || activeRoomOwner;
+		   directLeaveToggle.hidden = kind !== "PERSONAL";
+
 		   
 		   closeInvitePanel();
 
@@ -820,7 +825,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	           await loadMyDirectRooms();
 
 	       } catch (e) {
-
 	           console.error("그룹 채팅방 나가기 실패:", e);
 
 	           alert(
@@ -833,6 +837,49 @@ document.addEventListener("DOMContentLoaded", function () {
 	           leaveToggle.disabled = false;
 	       }
 	   });
+	   
+	   directLeaveToggle.addEventListener("click", async function() {
+
+	       if (activeChatKind !== "PERSONAL" || activeChatRoomId == null) {
+	           return;
+	       }
+
+	       const confirmed = confirm(
+	           "1:1 채팅방에서 나가시겠습니까?\n" +
+	           "재참여하면 이전 대화는 다시 볼 수 없습니다.\n" +
+	           "마지막 참여자가 나가면 대화 기록이 즉시 삭제됩니다."
+	       );
+	       if (!confirmed) return;
+
+	       const chatRoomId = activeChatRoomId;
+
+	       const domainKey = window.location.pathname.split("/")[1];
+	       try {
+	           directLeaveToggle.disabled = true;
+
+	           await axios.delete("/" + domainKey + "/api/workchat/rooms/" + chatRoomId + "/direct/out"
+	           );
+
+	           if (activeChatKind === "PERSONAL" && Number(activeChatRoomId) === Number(chatRoomId)) {
+	               resetActiveChatRoom();
+	           }
+
+	           await loadMyDirectRooms();
+
+	       } catch (e) {
+	           console.error("1:1 채팅방 나가기 실패:", e);
+
+	           alert(
+	               typeof e.response?.data === "string"
+	                   ? e.response.data
+	                   : "1:1 채팅방에서 나가지 못했습니다."
+	           );
+
+	       } finally {
+	           directLeaveToggle.disabled = false;
+	       }
+	   });
+
 
 
 	   renameToggle.addEventListener("click", () => {
