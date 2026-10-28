@@ -215,3 +215,195 @@ body:has(.home-layout) > main {
     color: #465B38;
     font-size: 13px;
 }
+
+.home-layout .page-heading:has([data-bs-target="#personalScheduleModal"]) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.home-layout .page-heading:has([data-bs-target="#personalScheduleModal"])
+.page-description {
+    margin: 0;
+}
+
+.home-layout [data-bs-target="#personalScheduleModal"] {
+    --bs-btn-color: #FFFFFF;
+    --bs-btn-bg: #596F46;
+    --bs-btn-border-color: #596F46;
+    --bs-btn-hover-color: #FFFFFF;
+    --bs-btn-hover-bg: #465B38;
+    --bs-btn-hover-border-color: #465B38;
+    --bs-btn-active-color: #FFFFFF;
+    --bs-btn-active-bg: #3C5030;
+    --bs-btn-active-border-color: #3C5030;
+
+    padding: 11px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(70, 91, 56, 0.12);
+}
+
+#personalScheduleModal .modal-dialog {
+    width: calc(100% - 32px);
+    max-width: 500px;
+    margin: 28px auto;
+}
+
+#personalScheduleModal .modal-content {
+    max-height: calc(100vh - 56px);
+    max-height: calc(100dvh - 56px);
+    overflow: hidden;
+    border: 1px solid #E8E2D9;
+    border-radius: 22px;
+    background: #FFFFFF;
+    color: #594331;
+    box-shadow: 0 24px 70px rgba(54, 43, 31, 0.18);
+}
+
+#personalScheduleModal .modal-header {
+    flex-shrink: 0;
+    padding: 24px 26px;
+    border-bottom: 1px solid #EAE5DC;
+    background: #F7F8F2;
+}
+
+#personalScheduleModal .modal-title {
+    margin: 0;
+    color: #465B38;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+#personalScheduleModal .btn-close {
+    padding: 10px;
+    border-radius: 8px;
+    opacity: 0.55;
+    transition: opacity 0.15s, background-color 0.15s;
+}
+
+#personalScheduleModal .btn-close:hover {
+    background-color: #E8EDDF;
+    opacity: 1;
+}
+
+#personalScheduleModal .modal-body {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 24px 26px 28px;
+    overscroll-behavior-y: contain;
+}
+
+#personalScheduleForm {
+    margin: 0;
+}
+
+#personalScheduleForm .form-label {
+    display: block;
+    margin: 0 0 8px;
+    color: #594331;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+#personalScheduleForm .form-control + .form-label {
+    margin-top: 20px;
+}
+
+#personalScheduleForm .form-control {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 11px 14px;
+    border: 1px solid #E0DCD3;
+    border-radius: 11px;
+    background: #FCFBF8;
+    color: #594331;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: none;
+    transition: border-color 0.15s, background-color 0.15s,
+                box-shadow 0.15s;
+}
+
+#personalScheduleForm .form-control:hover {
+    border-color: #B8C3AA;
+}
+
+#personalScheduleForm .form-control:focus {
+    border-color: #71865B;
+    outline: none;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.16);
+}
+
+#personalScheduleForm textarea.form-control {
+    height: 104px;
+    min-height: 104px;
+    max-height: 220px;
+    resize: vertical;
+}
+
+#personalScheduleForm input[type="date"] {
+    color-scheme: light;
+}
+
+#personalScheduleModal .modal-footer {
+    flex-shrink: 0;
+    gap: 10px;
+    padding: 18px 26px;
+    border-top: 1px solid #EAE5DC;
+    background: #FCFBF8;
+}
+
+#personalScheduleModal .modal-footer .btn {
+    min-width: 84px;
+    min-height: 42px;
+    margin: 0;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+#personalScheduleModal .btn-primary {
+    --bs-btn-color: #FFFFFF;
+    --bs-btn-bg: #596F46;
+    --bs-btn-border-color: #596F46;
+    --bs-btn-hover-color: #FFFFFF;
+    --bs-btn-hover-bg: #465B38;
+    --bs-btn-hover-border-color: #465B38;
+    --bs-btn-active-color: #FFFFFF;
+    --bs-btn-active-bg: #3C5030;
+    --bs-btn-active-border-color: #3C5030;
+    --bs-btn-disabled-color: #FFFFFF;
+    --bs-btn-disabled-bg: #596F46;
+    --bs-btn-disabled-border-color: #596F46;
+    --bs-btn-disabled-opacity: 0.45;
+}
+
+#personalScheduleModal .btn-secondary {
+    --bs-btn-color: #665747;
+    --bs-btn-bg: #FFFFFF;
+    --bs-btn-border-color: #DED7CD;
+    --bs-btn-hover-color: #594331;
+    --bs-btn-hover-bg: #F0ECE5;
+    --bs-btn-hover-border-color: #CFC5B7;
+    --bs-btn-active-color: #594331;
+    --bs-btn-active-bg: #E8E2D9;
+    --bs-btn-active-border-color: #CFC5B7;
+}
+
+.home-layout [data-bs-target="#personalScheduleModal"]:focus-visible,
+#personalScheduleModal .btn:focus-visible,
+#personalScheduleModal .btn-close:focus-visible {
+    outline: 2px solid #596F46;
+    outline-offset: 3px;
+    box-shadow: none;
+}

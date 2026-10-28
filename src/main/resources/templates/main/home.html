@@ -16,6 +16,9 @@
 			<!-- 페이지 제목 영역 -->
 			<div class="page-heading">
 				<p class="page-description">👉🏻담당 업무의 일정을 확인해보세요.</p>
+				<!-- 모달 열기 버튼 -->
+				<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+					data-bs-target="#personalScheduleModal">개인 일정 등록</button>
 			</div>
 			
 			<!-- 콘텐츠 영역 -->
@@ -37,7 +40,26 @@
 				    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
 				</div>
 					<div class="modal-body">
+						<form id="personalScheduleForm" onsubmit="return false;" 
+							th:data-create-url="@{/{domainKey}/home/personal-schedules(domainKey=${domainKey})}">
+							<label class="form-label" for="personalScheduleTitle">제목</label>
+							<input type="text" id="personalScheduleTitle" name="title" class="form-control" required>
+						
+							<label class="form-label" for="personalScheduleContent">내용</label>
+							<textarea id="personalScheduleContent" name="content" class="form-control" rows="3"></textarea>
+							
+							<label class="form-label" for="personalScheduleStartAt">시작일</label>
+							<input type="date" id="personalScheduleStartAt" name="startAt" class="form-control" required>
+							
+							<label class="form-label" for="personalScheduleEndAt">종료일</label>
+							<input type="date" id="personalScheduleEndAt" name="endAt" class="form-control" required>
+						</form>
 					</div>
+						
+						<div class="modal-footer">
+							<button type="button" id="personalScheduleSubmitBtn" class="btn btn-primary">등록</button>
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+						</div>
 			</div>
 		</div>
 	</div>
@@ -47,17 +69,73 @@
 <th:block layout:fragment="script">
 	<script th:src="@{/dist/vendor/fullcalendar6/dist/index.global.min.js}"></script>
 	<script th:src="@{/dist/vendor/fullcalendar6/dist/locales/ko.global.min.js}"></script>
-
+	<script th:src="@{/dist/js/util-async.js}"></script>
+	<script th:src="@{/dist/js/util-bootstrap.js}"></script>
+	
 	<script th:inline="javascript">
-		document.addEventListener('DOMContentLoaded', function(){
+		document.addEventListener('DOMContentLoaded', async function(){
 			const calendarEl = document.getElementById('myTaskCalendar');
+			
+			// 등록 이벤트
+			const personalScheduleForm = document.getElementById('personalScheduleForm');
+			const personalScheduleSubmitBtn = document.getElementById('personalScheduleSubmitBtn');
+			
+			personalScheduleSubmitBtn.addEventListener('click', async function() {
+				// HTML 입력 조건 검사
+				if(!personalScheduleForm.reportValidity()) {
+					return;
+				}
+				
+				// 서버에 보낼 입력값을 객체로 모으기
+				const scheduleData = {
+					title: personalScheduleForm.elements.namedItem('title').value,
+					content: personalScheduleForm.elements.namedItem('content').value,
+					startAt: personalScheduleForm.elements.namedItem('startAt').value,
+					endAt : personalScheduleForm.elements.namedItem('endAt').value
+				};
+				
+				// 등록 전송
+				personalScheduleSubmitBtn.disabled = true;
+				try{
+					const insertCount = await fetchRequest(
+							personalScheduleForm.dataset.createUrl,
+							'POST',
+							scheduleData,
+							'json',
+							'json'
+					);
+					
+					if(insertCount === 1) {
+						alert('일정이 등록되었습니다.');
+						hideModal('#personalScheduleModal');
+					}
+				} catch(err) {
+					console.error(err);
+					alert('등록 결과를 확인하지 못했습니다.');
+				} finally {
+					personalScheduleSubmitBtn.disabled = false;
+				}
+			});
 			
 			// 컨트롤러가 전달한 담당 업무 목록
 			// /*[[${myTasks}]]*/ : 타임리프가 실제 조회 결과로 바꾸는 표현식
 			const tasks = /*[[${myTasks}]]*/[];
 			
 			// 개인 일정 업무 목록
-			const personalSchedules = /*[[${personalSchedules}]]*/[];
+			let personalSchedules = [];
+			
+			try {
+				const schedules = await fetchRequest(
+						personalScheduleForm.dataset.createUrl,
+						'GET'
+				);
+				
+				if(Array.isArray(schedules) == true) {
+					personalSchedules = schedules;
+				}
+			} catch(err) {
+				console.error(err);
+			}
 			
 			// 스크립트에서 참여 프로젝트 목록 받기
 			const participatingProjects = /*[[${participatingProjects}]]*/[];
@@ -126,7 +204,7 @@
 					center: 'title',
 					right: ''
 				},
-				events: taskEvents
+				events: calendarEvents
 			});
 			
 			calendar.render();

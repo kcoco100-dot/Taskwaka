@@ -7,13 +7,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.tk.app.admin.domain.dto.WorkspaceDto;
 import com.tk.app.domain.dto.GrowthLevelDto;
 import com.tk.app.domain.dto.GrowthTreeDto;
 import com.tk.app.domain.dto.HomeDashboardDataDto;
+import com.tk.app.domain.dto.HomePersonalScheduleDto;
 import com.tk.app.domain.dto.MyTaskDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
 import com.tk.app.service.GrowthTreeService;
@@ -134,5 +138,26 @@ public class HomeDashboardController {
 						workspace.getWorkspaceId(), workspace.getMemberId()));
 		
 		return "main/home";
+	}
+	
+	// 개인 일정 등록요청
+	@PostMapping("/personal-schedules")
+	@ResponseBody
+	public int insertPersonalSchedule(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@RequestBody HomePersonalScheduleDto dto) {
+		
+		return homePersonalScheduleService.insertPersonalSchedule(
+				workspace.getWorkspaceId(), workspace.getMemberId(), dto);
+	}
+	
+	// 캘린더 일정
+	@GetMapping("/personal-schedules")
+	@ResponseBody
+	public List<HomePersonalScheduleDto> findPersonalSchedules(
+			@RequestAttribute("workspace") WorkspaceDto workspace) {
+		
+		return homePersonalScheduleService.findPersonalSchedules(
+				workspace.getWorkspaceId(), workspace.getMemberId());
 	}
 }
