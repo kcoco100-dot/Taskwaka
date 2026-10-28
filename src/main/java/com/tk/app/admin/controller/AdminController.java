@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tk.app.admin.domain.dto.AdminMemberDto;
+import com.tk.app.admin.domain.dto.AdminMonthlyRevenueDto;
 import com.tk.app.admin.service.AdminMemberService;
+import com.tk.app.admin.service.AdminStatsService;
 import com.tk.app.common.PaginateUtil;
 import com.tk.app.service.LoginHistoryService;
 
@@ -32,6 +34,7 @@ public class AdminController {
 	private final AdminMemberService service;
 	private final PaginateUtil paginateUtil;
 	private final LoginHistoryService loginHistoryService;
+	private final AdminStatsService adminStatsService;
 
     @GetMapping
     public String adminMain() {
@@ -163,6 +166,7 @@ public class AdminController {
     public String stats(Model model,
     		@RequestParam(value = "period", defaultValue = "all") String period) {
     	try {
+    		// 접속자 통계
     		int loginCount = loginHistoryService.countLoginHistory();
     		int memberCount = loginHistoryService.countDistinctMembers();
     		int dailyLoginCount = loginHistoryService.countDailyLoginHistory();
@@ -173,8 +177,24 @@ public class AdminController {
     		int monthMemberCount = loginHistoryService.countMonthMember();
     		int yearLoginCount = loginHistoryService.countYearLogin();
     		int yearMemberCount = loginHistoryService.countYearMember();
+    		// 수익 통계
+    		int paymentCount = adminStatsService.countPayment();
+    		long paymentAmount = adminStatsService.sumPayment();
+    		long refundAmount = adminStatsService.sumRefund();
+    		long netAmount = paymentAmount - refundAmount;
+    		int monthPaymentCount = adminStatsService.countMonthPayment();
+    		long monthPaymentAmount = adminStatsService.sumMonthPayment();
+    		long monthRefundAmount =  adminStatsService.sumMonthRefund();
+    		long monthNetAmount = monthPaymentAmount - monthRefundAmount;
+    		int quarterPaymentCount = adminStatsService.countQuarterPayment();
+    		long quarterPaymentAmount = adminStatsService.sumQuarterPayment();
+    		long quarterRefundAmount = adminStatsService.sumQuarterRefund();
+    		long quarterNetAmount = quarterPaymentAmount - quarterRefundAmount;
     		
+    		List<AdminMonthlyRevenueDto> monthlyRevenueList = adminStatsService.listMonthlyRevenue();
+    		System.out.println("월별 매출 데이터 개수 = " + monthlyRevenueList.size());
     		
+    		// 접속자 통계
     		LocalDate today = LocalDate.now();
     		LocalDate weekStart = today.with(DayOfWeek.MONDAY);
     		LocalDate weekEnd = weekStart.plusDays(6);
@@ -187,6 +207,9 @@ public class AdminController {
     		String yearPeriod = yearStart + " ~ " + yearEnd;
     		
     		System.out.println("선택한 기간 = " + period);
+    		
+    		int quarter = (today.getMonthValue() - 1) / 3 + 1;
+    		String quarterPeriod = today.getYear() + "년 " + quarter + "분기 (당분기 실적)";
 
     		if ("daily".equals(period)) {
     		    loginCount = dailyLoginCount;
@@ -202,6 +225,7 @@ public class AdminController {
     		    memberCount = yearMemberCount;
     		}
     		
+    		// 접속자 통계
     		model.addAttribute("loginCount", loginCount);
     		model.addAttribute("memberCount", memberCount);
     		model.addAttribute("dailyLoginCount", dailyLoginCount);
@@ -219,6 +243,24 @@ public class AdminController {
     		model.addAttribute("weekPeriod", weekPeriod);
     		model.addAttribute("monthPeriod", monthPeriod);
     		model.addAttribute("yearPeriod", yearPeriod);
+    		
+    		//수익 통계
+    		model.addAttribute("paymentCount", paymentCount);
+    		model.addAttribute("paymentAmount", paymentAmount);
+    		model.addAttribute("refundAmount", refundAmount);
+    		model.addAttribute("netAmount", netAmount);
+    		model.addAttribute("monthPaymentCount", monthPaymentCount);
+    		model.addAttribute("monthPaymentAmount", monthPaymentAmount);
+    		model.addAttribute("monthRefundAmount", monthRefundAmount);
+    		model.addAttribute("monthNetAmount", monthNetAmount);
+    		model.addAttribute("quarterPaymentCount", quarterPaymentCount);
+    		model.addAttribute("quarterPaymentAmount", quarterPaymentAmount);
+    		model.addAttribute("quarterRefundAmount", quarterRefundAmount);
+    		model.addAttribute("quarterNetAmount", quarterNetAmount);
+    		model.addAttribute("quarterPeriod", quarterPeriod);
+    		model.addAttribute("monthlyRevenueList", monthlyRevenueList);
+    		
+    		
 		} catch (Exception e) {
 			log.error("stats : ", e);
 			throw e;

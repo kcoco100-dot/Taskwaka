@@ -50,21 +50,34 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><strong>2026년 10월 (당월 실적)</strong></td>
-                    <td>124 건</td>
-                    <td>₩ 14,880,000</td>
-                    <td>₩ 480,000</td>
-                    <td><strong class="stats-net-revenue">₩ 14,400,000</strong></td>
-                </tr>
+				    <td><strong>전체 누적 실적</strong></td>
+				    <td><span th:text="${paymentCount}">0</span> 건</td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(paymentAmount, 3, 'COMMA')}">0</span></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(refundAmount, 3, 'COMMA')}">0</span></td>
+				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(netAmount, 3, 'COMMA')}">0</span></strong></td>
+				</tr>
                 <tr>
-                    <td><strong>2026년 3분기 (누적 실적)</strong></td>
-                    <td>412 건</td>
-                    <td>₩ 49,440,000</td>
-                    <td>₩ 1,200,000</td>
-                    <td><strong class="stats-net-revenue">₩ 48,240,000</strong></td>
-                </tr>
+				    <td><strong th:text="${#temporals.format(today, 'yyyy년 MM월')} + ' (당월 실적)'">이번 달 실적</strong></td>
+				    <td><span th:text="${monthPaymentCount}">0</span> 건</td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(monthPaymentAmount, 3, 'COMMA')}">0</span></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(monthRefundAmount, 3, 'COMMA')}">0</span></td>
+				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(monthNetAmount, 3, 'COMMA')}">0</span></strong></td>
+				</tr>
+				<tr>
+				    <td><strong th:text="${quarterPeriod}">이번 분기 실적</strong></td>
+				    <td><span th:text="${quarterPaymentCount}">0</span> 건</td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(quarterPaymentAmount, 3, 'COMMA')}">0</span></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(quarterRefundAmount, 3, 'COMMA')}">0</span></td>
+				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(quarterNetAmount, 3, 'COMMA')}">0</span></strong></td>
+				</tr>
             </tbody>
         </table>
+        <div class="stats-chart-section">
+		    <h3>최근 6개월 순결제 금액 추이</h3>
+		    <div style="height: 300px;">
+		        <canvas id="monthlyRevenueChart" th:attr="data-months=${#strings.listJoin(monthlyRevenueList.![month], ',')}, data-amounts=${#strings.listJoin(monthlyRevenueList.![net_amount], ',')}"></canvas>
+		    </div>
+		</div>
     </div>
 
 </div>

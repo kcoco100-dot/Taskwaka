@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.admin.mapper.AdminStatsMapper">
+	<select id="countPayment" resultType="int">
+		SELECT COUNT(*) AS payment_count
+		FROM payments
+		WHERE status = 1
+	</select>
+	
+	<select id="sumPayment" resultType="long">
+		SELECT NVL(SUM(amount), 0) AS total_amount
+		FROM payments
+		WHERE status = 1
+	</select>
+	
+	<select id="sumRefund" resultType="long">
+		SELECT NVL(SUM(amount), 0) AS refund_amount
+		FROM refunds
+		WHERE status = 1
+	</select>
+	
+	<select id="countMonthPayment" resultType="int">
+		SELECT COUNT(*) AS month_payment_count
+		FROM payments
+		WHERE status = 1
+		    AND paid >= TRUNC(SYSDATE, 'MM')
+		    AND paid &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	</select>
+	
+	<select id="sumMonthPayment" resultType="long">
+		SELECT NVL(SUM(amount), 0) AS payment_amount
+		FROM payments
+		WHERE status = 1  
+		    AND paid >= TRUNC(SYSDATE, 'MM')
+		    AND paid &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	</select>
+	
+	<select id="sumMonthRefund" resultType="long">
+		SELECT NVL(SUM(amount), 0) AS refund_amount
+		FROM refunds
+		WHERE status = 1
+		    AND completed  >= TRUNC(SYSDATE, 'MM')
+		    AND completed  &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	</select>
+	
+	<select id="countQuarterPayment" resultType="int">
+		SELECT COUNT(*) AS quarter_payment_count
+		FROM payments
+		WHERE status = 1
+		    AND paid >= TRUNC(SYSDATE, 'Q')
+		    AND paid &lt; ADD_MONTHS(TRUNC(SYSDATE, 'Q'), 3)
+	</select>
+	
+	<select id="sumQuarterPayment" resultType="long">
+		SELECT NVL(SUM(amount), 0) AS quarter_payment_amount
+		FROM payments
+		WHERE status = 1
+		    AND paid >= TRUNC(SYSDATE, 'Q')
+		    AND paid &lt; ADD_MONTHS(TRUNC(SYSDATE, 'Q'), 3)
+	</select>
+	
+	<select id="sumQuarterRefund" resultType="long">
+		SELECT NVL(SUM(amount), 0) AS quarter_refund_amount
+		FROM refunds
+		WHERE status = 1
+		    AND completed >= TRUNC(SYSDATE, 'Q')
+		    AND completed &lt; ADD_MONTHS(TRUNC(SYSDATE, 'Q'), 3)  
+	</select>
+	
+	<select id="listMonthlyRevenue" resultType="com.tk.app.admin.domain.dto.AdminMonthlyRevenueDto">
+		WITH months AS (
+	        SELECT TO_CHAR(ADD_MONTHS(TRUNC(SYSDATE, 'MM'), LEVEL - 6), 'YYYY-MM') AS month
+	        FROM dual
+	        CONNECT BY LEVEL &lt;= 6
+	    ),
+	    payment_monthly AS (
+	        SELECT TO_CHAR(paid, 'YYYY-MM') AS month,
+	               NVL(SUM(amount), 0) AS payment_amount
+	        FROM payments
+	        WHERE status = 1
+	            AND paid >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+	            AND paid &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	        GROUP BY TO_CHAR(paid, 'YYYY-MM')
+	    ),
+	    refund_monthly AS (
+	        SELECT TO_CHAR(completed, 'YYYY-MM') AS month,
+	               NVL(SUM(amount), 0) AS refund_amount
+	        FROM refunds
+	        WHERE status = 1
+	            AND completed >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+	            AND completed &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	        GROUP BY TO_CHAR(completed, 'YYYY-MM')
+	    )
+	    SELECT m.month,
+	           NVL(p.payment_amount, 0) AS payment_amount,
+	           NVL(r.refund_amount, 0) AS refund_amount,
+	           NVL(p.payment_amount, 0) - NVL(r.refund_amount, 0) AS net_amount
+	    FROM months m
+	    LEFT JOIN payment_monthly p ON m.month = p.month
+	    LEFT JOIN refund_monthly r ON m.month = r.month
+	    ORDER BY m.month
+	</select>
+</mapper>

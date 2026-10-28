@@ -184,6 +184,9 @@
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/quill.js}"></script>
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/resize.js}"></script>
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/posts/qeditor.js}"></script>
+<!-- 관리자 수익 통계 Chart.js -->
+<script th:if="${activeSection == 'stats'}" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:if="${activeSection == 'stats'}" th:src="@{/dist/js/adminStatsChart.js}"></script>
 
 <th:block th:if="${activeSection == 'noticeWrite'}"><th:block th:replace="~{admin/fragments/notice-write :: script}"></th:block></th:block>
 <th:block th:if="${activeSection == 'noticeEdit'}" th:replace="~{admin/fragments/notice-edit :: script}"></th:block>	
