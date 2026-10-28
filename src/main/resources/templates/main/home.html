@@ -27,6 +27,21 @@
 		
 	</div>
 </th:block>
+
+<th:block layout:fragment="aside-container">
+	<div class="modal fade" id="personalScheduleModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+				    <h5 class="modal-title">개인 일정 등록</h5>
+				    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+					<div class="modal-body">
+					</div>
+			</div>
+		</div>
+	</div>
+</th:block>
  
  <!-- th:inline="javascript" : 컨트롤러가 전달한 데이터를 스크립트에서 사용할 수 있게 해줌 -->
 <th:block layout:fragment="script">
@@ -40,6 +55,12 @@
 			// 컨트롤러가 전달한 담당 업무 목록
 			// /*[[${myTasks}]]*/ : 타임리프가 실제 조회 결과로 바꾸는 표현식
 			const tasks = /*[[${myTasks}]]*/[];
+			
+			// 개인 일정 업무 목록
+			const personalSchedules = /*[[${personalSchedules}]]*/[];
+			
+			// 스크립트에서 참여 프로젝트 목록 받기
+			const participatingProjects = /*[[${participatingProjects}]]*/[];
 			
 			// 업무 하나씩 FullCalendar 가 사용하는 일정 형태로 변환
 			function nextDate(dateString) {
@@ -61,6 +82,41 @@
 				};
 			});
 			
+			// 배열의 map 으로 꺼내기
+			const personalEvents = (personalSchedules ?? []).map(function (schedule) {
+				return {
+					// 개인 일정 ID가 업무 일정 ID와 겹칠 수 있으므로 접두어를 붙여야 함
+					id: `personal-${schedule.scheduleId}`,
+					title: `${schedule.title}`,
+					start: schedule.startAt,
+					end: nextDate(schedule.endAt),
+					allDay: true
+				};
+				
+			});
+			
+			// 프로젝트 목록
+			const projectEvents = (participatingProjects ?? [])
+				.filter(function (project) {
+					return project.startAt && project.endAt;
+				})
+				.map(function (project) {
+					return {
+					// 개인 일정 ID가 업무 일정 ID와 겹칠 수 있으므로 접두어를 붙여야 함
+					id: `project-${project.projectId}`,
+					title: `${project.subject}`,
+					start: project.startAt,
+					end: nextDate(project.endAt),
+					allDay: true,
+					url: calendarEl.dataset.projectBaseUrl + project.projectId
+				};
+				
+			});
+			
+			// 한 캘린더에 업무, 개인, 프로젝트 일정을 함께 표시하기 위해서 이벤트 모아두기
+			const calendarEvents = [...taskEvents, ...personalEvents, ...projectEvents];
+			
+			// 업무 일정
 			const calendar = new FullCalendar.Calendar(calendarEl, {
 				initialView: 'dayGridMonth',
 				locale: 'ko',
