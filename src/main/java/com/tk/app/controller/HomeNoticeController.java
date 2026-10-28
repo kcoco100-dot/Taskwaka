@@ -103,7 +103,7 @@ public class HomeNoticeController {
 		String listUrl = RequestUtils.getCurrentRequest().getRequestURI();
 		
 		if (! kwd.isBlank()) { // if(kwd.length() != 0) {
-			query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+			query = "schType=" + myUtil.encodeUrl(schType) + "&kwd=" + myUtil.encodeUrl(kwd);
 			
 			listUrl += "?" + query;
 		}

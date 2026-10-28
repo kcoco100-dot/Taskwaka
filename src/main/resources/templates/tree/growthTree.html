@@ -60,7 +60,8 @@
                             <span class="tree-shop-preview-badge">미리보기</span>
                         </div>
                         <p>우리 팀의 정원을 꾸며보세요.</p>
-                        <div class="tree-shop-wallet"><span>상품·가격 안내</span><strong>미리보기</strong></div>
+                        <!-- aria-live="polite" : 현재 읽고 있는 내용을 마친 뒤 변경 내용을 안내하라 -->
+                        <div class="tree-shop-wallet"><span>상품·가격 안내</span><strong id="shopSelectedPrice" aria-live="polite">미리보기</strong></div>
                     </div>
 
                     <div class="tree-shop-categories" role="group" aria-label="상점 아이템 분류">

@@ -25,4 +25,16 @@ document.addEventListener('DOMContentLoaded', function () {
             shop.querySelector('.tree-shop-catalog').scrollTop = 0;
         });
     }
+	// shop 안에서 요소를 찾아 변수에 저장
+	const selectPrice = shop.querySelector('#shopSelectedPrice');
+	// shop 안의 모든 요소 찾아 for~of 문으로 하나씩 꺼내기
+	for(const products of shop.querySelectorAll('.tree-shop-product')) {
+		products.addEventListener('click', function () {
+			const price = products.querySelector('.tree-shop-price');
+			
+			if(selectPrice !== null && price !== null) {
+				selectPrice.textContent = price.textContent.trim();
+			}
+		});
+	}
 });

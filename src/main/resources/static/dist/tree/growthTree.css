@@ -264,6 +264,7 @@
     border: 1px solid #EAE4D8;
     border-radius: 10px;
     background: #FFFFFF;
+    cursor: pointer;
 }
 
 .tree-shop-product.is-equipped {

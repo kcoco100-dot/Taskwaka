@@ -633,6 +633,31 @@ public class GrowthTreeService {
 		return savedReport;
 	}
 	
+	// 기존 권한, 소속 검증, 삭제, 경험치 회수 재사용
+	@Transactional(rollbackFor = Exception.class)
+	public boolean deleteDailyReportWithExp(
+			Long dailyReportId, Long projectId, String domainKey) {
+
+		if (dailyReportId == null || projectId == null
+				|| domainKey == null || domainKey.isBlank()) {
+			throw new IllegalArgumentException("삭제 요청 정보를 확인할 수 없습니다.");
+		}
+
+		Map<String, Object> context = findDailyReportDeleteContext(
+				dailyReportId, projectId, domainKey);
+
+		long workspaceId = ((Number) context.get("workspaceId")).longValue();
+
+		boolean deleted = taskService.deleteDailyReport(dailyReportId);
+
+		if (!deleted) {
+			return false;
+		}
+
+		revokeDailyReportCreateExp(workspaceId, dailyReportId);
+		return true;
+	}
+	
 	// 일일 보고서 승인 시 +10
 	@Transactional(rollbackFor = Exception.class)
 	public void grantDailyReportApproveExp(
