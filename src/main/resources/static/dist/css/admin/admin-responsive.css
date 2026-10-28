@@ -1,0 +1,27 @@
+/* 관리자 화면 너비 대응 */
+@media (max-width: 1200px) {
+
+    .main-viewport,
+    .content-area,
+    .panel-card {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 테이블이 들어 있는 카드에서 가로 스크롤 */
+    .content-area .panel-card {
+        overflow-x: auto;
+    }
+
+    /* 테이블 칸이 지나치게 좁아지는 문제 방지 */
+    .content-area table {
+        min-width: 950px;
+        border-collapse: collapse;
+    }
+
+    .content-area th,
+    .content-area td {
+        white-space: nowrap;
+    }
+}

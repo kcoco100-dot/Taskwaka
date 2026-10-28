@@ -164,8 +164,12 @@ public class AdminController {
 
     @GetMapping("/stats")
     public String stats(Model model,
-    		@RequestParam(value = "period", defaultValue = "all") String period) {
+    		@RequestParam(value = "period", defaultValue = "all") String period,
+    		@RequestParam(value = "startDate", required = false) String startDate,
+    		@RequestParam(value = "endDate", required = false) String endDate) {
     	try {
+    		System.out.println("시작일 = " + startDate);
+    		System.out.println("종료일 = " + endDate);
     		// 접속자 통계
     		int loginCount = loginHistoryService.countLoginHistory();
     		int memberCount = loginHistoryService.countDistinctMembers();
@@ -211,7 +215,15 @@ public class AdminController {
     		int quarter = (today.getMonthValue() - 1) / 3 + 1;
     		String quarterPeriod = today.getYear() + "년 " + quarter + "분기 (당분기 실적)";
 
-    		if ("daily".equals(period)) {
+    		if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
+    		    loginCount = loginHistoryService.countDateLogin(startDate, endDate);
+    		    memberCount = loginHistoryService.countDateMember(startDate, endDate);
+    		    paymentCount = adminStatsService.countDatePayment(startDate, endDate);
+    		    paymentAmount = adminStatsService.sumDatePayment(startDate, endDate);
+    		    refundAmount = adminStatsService.sumDateRefund(startDate, endDate);
+    		    netAmount = paymentAmount - refundAmount;
+    		    monthlyRevenueList = adminStatsService.listDateRevenue(startDate, endDate);
+    		} else if ("daily".equals(period)) {
     		    loginCount = dailyLoginCount;
     		    memberCount = dailyMemberCount;
     		} else if ("weekly".equals(period)) {
@@ -259,6 +271,9 @@ public class AdminController {
     		model.addAttribute("quarterNetAmount", quarterNetAmount);
     		model.addAttribute("quarterPeriod", quarterPeriod);
     		model.addAttribute("monthlyRevenueList", monthlyRevenueList);
+    		
+    		model.addAttribute("startDate", startDate);
+    		model.addAttribute("endDate", endDate);
     		
     		
 		} catch (Exception e) {

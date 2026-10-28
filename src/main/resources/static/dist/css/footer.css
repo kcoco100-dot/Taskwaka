@@ -43,3 +43,21 @@
     outline-offset: 4px;
     border-radius: 2px;
 }
+
+/* 화면 내용이 적어도 푸터를 아래에 배치 */
+body:has(.site-notice-wrap),
+body:has(.site-inquiry-list-page) {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body:has(.site-notice-wrap) > main,
+body:has(.site-inquiry-list-page) > main {
+    flex: 1;
+}
+
+/* 나의 1:1 문의 화면 배경을 푸터까지 채우기 */
+body:has(.site-inquiry-list-page) > main {
+    background: #f8f9fb;
+}

@@ -340,3 +340,55 @@ body.login-page {
         animation: none;
     }
 }
+
+/* 로그인 화면 움직이는 공 배경 */
+
+.login-page .login-main {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.login-page .login-main::before,
+.login-page .login-main::after {
+    content: "";
+    position: absolute;
+    width: clamp(190px, 30vw, 390px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.login-page .login-main::before {
+    top: -80px;
+    left: -70px;
+    background: rgba(166, 124, 91, 0.34);
+    animation: mainHome-brown 8s ease-in-out -4s infinite alternate;
+}
+
+.login-page .login-main::after {
+    right: -70px;
+    bottom: -100px;
+    background: rgba(172, 202, 137, 0.44);
+    animation: mainHome-green 8s ease-in-out -5s infinite alternate;
+}
+
+@keyframes mainHome-brown {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(160px, 130px) scale(1.15);
+    }
+}
+
+@keyframes mainHome-green {
+    from {
+        transform: translate(0, 0) scale(1);
+    }
+    to {
+        transform: translate(-170px, -120px) scale(1.12);
+    }
+}

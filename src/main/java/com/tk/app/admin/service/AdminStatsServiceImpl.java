@@ -116,5 +116,45 @@ public class AdminStatsServiceImpl implements AdminStatsService{
 			throw e;
 		}
 	}
+
+	@Override
+	public int countDatePayment(String startDate, String endDate) {
+		try {
+			return adminStatsMapper.countDatePayment(startDate, endDate);
+		} catch (Exception e) {
+			log.error("countDatePayment : ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public long sumDatePayment(String startDate, String endDate) {
+		try {
+			return adminStatsMapper.sumDatePayment(startDate, endDate);
+		} catch (Exception e) {
+			log.error("sumDatePayment : ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public long sumDateRefund(String startDate, String endDate) {
+		try {
+			return adminStatsMapper.sumDateRefund(startDate, endDate);
+		} catch (Exception e) {
+			log.error("sumDateRefund : ", e);
+			throw e;
+		}
+	}
+
+	@Override
+	public List<AdminMonthlyRevenueDto> listDateRevenue(String startDate, String endDate) {
+		try {
+			return adminStatsMapper.listDateRevenue(startDate, endDate);
+		} catch (Exception e) {
+			log.error("listDateRevenue : ", e);
+			throw e;
+		}
+	}
 	
 }

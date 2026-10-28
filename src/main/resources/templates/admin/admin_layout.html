@@ -11,6 +11,7 @@
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user-detail.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-domain.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-stats.css}">
+	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-responsive.css}">
 	<!-- Quill editor -->
 	<link rel="stylesheet" th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeDetail' or activeSection == 'noticeEdit'}"
 	 	th:href="@{/dist/vendor/quill/css/quill.snow.css}">
@@ -18,6 +19,10 @@
 	 	th:href="@{/dist/vendor/quill/css/resize.css}">
 	 <link rel="stylesheet" th:href="@{/dist/css/admin/admin-notice.css}">	
 </th:block>
+<!-- Flatpickr 달력 디자인 -->
+<link th:if="${activeSection == 'stats'}" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr 달력 기능 -->
+<script th:if="${activeSection == 'stats'}" src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
 
@@ -47,7 +52,7 @@
 		<aside class="sidebar">
 			<div class="menu-group">
 				<div class="menu-toggle">
-					<span>계정 및 보안 관리</span> <span style="font-size: 10px;">▲</span>
+					<span>계정 및 보안 관리</span> <span style="font-size: 10px;">▼</span>
 				</div>
 				<ul class="submenu">
 					<li><a th:href="@{/admin(section='user')}"
@@ -55,10 +60,7 @@
 							회원 관리</a></li>
 					<li><a th:href="@{/admin/domain}"
 						th:classappend="${activeSection == 'domain'} ? 'active'">🌐
-							도메인 접근 제한</a></li>
-					<li><a th:href="@{/admin(section='security')}"
-						th:classappend="${activeSection == 'security'} ? 'active'">🔒
-							공개 설정 및 보안</a></li>
+							도메인 접근 제한</a></li>				
 				</ul>
 			</div>
 
@@ -104,7 +106,6 @@
 					<a th:href="@{/admin/inquiry}" class="tab-btn" th:classappend="${activeSection == 'inquiry'} ? 'active'">1:1 문의 답변</a> 
 					<a th:href="@{/admin/faq}" class="tab-btn" th:classappend="${activeSection == 'faq' or activeSection == 'faqWrite'} ? 'active'">FAQ 관리</a>
 					<a th:href="@{/admin/stats}" class="tab-btn" th:classappend="${activeSection == 'stats'} ? 'active'">통계 관리</a>
-					<a th:href="@{/admin/security}" class="tab-btn" th:classappend="${activeSection == 'security'} ? 'active'">보안 및 공개설정</a>
 				</nav>
 			</div>
 
@@ -184,6 +185,7 @@
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/quill.js}"></script>
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/vendor/quill/js/resize.js}"></script>
 <script th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeEdit'}" th:src="@{/dist/posts/qeditor.js}"></script>
+
 <!-- 관리자 수익 통계 Chart.js -->
 <script th:if="${activeSection == 'stats'}" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script th:if="${activeSection == 'stats'}" th:src="@{/dist/js/adminStatsChart.js}"></script>

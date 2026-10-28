@@ -23,7 +23,10 @@ public interface LoginHistoryService {
 	public int countYearLogin();
 	// 연간 접속 회원 수(중복 제외)
 	public int countYearMember();
-
+	// 로그인 성공 횟수
+	public int countDateLogin(String startDate, String endDate);
+	// 로그인 성공한 중복 제외한 회원수
+	public int countDateMember(String startDate, String endDate);
 
 
 

@@ -24,7 +24,17 @@ public interface AdminStatsService {
 	public long sumQuarterPayment();
 	// 분기 환불 금액
 	public long sumQuarterRefund();
-	// 
+	// 최근 6개월 월별 결제, 환불, 순결제 금액
 	public List<AdminMonthlyRevenueDto> listMonthlyRevenue();
+	// 선택 기간 월별 결제, 환불, 순결제 금액
+	public List<AdminMonthlyRevenueDto> listDateRevenue(String startDate, String endDate);
+	// 선택 기간 결제 성공 건수
+	public int countDatePayment(String startDate, String endDate);
+	// 선택 기간 결제 완료 금액 합계
+	public long sumDatePayment(String startDate, String endDate);
+	// 선택 기간 환불 완료 금액 합계
+	public long sumDateRefund(String startDate, String endDate);
+	
+
 
 }

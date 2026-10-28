@@ -70,4 +70,19 @@
 	    WHERE login_at >= TRUNC(SYSDATE, 'YYYY')
 	      AND login_at &lt; ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), 12)
 	</select>
+	
+	<select id="countDateLogin" resultType="int">
+		SELECT COUNT(*) AS login_count
+	    FROM login_history
+	    WHERE login_at >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+	      AND login_at &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+	</select>
+	
+	<select id="countDateMember" resultType="int">
+		SELECT COUNT(DISTINCT member_id) AS member_count
+	    FROM login_history
+	    WHERE login_at >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+	      AND login_at &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+	</select>
+	
 </mapper>

@@ -7,11 +7,12 @@
 	<link rel="stylesheet" th:href="@{/dist/css/admin-faq.css}">
     
     <div class="panel-card">
-        <div class="panel-card-title">FAQ 관리</div>
-
-        <div class="faq-list-actions">
-            <a th:href="@{/admin/faq/write}" class="btn-sage">FAQ 등록</a>
-        </div>
+	    <div class="faq-header">
+	        <div class="panel-card-title">FAQ 관리</div>
+	        <div class="faq-list-actions">
+	            <a th:href="@{/admin/faq/write}" class="btn-sage">FAQ 등록</a>
+	        </div>
+	    </div>
 
         <form class="faq-search-form" th:action="@{/admin/faq}" method="get">
 

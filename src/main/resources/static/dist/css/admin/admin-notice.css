@@ -1,22 +1,42 @@
 @charset "UTF-8";
 
-/* 공지사항 목록 */
+/* 공지사항 제목 및 등록 버튼 */
 .notice-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
+.notice-header .panel-card-title {
+    margin: 0;
+}
+
+/* 공지사항 검색 영역 */
 .notice-search {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+/* 검색 입력창 */
+.notice-search .warm-input {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    box-sizing: border-box;
 }
 
 .notice-search input {
     width: 300px;
+}
+
+/* 검색 버튼 */
+.notice-search .btn-sage {
+    height: 44px;
+    padding: 0 24px;
 }
 
 .notice-page .notice-table a {

@@ -17,4 +17,7 @@ public interface LoginHistoryMapper {
 	public int countMonthMember();
 	public int countYearLogin();
 	public int countYearMember();
+	
+	public int countDateLogin(@Param("startDate") String startDate, @Param("endDate") String endDate);
+	public int countDateMember(@Param("startDate") String startDate, @Param("endDate") String endDate);
 }

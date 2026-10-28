@@ -144,3 +144,19 @@
     font-size: 14px;
     resize: none;
 }
+
+/* FAQ 제목과 등록 버튼 한 줄 배치 */
+.faq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.faq-header .panel-card-title {
+    margin: 0;
+}
+
+.faq-header .faq-list-actions {
+    margin: 0;
+}

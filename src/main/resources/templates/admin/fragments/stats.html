@@ -3,6 +3,23 @@
 <body>
 <div th:fragment="content">
 
+	<div class="panel-card">
+	    <div class="panel-card-title">
+	        <span>통계 기간 검색</span>
+	    </div>
+	
+	    <form action="/admin/stats" method="get">
+	        <div class="stats-search-area">
+	            <label for="dateRange">조회 기간</label>
+	            <input type="text" id="dateRange" placeholder="시작일 ~ 종료일" readonly>
+	            <input type="hidden" id="startDate" name="startDate" th:value="${startDate}">
+				<input type="hidden" id="endDate" name="endDate" th:value="${endDate}">
+	            <button type="submit" class="btn-subtle">조회</button>
+	            <a th:href="@{/admin/stats}" class="btn-subtle">초기화</a>
+	        </div>
+	    </form>
+	</div>
+
     <div class="panel-card">
         <div class="panel-card-title">
             <span>접속자 통계 조회 (중복 제거 회원 수 &amp; 로그인 성공 건수)</span>
@@ -50,7 +67,7 @@
             </thead>
             <tbody>
                 <tr>
-				    <td><strong>전체 누적 실적</strong></td>
+				    <td th:text="${startDate != null and endDate != null and !startDate.isEmpty() and !endDate.isEmpty() ? '선택 기간 실적' : '전체 누적 실적'}">전체 누적 실적</td>
 				    <td><span th:text="${paymentCount}">0</span> 건</td>
 				    <td>₩ <span th:text="${#numbers.formatInteger(paymentAmount, 3, 'COMMA')}">0</span></td>
 				    <td>₩ <span th:text="${#numbers.formatInteger(refundAmount, 3, 'COMMA')}">0</span></td>
@@ -73,9 +90,21 @@
             </tbody>
         </table>
         <div class="stats-chart-section">
-		    <h3>최근 6개월 순결제 금액 추이</h3>
+		    <div class="stats-chart-header">
+		        <h3>월별 수익 추이</h3>
+		        <select id="revenueType">
+		            <option value="net">순결제 금액</option>
+		            <option value="payment">결제 금액</option>
+		            <option value="refund">환불 금액</option>
+		        </select>
+		    </div>
+		
 		    <div style="height: 300px;">
-		        <canvas id="monthlyRevenueChart" th:attr="data-months=${#strings.listJoin(monthlyRevenueList.![month], ',')}, data-amounts=${#strings.listJoin(monthlyRevenueList.![net_amount], ',')}"></canvas>
+		        <canvas id="monthlyRevenueChart" th:attr="data-months=${#strings.listJoin(monthlyRevenueList.![month], ',')}, 
+		        		data-amounts=${#strings.listJoin(monthlyRevenueList.![net_amount], ',')}, 
+		        		data-payments=${#strings.listJoin(monthlyRevenueList.![payment_amount], ',')}, 
+		        		data-refunds=${#strings.listJoin(monthlyRevenueList.![refund_amount], ',')}">
+		        	</canvas>
 		    </div>
 		</div>
     </div>

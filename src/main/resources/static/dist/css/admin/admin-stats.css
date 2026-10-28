@@ -61,3 +61,71 @@
     color: var(--primary-green);
 }
 
+/* 통계 검색 조회·초기화 버튼 */
+.stats-search-area .btn-subtle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 38px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border: 1px solid #e5dfd7;
+    border-radius: 7px;
+    background: #f6f4f1;
+    color: #4b382a;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.stats-search-area .btn-subtle:hover {
+    background: #eeeae4;
+    text-decoration: none;
+}
+
+/* 수익 그래프 영역 */
+.stats-chart-section {
+    margin-top: 32px;
+}
+
+/* 그래프 제목과 선택 메뉴 */
+.stats-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stats-chart-header h3 {
+    margin: 0;
+}
+
+/* 수익 종류 선택 메뉴 */
+#revenueType {
+    min-width: 160px;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #e5dfd7;
+    border-radius: 7px;
+    background: #f6f4f1;
+    color: #4b382a;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#revenueType:focus {
+    outline: none;
+    border-color: #87745e;
+}
+
+/* 접속자 통계 기간 선택 버튼 */
+.stats-period-buttons .btn-subtle {
+    text-decoration: none;
+}
+
+.stats-period-buttons .btn-subtle:hover {
+    text-decoration: none;
+}

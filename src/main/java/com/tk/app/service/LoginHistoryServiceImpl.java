@@ -123,5 +123,25 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
 	        throw e;
 	    }
 	}
+
+	@Override
+	public int countDateLogin(String startDate, String endDate) {
+		try {
+	        return loginHistoryMapper.countDateLogin(startDate, endDate);
+	    } catch (Exception e) {
+	        log.error("countDateLogin : ", e);
+	        throw e;
+	    }
+	}
+
+	@Override
+	public int countDateMember(String startDate, String endDate) {
+		try {
+	        return loginHistoryMapper.countDateMember(startDate, endDate);
+	    } catch (Exception e) {
+	        log.error("countDateMember : ", e);
+	        throw e;
+	    }
+	}
 	
 }
