@@ -126,5 +126,35 @@ public interface ManageWorkRepository extends JpaRepository<ManageWorkspaceMembe
 			""", nativeQuery = true)
 	Long lockWorkspaceForChange(@Param("workspaceId") Long workspaceId);
 	
+	// 사장 교체 신청 내역 조회
+	@Query("""
+	    SELECT c.pm_change_id,
+	           oldMd.name,
+	           newMd.name,
+	           c.reason,
+	           c.status,
+	           c.requested,
+	           c.processed,
+	           c.reject_reason
+	    FROM ManageChange c
+	    LEFT JOIN ManageMemberDetail oldMd
+	           ON oldMd.memberId = c.old_member_id
+	    LEFT JOIN ManageMemberDetail newMd
+	           ON newMd.memberId = c.new_member_id
+	    WHERE c.workspace_id = :workspaceId
+	      AND EXISTS (
+	          SELECT wm.workspaceMemberId
+	          FROM ManageWorkspaceMember wm
+	          WHERE wm.workspaceId = c.workspace_id
+	            AND wm.memberId = :actorId
+	            AND wm.status = 0
+	            AND wm.role IN (50, 70)
+	      )
+	    ORDER BY c.requested DESC, c.pm_change_id DESC
+	    """)
+	List<Object[]> listChangeRequests(
+	        @Param("workspaceId") Long workspaceId,
+	        @Param("actorId") Long actorId,
+	        Pageable pageable);
 	
 }

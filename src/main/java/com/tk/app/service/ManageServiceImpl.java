@@ -171,12 +171,19 @@ public class ManageServiceImpl implements ManageService{
             if (projectMemberRepository.countActiveProjectMember(workspaceId, projectMemberId) != 1) {
                 throw new IllegalArgumentException("프로젝트 참여자를 확인하세요.");
             }
-            if (projectMemberRepository.countAssignedTasks(workspaceId, projectMemberId) > 0) {
-                throw new IllegalStateException("업무 담당자는 프로젝트에서 제외할 수 없습니다.");
+            
+            projectMemberRepository.deleteSubTaskMembersForExclusion(projectMemberId);
+            projectMemberRepository.deleteUnlinkedTaskMembers(projectMemberId);
+
+            int updated = projectMemberRepository.excludeFromProject(projectMemberId);
+
+            if (updated != 1) {
+                throw new IllegalStateException("프로젝트 참여자를 제외하지 못했습니다.");
             }
-            projectMemberRepository.excludeFromProject(projectMemberId);
+            
         } catch (Exception e) {
             log.info("excludeProjectMember : ", e);
+            
             throw e;
         }
     }
@@ -187,19 +194,26 @@ public class ManageServiceImpl implements ManageService{
         try {
             Long workspaceId = mapper.findByDomainKey((String) map.get("domainKey"));
             Long workspaceMemberId = requiredLong(map, "workspaceMemberId");
-            if (projectMemberRepository.countActiveWorkspaceMember(workspaceId, workspaceMemberId) != 1) {
-                throw new IllegalArgumentException("워크 참여자를 확인하세요.");
-            }
-            if (projectMemberRepository.countWorkspaceAssignedTasks(workspaceId, workspaceMemberId) > 0) {
-                throw new IllegalStateException("업무 담당자는 워크에서 제외할 수 없습니다.");
-            }
-            List<Long> projectMemberIds = projectMemberRepository.findActiveProjectMemberIds(workspaceId, workspaceMemberId);
+            
+            List<Long> projectMemberIds = projectMemberRepository.findProjectMemberIdsForWorkspaceExclusion(workspaceId, workspaceMemberId);
+
             for (Long projectMemberId : projectMemberIds) {
+
+                projectMemberRepository.deleteSubTaskMembersForExclusion(projectMemberId);
+                projectMemberRepository.deleteUnlinkedTaskMembers(projectMemberId);
+
                 projectMemberRepository.excludeFromProject(projectMemberId);
             }
-            projectMemberRepository.excludeFromWorkspace(workspaceMemberId);
+
+            int updated = projectMemberRepository.excludeFromWorkspace(workspaceMemberId);
+
+            if (updated != 1) {
+                throw new IllegalStateException("워크 참여자를 제외하지 못했습니다.");
+            }
+            
         } catch (Exception e) {
             log.info("excludeWorkspaceMember : ", e);
+            
             throw e;
         }
     }
@@ -262,6 +276,7 @@ public class ManageServiceImpl implements ManageService{
             map.put("selectedProject", selectedProject);
             map.put("selectedProjectId", projectId);
             map.put("teamMembers", new ArrayList<>(members.values()));
+            
         } catch (Exception e) {
             log.info("getProjectMemberForm : ", e);
             

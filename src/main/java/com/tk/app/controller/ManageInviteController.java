@@ -101,6 +101,7 @@ public class ManageInviteController {
         
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
+            
             if (info == null) {
                 log.info("로그인 정보가 존재하지 않습니다.");
                 return ResponseEntity.status(401).build();
@@ -113,6 +114,7 @@ public class ManageInviteController {
             
             if (targetMemberIds == null || targetMemberIds.isEmpty()) {
                 return ResponseEntity.badRequest().build();
+                
             }
 
             Map<String, Object> inviteMap = new HashMap<>();
@@ -123,13 +125,27 @@ public class ManageInviteController {
 
             myInviteService.sendInvitesAndMail(inviteMap);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok("초대 메일을 발송했습니다.");
 
         } catch (ResponseStatusException e) {
-            throw e;
+        	
+        	log.info("sendInvitations : ", e);
+
+            String message = e.getReason();
+
+            if (message == null || message.isBlank()) {
+                message = "초대 요청을 처리할 수 없습니다.";
+            }
+
+            return ResponseEntity.status(e.getStatusCode()).body(message);
+
+            
         } catch (Exception e) {
-            log.info("sendInvitations 오류 : ", e);
-            return ResponseEntity.badRequest().build();
+        	
+            log.info("sendInvitations : ", e);
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("초대 메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.");
         }
     }
 

@@ -1,6 +1,7 @@
 package com.tk.app.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.tk.app.domain.dto.ManageWorkDto;
 
@@ -11,5 +12,6 @@ public interface ManageWorkService {
 	public void updateWorkRole(Long workspaceId, Long actorId, Long workspaceMemberId, int role) throws Exception;
 	
 	public int requestChange(Long workspaceId, Long memberId, Long newMemberId, String reason) throws Exception;
-	
+	public boolean hasPendingChangeRequest(Long workspaceId) throws Exception;
+	public List<Map<String, Object>> listChangeRequests(Long workspaceId, Long actorId) throws Exception;
 }

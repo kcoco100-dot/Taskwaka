@@ -1,7 +1,9 @@
 package com.tk.app.service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -152,5 +154,64 @@ public class ManageWorkServiceImpl implements ManageWorkService {
 		
 		
 		return result;
+	}
+	
+	// 사장 교체 신청 대기
+	@Override
+	@Transactional(readOnly = true)
+	public boolean hasPendingChangeRequest(Long workspaceId) throws Exception {
+		boolean result = false;
+		try {
+	        if (workspaceId == null || workspaceId <= 0) {
+	            throw new IllegalArgumentException(
+	                    "워크스페이스 정보가 올바르지 않습니다.");
+	        }
+
+	        result = repository.countpendingRequests(workspaceId) > 0;
+
+	    } catch (Exception e) {
+	        log.info("hasPendingChangeRequest : ", e);
+	        
+	        throw e;
+	    }
+
+	    return result;
+	}
+
+	// 사장 교체 신청 내역 조회
+	@Override
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> listChangeRequests(Long workspaceId, Long actorId) throws Exception {
+		List<Map<String, Object>> result = new ArrayList<>();
+
+	    try {
+	        if (workspaceId == null || workspaceId <= 0 || actorId == null || actorId <= 0) {
+	            throw new IllegalArgumentException("워크 또는 회원 정보가 올바르지 않습니다.");
+	        }
+
+	        List<Object[]> rows = repository.listChangeRequests(workspaceId, actorId, PageRequest.of(0, 3));
+
+	        for (Object[] row : rows) {
+	            Map<String, Object> item = new LinkedHashMap<>();
+
+	            item.put("requestId", row[0]);
+	            item.put("requesterName", row[1]);
+	            item.put("targetName", row[2]);
+	            item.put("reason", row[3]);
+	            item.put("status", row[4]);
+	            item.put("requested", row[5]);
+	            item.put("processed", row[6]);
+	            item.put("rejectReason", row[7]);
+
+	            result.add(item);
+	        }
+
+	    } catch (Exception e) {
+	        log.info("listChangeRequests : ", e);
+	        
+	        throw e;
+	    }
+
+	    return result;
 	}
 }

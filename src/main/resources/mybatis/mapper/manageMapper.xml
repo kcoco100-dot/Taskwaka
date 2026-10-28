@@ -89,7 +89,7 @@
                TO_CHAR(t.start_at, 'YYYY-MM-DD') AS "startAt",
                TO_CHAR(t."END", 'YYYY-MM-DD') AS "endAt",
                t.status AS "status", t.progress AS "progress",
-               md.name AS "assignee"
+               NVL(md.name, '미지정') AS "assignee"
         FROM tasks t
         JOIN projects p ON p.project_id = t.project_id
         LEFT JOIN project_members pm ON pm.project_member_id = t.project_member_id

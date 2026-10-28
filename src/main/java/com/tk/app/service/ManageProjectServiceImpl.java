@@ -453,14 +453,13 @@ public class ManageProjectServiceImpl implements ManageProjectService {
     // 업무 배정 비중 확인
     private void checkTaskWeight(ManageTaskDto dto, Map<String, Object> map) throws SQLException {
         Double weight = dto.getProgress_weight();
-        if (weight == null || !Double.isFinite(weight) || weight <= 0 || weight > 100
-                || Math.abs(weight * 100 - Math.rint(weight * 100)) > 0.000001) {
-            throw new IllegalArgumentException("배정 비중은 소수점 두 자리까지 0 초과 100 이하로 입력하세요.");
+        if (weight == null || !Double.isFinite(weight) || weight < 1 || weight > 100 || weight != Math.rint(weight)) {
+            throw new IllegalArgumentException("배정 비중은 1부터 100까지 정수로 입력하세요.");
         }
+
         if (mapper.sumTaskWeights(map) + weight > 100.000001) {
             throw new IllegalArgumentException("업무 배정 비중의 합계는 100%를 초과할 수 없습니다.");
         }
-
     }
 
     // 이전 프로젝트 조회

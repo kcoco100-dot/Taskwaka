@@ -184,14 +184,35 @@
 
    <!-- 프로젝트 업무 목록 조회 -->
    <select id="listManageTasks" parameterType="map" resultType="com.tk.app.domain.dto.ManageTaskDto">
-	    SELECT t.task_id, t.project_id, t.project_member_id, t.title, t.content, t.task_level, TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_date,
-	        TO_CHAR(t."END", 'YYYY-MM-DD') AS end_date, t.status, t.progress, NVL(t.progress_weight, 0) AS progress_weight, md.name AS tl_name
+	    SELECT t.task_id, t.project_id, 
+			CASE
+				WHEN wm.workspace_member_id IS NOT NULL
+				THEN pm.project_member_id
+				ELSE NULL
+			END AS project_member_id,
+	    	t.title, t.content, t.task_level, TO_CHAR(t.start_at, 'YYYY-MM-DD') AS start_date,
+	        TO_CHAR(t."END", 'YYYY-MM-DD') AS end_date, t.status, t.progress, NVL(t.progress_weight, 0) AS progress_weight, NVL(md.name, '미지정') AS tl_name
 	    FROM tasks t
 	    JOIN projects p ON t.project_id = p.project_id
 	    JOIN workspace_domains wd ON p.workspace_id = wd.workspace_id
-	    JOIN project_members pm ON t.project_member_id = pm.project_member_id
-	    JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-	    JOIN member_details md ON wm.member_id = md.member_id
+	    
+		LEFT JOIN project_members pm ON t.project_member_id = pm.project_member_id
+			AND pm.project_id = t.project_id
+			AND pm.status = 0
+			AND pm."LEFT" IS NULL
+			AND EXISTS (
+				SELECT 1
+				FROM task_members tm
+				WHERE tm.task_id = t.task_id
+				AND tm.project_member_id = pm.project_member_id
+			)
+			
+		LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+			AND wm.workspace_id = p.workspace_id
+			AND wm.status = 0
+			AND wm."LEFT" IS NULL
+			
+		LEFT JOIN member_details md ON wm.member_id = md.member_id
 	    WHERE t.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y'
 	      AND p.deleted IS NULL AND t.deleted IS NULL
         <include refid="projectReadableForMember"/>

@@ -38,15 +38,25 @@ public class ManageWorkController {
             @RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) throws Exception {
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
+            
             Long workspaceId = manageService.findByDomainKey(domainKey);
             kwd = kwd == null ? "" : kwd.trim();
+            
             int size = 10;
             int dataCount = service.dataCount(workspaceId, info.getMember_id(), kwd);
             int totalPage = paginateUtil.pageCount(dataCount, size);
+            
             page = Math.max(1, Math.min(page, totalPage));
             List<ManageWorkDto> memberList = service.listWorkMember(workspaceId, info.getMember_id(), kwd, page, size);
             String listUrl = RequestUtils.getContextPath() + "/" + domainKey + "/manage/workspaceRoles?schType=" + myUtil.encodeUrl(schType) + "&kwd=" + myUtil.encodeUrl(kwd);
+            
+            boolean pmChangePending = service.hasPendingChangeRequest(workspaceId);
+            
             model.addAttribute("memberList", memberList);
+            model.addAttribute("pmChangePending", pmChangePending);
+            model.addAttribute("pmChangePending", service.hasPendingChangeRequest(workspaceId));
+            model.addAttribute("pmChangeHistory", service.listChangeRequests(workspaceId, info.getMember_id()));
+            
             model.addAttribute("schType", schType);
             model.addAttribute("kwd", kwd);
             model.addAttribute("page", page);
@@ -54,10 +64,13 @@ public class ManageWorkController {
             model.addAttribute("totalPage", totalPage);
             model.addAttribute("paging", paginateUtil.paging(page, totalPage, listUrl));
             model.addAttribute("pageBaseUrl", listUrl + "&page=");
+            
         } catch (Exception e) {
             log.info("listWorkMember : ", e);
+            
             throw e;
         }
+        
         return "manage/workspaceRoles";
     }
     
