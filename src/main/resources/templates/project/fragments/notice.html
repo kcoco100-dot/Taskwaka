@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
+	
+
 	<div th:fragment="content">
 		<link rel="stylesheet" th:href="@{/dist/css/project/task_notice.css}">
 		<link rel="stylesheet" th:href="@{/dist/css/paginate.css}">
-
+		<!-- Quill Rich Text Editor -->
+		<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+		<!-- Quill Editor Image Resize CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.css" rel="stylesheet">
+		
 		<div class="notice-split-wrapper" id="noticeSplitWrapper">
 
 			<!-- [좌측/본문] 업무공지 목록 영역 -->
@@ -14,21 +20,26 @@
 				<div class="notice-toolbar">
 					<div class="notice-toolbar-left">
 						<div class="notice-filter-tabs">
-							<button type="button" class="btn-n-filter active" data-filter="ALL" onclick="filterNoticeList('ALL', this)">전체 보기</button>
-							<button type="button" class="btn-n-filter" data-filter="WORKSPACE" onclick="filterNoticeList('WORKSPACE', this)">전체공지</button>
-							<button type="button" class="btn-n-filter" data-filter="PROJECT" onclick="filterNoticeList('PROJECT', this)">프로젝트 공지</button>
-							<button type="button" class="btn-n-filter" data-filter="TASK" onclick="filterNoticeList('TASK', this)">업무별 공지</button>
+							<select onchange="filterNoticeList(value)">
+								<option value="all">전체</option>
+								<option value="workspace">전체 공지</option>
+								<option value="project">프로젝트 공지</option>
+								<option value="task">업무별 공지</option>
+							</select>
 						</div>
 
 						<div class="notice-search-box">
-							<input type="text" id="noticeSearchInput" placeholder="공지 제목 또는 작성자 검색...">
-							<button type="button" class="btn-open-notice-write" onclick="applyNoticeFilterAndSearch()">검색</button>
+							<input type="text" id="noticeSearchInput"
+								placeholder="공지 제목 또는 작성자 검색...">
+							<button type="button" class="btn-open-notice-write"
+								onclick="applyNoticeFilterAndSearch()">검색</button>
 						</div>
 					</div>
 
 					<!-- 팀 리더(isTeamLeader == true)에게만 노출되는 공지 작성 버튼 -->
 					<div class="notice-toolbar-right" th:if="${isTeamLeader}">
-						<button type="button" class="btn-open-notice-write" onclick="openNoticeWriteDrawer()">＋ 새 공지 작성</button>
+						<button type="button" class="btn-open-notice-write"
+							onclick="openNoticeWriteDrawer()">＋ 새 공지 작성</button>
 					</div>
 				</div>
 
@@ -46,78 +57,75 @@
 
 					<ul class="notice-list-body" id="noticeListBody">
 						<li class="notice-empty-row" id="noticeEmptyRow"
-						    th:style="${taskNotices == null or #lists.isEmpty(taskNotices)} ? 'display:block;' : 'display:none;'">
-							등록된 공지사항이 없습니다.
-						</li>
+							th:style="${taskNotices == null or #lists.isEmpty(taskNotices)} ? 'display:block;' : 'display:none;'">
+							등록된 공지사항이 없습니다.</li>
 
 						<th:block th:if="${taskNotices != null}">
 							<li class="notice-item-row notice-grid-cols"
-							    th:each="n : ${taskNotices}"
-							    th:attr="data-notice-id=${n['noticeId']}, data-type=${n['noticeType']}, data-title=${n['title']}, data-writer=${n['writerName']}"
-							    th:onclick="|openNoticeDetailDrawer(${n['noticeId']}, this)|">
+								th:each="n : ${taskNotices}"
+								th:attr="data-notice-id=${n['noticeId']}, data-type=${n['noticeType']}, data-title=${n['title']}, data-writer=${n['writerName']}"
+								th:onclick="|openNoticeDetailDrawer(${n['noticeId']}, this)|">
 
 								<!-- 1. 공지 번호 -->
-								<div class="col-n-id" th:text="|#${n['noticeId']}|">#1</div>
-
-								<!-- 2. 공지 범위(WORKSPACE / PROJECT / TASK) 및 연결 업무명 -->
+								<div class="col-n-id" th:text="|#${n['noticeId']}|">#1</div> <!-- 2. 공지 범위(WORKSPACE / PROJECT / TASK) 및 연결 업무명 -->
 								<div class="col-n-type">
 									<span class="n-type-badge"
-									      th:classappend="${n['noticeType'] == 'TASK'} ? 'type-task' : 'type-project'"
-									      th:text="${n['noticeType'] == 'WORKSPACE' ? '전체공지' : (n['noticeType'] == 'TASK' ? '업무공지' : '프로젝트')}">전체공지</span>
-									<span class="n-task-chip"
-									      th:if="${n['taskTitle'] != null}"
-									      th:text="${n['taskTitle']}">연결 업무명</span>
-								</div>
-
-								<!-- 3. 공지 제목 -->
+										th:classappend="${n['noticeType'] == 'TASK'} ? 'type-task' : 'type-project'"
+										th:text="${n['noticeType'] == 'WORKSPACE' ? '전체공지' : (n['noticeType'] == 'TASK' ? '업무공지' : '프로젝트')}">전체공지</span>
+									<span class="n-task-chip" th:if="${n['taskTitle'] != null}"
+										th:text="${n['taskTitle']}">연결 업무명</span>
+								</div> <!-- 3. 공지 제목 -->
 								<div class="col-n-title">
-									<span class="notice-title-text" th:text="${n['title']}">공지사항 제목</span>
-								</div>
-
-								<!-- 4. 공개 상태 (0=비공개, 1=공개) -->
+									<span class="notice-title-text" th:text="${n['title']}">공지사항
+										제목</span>
+								</div> <!-- 4. 공개 상태 (0=비공개, 1=공개) -->
 								<div>
 									<span class="n-status-badge"
-									      th:classappend="${n['status'] != null and n['status'].toString() == '0'} ? 'status-private' : 'status-public'"
-									      th:text="${n['status'] != null and n['status'].toString() == '0' ? '🔒 비공개' : '🌐 공개'}">🌐 공개</span>
-								</div>
-
-								<!-- 5. 작성자 -->
-								<div class="col-n-writer" th:text="${n['writerName']}">팀 리더</div>
-
-								<!-- 6. 조회수 -->
-								<div class="col-n-views" th:text="${n['viewCount'] != null ? n['viewCount'] : 0}">0</div>
+										th:classappend="${n['status'] != null and n['status'].toString() == '0'} ? 'status-private' : 'status-public'"
+										th:text="${n['status'] != null and n['status'].toString() == '0' ? '🔒 비공개' : '🌐 공개'}">🌐
+										공개</span>
+								</div> <!-- 5. 작성자 -->
+								<div class="col-n-writer" th:text="${n['writerName']}">팀
+									리더</div> <!-- 6. 조회수 -->
+								<div class="col-n-views"
+									th:text="${n['viewCount'] != null ? n['viewCount'] : 0}">0</div>
 
 								<!-- 7. 작성일 -->
-								<div class="col-n-date" th:text="${n['created'] != null ? n['created'] : '-'}">2026-10-16</div>
+								<div class="col-n-date"
+									th:text="${n['created'] != null ? n['created'] : '-'}">2026-10-16</div>
 							</li>
 						</th:block>
 					</ul>
 				</div>
 
-			<div class="page-navigation"></div>
+				<div class="page-navigation"></div>
 			</div>
 
 			<!-- ==========================================================================
 			     [우측] 업무공지 전용 오버레이 드로어 패널 (조회 뷰 / 작성·수정 폼 뷰 겸용)
 			     ========================================================================== -->
 			<aside class="notice-drawer-panel" id="noticeSideDrawer">
-				<div class="notice-resizer-bar" id="noticeResizerBar" title="드래그하여 패널 너비 조절"></div>
+				<div class="notice-resizer-bar" id="noticeResizerBar"
+					title="드래그하여 패널 너비 조절"></div>
 
 				<!-- 드로어 상단 네비게이션 -->
 				<div class="notice-drawer-top">
-					<div style="display:flex; align-items:center; gap:8px;">
-						<span>📢</span>
-						<span id="noticeDrawerTopTitle">업무 공지 상세</span>
-						<span class="n-drawer-mode-chip" id="noticeDrawerModeChip">조회</span>
+					<div style="display: flex; align-items: center; gap: 8px;">
+						<span>📢</span> <span id="noticeDrawerTopTitle">업무 공지 상세</span> <span
+							class="n-drawer-mode-chip" id="noticeDrawerModeChip">조회</span>
 					</div>
 
-					<div style="display:flex; align-items:center; gap:6px;">
+					<div style="display: flex; align-items: center; gap: 6px;">
 						<!-- 팀 리더 전용: 상세 조회 모드일 때만 수정/삭제 버튼 표시 -->
-						<div id="noticeLeaderActionBtns" th:if="${isTeamLeader}" style="display:none; gap:6px;">
-							<button type="button" class="btn-n-top-edit" onclick="switchDrawerToEditMode()">수정</button>
-							<button type="button" class="btn-n-top-del" onclick="deleteCurrentNotice()">삭제</button>
+						<div id="noticeLeaderActionBtns" th:if="${isTeamLeader}"
+							style="display: none; gap: 6px;">
+							<button type="button" class="btn-n-top-edit"
+								onclick="switchDrawerToEditMode()">수정</button>
+							<button type="button" class="btn-n-top-del"
+								onclick="deleteCurrentNotice()">삭제</button>
 						</div>
-						<button type="button" class="notice-close-btn" onclick="closeNoticeDrawer()" title="닫기 (ESC)">✕</button>
+						<button type="button" class="notice-close-btn"
+							onclick="closeNoticeDrawer()" title="닫기 (ESC)">✕</button>
 					</div>
 				</div>
 
@@ -126,8 +134,10 @@
 					<div class="n-read-meta-top">
 						<div class="n-read-badges">
 							<span class="n-type-badge type-task" id="readNoticeTypeBadge">업무공지</span>
-							<span class="n-task-chip" id="readNoticeTaskChip" style="display:none;">대상 업무명</span>
-							<span class="n-status-badge status-public" id="readNoticeStatusBadge">🌐 공개</span>
+							<span class="n-task-chip" id="readNoticeTaskChip"
+								style="display: none;">대상 업무명</span> <span
+								class="n-status-badge status-public" id="readNoticeStatusBadge">🌐
+								공개</span>
 						</div>
 						<div class="n-read-views">
 							조회수 <strong id="readNoticeViewCount">0</strong>
@@ -139,40 +149,45 @@
 					<div class="n-read-author-bar">
 						<div class="n-author-avatar" id="readNoticeAvatar">리더</div>
 						<div class="n-author-info">
-							<span class="n-author-name" id="readNoticeWriter">팀 리더</span>
-							<span class="n-author-date" id="readNoticeDates">작성일: -</span>
+							<span class="n-author-name" id="readNoticeWriter">팀 리더</span> <span
+								class="n-author-date" id="readNoticeDates">작성일: -</span>
 						</div>
 					</div>
 
-					<div class="n-read-content-box" id="readNoticeContent">공지 본문 내용</div>
+					<div class="n-read-content-box" id="readNoticeContent">공지 본문
+						내용</div>
 				</div>
 
 				<!-- [모드 2] 공지 작성 / 수정 폼 뷰 (팀 리더 전용, notice 테이블 컬럼 기반) -->
-				<div class="notice-drawer-scroll" id="noticeFormView" style="display:none;" th:if="${isTeamLeader}">
+				<div class="notice-drawer-scroll" id="noticeFormView"
+					style="display: none;" th:if="${isTeamLeader}">
 					<input type="hidden" id="formNoticeId" value="">
 
 					<!-- 공지 제목 (notice.title) -->
 					<div class="n-form-group">
-						<label class="n-form-label" for="formNoticeTitle">공지 제목 <span class="req-star">*</span></label>
-						<input type="text" class="n-form-input" id="formNoticeTitle" placeholder="공지사항 제목을 입력해 주세요 (최대 200자)">
+						<label class="n-form-label" for="formNoticeTitle">공지 제목 <span
+							class="req-star">*</span></label> <input type="text" class="n-form-input"
+							id="formNoticeTitle" placeholder="공지사항 제목을 입력해 주세요 (최대 200자)">
 					</div>
 
 					<!-- notice 속성 카드: 공지범위(notice_type), 대상업무(task_id), 공개상태(status) -->
 					<div class="n-props-card">
 						<div class="n-prop-row">
 							<span class="n-prop-label">공지 범위 <span class="req-star">*</span></span>
-							<select class="n-form-select" id="formNoticeType" onchange="onNoticeTypeChange(this.value)">
+							<select class="n-form-select" id="formNoticeType"
+								onchange="onNoticeTypeChange(this.value)">
 								<option value="TASK">업무 공지 (TASK)</option>
 								<option value="PROJECT">프로젝트 전체 공지 (PROJECT)</option>
 							</select>
 						</div>
 
 						<div class="n-prop-row" id="formTaskSelectRow">
-							<span class="n-prop-label">대상 업무</span>
-							<select class="n-form-select" id="formNoticeTaskId">
+							<span class="n-prop-label">대상 업무</span> <select
+								class="n-form-select" id="formNoticeTaskId">
 								<option value="">-- 전체 또는 연결할 상위 업무 선택 --</option>
 								<th:block th:if="${tasks != null}">
-									<option th:each="t : ${tasks}" th:value="${t.taskId}" th:text="${t.title}">메인 업무명</option>
+									<option th:each="t : ${tasks}" th:value="${t.taskId}"
+										th:text="${t.title}">메인 업무명</option>
 								</th:block>
 							</select>
 						</div>
@@ -180,32 +195,39 @@
 						<div class="n-prop-row">
 							<span class="n-prop-label">공개 상태 <span class="req-star">*</span></span>
 							<div class="n-radio-group">
-								<label class="n-radio-item">
-									<input type="radio" name="formNoticeStatus" value="1" checked>
-									<span>🌐 공개 (팀원 전체 열람)</span>
-								</label>
-								<label class="n-radio-item">
-									<input type="radio" name="formNoticeStatus" value="0">
-									<span>🔒 비공개 (리더만 열람)</span>
+								<label class="n-radio-item"> <input type="radio"
+									name="formNoticeStatus" value="1" checked> <span>🌐
+										공개 (팀원 전체 열람)</span>
+								</label> <label class="n-radio-item"> <input type="radio"
+									name="formNoticeStatus" value="0"> <span>🔒 비공개
+										(리더만 열람)</span>
 								</label>
 							</div>
 						</div>
 					</div>
 
 					<!-- 공지 내용 (notice.content CLOB) -->
-					<div class="n-form-group" style="flex:1;">
-						<label class="n-form-label" for="formNoticeContent">공지 상세 내용 <span class="req-star">*</span></label>
+					<div class="n-form-group" style="flex: 1;">
+						<label class="n-form-label" for="formNoticeContent">공지 상세
+							내용 <span class="req-star">*</span>
+						</label>
+						<!-- 
 						<textarea class="n-form-textarea" id="formNoticeContent" placeholder="팀원들에게 전달할 업무 가이드 및 공지 내용을 작성해 주세요..."></textarea>
+						 -->
+						<div id="editor"></div>
+						<input type="hidden" name="content">
 					</div>
 
 					<!-- 공지 첨부파일 (notice_files 연동 UI) -->
 					<div class="n-form-group">
-						<label class="n-form-label">📎 첨부파일 <span id="noticeFileCount" style="color:var(--text-muted); font-weight:600;">(0)</span></label>
+						<label class="n-form-label">📎 첨부파일 <span
+							id="noticeFileCount"
+							style="color: var(--text-muted); font-weight: 600;">(0)</span></label>
 						<div class="n-file-dropzone">
-							<span style="font-size:12px; color:var(--text-sub);">공지에 첨부할 문서를 선택하세요</span>
-							<label class="btn-n-file-attach">
-								<span>＋ 파일 선택</span>
-								<input type="file" style="display:none;" onchange="handleNoticeFileSelect(this)">
+							<span style="font-size: 12px; color: var(--text-sub);">공지에
+								첨부할 문서를 선택하세요</span> <label class="btn-n-file-attach"> <span>＋
+									파일 선택</span> <input type="file" style="display: none;"
+								onchange="handleNoticeFileSelect(this)">
 							</label>
 						</div>
 						<div class="n-file-list" id="noticeAttachedFileList"></div>
@@ -213,17 +235,37 @@
 
 					<!-- 하단 저장 / 취소 버튼 -->
 					<div class="n-form-footer">
-						<button type="button" class="btn-n-cancel" onclick="cancelNoticeForm()">취소</button>
-						<button type="button" class="btn-n-submit" id="btnSubmitNoticeForm" onclick="submitNoticeForm()">공지 등록</button>
+						<button type="button" class="btn-n-cancel"
+							onclick="cancelNoticeForm()">취소</button>
+						<button type="button" class="btn-n-submit"
+							id="btnSubmitNoticeForm" onclick="submitNoticeForm()">공지
+							등록</button>
 					</div>
 				</div>
 
 			</aside>
 
 		</div>
+		<th:block layout:fragment="script">
 		
-		<script type="text/javascript" th:src="@{/dist/posts/renderPaging.js}"></script>
-		<script th:inline="javascript">
+			<script type="text/javascript"
+				th:src="@{/dist/posts/renderPaging.js}"></script>
+			<script type="text/javascript" th:src="@{/dist/posts/file-upload.js}"></script>
+			<script type="text/javascript" th:src="@{/dist/js/util-async.js}"></script>
+			<script type="text/javascript"
+				th:src="@{/dist/js/project/task_notice.js}"></script>
+
+		
+			<!-- Quill Rich Text Editor -->
+			<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+			<!-- Quill Editor Image Resize JS -->
+			<script
+				src="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.js"></script>
+			<!-- Quill Editor 적용 JS -->
+			
+			<script th:src="@{/dist/posts/qeditor.js}"></script>
+			
+			<script type="text/javascript">
 			/*<![CDATA[*/
 			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
 			const currentProjectId = /*[[${projectId}]]*/ 1;
@@ -245,37 +287,23 @@
 			let totalPage = getPageCount(dataCount, pageSize);
 			let paging = renderPaging(page, totalPage, url);
 		
-			/*document.querySelector('span.dataCount').textContent = 
-				dataCount + '개 (' + page + '/' + totalPage + ' 페이지)';*/
 			document.querySelector('div.page-navigation').innerHTML = 
 				dataCount === 0 ? '등록된 게시물이 없습니다.' : paging;
 		});
 			
 		document.addEventListener('DOMContentLoaded', () => {
-				const inputEL = document.querySelector('input[name=kwd]'); 
+				const inputEL = document.getElementById('noticeSearchInput'); 
 				inputEL.addEventListener('keydown', function (ev) {
 					if(ev.key === 'Enter') {
 						ev.preventDefault();
 						
-						searchList();
+						applyNoticeFilterAndSearch();
 					}
 				});
 			});
 
-			function searchList() {
-				const f = document.searchForm;
-				if(! f.kwd.value.trim()) {
-					return;
-				}
-				
-				const formData = new FormData(f);
-				let params = new URLSearchParams(formData).toString();
-				
-				let url = '[(@{/bbs/list})]';
-				location.href = url + '?' + params;
-			}
 		</script>
-		<script type="text/javascript" th:src="@{/dist/js/project/task_notice.js}"></script>
+		</th:block>
 	</div>
 </body>
 </html>

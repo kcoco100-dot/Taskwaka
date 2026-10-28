@@ -587,9 +587,64 @@
             ORDER BY n.notice_id DESC
         ) WHERE ROWNUM &lt;= 6
     </select>
+    
+<!-- 1. 검색 및 필터 공통 조건절 -->
+    <sql id="where-list">
+        <!-- (1) 공지 분류 탭 필터 (schType이 workspace, project, task 중 하나일 때) -->
+        <if test="schType != null and schType != '' and schType != 'all' and schType != 'ALL'">
+            <choose>
+                <when test="schType == 'workspace' or schType == 'WORKSPACE'">
+                    AND n.notice_type = 'WORKSPACE'
+                </when>
+                <when test="schType == 'project' or schType == 'PROJECT'">
+                    AND n.notice_type = 'PROJECT'
+                </when>
+                <when test="schType == 'task' or schType == 'TASK'">
+                    AND n.notice_type = 'TASK'
+                </when>
+            </choose>
+        </if>
 
-    <!-- 2) 업무공지 탭용 목록 조회 (WORKSPACE 전체공지 + PROJECT 공지 + TASK 공지 모두 조회) -->
-    <select id="selectTaskNoticesByProject" resultType="map">
+        <!-- (2) 검색어(kwd) 조건 -->
+        <if test="kwd != null and kwd != ''">
+            <choose>
+                <!-- 제목만 검색할 때 -->
+                <when test="schType == 'title'">
+                    AND INSTR(n.title, #{kwd}) &gt; 0
+                </when>
+                <!-- 내용만 검색할 때 -->
+                <when test="schType == 'content'">
+                    <![CDATA[
+                    AND DBMS_LOB.INSTR(REGEXP_REPLACE(n.content, '<[^>]+>', ''), #{kwd}) > 0
+                    ]]>
+                </when>
+                <!-- 작성자 이름으로 검색할 때 -->
+                <when test="schType == 'writer'">
+                    AND INSTR(NVL(md.name, '팀 리더'), #{kwd}) &gt; 0
+                </when>
+                <!-- 등록일(created)로 검색할 때 -->
+                <when test="schType == 'created'">
+                    AND (
+                        INSTR(TO_CHAR(n.created, 'YYYYMMDD'), #{kwd}) &gt; 0
+                        OR TO_CHAR(n.created, 'YYYY-MM-DD') = #{kwd}
+                    )
+                </when>
+                <!-- 기본값(all 또는 탭 선택 상태): 제목 + 내용 + 작성자 통합 검색 -->
+                <otherwise>
+                    <![CDATA[
+                    AND (
+                        INSTR(n.title, #{kwd}) > 0
+                        OR DBMS_LOB.INSTR(REGEXP_REPLACE(n.content, '<[^>]+>', ''), #{kwd}) > 0
+                        OR INSTR(NVL(md.name, '팀 리더'), #{kwd}) > 0
+                    )
+                    ]]>
+                </otherwise>
+            </choose>
+        </if>
+    </sql>
+
+    <!-- 2. 프로젝트 공지사항 목록 조회 (페이징 + 검색) -->
+    <select id="selectTaskNoticesByProject" parameterType="map" resultType="map">
         SELECT
             n.notice_id AS "noticeId",
             n.notice_type AS "noticeType",
@@ -622,18 +677,23 @@
             )
         )
           AND n.deleted IS NULL
-          <if test="!isLeader">
+          <if test="!isTeamLeader">
               AND (n.status = 1 OR n.notice_type = 'WORKSPACE')
           </if>
+          <!-- 동적 검색 조건 포함 -->
+          <include refid="where-list"/>
         ORDER BY
             CASE WHEN n.notice_type = 'WORKSPACE' THEN 0 ELSE 1 END ASC,
             n.notice_id DESC
-            OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
     </select>
-    
-    <select id="countTaskNoticesByProject" resultType="int">
+
+    <!-- 3. 프로젝트 공지사항 전체 개수 조회 (페이징 dataCount 계산용) -->
+    <select id="countTaskNoticesByProject" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM notice n
+        LEFT JOIN tasks t ON n.task_id = t.task_id
+        LEFT JOIN member_details md ON n.member_id = md.member_id
         WHERE (
             n.project_id = #{projectId}
             OR (
@@ -648,9 +708,11 @@
             )
         )
           AND n.deleted IS NULL
-          <if test="!isLeader">
+          <if test="!isTeamLeader">
               AND (n.status = 1 OR n.notice_type = 'WORKSPACE')
           </if>
+          <!-- 목록과 동일한 검색 조건 포함 -->
+          <include refid="where-list"/>
     </select>
 
     <!-- 공지사항 단건 상세 조회 -->

@@ -8,6 +8,7 @@ import com.tk.app.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,8 @@ public class ProjectController {
             @PathVariable("projectId") Long projectId,
             @RequestParam(name = "tab", defaultValue = "dashboard") String tab,
             @RequestParam(name="page", defaultValue = "1") int page,
-            // @RequestParam(name="kwd", defaultValue = "") String kwd,
+            @RequestParam(name="kwd", defaultValue = "") String kwd,
+            @RequestParam(name="schType", defaultValue = "all") String schType,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         
@@ -80,12 +82,25 @@ public class ProjectController {
 	        	int pageSize = 10;
 	        	int currentPage = (page < 1) ? 1 : page;
 	        	int offset = (currentPage - 1) * pageSize;
+	        	if(offset < 0) offset = 0;
 	        	
-	        	int dataCount = taskService.getTaskNoticeCount(projectId, isTeamLeader);
-	        	List<Map<String, Object>> taskNotices = taskService.getTaskNoticeList(projectId, isTeamLeader,offset, pageSize);
+	        	Map<String, Object> map = new HashMap<>();
+	        	map.put("schType", schType);
+	        	map.put("kwd", kwd);
+	        	
+	        	map.put("projectId", projectId);
+	        	map.put("isTeamLeader", isTeamLeader);
+
+	        	int dataCount = taskService.getTaskNoticeCount(map);
+	        	
+	        	map.put("offset", offset);
+				map.put("pageSize", pageSize);
+				
+	        	List<Map<String, Object>> taskNotices = taskService.getTaskNoticeList(map);
+	        	
 	        	model.addAttribute("dataCount", dataCount);
 	        	model.addAttribute("page", currentPage);
-	        	model.addAttribute("taskNotices",taskNotices );
+	        	model.addAttribute("taskNotices",taskNotices);
 	        }
         }
         return "project/project_layout";

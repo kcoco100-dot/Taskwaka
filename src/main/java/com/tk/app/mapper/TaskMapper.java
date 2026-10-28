@@ -60,12 +60,8 @@ public interface TaskMapper {
     
     // 8. 업무공지(notice) 탭 전용 CRUD 
     Map<String, Object> selectProjectMemberRoleInfo(@Param("projectMemberId") Long projectMemberId);
-    List<Map<String, Object>> selectTaskNoticesByProject(
-            @Param("projectId") Long projectId,
-            @Param("isLeader") boolean isLeader,
-            @Param("offset")int offset,
-            @Param("pageSize")int pageSize);
-    int countTaskNoticesByProject(@Param("projectId") Long projectId, @Param("isLeader") boolean isLeader);
+    List<Map<String, Object>> selectTaskNoticesByProject(Map<String, Object> map);
+    int countTaskNoticesByProject(Map<String, Object> map);
     Map<String, Object> selectTaskNoticeDetail(@Param("noticeId") Long noticeId);
     int incrementNoticeViewCount(@Param("noticeId") Long noticeId);
     int insertTaskNotice(Map<String, Object> param);

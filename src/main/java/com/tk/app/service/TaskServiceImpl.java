@@ -227,15 +227,24 @@ public class TaskServiceImpl implements TaskService {
         return 1L;
     }
 
-    @Override
+    /**
+	 * @deprecated Use {@link #getTaskNoticeList(Map)} instead
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader, int offset, int pageSize) {
+		return getTaskNoticeList(null);
+	}
+
+	@Override
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader, int offset, int pageSize) {
-        return taskMapper.selectTaskNoticesByProject(projectId, isLeader, offset, pageSize);
+    public List<Map<String, Object>> getTaskNoticeList(Map<String, Object> map) {
+        return taskMapper.selectTaskNoticesByProject(map);
     }
     
     @Override
-    public int getTaskNoticeCount(Long projectId, boolean isTeamLeader) {
-    	return taskMapper.countTaskNoticesByProject(projectId, isTeamLeader);
+    public int getTaskNoticeCount(Map<String, Object> map) {
+    	return taskMapper.countTaskNoticesByProject(map);
     }
 
     @Override

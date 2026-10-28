@@ -1,8 +1,6 @@
 /* ==========================================================================
    [JS] 업무공지 탭 제어 (조회 드로어 & 팀 리더 전용 작성/수정/삭제 드로어 전환)
    ========================================================================== */
-import {fetchRequest} from '../util-async.js';
-   
 let currentNoticeFilter = 'ALL';
 let activeNoticeData = null;
 let activeNoticeRow = null;
@@ -12,46 +10,24 @@ function getNoticeApiBaseUrl() {
 }
 
 // ================= 1. 공지 목록 필터링 & 검색 =================
-function filterNoticeList(filterType, btnElem) {
+function filterNoticeList(filterType) {
   currentNoticeFilter = filterType;
-  document.querySelectorAll('.btn-n-filter').forEach(b => b.classList.remove('active'));
-  if (btnElem) btnElem.classList.add('active');
-  applyNoticeFilterAndSearch();
 }
 
-async function applyNoticeFilterAndSearch() {
-  const keyword = (document.getElementById('noticeSearchInput')?.value || '').trim().toLowerCase();
-  const url = `/${currentDomainKey}/project/${currentProjectId}?tab=notice`;
-  const params ={
-	kwd: keyword,
+function applyNoticeFilterAndSearch() {
+	const keyword = (document.getElementById('noticeSearchInput')?.value || '').trim();
 	
-  }
-  
-  fetchRequest(url, 'GET', JSON.stringify(params), 'json');
-  
-  const rows = document.querySelectorAll('.notice-item-row');
-  let visibleCount = 0;
+	const params = new URLSearchParams({
+		tab: 'notice',
+		schType: currentNoticeFilter,
+		kwd: keyword,
+		page: 1 // 검색 시 1페이지부터 조회
+	});
+	
 
-  rows.forEach(row => {
-    const type = row.getAttribute('data-type') || 'TASK';
-    const title = (row.getAttribute('data-title') || '').toLowerCase();
-    const writer = (row.getAttribute('data-writer') || '').toLowerCase();
+	// 페이지 이동 -> 컨트롤러가 검색된 목록과 페이징을 타임리프로 다시 그려줌
+	location.href = `/${currentDomainKey}/project/${currentProjectId}?${params.toString()}`;
 
-    const matchType = (currentNoticeFilter === 'ALL') || (type === currentNoticeFilter);
-    const matchKeyword = !keyword || title.includes(keyword) || writer.includes(keyword);
-
-    if (matchType && matchKeyword) {
-      row.style.display = 'grid';
-      visibleCount++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-
-  const emptyRow = document.getElementById('noticeEmptyRow');
-  if (emptyRow) {
-    emptyRow.style.display = (visibleCount === 0) ? 'block' : 'none';
-  }
 }
 
 // ================= 2. 공지 행 클릭 -> 우측 드로어 [상세 조회 모드] 오픈 =================
@@ -70,7 +46,7 @@ async function openNoticeDetailDrawer(noticeId, rowElem) {
 
   if (readView) readView.style.display = 'flex';
   if (formView) formView.style.display = 'none';
-  if (leaderBtns) leaderBtns.style.display = isTeamLeader ? 'flex' : 'none';
+  if (leaderBtns) leaderBtns.style.display = `${isTeamLeader}` ? 'flex' : 'none';
 
   drawer.classList.add('active');
 
@@ -125,8 +101,8 @@ function bindNoticeReadView(data) {
 
 // ================= 3. [+ 새 공지 작성] 클릭 -> 우측 드로어 [작성 폼 모드] 오픈 (팀 리더 전용) =================
 function openNoticeWriteDrawer() {
-  if (!isTeamLeader) {
-    alert('팀 리더만 공지를 작성할 수 있습니다.');
+  if (! `${isTeamLeader}`) {
+    alert('팀 리더만 공지를 작성할 수 있습니다.'+ `${isTeamLeader}`);
     return;
   }
 
@@ -153,7 +129,6 @@ function openNoticeWriteDrawer() {
   document.getElementById('formNoticeType').value = 'TASK';
   document.getElementById('formNoticeTaskId').value = '';
   document.getElementById('formTaskSelectRow').style.display = 'flex';
-  document.getElementById('formNoticeContent').value = '';
 
   const publicRadio = document.querySelector('input[name="formNoticeStatus"][value="1"]');
   if (publicRadio) publicRadio.checked = true;
@@ -164,7 +139,7 @@ function openNoticeWriteDrawer() {
 
 // ================= 4. 상세 조회 중 [수정] 버튼 클릭 -> 우측 드로어를 [수정 폼 모드]로 전환 =================
 function switchDrawerToEditMode() {
-  if (!isTeamLeader || !activeNoticeData) return;
+  if (!`${isTeamLeader}` || !activeNoticeData) return;
 
   const readView = document.getElementById('noticeReadView');
   const formView = document.getElementById('noticeFormView');
@@ -186,7 +161,8 @@ function switchDrawerToEditMode() {
   onNoticeTypeChange(nType);
 
   document.getElementById('formNoticeTaskId').value = activeNoticeData.taskId != null ? String(activeNoticeData.taskId) : '';
-  document.getElementById('formNoticeContent').value = activeNoticeData.content || '';
+  
+  document.getElementById('editor').querySelector('.ql-editor').innerHTML = activeNoticeData.content || '';
 
   const statusVal = activeNoticeData.status != null ? String(activeNoticeData.status) : '1';
   const targetRadio = document.querySelector(`input[name="formNoticeStatus"][value="${statusVal}"]`);
@@ -221,7 +197,7 @@ function closeNoticeDrawer() {
 
 // ================= 5. 공지 등록 / 수정 제출 및 삭제 처리 (REST API 연동) =================
 async function submitNoticeForm() {
-  if (!isTeamLeader) return;
+  if (! `${isTeamLeader}`) return;
 
   const editingId = document.getElementById('formNoticeId').value;
   const title = document.getElementById('formNoticeTitle').value.trim();
@@ -286,7 +262,7 @@ async function submitNoticeForm() {
 }
 
 async function deleteCurrentNotice() {
-  if (!isTeamLeader || !activeNoticeData || !activeNoticeData.noticeId) return;
+  if (!`${isTeamLeader}` || !activeNoticeData || !activeNoticeData.noticeId) return;
   if (!confirm('이 업무 공지사항을 삭제하시겠습니까?')) return;
 
   const noticeId = activeNoticeData.noticeId;
