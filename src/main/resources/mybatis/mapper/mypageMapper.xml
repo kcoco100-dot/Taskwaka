@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.MypageMapper">
+    <select id="findMyInfo" parameterType="Long" resultType="MypageDto">
+
+        SELECT m.login_id loginId, d.name, d.email, TO_CHAR(d.birth, 'YYYY-MM-DD') birth,
+            d.phone, d.address, d.profile
+        FROM members m
+        
+        LEFT JOIN member_details d ON m.member_id = d.member_id
+        
+        WHERE m.member_id = #{memberId}
+          AND m.status = 0
+    </select>
+
+</mapper>

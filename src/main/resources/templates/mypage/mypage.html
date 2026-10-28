@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>마이페이지 | TASKWAKA</title>
+    <link rel="stylesheet" th:href="@{/dist/css/mypage.css}">
+</head>
+
+<body class="mypage-body">
+
+<header class="mypage-topbar">
+    <a th:href="@{/myHome}" class="mypage-brand">
+        <img th:src="@{/dist/images/taskwaka-bear-icon.png}" alt="">
+        <strong>TASKWAKA</strong>
+    </a>
+    <a th:href="@{/myHome}" class="mypage-back">
+        워크 목록으로
+    </a>
+</header>
+
+<main class="mypage-container">
+
+    <div class="mypage-heading">
+        <span class="mypage-eyebrow">MY ACCOUNT</span>
+        <h1>마이페이지</h1>
+        <p>내 프로필과 계정 정보를 관리합니다.</p>
+    </div>
+
+    <div class="mypage-layout">
+        <nav class="mypage-sidebar" aria-label="마이페이지 메뉴">
+            <strong class="mypage-sidebar-title">계정 관리</strong>
+            <a th:href="@{/member/mypage}"
+               th:classappend="${page == 'overview'} ? 'is-active' : ''">
+                내 정보
+            </a>
+
+            <a th:href="@{/member/mypage/profile}"
+               th:classappend="${page == 'profile'} ? 'is-active' : ''">
+                프로필 사진 수정
+            </a>
+
+            <a th:if="${isLocalAccount}"
+               th:href="@{/member/mypage/contact}"
+               th:classappend="${page == 'contact'} ? 'is-active' : ''">
+                연락처 및 주소 수정
+            </a>
+
+            <a th:if="${isLocalAccount}"
+               th:href="@{/member/mypage/security}"
+               th:classappend="${page == 'security'} ? 'is-active' : ''">
+                비밀번호 변경
+            </a>
+
+            <div class="mypage-sidebar-divider"></div>
+
+            <strong class="mypage-sidebar-title">탈퇴 관리</strong>
+
+            <a th:href="@{/member/mypage/work-leave}"
+               th:classappend="${page == 'work-leave'} ? 'is-active' : ''">
+                워크 탈퇴
+            </a>
+
+            <a th:href="@{/member/mypage/withdraw}"
+               class="mypage-sidebar-danger"
+               th:classappend="${page == 'withdraw'} ? 'is-active' : ''">
+                사이트 탈퇴
+            </a>
+        </nav>
+
+        <div class="mypage-content">
+        
+            <section class="mypage-card" th:if="${page == 'overview'}">
+                <div class="mypage-card-heading">
+                    <h2>내 정보</h2>
+                    <p>현재 로그인한 계정의 정보를 확인합니다.</p>
+                </div>
+
+                <div class="mypage-info-section">
+                    <h3>프로필 사진</h3>
+                    <div class="mypage-profile">
+                        <div class="mypage-avatar" aria-label="기본 프로필">
+                            <span aria-hidden="true">👤</span>
+                        </div>
+
+                        <div class="mypage-profile-info">
+							<strong th:text="${#strings.isEmpty(myInfo.name) ? '' : myInfo.name}"></strong>
+
+                            <p>프로필 사진은 왼쪽 메뉴에서 변경할 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mypage-separator"></div>
+
+                <div class="mypage-info-section">
+                    <h3>기본 정보</h3>
+
+
+				<div class="mypage-info-grid">
+				
+				    <div class="mypage-info-item">
+				        <span class="mypage-info-label">아이디</span>
+				        <span class="mypage-info-value" id="mypageLoginId"
+				              th:text="${isLocalAccount ? (#strings.isEmpty(myInfo.loginId) ? '' : myInfo.loginId) : '소셜 로그인 계정'}"></span>
+				    </div>
+				
+				    <div class="mypage-info-item">
+				        <span class="mypage-info-label">이름</span>
+				
+				        <span class="mypage-info-value" id="mypageName"
+				              th:text="${#strings.isEmpty(myInfo.name) ? '' : myInfo.name}"></span>
+				    </div>
+				
+				    <div class="mypage-info-item">
+				        <span class="mypage-info-label">생년월일</span>
+				
+				        <span class="mypage-info-value" id="mypageBirth"
+				              th:text="${#strings.isEmpty(myInfo.birth) ? '' : myInfo.birth}"></span>
+				    </div>
+				
+				    <div class="mypage-info-item">
+				        <span class="mypage-info-label">이메일</span>
+				
+				        <span class="mypage-info-value" id="mypageEmail"
+				              th:text="${#strings.isEmpty(myInfo.email) ? '' : myInfo.email}"></span>
+				    </div>
+				
+				</div>
+
+
+                    <p class="mypage-help">
+                        기본 정보는 이 페이지에서 수정할 수 없습니다.
+                    </p>
+                </div>
+
+                <div class="mypage-separator"></div>
+
+                <div class="mypage-info-section">           
+                    <h3>연락처 및 주소</h3>
+
+					<div class="mypage-info-grid">
+					    <div class="mypage-info-item">
+					        <span class="mypage-info-label">연락처</span>
+					
+					        <span class="mypage-info-value" id="mypagePhone"
+					              th:text="${#strings.isEmpty(myInfo.phone) ? '' : myInfo.phone}"></span>
+					    </div>
+					
+					    <div class="mypage-info-item mypage-info-full">
+					        <span class="mypage-info-label">
+					            주소 <small>(선택)</small>
+					        </span>
+					
+					        <span class="mypage-info-value" id="mypageAddress"
+					              th:text="${#strings.isEmpty(myInfo.address) ? '' : myInfo.address}"></span>
+					              
+					    </div>
+					</div>
+                </div>
+            </section>
+
+
+            <section class="mypage-card" th:if="${page == 'profile'}">
+
+                <div class="mypage-card-heading">
+                    <h2>프로필 사진 수정</h2>
+                    <p>다른 회원에게 표시되는 프로필 사진을 관리합니다.</p>
+                </div>
+
+                <div class="mypage-profile-edit">
+
+                    <div class="mypage-avatar mypage-avatar-large" aria-label="프로필 사진 미리보기">
+                        <span aria-hidden="true">👤</span>
+                    </div>
+
+                    <div class="mypage-profile-info">
+						<strong th:text="${#strings.isEmpty(myInfo.name) ? '' : myInfo.name}"></strong>
+                        <p>프로필 사진을 선택하거나 삭제할 수 있습니다.</p>
+
+                        <div class="mypage-actions">
+                            <button type="button" id="mypagePhotoChange" disabled>
+                                사진 선택
+                            </button>
+
+                            <button type="button" id="mypagePhotoDelete" class="mypage-button-light" disabled>
+                                사진 삭제
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mypage-footer-actions">
+                    <button type="button" id="mypagePhotoSave" class="mypage-button-primary" disabled>
+                        변경사항 저장
+                    </button>
+                </div>
+            </section>
+
+
+            <section class="mypage-card" th:if="${page == 'contact' and isLocalAccount}">
+
+                <div class="mypage-card-heading">
+                    <h2>연락처 및 주소 수정</h2>
+                    <p>연락처와 선택 입력 항목인 주소를 관리합니다.</p>
+                </div>
+
+                <div class="mypage-form-grid">
+
+                    <div class="mypage-field mypage-field-full">
+                        <label for="mypageEditPhone">연락처</label>
+                        <input type="tel" id="mypageEditPhone" placeholder="010-0000-0000"
+                               th:value="${myInfo.phone}" disabled>
+                    </div>
+
+                    <div class="mypage-form-subheading">
+                        <h3>주소</h3>
+                        <span class="mypage-optional">선택 입력</span>
+                    </div>
+
+                    <p class="mypage-form-description">
+                        주소는 입력하지 않아도 됩니다.
+                    </p>
+
+                    <div class="mypage-field mypage-field-full">
+                        <label for="mypagePostcode">우편번호</label>
+
+                        <div class="mypage-input-with-button">
+                            <input type="text" id="mypagePostcode" placeholder="우편번호"
+                                   readonly disabled>
+
+                            <button type="button" id="mypageAddressSearch" class="mypage-button-light" disabled>
+                                주소 검색
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mypage-field mypage-field-full">
+                        <label for="mypageBaseAddress">기본주소</label>
+                        <input type="text" id="mypageBaseAddress" placeholder="주소 검색 결과"
+                               readonly disabled>
+                    </div>
+
+                    <div class="mypage-field mypage-field-full">
+                        <label for="mypageDetailAddress">상세주소</label>
+                        <input type="text" id="mypageDetailAddress"
+                               placeholder="상세주소 (선택)" disabled>
+                    </div>
+                </div>
+
+                <p class="mypage-help">
+                    주소는 DB의 하나의 컬럼에 저장하며,
+                    입력하지 않으면 NULL을 허용합니다.
+                </p>
+                <p class="mypage-help">
+				    현재 등록된 주소:
+				    <span th:text="${#strings.isEmpty(myInfo.address) ? '' : myInfo.address}"></span>
+				</p>
+
+                <div class="mypage-footer-actions">
+                    <button type="button" id="mypageContactSave" class="mypage-button-primary" disabled>
+                        변경사항 저장
+                    </button>
+                </div>
+            </section>
+
+            <section class="mypage-card" th:if="${page == 'security' and isLocalAccount}">
+
+                <div class="mypage-card-heading">
+                    <h2>보안 설정</h2>
+                    <p>로그인 비밀번호를 변경할 수 있습니다.</p>
+                </div>
+
+                <div class="mypage-form-grid">
+
+                    <div class="mypage-field mypage-field-full">
+                        <label for="mypageCurrentPassword">현재 비밀번호</label>
+                        <input type="password" id="mypageCurrentPassword" disabled>
+                    </div>
+
+                    <div class="mypage-field mypage-field-full">
+                        <label for="mypageNewPassword">새 비밀번호</label>
+                        <input type="password" id="mypageNewPassword" disabled>
+                    </div>
+
+                    <div class="mypage-field mypage-field-full">
+                        <label for="mypageConfirmPassword">새 비밀번호 확인</label>
+                        <input type="password" id="mypageConfirmPassword" disabled>
+                    </div>
+                </div>
+
+                <div class="mypage-footer-actions">
+                    <button type="button" id="mypagePasswordSave" class="mypage-button-primary" disabled>
+                        비밀번호 변경
+                    </button>
+                </div>
+
+            </section>
+
+
+            <section class="mypage-card" th:if="${page == 'work-leave'}">
+
+                <div class="mypage-card-heading">
+                    <h2>워크 탈퇴</h2>
+                    <p>현재 참여 중인 워크에서 탈퇴합니다.</p>
+                </div>
+
+                <div class="mypage-field">
+                    <label for="mypageWorkspaceSelect">탈퇴할 워크</label>
+                    <select id="mypageWorkspaceSelect" disabled>
+                        <option value="">
+                            참여 중인 워크 조회 예정
+                        </option>
+                    </select>
+                </div>
+
+                <div class="mypage-info-box">
+                    <strong>워크 탈퇴 전 확인사항</strong>
+
+                    <p>
+                        워크 탈퇴 시 해당 워크의 접근 권한이 해제됩니다.
+                    </p>
+
+                    <p>
+                        워크 소유자는 먼저 활성 회원에게 소유권을
+                        양도해야 합니다. 양도할 대상이 없다면
+                        워크 삭제 후 탈퇴할 수 있습니다.
+                    </p>
+
+                    <p>
+                        재참여 시 이전 직급과 권한은 자동 복원되지 않습니다.
+                    </p>
+                </div>
+
+                <div class="mypage-footer-actions">
+                    <button type="button" id="mypageWorkLeave" class="mypage-button-outline-danger" disabled>
+                        선택한 워크 탈퇴
+                    </button>
+                </div>
+
+            </section>
+
+
+            <section class="mypage-card mypage-card-danger" th:if="${page == 'withdraw'}">
+
+                <div class="mypage-card-heading">
+                    <h2>사이트 탈퇴</h2>
+                    <p>TASKWAKA 회원 계정 전체를 탈퇴합니다.</p>
+                </div>
+
+                <div class="mypage-info-box mypage-info-box-danger">
+                    <strong>사이트 탈퇴 전 확인사항</strong>
+
+                    <p>
+                        워크 탈퇴와 달리 TASKWAKA 회원 계정 전체에
+                        적용됩니다.
+                    </p>
+
+                    <p>
+                        탈퇴 후 계정 접근이 차단되며,
+                        동일 아이디로 재가입할 수 없습니다.
+                    </p>
+
+                    <p>
+                        탈퇴 회원의 기존 작성 기록은 정책에 따라
+                        보존되며 작성자 이름은 UNKNOWN으로 표시됩니다.
+                    </p>
+
+                    <p>
+                        소유하고 있는 워크나 프로젝트는
+                        별도 정리 절차를 거쳐야 합니다.
+                    </p>
+                </div>
+
+                <div class="mypage-footer-actions">
+                    <button type="button" id="mypageAccountWithdrawal" class="mypage-button-danger" disabled>
+                        사이트 회원 탈퇴
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
