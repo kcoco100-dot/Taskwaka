@@ -6,6 +6,13 @@ import com.tk.app.domain.dto.MypageDto;
 
 @Mapper
 public interface MypageMapper {
-
-    MypageDto findMyInfo(Long memberId);
+	
+	public MypageDto findMyInfo(Long memberId);
+	public int countSnsAccount(Long memberId);
+	
+    public int countActivePhone(MypageDto dto);
+    public int updateContact(MypageDto dto);
+    
+    public int updateProfile(MypageDto dto);
+	
 }

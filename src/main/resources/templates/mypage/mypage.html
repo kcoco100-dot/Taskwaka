@@ -70,7 +70,9 @@
 
         <div class="mypage-content">
         
-            <section class="mypage-card" th:if="${page == 'overview'}">
+            <section class="mypage-card" th:if="${page == 'profile'}"
+         		th:attr="data-profile-url=@{/member/mypage/profile}">
+         		
                 <div class="mypage-card-heading">
                     <h2>내 정보</h2>
                     <p>현재 로그인한 계정의 정보를 확인합니다.</p>
@@ -161,108 +163,148 @@
             </section>
 
 
-            <section class="mypage-card" th:if="${page == 'profile'}">
+            
+			<section class="mypage-card"
+			         th:if="${page == 'profile'}"
+			         th:attr="data-profile-url=@{/member/mypage/profile}">
+			
+			    <div class="mypage-card-heading">
+			        <h2>프로필 사진 수정</h2>
+			        <p>다른 회원에게 표시되는 프로필 사진을 관리합니다.</p>
+			    </div>
+			
+			    <div class="mypage-profile-edit">
+			
+			        <div class="mypage-avatar mypage-avatar-large"
+			             aria-label="프로필 사진 미리보기">
+			
+			            <img id="mypagePhotoPreview"
+			                 th:src="${#strings.isEmpty(myInfo.profile)} ? null : @{/uploads/member/{filename}(filename=${myInfo.profile})}"
+			                 th:style="${#strings.isEmpty(myInfo.profile) ? 'display:none;' : ''}"
+			                 alt="프로필 사진">
+			
+			            <span id="mypagePhotoPlaceholder"
+			                  th:style="${#strings.isEmpty(myInfo.profile) ? '' : 'display:none;'}"
+			                  aria-hidden="true">👤</span>
+			
+			        </div>
+			
+			        <div class="mypage-profile-info">
+			
+			            <strong th:text="${myInfo.name ?: ''}"></strong>
+			            <p>프로필 사진을 선택하거나 삭제할 수 있습니다.</p>
+			
+			            <input type="file"
+			                   id="mypagePhotoFile"
+			                   accept=".jpg,.jpeg,.png"
+			                   hidden>
+			
+			            <div class="mypage-actions">
+			
+			                <button type="button" id="mypagePhotoChange">
+			                    사진 선택
+			                </button>
+			
+			                <button type="button"
+			                        id="mypagePhotoDelete"
+			                        class="mypage-button-light"
+			                        th:disabled="${#strings.isEmpty(myInfo.profile)}">
+			                    사진 삭제
+			                </button>
+			
+			            </div>
+			        </div>
+			
+			    </div>
+			
+			    <div class="mypage-footer-actions">
+			        <button type="button"
+			                id="mypagePhotoSave"
+			                class="mypage-button-primary"
+			                disabled>
+			            변경사항 저장
+			        </button>
+			    </div>
+			
+			</section>
 
-                <div class="mypage-card-heading">
-                    <h2>프로필 사진 수정</h2>
-                    <p>다른 회원에게 표시되는 프로필 사진을 관리합니다.</p>
-                </div>
 
-                <div class="mypage-profile-edit">
+         
+			<section class="mypage-card" th:if="${page == 'contact' and isLocalAccount}"
+			         th:attr="data-update-url=@{/member/mypage/contact}">
+	
+			    <div class="mypage-card-heading">
+			        <h2>연락처 및 주소 수정</h2>
+			        <p>연락처와 선택 입력 항목인 주소를 관리합니다.</p>
+			    </div>
+			    <div class="mypage-form-grid">
+			        <div class="mypage-field mypage-field-full">
+			            <label for="mypageEditPhone">연락처</label>
+			            <input type="tel" id="mypageEditPhone"
+			                   placeholder="010-0000-0000" th:value="${myInfo.phone ?: ''}">
+			        </div>
+			
+			        <div class="mypage-form-subheading">
+			            <h3>주소</h3>
+			            <span class="mypage-optional">선택 입력</span>
+			        </div>
+			
+			        <p class="mypage-form-description">
+			            주소를 변경하지 않으면 현재 등록된 주소가 유지됩니다.
+			        </p>
+			
+			        <div class="mypage-field mypage-field-full">
+			            <label for="mypagePostcode">우편번호</label>
+			            <div class="mypage-input-with-button">
+			                <input type="text" id="mypagePostcode"
+			                       placeholder="우편번호" readonly>
+			                <button type="button" id="mypageAddressSearch"
+			                		class="mypage-button-light">
+			                    주소 검색
+			                </button>
+			            </div>
+			        </div>
+			
+			        <div class="mypage-field mypage-field-full">
+			            <label for="mypageBaseAddress">기본주소</label>
+			            <input type="text" id="mypageBaseAddress"
+			                   placeholder="주소 검색 결과" readonly>
+			        </div>
+			
+			        <div class="mypage-field mypage-field-full">
+			            <label for="mypageDetailAddress">상세주소</label>
+			            <input type="text" id="mypageDetailAddress"
+			                   placeholder="상세주소 (선택)" disabled>
+			        </div>
+			    </div>
+			
+			    <p class="mypage-help">
+			        현재 등록된 주소:
+			        <span id="mypageCurrentAddress" th:text="${myInfo.address ?: ''}"></span>
+			    </p>
+			    <input type="hidden" id="mypageAddressValue" th:value="${myInfo.address ?: ''}">
+			
+			    <p id="mypageAddressStatus" class="mypage-help" role="status">
+			        주소를 변경하지 않으면 기존 주소가 유지됩니다.
+			    </p>
+			
+			    <div class="mypage-actions">
+			        <button type="button" id="mypageAddressClear" class="mypage-button-light">
+			            주소 삭제
+			        </button>
+			
+			        <button type="button" id="mypageAddressCancel" class="mypage-button-light">
+			            주소 변경 취소
+			        </button>
+			    </div>
+			
+			    <div class="mypage-footer-actions">
+			        <button type="button" id="mypageContactSave" class="mypage-button-primary">
+			            변경사항 저장
+			        </button>
+			    </div>
+			</section>
 
-                    <div class="mypage-avatar mypage-avatar-large" aria-label="프로필 사진 미리보기">
-                        <span aria-hidden="true">👤</span>
-                    </div>
-
-                    <div class="mypage-profile-info">
-						<strong th:text="${#strings.isEmpty(myInfo.name) ? '' : myInfo.name}"></strong>
-                        <p>프로필 사진을 선택하거나 삭제할 수 있습니다.</p>
-
-                        <div class="mypage-actions">
-                            <button type="button" id="mypagePhotoChange" disabled>
-                                사진 선택
-                            </button>
-
-                            <button type="button" id="mypagePhotoDelete" class="mypage-button-light" disabled>
-                                사진 삭제
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mypage-footer-actions">
-                    <button type="button" id="mypagePhotoSave" class="mypage-button-primary" disabled>
-                        변경사항 저장
-                    </button>
-                </div>
-            </section>
-
-
-            <section class="mypage-card" th:if="${page == 'contact' and isLocalAccount}">
-
-                <div class="mypage-card-heading">
-                    <h2>연락처 및 주소 수정</h2>
-                    <p>연락처와 선택 입력 항목인 주소를 관리합니다.</p>
-                </div>
-
-                <div class="mypage-form-grid">
-
-                    <div class="mypage-field mypage-field-full">
-                        <label for="mypageEditPhone">연락처</label>
-                        <input type="tel" id="mypageEditPhone" placeholder="010-0000-0000"
-                               th:value="${myInfo.phone}" disabled>
-                    </div>
-
-                    <div class="mypage-form-subheading">
-                        <h3>주소</h3>
-                        <span class="mypage-optional">선택 입력</span>
-                    </div>
-
-                    <p class="mypage-form-description">
-                        주소는 입력하지 않아도 됩니다.
-                    </p>
-
-                    <div class="mypage-field mypage-field-full">
-                        <label for="mypagePostcode">우편번호</label>
-
-                        <div class="mypage-input-with-button">
-                            <input type="text" id="mypagePostcode" placeholder="우편번호"
-                                   readonly disabled>
-
-                            <button type="button" id="mypageAddressSearch" class="mypage-button-light" disabled>
-                                주소 검색
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mypage-field mypage-field-full">
-                        <label for="mypageBaseAddress">기본주소</label>
-                        <input type="text" id="mypageBaseAddress" placeholder="주소 검색 결과"
-                               readonly disabled>
-                    </div>
-
-                    <div class="mypage-field mypage-field-full">
-                        <label for="mypageDetailAddress">상세주소</label>
-                        <input type="text" id="mypageDetailAddress"
-                               placeholder="상세주소 (선택)" disabled>
-                    </div>
-                </div>
-
-                <p class="mypage-help">
-                    주소는 DB의 하나의 컬럼에 저장하며,
-                    입력하지 않으면 NULL을 허용합니다.
-                </p>
-                <p class="mypage-help">
-				    현재 등록된 주소:
-				    <span th:text="${#strings.isEmpty(myInfo.address) ? '' : myInfo.address}"></span>
-				</p>
-
-                <div class="mypage-footer-actions">
-                    <button type="button" id="mypageContactSave" class="mypage-button-primary" disabled>
-                        변경사항 저장
-                    </button>
-                </div>
-            </section>
 
             <section class="mypage-card" th:if="${page == 'security' and isLocalAccount}">
 
@@ -381,6 +423,10 @@
         </div>
     </div>
 </main>
+
+<script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
+
+<script th:src="@{/dist/js/mypage.js}" defer></script>
 
 </body>
 </html>

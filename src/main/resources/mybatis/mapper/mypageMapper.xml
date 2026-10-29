@@ -4,8 +4,8 @@
 <mapper namespace="com.tk.app.mapper.MypageMapper">
     <select id="findMyInfo" parameterType="Long" resultType="MypageDto">
 
-        SELECT m.login_id loginId, d.name, d.email, TO_CHAR(d.birth, 'YYYY-MM-DD') birth,
-            d.phone, d.address, d.profile
+        SELECT m.member_id memberId, m.login_id loginId, d.name, d.email,
+        TO_CHAR(d.birth, 'YYYY-MM-DD') birth, d.phone, d.address, d.profile
         FROM members m
         
         LEFT JOIN member_details d ON m.member_id = d.member_id
@@ -13,5 +13,54 @@
         WHERE m.member_id = #{memberId}
           AND m.status = 0
     </select>
+    
+	<select id="countSnsAccount" parameterType="Long" resultType="int">
+	    SELECT COUNT(*) sns_count
+	    FROM social_accounts
+	    WHERE member_id = #{memberId}
+	      AND provider_user_id IS NOT NULL
+	</select>
+	
+	<select id="countActivePhone" parameterType="MypageDto" resultType="int">
+	    SELECT COUNT(*)
+	    FROM members m JOIN member_details d ON m.member_id = d.member_id
+	    WHERE m.status = 0
+	      AND m.member_id != #{memberId}
+	      AND REGEXP_REPLACE(d.phone, '[^0-9]', '') = #{phone}
+	</select>
+	
+
+	<update id="updateContact" parameterType="MypageDto">
+	    UPDATE member_details d SET phone = #{phone}, address = #{address, jdbcType=VARCHAR}
+	    WHERE d.member_id = #{memberId}
+	      AND EXISTS (
+	          SELECT 1
+	          FROM members m
+	          WHERE m.member_id = d.member_id
+	            AND m.status = 0
+	      )
+	      AND NOT EXISTS (
+	          SELECT 1
+	          FROM social_accounts s
+	          WHERE s.member_id = d.member_id
+	            AND s.provider_user_id IS NOT NULL
+	      )
+	</update>
+	
+	
+	<update id="updateProfile" parameterType="MypageDto">
+	    UPDATE member_details d SET profile = #{profile, jdbcType=VARCHAR}
+	    WHERE d.member_id = #{memberId}
+	      AND EXISTS (
+	          SELECT 1
+	          FROM members m
+	          WHERE m.member_id = d.member_id
+	            AND m.status = 0
+	      )
+	</update>
+	
+
+	
+    
 
 </mapper>
