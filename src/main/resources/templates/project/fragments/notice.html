@@ -178,18 +178,9 @@
 
 					<!-- notice 속성 카드: 공지범위(notice_type), 대상업무(task_id), 공개상태(status) -->
 					<div class="n-props-card">
-						<div class="n-prop-row">
-							<span class="n-prop-label">공지 범위 <span class="req-star">*</span></span>
-							<select class="n-form-select" id="formNoticeType"
-								onchange="onNoticeTypeChange(value)">
-								<option value="workspace" selected >전체 공지</option>
-								<option value="project">프로젝트 공지</option>
-								<option value="task">업무 공지</option>
-							</select>
-						</div>
-
 						<div class="n-prop-row" id="formTaskSelectRow">
-							<span class="n-prop-label">대상 업무</span> <select
+							<span class="n-prop-label">대상 업무</span> 
+							<select
 								class="n-form-select" id="formNoticeTaskId">
 								<option value="">-- 전체 또는 연결할 상위 업무 선택 --</option>
 								<th:block th:if="${tasks != null}">

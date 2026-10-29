@@ -125,7 +125,6 @@ function openNoticeWriteDrawer() {
   // 폼 필드 초기화
   document.getElementById('formNoticeId').value = '';
   document.getElementById('formNoticeTitle').value = '';
-  document.getElementById('formNoticeType').value = 'task';
   document.getElementById('formNoticeTaskId').value = '';
   document.getElementById('formTaskSelectRow').style.display = 'flex';
   document.getElementById('editor').querySelector('.ql-editor').innerHTML = '';
@@ -155,9 +154,7 @@ function switchDrawerToEditMode() {
   document.getElementById('formNoticeId').value = activeNoticeData.noticeId;
   document.getElementById('formNoticeTitle').value = activeNoticeData.title || '';
 
-  const nType = activeNoticeData.noticeType.toLowerCase();
-  document.getElementById('formNoticeType').value = nType;
-  onNoticeTypeChange(nType);
+  const nType = 'task';
 
   document.getElementById('formNoticeTaskId').value = activeNoticeData.taskId != null ? String(activeNoticeData.taskId) : '';
   
@@ -200,7 +197,6 @@ async function submitNoticeForm() {
 
   const editingId = document.getElementById('formNoticeId').value;
   const title = document.getElementById('formNoticeTitle').value.trim();
-  const noticeType = document.getElementById('formNoticeType').value;
   const taskId = document.getElementById('formNoticeTaskId').value;
   const content = document.getElementById('editor').querySelector('.ql-editor').innerHTML;
   const statusRadio = document.querySelector('input[name="formNoticeStatus"]:checked');
@@ -218,7 +214,7 @@ async function submitNoticeForm() {
 
   const payload = {
     currentProjectMemberId: currentProjectMemberId,
-    noticeType: noticeType.toUpperClass(),
+    noticeType: 'TASK',
     taskId: (noticeType === 'task' && taskId) ? Number(taskId) : null,
     title: title,
     content: content,

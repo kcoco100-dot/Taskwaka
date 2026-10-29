@@ -254,14 +254,13 @@ async function submitCreateReportModal() {
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
   const projectMemberId = memberIdInput.value;
-    const isTask = document.getElementById('isTaskInput');
-  
+  const isTask = document.getElementById('isTaskInput').value;
 
   if (!title) { alert('보고서 제목을 입력해 주세요.'); titleInput.focus(); return; }
   if (!content) { alert('상세 내용을 입력해 주세요.'); contentInput.focus(); return; }
   
+  console.log(isTask);
   
-
   try {
 	if(isTask === 'task'){
 		
@@ -276,6 +275,7 @@ async function submitCreateReportModal() {
         };
 		
 		console.log(payload);
+		console.log(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${taskId}/reports`);
 
 		const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${taskId}/reports`, 
 		{
