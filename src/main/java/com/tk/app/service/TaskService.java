@@ -48,12 +48,7 @@ public interface TaskService {
     boolean deletePersonalEvent(Long scheduleId);
     
     // 업무공지 탭 전용
-    boolean isTeamLeaderOrAbove(Long projectMemberId);
-    Long getMemberIdByProjectMemberId(Long projectMemberId);
-    /**
-	 * @deprecated Use {@link #getTaskNoticeList(Map)} instead
-	 */
-	List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader, int offset, int pageSize);
+    boolean isTeamLeaderOrAbove(Map<String, Object> isTeamLeaderMap);
 	List<Map<String, Object>> getTaskNoticeList(Map<String, Object> map);
     public int getTaskNoticeCount(Map<String, Object> map);
     Map<String, Object> getTaskNoticeDetail(Long noticeId, boolean incrementView);

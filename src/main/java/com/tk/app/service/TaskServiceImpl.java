@@ -205,36 +205,13 @@ public class TaskServiceImpl implements TaskService {
     
     @Override
     @Transactional(readOnly = true)
-    public boolean isTeamLeaderOrAbove(Long projectMemberId) {
-        if (projectMemberId == null) return false;
-        Map<String, Object> info = taskMapper.selectProjectMemberRoleInfo(projectMemberId);
-        if (info == null || info.get("role") == null) {
-            // DB에 테스트 멤버 role이 아직 없을 경우 기본 번호(1번)는 리더로 허용
-            return projectMemberId == 1L;
-        }
+    public boolean isTeamLeaderOrAbove(Map<String, Object> isTeamLeaderMap) {
+        if (! isTeamLeaderMap.containsKey("currentProjectMemberId")) return false;
+        Map<String, Object> info = taskMapper.selectProjectMemberRoleInfo(isTeamLeaderMap);
+
         int role = Integer.parseInt(String.valueOf(info.get("role")));
         return role >= 30; // 30=TL(팀 리더), 50=DT, 70=PM
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Long getMemberIdByProjectMemberId(Long projectMemberId) {
-        if (projectMemberId == null) return 1L;
-        Map<String, Object> info = taskMapper.selectProjectMemberRoleInfo(projectMemberId);
-        if (info != null && info.get("memberId") != null) {
-            return Long.valueOf(String.valueOf(info.get("memberId")));
-        }
-        return 1L;
-    }
-
-    /**
-	 * @deprecated Use {@link #getTaskNoticeList(Map)} instead
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public List<Map<String, Object>> getTaskNoticeList(Long projectId, boolean isLeader, int offset, int pageSize) {
-		return getTaskNoticeList(null);
-	}
 
 	@Override
     @Transactional(readOnly = true)

@@ -219,7 +219,7 @@
     <update id="softDeleteSubTask">
         UPDATE sub_tasks
         SET deleted = SYSDATE, updated = SYSDATE
-        WHERE sub_task_id = #{subTaskId}
+        WHERE sub_task_id = #{subTaskId} AND deleted IS NULL
     </update>
 
     <!-- 11. 참여 인원 (task_members / sub_task_members) 조회 및 등록 -->
@@ -385,6 +385,7 @@
           AND NOT EXISTS (
               SELECT 1 FROM report_reviews rr
               WHERE rr.daily_report_id = dr.daily_report_id
+              	AND dr.deleted IS NULL
                 AND (rr.viewed IS NOT NULL OR rr.reviewed IS NOT NULL)
           )
     </update>
@@ -543,7 +544,7 @@
          15. 업무공지 탭: 팀 리더 권한 조회 & notice 테이블 CRUD
          ========================================================================= -->
     <!-- 현재 프로젝트 멤버의 member_id, workspace_id, role(30=TL 이상인지) 조회 -->
-    <select id="selectProjectMemberRoleInfo" resultType="map">
+    <select id="selectProjectMemberRoleInfo" parameterType="map" resultType="map">
         SELECT
             pm.project_member_id AS "projectMemberId",
             pm.project_id AS "projectId",
@@ -554,11 +555,11 @@
         FROM project_members pm
         LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
         LEFT JOIN member_details md ON wm.member_id = md.member_id
-        WHERE pm.project_member_id = #{projectMemberId}
+        WHERE wm.member_id = #{currentProjectMemberId} AND pm.project_id = #{projectId}
     </select>
 
 <!-- 1) 대시보드 탭용 최근 공지사항 조회 (전체공지 + 프로젝트공지 + 업무공지 포함) -->
-    <select id="selectRecentProjectNotices" resultType="com.tk.app.domain.dto.NoticeDto">
+    <select id="selectRecentProjectNotices" parameterType="map" resultType="com.tk.app.domain.dto.NoticeDto">
         SELECT * FROM (
             SELECT
                 n.notice_id AS noticeId,
@@ -669,22 +670,17 @@
                 n.notice_type = 'WORKSPACE'
                 AND (
                     n.workspace_id = (SELECT workspace_id FROM projects WHERE project_id = #{projectId})
-                    OR n.workspace_id IS NULL
                 )
-            )
-            OR (
-                n.task_id IN (SELECT task_id FROM tasks WHERE project_id = #{projectId})
             )
         )
           AND n.deleted IS NULL
-          <if test="!isTeamLeader">
-              AND (n.status = 1 OR n.notice_type = 'WORKSPACE')
+          <if test="! isTeamLeader">
+              AND (n.status = 1)
           </if>
           <!-- 동적 검색 조건 포함 -->
           <include refid="where-list"/>
         ORDER BY
-            CASE WHEN n.notice_type = 'WORKSPACE' THEN 0 ELSE 1 END ASC,
-            n.notice_id DESC
+            n.created DESC
         OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
     </select>
 

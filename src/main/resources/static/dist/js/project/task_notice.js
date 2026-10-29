@@ -19,13 +19,12 @@ function applyNoticeFilterAndSearch() {
 	
 	const params = new URLSearchParams({
 		tab: 'notice',
-		schType: currentNoticeFilter,
+		schType: currentNoticeFilter || 'all',
 		kwd: keyword,
 		page: 1 // 검색 시 1페이지부터 조회
 	});
-	
 
-	// 페이지 이동 -> 컨트롤러가 검색된 목록과 페이징을 타임리프로 다시 그려줌
+	// 페이지 이동
 	location.href = `/${currentDomainKey}/project/${currentProjectId}?${params.toString()}`;
 
 }
@@ -46,7 +45,7 @@ async function openNoticeDetailDrawer(noticeId, rowElem) {
 
   if (readView) readView.style.display = 'flex';
   if (formView) formView.style.display = 'none';
-  if (leaderBtns) leaderBtns.style.display = `${isTeamLeader}` ? 'flex' : 'none';
+  if (leaderBtns) leaderBtns.style.display = isTeamLeader ? 'flex' : 'none';
 
   drawer.classList.add('active');
 
@@ -70,7 +69,7 @@ async function openNoticeDetailDrawer(noticeId, rowElem) {
 
 function bindNoticeReadView(data) {
   const typeBadge = document.getElementById('readNoticeTypeBadge');
-  const isTaskType = (data.noticeType === 'TASK');
+  const isTaskType = (data.noticeType === 'task');
   typeBadge.textContent = isTaskType ? '업무공지' : '프로젝트 공지';
   typeBadge.className = 'n-type-badge ' + (isTaskType ? 'type-task' : 'type-project');
 
@@ -96,13 +95,13 @@ function bindNoticeReadView(data) {
 
   const dateText = `작성일: ${data.created || '-'}` + (data.updated ? ` · 수정일: ${data.updated}` : '');
   document.getElementById('readNoticeDates').textContent = dateText;
-  document.getElementById('readNoticeContent').textContent = data.content || '';
+  document.getElementById('readNoticeContent').innerHTML = data.content || '';
 }
 
 // ================= 3. [+ 새 공지 작성] 클릭 -> 우측 드로어 [작성 폼 모드] 오픈 (팀 리더 전용) =================
 function openNoticeWriteDrawer() {
-  if (! `${isTeamLeader}`) {
-    alert('팀 리더만 공지를 작성할 수 있습니다.'+ `${isTeamLeader}`);
+  if (! isTeamLeader) {
+    alert('팀 리더만 공지를 작성할 수 있습니다.'+ isTeamLeader);
     return;
   }
 
@@ -126,10 +125,10 @@ function openNoticeWriteDrawer() {
   // 폼 필드 초기화
   document.getElementById('formNoticeId').value = '';
   document.getElementById('formNoticeTitle').value = '';
-  document.getElementById('formNoticeType').value = 'TASK';
+  document.getElementById('formNoticeType').value = 'task';
   document.getElementById('formNoticeTaskId').value = '';
   document.getElementById('formTaskSelectRow').style.display = 'flex';
-
+  document.getElementById('editor').querySelector('.ql-editor').innerHTML = '';
   const publicRadio = document.querySelector('input[name="formNoticeStatus"][value="1"]');
   if (publicRadio) publicRadio.checked = true;
 
@@ -139,7 +138,7 @@ function openNoticeWriteDrawer() {
 
 // ================= 4. 상세 조회 중 [수정] 버튼 클릭 -> 우측 드로어를 [수정 폼 모드]로 전환 =================
 function switchDrawerToEditMode() {
-  if (!`${isTeamLeader}` || !activeNoticeData) return;
+  if (! isTeamLeader || !activeNoticeData) return;
 
   const readView = document.getElementById('noticeReadView');
   const formView = document.getElementById('noticeFormView');
@@ -156,7 +155,7 @@ function switchDrawerToEditMode() {
   document.getElementById('formNoticeId').value = activeNoticeData.noticeId;
   document.getElementById('formNoticeTitle').value = activeNoticeData.title || '';
 
-  const nType = activeNoticeData.noticeType || 'TASK';
+  const nType = activeNoticeData.noticeType.toLowerCase();
   document.getElementById('formNoticeType').value = nType;
   onNoticeTypeChange(nType);
 
@@ -169,10 +168,10 @@ function switchDrawerToEditMode() {
   if (targetRadio) targetRadio.checked = true;
 }
 
-function onNoticeTypeChange(typeVal) {
+function onNoticeTypeChange(value) {
   const row = document.getElementById('formTaskSelectRow');
   if (!row) return;
-  if (typeVal === 'PROJECT') {
+  if (value === 'project' || value === 'workspace') {
     row.style.display = 'none';
     document.getElementById('formNoticeTaskId').value = '';
   } else {
@@ -197,13 +196,13 @@ function closeNoticeDrawer() {
 
 // ================= 5. 공지 등록 / 수정 제출 및 삭제 처리 (REST API 연동) =================
 async function submitNoticeForm() {
-  if (! `${isTeamLeader}`) return;
+  if (! isTeamLeader) return;
 
   const editingId = document.getElementById('formNoticeId').value;
   const title = document.getElementById('formNoticeTitle').value.trim();
   const noticeType = document.getElementById('formNoticeType').value;
   const taskId = document.getElementById('formNoticeTaskId').value;
-  const content = document.getElementById('formNoticeContent').value.trim();
+  const content = document.getElementById('editor').querySelector('.ql-editor').innerHTML;
   const statusRadio = document.querySelector('input[name="formNoticeStatus"]:checked');
   const status = statusRadio ? Number(statusRadio.value) : 1;
 
@@ -214,18 +213,19 @@ async function submitNoticeForm() {
   }
   if (!content) {
     alert('공지 상세 내용을 입력해 주세요.');
-    document.getElementById('formNoticeContent').focus();
     return;
   }
 
   const payload = {
     currentProjectMemberId: currentProjectMemberId,
-    noticeType: noticeType,
-    taskId: (noticeType === 'TASK' && taskId) ? Number(taskId) : null,
+    noticeType: noticeType.toUpperClass(),
+    taskId: (noticeType === 'task' && taskId) ? Number(taskId) : null,
     title: title,
     content: content,
     status: status
   };
+  
+  console.log(payload);
 
   try {
     const baseUrl = getNoticeApiBaseUrl();
@@ -262,7 +262,7 @@ async function submitNoticeForm() {
 }
 
 async function deleteCurrentNotice() {
-  if (!`${isTeamLeader}` || !activeNoticeData || !activeNoticeData.noticeId) return;
+  if (! isTeamLeader || !activeNoticeData || !activeNoticeData.noticeId) return;
   if (!confirm('이 업무 공지사항을 삭제하시겠습니까?')) return;
 
   const noticeId = activeNoticeData.noticeId;
@@ -312,7 +312,7 @@ function updateNoticeRowInDom(n) {
 }
 
 function buildNoticeRowInnerHtml(n) {
-  const isTask = (n.noticeType === 'TASK');
+  const isTask = (n.noticeType === 'task');
   const isPrivate = String(n.status) === '0';
   const taskChipHtml = n.taskTitle ? `<span class="n-task-chip">${escapeNoticeHtml(n.taskTitle)}</span>` : '';
 

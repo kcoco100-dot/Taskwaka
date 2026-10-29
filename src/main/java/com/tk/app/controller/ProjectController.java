@@ -46,8 +46,12 @@ public class ProjectController {
         if (!tab.matches("dashboard|task|gantt|calendar|document|notice")) {
             tab = "dashboard";
         }
-
-        boolean isTeamLeader = taskService.isTeamLeaderOrAbove(currentProjectMemberId);
+        
+        Map<String, Object> isTeamLeaderMap = new HashMap<>();
+        isTeamLeaderMap.put("currentProjectMemberId", currentProjectMemberId);
+        isTeamLeaderMap.put("projectId", projectId);
+        
+        boolean isTeamLeader = taskService.isTeamLeaderOrAbove(isTeamLeaderMap); // 매퍼고쳐야댐
         ProjectDto pDto = taskService.getProjectById(projectId);
         
         model.addAttribute("isTeamLeader", isTeamLeader);
@@ -64,7 +68,6 @@ public class ProjectController {
 	            model.addAttribute("summary", taskService.getDashboardSummary(projectId));
 	            model.addAttribute("upcomingTasks", taskService.getUpcomingSubTasks(projectId));
 	            model.addAttribute("notices", taskService.getRecentProjectNotices(projectId));
-
 	        }
 	        case "task" -> {
 	        	
@@ -99,8 +102,10 @@ public class ProjectController {
 	        	List<Map<String, Object>> taskNotices = taskService.getTaskNoticeList(map);
 	        	
 	        	model.addAttribute("dataCount", dataCount);
-	        	model.addAttribute("page", currentPage);
 	        	model.addAttribute("taskNotices",taskNotices);
+	        	model.addAttribute("schType", schType);
+	        	model.addAttribute("page", currentPage);
+	        	model.addAttribute("kwd", kwd);
 	        }
         }
         return "project/project_layout";

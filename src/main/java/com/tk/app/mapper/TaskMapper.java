@@ -59,7 +59,7 @@ public interface TaskMapper {
     int deleteCalendarEvent(@Param("scheduleId") Long scheduleId);
     
     // 8. 업무공지(notice) 탭 전용 CRUD 
-    Map<String, Object> selectProjectMemberRoleInfo(@Param("projectMemberId") Long projectMemberId);
+    Map<String, Object> selectProjectMemberRoleInfo(Map<String, Object> isTeamLeaderMap);
     List<Map<String, Object>> selectTaskNoticesByProject(Map<String, Object> map);
     int countTaskNoticesByProject(Map<String, Object> map);
     Map<String, Object> selectTaskNoticeDetail(@Param("noticeId") Long noticeId);

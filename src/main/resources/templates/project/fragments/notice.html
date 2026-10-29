@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-	
+
 
 	<div th:fragment="content">
 		<link rel="stylesheet" th:href="@{/dist/css/project/task_notice.css}">
 		<link rel="stylesheet" th:href="@{/dist/css/paginate.css}">
 		<!-- Quill Rich Text Editor -->
-		<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+		<link
+			href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+			rel="stylesheet">
 		<!-- Quill Editor Image Resize CSS -->
-		<link href="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.css" rel="stylesheet">
+		<link
+			href="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.css"
+			rel="stylesheet">
 		
 		<div class="notice-split-wrapper" id="noticeSplitWrapper">
 
@@ -19,8 +23,9 @@
 				<!-- 상단 툴바 (전체/워크스페이스/프로젝트/업무 필터 & 검색 & 팀 리더 전용 공지 작성 버튼) -->
 				<div class="notice-toolbar">
 					<div class="notice-toolbar-left">
+					
 						<div class="notice-filter-tabs">
-							<select onchange="filterNoticeList(value)">
+							<select onchange="filterNoticeList(value)" id="schTypeSelect">
 								<option value="all">전체</option>
 								<option value="workspace">전체 공지</option>
 								<option value="project">프로젝트 공지</option>
@@ -34,6 +39,7 @@
 							<button type="button" class="btn-open-notice-write"
 								onclick="applyNoticeFilterAndSearch()">검색</button>
 						</div>
+						
 					</div>
 
 					<!-- 팀 리더(isTeamLeader == true)에게만 노출되는 공지 작성 버튼 -->
@@ -175,9 +181,10 @@
 						<div class="n-prop-row">
 							<span class="n-prop-label">공지 범위 <span class="req-star">*</span></span>
 							<select class="n-form-select" id="formNoticeType"
-								onchange="onNoticeTypeChange(this.value)">
-								<option value="TASK">업무 공지 (TASK)</option>
-								<option value="PROJECT">프로젝트 전체 공지 (PROJECT)</option>
+								onchange="onNoticeTypeChange(value)">
+								<option value="workspace" selected >전체 공지</option>
+								<option value="project">프로젝트 공지</option>
+								<option value="task">업무 공지</option>
 							</select>
 						</div>
 
@@ -247,7 +254,7 @@
 
 		</div>
 		<th:block layout:fragment="script">
-		
+
 			<script type="text/javascript"
 				th:src="@{/dist/posts/renderPaging.js}"></script>
 			<script type="text/javascript" th:src="@{/dist/posts/file-upload.js}"></script>
@@ -255,33 +262,41 @@
 			<script type="text/javascript"
 				th:src="@{/dist/js/project/task_notice.js}"></script>
 
-		
+
 			<!-- Quill Rich Text Editor -->
 			<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 			<!-- Quill Editor Image Resize JS -->
 			<script
 				src="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.js"></script>
 			<!-- Quill Editor 적용 JS -->
-			
+
 			<script th:src="@{/dist/posts/qeditor.js}"></script>
-			
+
 			<script type="text/javascript">
-			/*<![CDATA[*/
-			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
-			const currentProjectId = /*[[${projectId}]]*/ 1;
-			const currentProjectMemberId = /*[[${currentProjectMemberId}]]*/ 1;
-			const isTeamLeader = /*[[${isTeamLeader != null ? isTeamLeader : false}]]*/ false;
-			/*]]>*/
+			const currentDomainKey = '[[${domainKey}]]' ;
+			const currentProjectId = '[[${projectId}]]' ;
+			const currentProjectMemberId = '[[${currentProjectMemberId}]]';
+			const isTeamLeader = '[[${isTeamLeader != null ? isTeamLeader : false}]]';
 			
 			document.addEventListener('DOMContentLoaded', function(){
 			let page = Number('[[${page}]]') || 0;
 			let pageSize = Number('10');
 			let dataCount = Number('[[${dataCount}]]') || 0;
 	
-			let url = `/${currentDomainKey}/project/${currentProjectId}?tab=notice`;
-			let search = '[[${not #strings.isEmpty(kwd)}]]' === 'true';
+			/*
+			let url = '[[@{/{domainKey}/project/{projectId}(domainKey = ${domainKey}, projectId=${projectId}, tab=notice)}]]';
+			
+			let search = '[[${(not #strings.isEmpty(kwd)) or (not #strings.isEmpty(schType))}]]';
+			
 			if( search ) {
-				url = '[(@{/bbs/list(schType=${schType}, kwd=${kwd})})]';
+				url = '[[@{/{domainKey}/project/{projectId}(domainKey = ${domainKey}, projectId=${projectId}, tab=notice, schType=${schType}, kwd=${kwd})}]]';
+			}*/
+			
+			let url = '[(@{/{domainKey}/project/{projectId}(domainKey = ${domainKey}, projectId=${projectId}, tab=notice)})]';
+			let search = '[[${not #strings.isEmpty(kwd)}]]' === 'true';
+
+			if( search ) {
+				url = '[(@{/{domainKey}/project/{projectId}(domainKey = ${domainKey}, projectId=${projectId}, tab=notice, schType=${schType}, kwd=${kwd})})]';
 			}
 		
 			let totalPage = getPageCount(dataCount, pageSize);
@@ -289,6 +304,25 @@
 		
 			document.querySelector('div.page-navigation').innerHTML = 
 				dataCount === 0 ? '등록된 게시물이 없습니다.' : paging;
+			
+			const schType = '[[${schType}]]';
+			const kwd = '[[${kwd}]]';
+			
+			console.log(url);
+			console.log(search);
+			console.log(schType);
+			console.log(kwd);
+			
+			if(kwd){
+				document.getElementById('noticeSearchInput').value = kwd;
+			}
+			
+			if(schType){
+				document.getElementById('schTypeSelect').value = schType;	
+				currentNoticeFilter = schType;
+			}
+			
+			
 		});
 			
 		document.addEventListener('DOMContentLoaded', () => {

@@ -13,6 +13,7 @@ import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.domain.dto.TaskMemberDto;
 import com.tk.app.domain.dto.TeamReportDto;
 import com.tk.app.security.LoginMemberUtil;
+import com.tk.app.service.GrowthTreeService;
 import com.tk.app.service.TaskService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class TaskApiController {
 
     private final TaskService taskService;
+    private final GrowthTreeService growthTreeService;
 
     // 1. 전체 업무 목록 조회
     @GetMapping
@@ -121,10 +123,15 @@ public class TaskApiController {
 
     @PostMapping("/subtasks/{subTaskId}/daily-reports")
     public ResponseEntity<DailyReportDto> createDailyReport(
+            @PathVariable("domainKey") String domainKey,
+            @PathVariable("projectId") Long projectId,
             @PathVariable("subTaskId") Long subTaskId,
             @RequestBody DailyReportDto dto) {
+
         dto.setSubTaskId(subTaskId);
-        return ResponseEntity.ok(taskService.createDailyReport(dto));
+
+        return ResponseEntity.ok(
+                growthTreeService.createDailyReportWithExp(dto, projectId, domainKey));
     }
 
     @PutMapping("/daily-reports/{dailyReportId}")
@@ -142,14 +149,34 @@ public class TaskApiController {
     }
 
     @DeleteMapping("/daily-reports/{dailyReportId}")
-    public ResponseEntity<Map<String, Object>> deleteDailyReport(@PathVariable("dailyReportId") Long dailyReportId) {
-        boolean deleted = taskService.deleteDailyReport(dailyReportId);
+    public ResponseEntity<Map<String, Object>> deleteDailyReport(
+            @PathVariable("domainKey") String domainKey,
+            @PathVariable("projectId") Long projectId,
+            @PathVariable("dailyReportId") Long dailyReportId) {
+
         Map<String, Object> res = new HashMap<>();
-        res.put("success", deleted);
-        if (!deleted) {
-            res.put("message", "상급자가 이미 열람/확인한 보고서는 삭제할 수 없습니다.");
+
+        try {
+            boolean deleted = growthTreeService.deleteDailyReportWithExp(
+                    dailyReportId, projectId, domainKey);
+
+            res.put("success", deleted);
+
+            if (!deleted) {
+                res.put("message", "이미 삭제되었거나 삭제할 수 없는 보고서입니다.");
+                return ResponseEntity.status(409).body(res);
+            }
+
+            return ResponseEntity.ok(res);
+        } catch (IllegalArgumentException e) {
+            res.put("success", false);
+            res.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(res);
+        } catch (RuntimeException e) {
+            res.put("success", false);
+            res.put("message", "일일 보고서 삭제 처리 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(res);
         }
-        return ResponseEntity.ok(res);
     }
     
     // 11. 캘린더 일정 (업무 연동 + 개인 일정 추가/삭제) API 
@@ -189,18 +216,21 @@ public class TaskApiController {
             @PathVariable("projectId") Long projectId,
             @RequestBody Map<String, Object> req) {
 
-        Long currentPmId = req.get("currentProjectMemberId") != null
-                ? Long.valueOf(String.valueOf(req.get("currentProjectMemberId"))) : 1L;
+        Long currentPmId = Long.valueOf(String.valueOf(req.get("currentProjectMemberId")));
 
         Map<String, Object> res = new HashMap<>();
-        if (!taskService.isTeamLeaderOrAbove(currentPmId)) {
+        Map<String, Object> isTeamLeaderMap = new HashMap<>();
+        isTeamLeaderMap.put("currentProjectMemberId", currentPmId);
+        isTeamLeaderMap.put("projectId", projectId);
+        
+        if (!taskService.isTeamLeaderOrAbove(isTeamLeaderMap)) {
             res.put("success", false);
             res.put("message", "팀 리더만 공지를 작성할 수 있습니다.");
             return ResponseEntity.status(403).body(res);
         }
 
         req.put("projectId", projectId);
-        req.put("memberId", taskService.getMemberIdByProjectMemberId(currentPmId));
+        req.put("memberId", currentPmId);
         if (req.get("taskId") != null && String.valueOf(req.get("taskId")).isBlank()) {
             req.put("taskId", null);
         }
@@ -213,14 +243,17 @@ public class TaskApiController {
 
     @PutMapping("/notices/{noticeId}")
     public ResponseEntity<Map<String, Object>> updateTaskNotice(
+    		@PathVariable("projectId")Long projectId,
             @PathVariable("noticeId") Long noticeId,
             @RequestBody Map<String, Object> req) {
 
-        Long currentPmId = req.get("currentProjectMemberId") != null
-                ? Long.valueOf(String.valueOf(req.get("currentProjectMemberId"))) : 1L;
+        Long currentPmId = Long.valueOf(String.valueOf(req.get("currentProjectMemberId")));
 
         Map<String, Object> res = new HashMap<>();
-        if (!taskService.isTeamLeaderOrAbove(currentPmId)) {
+        Map<String, Object> isTeamLeaderMap = new HashMap<>();
+        isTeamLeaderMap.put("currentProjectMemberId", currentPmId);
+        isTeamLeaderMap.put("projectId", projectId);
+        if (!taskService.isTeamLeaderOrAbove(isTeamLeaderMap)) {
             res.put("success", false);
             res.put("message", "팀 리더만 공지를 수정할 수 있습니다.");
             return ResponseEntity.status(403).body(res);
@@ -239,11 +272,15 @@ public class TaskApiController {
 
     @DeleteMapping("/notices/{noticeId}")
     public ResponseEntity<Map<String, Object>> deleteTaskNotice(
+    		@PathVariable("projectId") Long projectId,
             @PathVariable("noticeId") Long noticeId,
-            @RequestParam(value = "currentProjectMemberId", defaultValue = "1") Long currentPmId) {
+            @RequestParam(value = "currentProjectMemberId") Long currentPmId) {
 
         Map<String, Object> res = new HashMap<>();
-        if (!taskService.isTeamLeaderOrAbove(currentPmId)) {
+        Map<String, Object> isTeamLeaderMap = new HashMap<>();
+        isTeamLeaderMap.put("currentProjectMemberId", currentPmId);
+        isTeamLeaderMap.put("projectId", projectId);
+        if (!taskService.isTeamLeaderOrAbove(isTeamLeaderMap)) {
             res.put("success", false);
             res.put("message", "팀 리더만 공지를 삭제할 수 있습니다.");
             return ResponseEntity.status(403).body(res);
