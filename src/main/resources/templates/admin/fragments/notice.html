@@ -25,7 +25,12 @@
 				</thead>
 				<tbody>
 					<tr th:each="notice : ${noticeList}">
-						<td><a th:href="@{/admin/notice/{id}(id=${notice.notice_id})}" th:text="${notice.title}"></a></td>
+						<td>
+						    <a th:href="@{/admin/notice/{id}(id=${notice.notice_id})}" class="notice-title-link">
+						        <span class="notice-title-text" th:text="${notice.title}"></span>
+						        <span class="notice-new-badge" th:if="${notice.is_new == 1}">NEW</span>
+						    </a>
+						</td>
 						<td th:text="${notice.name}"></td>
 						<td th:text="${#dates.format(notice.created, 'yyyy-MM-dd')}"></td>
 						<td>
@@ -33,6 +38,12 @@
 							<span th:if="${notice.file_count == 0}">-</span>
 						</td>
 						<td th:text="${notice.status == 1 ? '공개' : '비공개'}"></td>
+					</tr>
+					
+					<tr th:if="${noticeList == null or #lists.isEmpty(noticeList)}">
+					    <td colspan="5" style="text-align: center; padding: 35px 0; color: #888;">
+					        검색 결과가 없습니다.
+					    </td>
 					</tr>
 				</tbody>
 			</table>

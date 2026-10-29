@@ -46,6 +46,11 @@
 						<td v-text="workspace.member_count"></td>
 						<td v-text="workspace.active === 'Y' ? '활성' : '정지'"></td>
 					</tr>
+					<tr v-if="pagedWorkspaces.length === 0">
+					    <td colspan="5" style="text-align: center; padding: 35px 0; color: #888;">
+					        검색 결과가 없습니다.
+					    </td>
+					</tr>
 				</tbody>
 			</table>
 
@@ -164,10 +169,14 @@
 				</thead>
 				<tbody>
 					<tr v-for="pm in pagedPmChanges" :key="pm.pm_change_id">
-						<td v-text="pm.workspace_name"></td>
+						<td>
+						    <button type="button" class="pm-detail-link" @click="showPmDetail(pm)" v-text="pm.workspace_name"></button>
+						</td>
 						<td v-text="pm.old_pm_name"></td>
 						<td v-text="pm.new_pm_name"></td>
-						<td v-text="pm.reason"></td>
+						<td>
+						    <span class="pm-reason-text" v-text="pm.reason"></span>
+						</td>
 						<td
 							v-text="pm.status === 0 ? '승인 대기' : pm.status === 1 ? '승인' : '거절'">
 						</td>
@@ -185,6 +194,52 @@
 					</tr>
 				</tbody>
 			</table>
+			
+			<!-- 사장 변경 요청 상세보기 모달 -->
+			<div class="pm-modal-overlay" v-if="selectedPmChange" @click.self="closePmDetail">
+			    <div class="pm-modal-box">
+			        <div class="pm-modal-header">
+			            <h3>사장 변경 요청 상세정보</h3>
+			            <button type="button" class="pm-modal-close" @click="closePmDetail">✕</button>
+			        </div>
+			
+			        <div class="pm-modal-body">
+			            <div class="pm-modal-row">
+			                <span>워크스페이스</span>
+			                <strong v-text="selectedPmChange.workspace_name"></strong>
+			            </div>
+			            <div class="pm-modal-row">
+			                <span>기존 사장</span>
+			                <strong v-text="selectedPmChange.old_pm_name"></strong>
+			            </div>
+			            <div class="pm-modal-row">
+			                <span>변경할 사장</span>
+			                <strong v-text="selectedPmChange.new_pm_name"></strong>
+			            </div>
+			            <div class="pm-modal-row">
+						    <span>신청일</span>
+						    <strong v-text="selectedPmChange.requested ? selectedPmChange.requested.substring(0, 10) : '-'"></strong>
+						</div>
+						
+						<div class="pm-modal-row">
+						    <span>처리일</span>
+						    <strong v-text="selectedPmChange.processed ? selectedPmChange.processed.substring(0, 10) : '미처리'"></strong>
+						</div>
+			            <div class="pm-modal-row">
+			                <span>요청 사유</span>
+			                <strong v-text="selectedPmChange.reason"></strong>
+			            </div>
+			            <div class="pm-modal-row">
+			                <span>처리 상태</span>
+			                <strong v-text="selectedPmChange.status === 0 ? '승인 대기' : selectedPmChange.status === 1 ? '승인' : '거절'"></strong>
+			            </div>
+			        </div>
+			
+			        <div class="pm-modal-footer">
+			            <button type="button" class="btn-subtle" @click="closePmDetail">닫기</button>
+			        </div>
+			    </div>
+			</div>
 
 
 			<!-- 변경 요청 페이징 -->
@@ -220,6 +275,7 @@
 	    	        keyword: '',
 	    	        status: '',
 	    	        selectedWorkspace: null,
+	    	        selectedPmChange: null,
 	    	        stopReason: ''
 	    	    };
 	    	},
@@ -285,6 +341,14 @@
 	
 	    	    closeDetail: function() {
 	    	        this.selectedWorkspace = null;
+	    	    },
+	    	    
+	    	    showPmDetail: function(pm) {
+	    	        this.selectedPmChange = pm;
+	    	    },
+
+	    	    closePmDetail: function() {
+	    	        this.selectedPmChange = null;
 	    	    },
 	    	    
 	    	    changeWorkspaceStatus: function(active) {

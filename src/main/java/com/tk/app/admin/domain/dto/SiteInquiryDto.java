@@ -17,4 +17,5 @@ public class SiteInquiryDto {
 	private Date answered;
 	private Date created;
 	private Date updated;
+	private String name;
 }

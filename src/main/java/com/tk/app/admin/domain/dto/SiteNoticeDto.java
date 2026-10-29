@@ -18,4 +18,7 @@ public class SiteNoticeDto {
 	private String member_name;
 	private int file_count;
 	private String name;
+	
+	// new 딱지용
+	private int is_new;
 }

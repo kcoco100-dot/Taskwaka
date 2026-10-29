@@ -3,9 +3,9 @@
 <body>
 
 <div th:fragment="content">
-
-	<link rel="stylesheet" th:href="@{/dist/css/admin-faq.css}">
-    
+<th:block>
+	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-faq.css}">
+</th:block>    
     <div class="panel-card">
 	    <div class="faq-header">
 	        <div class="panel-card-title">FAQ 관리</div>
@@ -61,7 +61,13 @@
                     <td th:text="${faq.faqId}"></td>
 
                     <td>
-                        <span class="faq-preview" th:text="${faq.question}" th:title="${faq.question}"></span>
+                        <span class="faq-preview faq-detail-link" 
+                        		th:text="${faq.question}" 
+                        		th:title="${faq.question}" 
+                        		th:attr="data-faq-id=${faq.faqId},data-question=${faq.question},data-answer=${faq.answer}"
+                        		onclick="showFaqDetail(this)">
+                        		
+                        	</span>
                         <span class="faq-category-text" th:text="|${faq.category} / ${faq.subcategory}|"></span>
                     </td>
 
@@ -84,6 +90,40 @@
                 </tr>
             </tbody>
         </table>
+        
+        <!-- FAQ 상세보기 모달 -->
+		<div id="faqDetailModal" class="faq-modal-overlay" style="display:none;">
+		    <div class="faq-modal-box">
+		        <div class="faq-modal-header">
+		            <div>
+		                <span class="faq-modal-label">FAQ MANAGEMENT</span>
+		                <h3>FAQ 상세보기</h3>
+		            </div>
+		            <button type="button" class="faq-modal-close" onclick="closeFaqDetail()">×</button>
+		        </div>
+		
+		        <div class="faq-modal-body">
+		            <div class="faq-modal-number">
+		                <span>FAQ 번호</span>
+		                <strong id="faqDetailId"></strong>
+		            </div>
+		
+		            <div class="faq-modal-section">
+		                <div class="faq-modal-section-title">질문</div>
+		                <div class="faq-modal-content faq-modal-question" id="faqDetailQuestion"></div>
+		            </div>
+		
+		            <div class="faq-modal-section">
+		                <div class="faq-modal-section-title">답변</div>
+		                <div class="faq-modal-content faq-modal-answer" id="faqDetailAnswer"></div>
+		            </div>
+		        </div>
+		
+		        <div class="faq-modal-footer">
+		            <button type="button" class="btn-sage" onclick="closeFaqDetail()">닫기</button>
+		        </div>
+		    </div>
+		</div>
 
         <div class="faq-pagination" th:if="${totalPages > 1}">
 
@@ -144,6 +184,24 @@
         if (selectedSubcategory) {
             document.getElementById('faqSearchSubcategory').value = selectedSubcategory;
         }
+    </script>
+    
+    <script type="text/javascript">
+    		function showFaqDetail(element) {
+    			const faqId = element.getAttribute('data-faq-id');
+    			const question = element.getAttribute('data-question');
+    			const answer = element.getAttribute('data-answer');
+    			
+    			document.getElementById('faqDetailId').textContent = '#' + faqId;
+    			document.getElementById('faqDetailQuestion').textContent = question;
+    			document.getElementById('faqDetailAnswer').textContent = answer;
+    			document.getElementById('faqDetailModal').style.display = 'flex';
+    		}
+    		
+    		function closeFaqDetail() {
+    			document.getElementById('faqDetailModal').style.display = 'none';
+
+    		}
     </script>
 
 </div>

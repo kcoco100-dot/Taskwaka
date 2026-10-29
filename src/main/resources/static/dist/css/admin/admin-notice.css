@@ -552,3 +552,50 @@ a.notice-list-btn:hover {
         justify-content: flex-end;
     }
 }
+
+.notice-title-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #5b432f;
+}
+
+.notice-title-link:hover .notice-title-text {
+    color: #7a5a3d;
+    text-decoration: underline;
+}
+
+.notice-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #5b432f;
+}
+
+/* 공지사항 NEW 딱지 */
+.notice-new-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 4px;
+    border: 1px solid #f3c8c8;
+    border-radius: 3px;
+    background: #fffafa;
+    color: #e53935;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+    animation: newGlow 2s ease-in-out infinite;
+}
+
+/* 은은하게 반짝이는 효과 */
+@keyframes newGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 rgba(229, 57, 53, 0);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(229, 57, 53, 0.5);
+    }
+}
