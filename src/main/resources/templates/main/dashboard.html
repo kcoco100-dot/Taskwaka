@@ -61,10 +61,10 @@
 							</span>
 						</div>
 						<p class="overview-stat-value">
-							<th:block th:text="${#lists.size(todayTasks)}">02</th:block>
+							<th:block th:text="${#lists.size(todayTasks) + #lists.size(todayProjects)}">0</th:block>
 							<span>건</span>
 						</p>
-						<p class="overview-stat-description">업무 기간에 포함된 오늘의 담당 업무</p>
+						<p class="overview-stat-description">오늘이 기간에 포함된 담당 업무와 참여 프로젝트</p>
 					</article>
 
 					<article class="overview-stat">
@@ -110,7 +110,11 @@
 						        <span class="overview-task-check" aria-hidden="true"></span>
 						
 						        <div class="overview-task-copy">
-						            <h3 th:text="${task.title}">업무 제목</h3>
+						            <h3>
+						                <a class="text-reset"
+						                   th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${task.projectId}, tab='document')}"
+						                   th:text="${task.title}">업무 제목</a>
+						            </h3>
 						            <p>
 						                <span th:text="${task.subject}">프로젝트명</span>
 						                <span th:text="|${task.endAt} 마감|">마감일</span>
@@ -204,8 +208,9 @@
 							</div>
 						</div>
 						<ul class="overview-schedule-list">
-							<li th:if="${#lists.isEmpty(todayTasks)}">
-								오늘에 해당하는 담당 업무가 없습니다.
+							<!-- 오늘의 업무와 프로젝트가 모두 없을 때 표시 -->
+							<li th:if="${#lists.isEmpty(todayTasks) and #lists.isEmpty(todayProjects)}">
+								오늘에 해당하는 일정이 없습니다.
 							</li>
 							<li th:each="task:${todayTasks}">
 								<span class="overview-schedule-time">업무</span>
@@ -223,6 +228,17 @@
 							     </th:block>
 							     
 							</li>
+							
+							<!-- 오늘이 프로젝트 기간에 포함되는 참여 프로젝트 표시 -->
+							<li th:each="project : ${todayProjects}">
+								<span class="overview-schedule-time">프로젝트</span>
+								<span class="overview-schedule-line" aria-hidden="true"></span>
+								<div>
+									<h3 th:text="${project.subject}">프로젝트명</h3>
+									<p th:text="|${project.startAt} ~ ${project.endAt}|">프로젝트 기간</p>
+								</div>
+							</li>
+							
 						</ul>
 					</article>
 

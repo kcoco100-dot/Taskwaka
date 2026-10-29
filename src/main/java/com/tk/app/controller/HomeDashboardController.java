@@ -1,13 +1,17 @@
 package com.tk.app.controller;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,6 +64,7 @@ public class HomeDashboardController {
 
 		List<MyTaskDto> myTasks = myTaskService.findTasksList(
 				worksapce.getWorkspaceId(), worksapce.getMemberId());
+		// log.info("대시보드 내 업무 조회: workspaceId={}, memberId={}, taskCount={}", worksapce.getWorkspaceId(), worksapce.getMemberId(), myTasks.size());
 
 		HomeDashboardDataDto dashboardData = myTaskService.calculateHomeDashboardData(myTasks);
 		
@@ -81,7 +86,23 @@ public class HomeDashboardController {
 				.findParticipatingProjects(worksapce.getWorkspaceId(), worksapce.getMemberId());
 
 		model.addAttribute("participatingProjects", participatingProjects);
-
+		
+		// 오늘 프로젝트 일정
+		List<ParticipatingProjectDto> todayProjects = new ArrayList<>();
+		for(ParticipatingProjectDto projects : participatingProjects) {
+			if (projects.getStartAt() == null || projects.getStartAt().isBlank()
+					|| projects.getEndAt() == null || projects.getEndAt().isBlank()) {
+				continue;
+			}
+			
+			LocalDate start = LocalDate.parse(projects.getStartAt());
+			LocalDate end = LocalDate.parse(projects.getEndAt());
+			
+			if(!dashboardData.getToday().isBefore(start) && !dashboardData.getToday().isAfter(end)) {
+				todayProjects.add(projects);
+			}
+		}
+		model.addAttribute("todayProjects", todayProjects);
 		GrowthTreeDto growthTree = growthTreeService.findGrowthTree(worksapce.getWorkspaceId());
 		
 		// 목표 경험치를 찾기 위해 성장단계 목록 조회
@@ -151,6 +172,30 @@ public class HomeDashboardController {
 				workspace.getWorkspaceId(), workspace.getMemberId(), dto);
 	}
 	
+	// HOME 개인 일정 수정
+	@PutMapping("/personal-schedules/{scheduleId}")
+	@ResponseBody
+	public int updatePersonalSchedule(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@PathVariable("scheduleId") long scheduleId,
+			@RequestBody HomePersonalScheduleDto dto) {
+
+		return homePersonalScheduleService.updatePersonalSchedule(
+				workspace.getWorkspaceId(), workspace.getMemberId(),
+				scheduleId, dto);
+	}
+	
+	// HOME 개인 일정 삭제
+	@DeleteMapping("/personal-schedules/{scheduleId}")
+	@ResponseBody
+	public int deletePersonalSchedule(
+			@RequestAttribute("workspace") WorkspaceDto workspace,
+			@PathVariable("scheduleId") long scheduleId) {
+
+		return homePersonalScheduleService.deletePersonalSchedule(
+				workspace.getWorkspaceId(), workspace.getMemberId(), scheduleId);
+	}
+
 	// 캘린더 일정
 	@GetMapping("/personal-schedules")
 	@ResponseBody

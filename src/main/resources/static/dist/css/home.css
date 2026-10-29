@@ -318,7 +318,7 @@ body:has(.home-layout) > main {
 
 #personalScheduleModal .modal-dialog {
     width: calc(100% - 32px);
-    max-width: 500px;
+    max-width: 540px;
     margin: 28px auto;
 }
 
@@ -327,26 +327,28 @@ body:has(.home-layout) > main {
     max-height: calc(100dvh - 56px);
     overflow: hidden;
     border: 1px solid #E8E2D9;
-    border-radius: 22px;
+    border-radius: 18px;
     background: #FFFFFF;
     color: #594331;
-    box-shadow: 0 24px 70px rgba(54, 43, 31, 0.18);
+    box-shadow: 0 20px 60px rgba(54, 43, 31, 0.16);
 }
 
 #personalScheduleModal .modal-header {
     flex-shrink: 0;
-    padding: 24px 26px;
+    gap: 16px;
+    padding: 22px 26px;
     border-bottom: 1px solid #EAE5DC;
-    background: #F7F8F2;
+    background: #F6F8F2;
 }
 
 #personalScheduleModal .modal-title {
     margin: 0;
     color: #465B38;
     font-family: inherit;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.4px;
+    line-height: 1.5;
 }
 
 #personalScheduleModal .btn-close {
@@ -369,19 +371,61 @@ body:has(.home-layout) > main {
 }
 
 #personalScheduleForm {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+        "title-label title-label"
+        "title title"
+        "content-label content-label"
+        "content content"
+        "start-label end-label"
+        "start end";
+    gap: 8px 16px;
     margin: 0;
 }
 
 #personalScheduleForm .form-label {
     display: block;
-    margin: 0 0 8px;
+    margin: 0;
     color: #594331;
     font-size: 13px;
     font-weight: 700;
 }
 
 #personalScheduleForm .form-control + .form-label {
-    margin-top: 20px;
+    margin-top: 14px;
+}
+
+#personalScheduleForm label[for="personalScheduleTitle"] {
+    grid-area: title-label;
+}
+
+#personalScheduleTitle {
+    grid-area: title;
+}
+
+#personalScheduleForm label[for="personalScheduleContent"] {
+    grid-area: content-label;
+}
+
+#personalScheduleContent {
+    grid-area: content;
+}
+
+#personalScheduleForm label[for="personalScheduleStartAt"] {
+    grid-area: start-label;
+}
+
+#personalScheduleStartAt {
+    grid-area: start;
+}
+
+#personalScheduleForm label[for="personalScheduleEndAt"] {
+    grid-area: end-label;
+}
+
+#personalScheduleEndAt {
+    grid-area: end;
 }
 
 #personalScheduleForm .form-control {
@@ -390,8 +434,8 @@ body:has(.home-layout) > main {
     min-height: 46px;
     padding: 11px 14px;
     border: 1px solid #E0DCD3;
-    border-radius: 11px;
-    background: #FCFBF8;
+    border-radius: 10px;
+    background: #FFFFFF;
     color: #594331;
     font-family: inherit;
     font-size: 14px;
@@ -413,8 +457,8 @@ body:has(.home-layout) > main {
 }
 
 #personalScheduleForm textarea.form-control {
-    height: 104px;
-    min-height: 104px;
+    height: 120px;
+    min-height: 120px;
     max-height: 220px;
     resize: vertical;
 }
@@ -426,7 +470,7 @@ body:has(.home-layout) > main {
 #personalScheduleModal .modal-footer {
     flex-shrink: 0;
     gap: 10px;
-    padding: 18px 26px;
+    padding: 16px 26px;
     border-top: 1px solid #EAE5DC;
     background: #FCFBF8;
 }
@@ -442,6 +486,7 @@ body:has(.home-layout) > main {
 }
 
 #personalScheduleModal .btn-primary {
+    order: 1;
     --bs-btn-color: #FFFFFF;
     --bs-btn-bg: #596F46;
     --bs-btn-border-color: #596F46;
@@ -458,6 +503,7 @@ body:has(.home-layout) > main {
 }
 
 #personalScheduleModal .btn-secondary {
+    order: 0;
     --bs-btn-color: #665747;
     --bs-btn-bg: #FFFFFF;
     --bs-btn-border-color: #DED7CD;
@@ -476,3 +522,4 @@ body:has(.home-layout) > main {
     outline-offset: 3px;
     box-shadow: none;
 }
+

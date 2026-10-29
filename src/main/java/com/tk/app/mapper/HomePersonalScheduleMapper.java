@@ -21,4 +21,13 @@ public interface HomePersonalScheduleMapper {
 	List<HomePersonalScheduleDto> findPersonalSchedules(
 			@Param("workspaceId") long workspaceId,
 			@Param("memberId") long memberId);
+	
+	// 현재 워크에서 로그인 회원이 소유한 HOME 개인 일정 수정
+	int updatePersonalSchedule(HomePersonalScheduleDto dto);
+
+	// 현재 워크에서 로그인 회원이 소유한 HOME 개인 일정 삭제
+	int deletePersonalSchedule(
+			@Param("workspaceId") long workspaceId,
+			@Param("workspaceMemberId") long workspaceMemberId,
+			@Param("scheduleId") long scheduleId);
 }

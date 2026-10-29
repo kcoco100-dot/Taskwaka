@@ -62,5 +62,51 @@
 		  	   AND status = 0
 		  	   AND left IS NULL
 	</insert>
+	
+	<!-- 현재 워크에서 로그인 회원이 소유한 HOME 개인 일정 수정 -->
+	<update id="updatePersonalSchedule"
+			parameterType="com.tk.app.domain.dto.HomePersonalScheduleDto">
+		UPDATE calendar_events ce
+		SET title = #{title, jdbcType=VARCHAR},
+			content = #{content, jdbcType=VARCHAR},
+			start_at = TO_DATE(#{startAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+			end_at = TO_DATE(#{endAt, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+			updated_at = SYSDATE
+		WHERE ce.schedule_id = #{scheduleId}
+			AND ce.workspace_id = #{workspaceId}
+			AND ce.workspace_member_id = #{workspaceMemberId}
+			AND ce.schedule_type = 'PERSONAL'
+			AND ce.project_id IS NULL
+			AND ce.task_id IS NULL
+			AND ce.sub_task_id IS NULL
+			AND EXISTS (
+				SELECT 1
+				FROM workspace_members wm
+				WHERE wm.workspace_member_id = ce.workspace_member_id
+					AND wm.workspace_id = ce.workspace_id
+					AND wm.status = 0
+					AND wm."LEFT" IS NULL
+			)
+	</update>
+
+	<!-- 현재 워크에서 로그인 회원이 소유한 HOME 개인 일정 삭제 -->
+	<delete id="deletePersonalSchedule">
+		DELETE FROM calendar_events ce
+		WHERE ce.schedule_id = #{scheduleId}
+			AND ce.workspace_id = #{workspaceId}
+			AND ce.workspace_member_id = #{workspaceMemberId}
+			AND ce.schedule_type = 'PERSONAL'
+			AND ce.project_id IS NULL
+			AND ce.task_id IS NULL
+			AND ce.sub_task_id IS NULL
+			AND EXISTS (
+				SELECT 1
+				FROM workspace_members wm
+				WHERE wm.workspace_member_id = ce.workspace_member_id
+					AND wm.workspace_id = ce.workspace_id
+					AND wm.status = 0
+					AND wm."LEFT" IS NULL
+			)
+	</delete>
 
 </mapper>
