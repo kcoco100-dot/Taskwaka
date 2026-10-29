@@ -30,6 +30,8 @@ public interface ManageProjectMapper {
 	public int insertManageTask(ManageTaskDto dto) throws SQLException;
 	public int updateManageTask(ManageTaskDto dto) throws SQLException;
 	public int deleteManageTask(Map<String, Object> map) throws SQLException;
+	public int countDuplicateTaskLevel(Map<String, Object> map) throws SQLException;
+	
 	public int countValidTaskTL(Map<String, Object> map) throws SQLException;
 	public int countManageTaskReports(Map<String, Object> map) throws SQLException;
 	public Long lockManageProject(Map<String, Object> map) throws SQLException;

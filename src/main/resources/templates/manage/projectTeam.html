@@ -158,7 +158,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const root = document.getElementById("pt-editor");
     if (!root) return;
 
-    const initialMembers = /*[[${teamMembers}]]*/ [];
+    const workspaceRoleNames = /*[[${workspaceRoleNames}]]*/ {};
+
+    const initialMembers = (/*[[${teamMembers}]]*/ []).map(member => {
+        const workspaceMemberId = member.workspaceMemberId ?? member.id;
+        const roleName = workspaceRoleNames[String(workspaceMemberId)] || '';
+
+        return {
+            ...member,
+            originalName: member.name,
+            name: roleName ? `${roleName} ${member.name}` : member.name
+        };
+    });
+    
     const pageUrl = /*[[@{/{domainKey}/manage/projectMembers(domainKey=${domainKey})}]]*/ "";
     const saveUrl = /*[[@{/{domainKey}/manage/projectMembers/save(domainKey=${domainKey})}]]*/ "";
     const csrfToken = /*[[${_csrf != null ? _csrf.token : null}]]*/ null;
@@ -168,6 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
         String(row.id), {
             id: String(row.id),
             name: row.name || "이름 없음",
+            originalName: row.originalName || row.name || "이름 없음",
             role: row.role == null ? null : Number(row.role)
         }
     ]));
@@ -318,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const avatar = document.createElement("span");
                 avatar.className = "pt-avatar";
-                avatar.textContent = [...member.name][0] || "?";
+                avatar.textContent = [...member.originalName.trim()][0] || "?";
                 avatar.setAttribute("aria-hidden", "true");
 
                 const name = document.createElement("span");

@@ -331,9 +331,17 @@ public class ManageProjectController {
 
 			response.put("status", "success");
 
+		} catch (IllegalArgumentException e) {
+		    log.info("taskWriteSubmit : ", e);
+		    
+		    response.put("status", "error");
+		    response.put("message", e.getMessage());
+		    
 		} catch (Exception e) {
-			log.info("taskWriteSubmit : ", e);
-			response.put("status", "error");
+		    log.info("taskWriteSubmit : ", e);
+		    
+		    response.put("status", "error");
+		    response.put("message", "업무 등록에 실패했습니다.");
 		}
 
 		return response;
@@ -361,10 +369,17 @@ public class ManageProjectController {
 
 			response.put("status", "success");
 
+		} catch (IllegalArgumentException e) {
+		    log.info("taskUpdateSubmit : ", e);
+		    
+		    response.put("status", "error");
+		    response.put("message", e.getMessage());
+		    
 		} catch (Exception e) {
-			log.info("taskUpdateSubmit : ", e);
-
-			response.put("status", "error");
+		    log.info("taskUpdateSubmit : ", e);
+		    
+		    response.put("status", "error");
+		    response.put("message", "업무 수정에 실패했습니다.");
 		}
 
 		return response;

@@ -85,6 +85,12 @@
 							</form>
 						</td>
 					</tr>
+					
+					<tr th:if="${members == null or #lists.isEmpty(members)}">
+					    <td colspan="10" style="text-align: center; padding: 35px 0; color: #888;">
+					        검색 결과가 없습니다.
+					    </td>
+					</tr>
 				</tbody>
 			</table>
 			<div class="member-pagination">

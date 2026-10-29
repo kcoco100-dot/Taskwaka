@@ -8,44 +8,22 @@
     <link rel="stylesheet" th:href="@{/dist/css/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/css/manage/project-list.css}">
     <link rel="stylesheet" th:href="@{/dist/css/manage/noticewrite.css}">
+	<link rel="stylesheet" th:href="@{/dist/vendor/quill/css/quill.snow.css}">
 </th:block>
 
 <th:block layout:fragment="content">
     <div class="home-layout manage-layout project-list-layout">
         <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
 
-        <section class="section project-list-page"
-                 th:with="canUseForm=${mode == 'write' ?
-                     currentRole >= 50 :
-                     (notice.status != 0 and
-                     ((notice.notice_type == 'WORKSPACE' and currentRole == 70)
-                     or ((notice.notice_type == 'PROJECT' or notice.notice_type == 'TASK')
-                     and currentRole >= 50)))}">
-
+        <section class="section project-list-page" th:with="canUseForm=${mode == 'write' ? currentRole >= 50 : (notice.status != 0 and ((notice.notice_type == 'WORKSPACE' and currentRole == 70) or ((notice.notice_type == 'PROJECT' or notice.notice_type == 'TASK') and currentRole >= 50)))}">
             <div class="page-heading">
                 <div>
-                    <h1 class="page-title"
-                        th:text="${mode == 'update' ? '공지사항 수정' : '공지사항 등록'}">
-                        공지사항 등록
-                    </h1>
-                    <p class="page-description"
-                       th:text="${mode == 'update' ? '공지사항 내용을 수정하세요.' : '새로운 공지사항을 작성하세요.'}">
-                        새로운 공지사항을 작성하세요.
-                    </p>
+                    <h1 class="page-title" th:text="${mode == 'update' ? '공지사항 수정' : '공지사항 등록'}">공지사항 등록</h1>
+                    <p class="page-description" th:text="${mode == 'update' ? '공지사항 내용을 수정하세요.' : '새로운 공지사항을 작성하세요.'}">새로운 공지사항을 작성하세요.</p>
                 </div>
             </div>
 
-            
-
-            <form name="noticeForm" id="notice-form"
-                  method="post"
-                  enctype="multipart/form-data"
-                  th:if="${canUseForm}"
-                  th:object="${notice}"
-                  th:action="${mode == 'update'} ?
-                      @{/{domainKey}/manage/noticeEdit(domainKey=${domainKey})} :
-                      @{/{domainKey}/manage/noticeWrite(domainKey=${domainKey})}">
-
+            <form name="noticeForm" id="notice-form" method="post" enctype="multipart/form-data" th:if="${canUseForm}" th:object="${notice}" th:action="${mode == 'update'} ? @{/{domainKey}/manage/noticeEdit(domainKey=${domainKey})} : @{/{domainKey}/manage/noticeWrite(domainKey=${domainKey})}">
                 <th:block th:if="${mode == 'update'}">
                     <input type="hidden" th:field="*{notice_id}">
                     <input type="hidden" name="page" th:value="${page}">
@@ -55,34 +33,18 @@
                 </th:block>
 
                 <div class="notice-write-container">
-
                     <div class="notice-form-group">
-                        <label for="noticeTitle" class="notice-form-label">
-                            공지 제목
-                        </label>
-                        <input type="text" id="noticeTitle"
-                               th:field="*{title}"
-                               class="notice-form-control"
-                               maxlength="200"
-                               placeholder="공지 제목을 입력하세요."
-                               required>
+                        <label for="noticeTitle" class="notice-form-label">공지 제목</label>
+                        <input type="text" id="noticeTitle" th:field="*{title}" class="notice-form-control" maxlength="200" placeholder="공지 제목을 입력하세요." required>
                     </div>
 
                     <div class="notice-form-group notice-scope-box">
                         <label class="notice-form-label">공지 유형</label>
-
-                        <select id="noticeType"
-                                th:if="${mode == 'write'}"
-                                th:field="*{notice_type}"
-                                class="notice-form-control"
-                                required>
+                        <select id="noticeType" th:if="${mode == 'write'}" th:field="*{notice_type}" class="notice-form-control" required>
                             <option value="">유형 선택</option>
-                            <option value="WORKSPACE"
-                                    th:if="${currentRole == 70}">워크 공지</option>
-                            <option value="PROJECT"
-                                    th:if="${currentRole >= 50}">프로젝트 공지</option>
-                            <option value="TASK"
-                                    th:if="${currentRole >= 50}">업무 공지</option>
+                            <option value="WORKSPACE" th:if="${currentRole == 70}">워크 공지</option>
+                            <option value="PROJECT" th:if="${currentRole >= 50}">프로젝트 공지</option>
+                            <option value="TASK" th:if="${currentRole >= 50}">업무 공지</option>
                         </select>
 
                         <div th:if="${mode == 'update'}">
@@ -91,141 +53,82 @@
                                 <span th:case="'PROJECT'">프로젝트 공지</span>
                                 <span th:case="'TASK'">업무 공지</span>
                             </strong>
-
-                            <p th:if="${notice.project_name != null}"
-                               th:text="|프로젝트: ${notice.project_name}|"></p>
-
-                            <p th:if="${notice.task_name != null}"
-                               th:text="|업무: ${notice.task_name}|"></p>
+                            <p th:if="${notice.project_name != null}" th:text="|프로젝트: ${notice.project_name}|"></p>
+                            <p th:if="${notice.task_name != null}" th:text="|업무: ${notice.task_name}|"></p>
                         </div>
                     </div>
 
                     <th:block th:if="${mode == 'write'}">
                         <div class="notice-form-group" id="projectField" hidden>
-                            <label for="projectId" class="notice-form-label">
-                                프로젝트 선택
-                            </label>
-                            <select id="projectId"
-                                    th:field="*{project_id}"
-                                    class="notice-form-control">
+                            <label for="projectId" class="notice-form-label">프로젝트 선택</label>
+                            <select id="projectId" th:field="*{project_id}" class="notice-form-control">
                                 <option value="">프로젝트 선택</option>
-                                <option th:each="p : ${projectOptions}"
-                                        th:value="${p.project_id}"
-                                        th:text="${p.project_name}"></option>
+                                <option th:each="p : ${projectOptions}" th:value="${p.project_id}" th:text="${p.project_name}"></option>
                             </select>
                         </div>
 
                         <div class="notice-form-group" id="taskField" hidden>
-                            <label for="taskId" class="notice-form-label">
-                                업무 선택
-                            </label>
-                            <select id="taskId"
-                                    th:field="*{task_id}"
-                                    class="notice-form-control">
+                            <label for="taskId" class="notice-form-label">업무 선택</label>
+                            <select id="taskId" th:field="*{task_id}" class="notice-form-control">
                                 <option value="">업무 선택</option>
-                                <option th:each="t : ${taskOptions}"
-                                        th:value="${t.task_id}"
-                                        th:attr="data-project=${t.project_id}"
-                                        th:text="${t.task_name}"></option>
+                                <option th:each="t : ${taskOptions}" th:value="${t.task_id}" th:attr="data-project=${t.project_id}" th:text="${t.task_name}"></option>
                             </select>
                         </div>
                     </th:block>
 
                     <div class="notice-form-group">
-                        <label for="noticeContent" class="notice-form-label">
-                            공지 내용
-                        </label>
-                        <textarea id="noticeContent"
-                                  th:field="*{content}"
-                                  class="notice-form-control"
-                                  placeholder="공지 내용을 입력하세요."
-                                  required></textarea>
+                            <label for="editor" class="notice-form-label">공지 내용</label>
+						    <div id="editor" th:utext="*{content}"></div>
+						    <input type="hidden" id="noticeContent" th:field="*{content}">
                     </div>
 
-                    <div class="notice-form-group"
-                         th:if="${mode == 'update'}">
+                    <div class="notice-form-group" th:if="${mode == 'update'}">
                         <label class="notice-form-label">기존 첨부파일</label>
-
-                        <div class="notice-scope-box">
-                            <p th:if="${#lists.isEmpty(noticeFiles)}">
-                                첨부파일이 없습니다.
-                            </p>
-
-                            <div class="notice-file-row"
-                                 th:each="file : ${noticeFiles}">
-                                <a th:href="@{/{domainKey}/manage/noticeFile/{notice_id}/{file_id}/download(domainKey=${domainKey},notice_id=${notice.notice_id},file_id=${file.notice_file_id})}"
-                                   th:text="${file.original_name}">파일명</a>
-
-                                <label>
-                                    <input type="checkbox"
-                                           name="deleteFileIds"
-                                           th:value="${file.notice_file_id}">
-                                    삭제
-                                </label>
-                            </div>
-                        </div>
+                        <p th:if="${#lists.isEmpty(noticeFiles)}">첨부파일이 없습니다.</p>
+                        <ul class="pending-upload-list existing-upload-list" th:if="${not #lists.isEmpty(noticeFiles)}">
+                            <li th:each="file : ${noticeFiles}" class="existing-file-row">
+                                <a class="pending-upload-name" th:href="@{/{domainKey}/manage/noticeFile/{notice_id}/{file_id}/download(domainKey=${domainKey},notice_id=${notice.notice_id},file_id=${file.notice_file_id})}" th:text="${file.original_name}">파일명</a>
+                                <input type="hidden" name="deleteFileIds" th:value="${file.notice_file_id}" disabled>
+                                <button type="button" class="pending-upload-remove existing-file-remove" th:attr="aria-label=|${file.original_name} 삭제|">삭제</button>
+                            </li>
+                        </ul>
                     </div>
 
                     <div class="notice-form-group">
-                        <label for="noticeFiles" class="notice-form-label"
-                               th:text="${mode == 'update' ? '새 첨부파일 추가' : '첨부파일'}">
-                            첨부파일
-                        </label>
-
+                        <label for="noticeFiles" class="notice-form-label" th:text="${mode == 'update' ? '새 첨부파일 추가' : '첨부파일'}">첨부파일</label>
                         <div class="file-upload-box">
-                            <label for="noticeFiles" class="file-upload-btn">
-                                + 파일 선택
-                            </label>
-
-                            <input type="file"
-                                   id="noticeFiles"
-                                   name="files"
-                                   class="file-input-hidden"
-                                   multiple
-                                   accept=".gif,.png,.txt,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
-
+                            <label for="noticeFiles" class="file-upload-btn">+ 파일 선택</label>
+                            <input type="file" id="noticeFiles" name="files" class="file-input-hidden" multiple accept=".gif,.png,.txt,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
                             <span id="fileNameDisplay" class="file-name-display">선택된 파일 없음</span>
-						</div>
-						<ul id="selectedNoticeFiles" class="pending-upload-list" hidden></ul>
-						<small>기존 파일을 포함하여 최대 5개까지 등록할 수 있습니다.</small>
+                        </div>
+                        <ul id="selectedNoticeFiles" class="pending-upload-list" hidden></ul>
+                        <small>기존 파일을 포함하여 최대 5개까지 등록할 수 있습니다.</small>
                     </div>
                 </div>
 
                 <div class="btn-action-group">
-                    <button type="submit"
-                            class="btn-action btn-submit"
-                            th:text="${mode == 'update' ? '수정완료' : '등록완료'}">
-                        등록완료
-                    </button>
-
+                    <button type="submit" class="btn-action btn-submit" th:text="${mode == 'update' ? '수정완료' : '등록완료'}">등록완료</button>
                     <button type="reset" class="btn-action">다시입력</button>
-
-                    <a th:if="${mode == 'write'}"
-                       class="btn-action"
-                       th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}">
-                        등록취소
-                    </a>
-
-                    <a th:if="${mode == 'update'}"
-                       class="btn-action"
-                       th:href="@{/{domainKey}/manage/noticeDetail/{notice_id}(domainKey=${domainKey},notice_id=${notice.notice_id},page=${page},noticeType=${noticeType},schType=${schType},kwd=${kwd})}">
-                        수정취소
-                    </a>
+                    <a th:if="${mode == 'write'}" class="btn-action" th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}">등록취소</a>
+                    <a th:if="${mode == 'update'}" class="btn-action" th:href="@{/{domainKey}/manage/noticeDetail/{notice_id}(domainKey=${domainKey},notice_id=${notice.notice_id},page=${page},noticeType=${noticeType},schType=${schType},kwd=${kwd})}">수정취소</a>
                 </div>
             </form>
 
             <div class="notice-write-container" th:unless="${canUseForm}">
                 <p>공지사항 등록 또는 수정 권한이 없습니다.</p>
-                <a class="btn-action"
-                   th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}">
-                    목록으로
-                </a>
+                <a class="btn-action" th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}">목록으로</a>
             </div>
         </section>
     </div>
 </th:block>
 
 <th:block layout:fragment="script">
+
+    <!-- Quill Editor -->
+    <script th:src="@{/dist/vendor/quill/js/quill.js}"></script>
+    <script th:src="@{/dist/vendor/quill/js/resize.js}"></script>
+    <script th:src="@{/dist/posts/qeditor.js}"></script>
+    
     <script>
     function renderPendingFiles(input, summary, list) {
         const selected = Array.from(input.files || []);
@@ -280,6 +183,27 @@
             return;
         }
 
+		// 기존 첨부파일 삭제 선택
+        form.querySelectorAll('.existing-file-remove').forEach(button => {
+            button.addEventListener('click', function () {
+                const row = button.closest('.existing-file-row');
+                const deleteInput = row.querySelector('input[name="deleteFileIds"]');
+
+                deleteInput.disabled = false;
+                row.hidden = true;
+            });
+        });
+
+        // 다시입력 시 삭제 선택 취소
+        form.addEventListener('reset', function () {
+            form.querySelectorAll('.existing-file-row').forEach(row => {
+                const deleteInput = row.querySelector('input[name="deleteFileIds"]');
+
+                deleteInput.disabled = true;
+                row.hidden = false;
+            });
+        });
+        
         const type = document.getElementById('noticeType');
         const project = document.getElementById('projectId');
         const task = document.getElementById('taskId');
@@ -359,6 +283,38 @@
                 }
             }, 0);
         });
+        
+		// Quill 에디터 내용 저장
+        const contentInput = document.getElementById('noticeContent');
+
+        form.addEventListener('submit', function (event) {
+            const htmlViewEL = document.querySelector('textarea#html-view');
+            const htmlContent = htmlViewEL ? htmlViewEL.value : quill.root.innerHTML;
+
+            if (!hasContent(htmlContent)) {
+                event.preventDefault();
+                alert('공지 내용을 입력하세요.');
+
+                if (htmlViewEL) {
+                    htmlViewEL.focus();
+                } else {
+                    quill.focus();
+                }
+                return;
+            }
+
+            contentInput.value = htmlContent;
+        });
+
+        // 다시입력 시 Quill 내용 복원
+        const originalContent = quill.root.innerHTML;
+
+        form.addEventListener('reset', function () {
+            setTimeout(function () {
+                quill.clipboard.dangerouslyPasteHTML(originalContent);
+            }, 0);
+        });
+        
     });
     </script>
 </th:block>

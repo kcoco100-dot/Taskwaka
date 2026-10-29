@@ -30,8 +30,10 @@
 	</select>
 	
 	<select id="selectAllInquiryList" resultType="com.tk.app.admin.domain.dto.SiteInquiryDto">
-		SELECT inquiry_id, member_id, title, content, status, created, updated, answered
-		FROM inquiries
+		SELECT i.inquiry_id, i.member_id, i.title, i.content, i.status, i.created, i.updated, i.answered, d.name
+		FROM inquiries i
+		LEFT JOIN member_details d
+		ON i.member_id  = d.member_id 
 		ORDER BY created DESC, inquiry_id DESC
 	</select>
 	

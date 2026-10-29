@@ -25,4 +25,5 @@ public class AdminPmChangeDto {
     private String workspace_name;
     private String old_pm_name;
     private String new_pm_name;
+    
 }

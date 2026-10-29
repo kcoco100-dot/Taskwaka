@@ -42,7 +42,10 @@
                         <tr class="project-list-row" th:each="member : ${teamMembers}">
                             
                             <td>
-                                <strong class="project-name" th:text="${member.name}">이팀장</strong>
+                                <strong class="project-name">
+								    <span th:text="${workspaceRoleNames[member.workspaceMemberId]}">과장</span>
+								    <span th:text="${member.name}">이팀장</span>
+								</strong>
                             </td>
                             
                             <td>

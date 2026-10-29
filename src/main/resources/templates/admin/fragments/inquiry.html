@@ -31,7 +31,7 @@
 			                <a th:href="@{/admin/inquiry/{id}(id=${inquiry.inquiry_id})}" th:text="${inquiry.title}">문의 제목</a>
 			            </td>
 			
-			            <td th:text="${inquiry.member_id}">회원번호</td>
+			            <td th:text="${inquiry.name}">이름</td>
 			
 			            <td th:text="${#dates.format(inquiry.created, 'yyyy-MM-dd')}">등록일</td>
 			

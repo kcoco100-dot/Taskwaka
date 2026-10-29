@@ -181,3 +181,108 @@
     border-radius: 8px;
     cursor: pointer;
 }
+
+/* 사장 변경 요청 상세보기 링크 */
+.pm-detail-link {
+    border: none;
+    background: none;
+    padding: 0;
+    color: #654b37;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.pm-detail-link:hover {
+    color: #94704f;
+    text-decoration: none;
+}
+
+/* 사장 변경 요청 상세보기 모달 */
+.pm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 27, 23, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.pm-modal-box {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.pm-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eee8e2;
+}
+
+.pm-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #43392f;
+}
+
+.pm-modal-close {
+    border: none;
+    background: none;
+    font-size: 20px;
+    color: #888;
+    cursor: pointer;
+}
+
+.pm-modal-body {
+    padding: 12px 24px;
+}
+
+.pm-modal-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid #f1eeea;
+    font-size: 14px;
+}
+
+.pm-modal-row:last-child {
+    border-bottom: none;
+}
+
+.pm-modal-row span {
+    color: #888;
+    flex-shrink: 0;
+}
+
+.pm-modal-row strong {
+    color: #43392f;
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.pm-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px;
+    background: #faf9f7;
+}
+
+/* 사장 변경 요청 목록 - 요청 사유 길이 제한 */
+.pm-reason-text {
+    display: block;
+    max-width: 250px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

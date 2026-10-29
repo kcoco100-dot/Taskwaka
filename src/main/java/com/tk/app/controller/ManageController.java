@@ -101,8 +101,18 @@ public class ManageController {
             List<ProjectTeamView> rawMembers = projectMemberRepository.findWorkspaceMembersWithProject(workspaceId, kwd);
 
 			Map<Long, WorkspaceMemberGroupDto> groupedMembers = new LinkedHashMap<>();
+			Map<Long, String> workspaceRoleNames = new HashMap<>();
+			
 			for (ProjectTeamView view : rawMembers) {
-				
+			    Integer workspaceRole = view.getWorkspaceRole();
+			    String roleName = workspaceRole == null ? ""
+			            : workspaceRole == 70 ? "사장"
+			            : workspaceRole == 50 ? "과장"
+			            : workspaceRole == 30 ? "대리"
+			            : workspaceRole == 10 ? "사원" : "";
+
+			    workspaceRoleNames.put(view.getWorkspaceMemberId(), roleName);
+			
 				WorkspaceMemberGroupDto groupDto = groupedMembers.computeIfAbsent(view.getWorkspaceMemberId(), k -> {
 					WorkspaceMemberGroupDto newDto = new WorkspaceMemberGroupDto();
 					newDto.setWorkspaceMemberId(view.getWorkspaceMemberId());
@@ -155,12 +165,15 @@ public class ManageController {
 			}
 
 			model.addAttribute("teamMembers", teamMembers);
+			model.addAttribute("workspaceRoleNames", workspaceRoleNames);
 			model.addAttribute("projectList", activeProjects);
 			model.addAttribute("currentRole", currentRole);
 			model.addAttribute("ownWorkspaceMemberId", ownWorkspaceMemberId);
 
 		} catch (ResponseStatusException e) {
+			
 			throw e;
+			
 		} catch (Exception e) {
 			log.info("manage : ", e);
             throw new IllegalStateException(e);
@@ -200,6 +213,7 @@ public class ManageController {
 
 		} catch (Exception e) {
 			log.error("assignProject 오류: ", e);
+			
 			resultMap.put("status", "fail");
 		}
 
@@ -266,6 +280,7 @@ public class ManageController {
 
 		} catch (Exception e) {
 			log.error("excludeWorkspace 오류: ", e);
+			
 			resultMap.put("status", "fail");
 		}
 
@@ -298,6 +313,7 @@ public class ManageController {
             model.addAttribute("myTasks", calendarData.get("myTasks"));
         } catch (Exception e) {
             log.info("calender : ", e);
+            
             throw e;
         }
         return "manage/manageCalender";
@@ -315,6 +331,7 @@ public class ManageController {
 		if (workspaceId == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
 		}
+		
 		return "manage/meeting";
 	}
 
@@ -464,8 +481,27 @@ public class ManageController {
 	        SessionInfo info = LoginMemberUtil.getSessionInfo();
 	        
 	        Map<String, Object> data = service.getProjectMemberForm(domainKey, info.getMember_id(), projectId);
-	        model.addAllAttributes(data);
+	        
+	        Long roleWorkspaceId = service.findByDomainKey(domainKey);
+	        Map<String, String> workspaceRoleNames = new HashMap<>();
 
+	        List<ProjectTeamView> roleMembers = projectMemberRepository.findWorkspaceMembersWithProject(roleWorkspaceId, "");
+
+	        for (ProjectTeamView view : roleMembers) {
+	            Integer workspaceRole = view.getWorkspaceRole();
+	            String roleName = workspaceRole == null ? ""
+	                    : workspaceRole == 70 ? "사장"
+	                    : workspaceRole == 50 ? "과장"
+	                    : workspaceRole == 30 ? "대리"
+	                    : workspaceRole == 10 ? "사원" : "";
+
+	            workspaceRoleNames.put(String.valueOf(view.getWorkspaceMemberId()), roleName);
+	        }
+
+	        model.addAllAttributes(data);
+	        
+	        model.addAttribute("workspaceRoleNames", workspaceRoleNames);
+	        
 	    } catch (Exception e) {
 	        log.info("projectMembers : ", e);
 	        

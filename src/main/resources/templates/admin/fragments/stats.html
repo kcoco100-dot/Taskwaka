@@ -75,23 +75,23 @@
                 <tr>
 				    <td th:text="${startDate != null and endDate != null and !startDate.isEmpty() and !endDate.isEmpty() ? '선택 기간 실적' : '전체 누적 실적'}">전체 누적 실적</td>
 				    <td><span th:text="${paymentCount}">0</span> 건</td>
-				    <td>₩ <span th:text="${#numbers.formatInteger(paymentAmount, 3, 'COMMA')}">0</span></td>
-				    <td>₩ <span th:text="${#numbers.formatInteger(refundAmount, 3, 'COMMA')}">0</span></td>
-				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(netAmount, 3, 'COMMA')}">0</span></strong></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(paymentAmount, 1, 'COMMA')}">0</span></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(refundAmount, 1, 'COMMA')}">0</span></td>
+				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(netAmount, 1, 'COMMA')}">0</span></strong></td>
 				</tr>
                 <tr>
 				    <td><strong th:text="${#temporals.format(today, 'yyyy년 MM월')} + ' (당월 실적)'">이번 달 실적</strong></td>
 				    <td><span th:text="${monthPaymentCount}">0</span> 건</td>
-				    <td>₩ <span th:text="${#numbers.formatInteger(monthPaymentAmount, 3, 'COMMA')}">0</span></td>
-				    <td>₩ <span th:text="${#numbers.formatInteger(monthRefundAmount, 3, 'COMMA')}">0</span></td>
-				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(monthNetAmount, 3, 'COMMA')}">0</span></strong></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(monthPaymentAmount, 1, 'COMMA')}">0</span></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(monthRefundAmount, 1, 'COMMA')}">0</span></td>
+				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(monthNetAmount, 1, 'COMMA')}">0</span></strong></td>
 				</tr>
 				<tr>
 				    <td><strong th:text="${quarterPeriod}">이번 분기 실적</strong></td>
 				    <td><span th:text="${quarterPaymentCount}">0</span> 건</td>
-				    <td>₩ <span th:text="${#numbers.formatInteger(quarterPaymentAmount, 3, 'COMMA')}">0</span></td>
-				    <td>₩ <span th:text="${#numbers.formatInteger(quarterRefundAmount, 3, 'COMMA')}">0</span></td>
-				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(quarterNetAmount, 3, 'COMMA')}">0</span></strong></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(quarterPaymentAmount, 1, 'COMMA')}">0</span></td>
+				    <td>₩ <span th:text="${#numbers.formatInteger(quarterRefundAmount, 1, 'COMMA')}">0</span></td>
+				    <td><strong class="stats-net-revenue">₩ <span th:text="${#numbers.formatInteger(quarterNetAmount, 1, 'COMMA')}">0</span></strong></td>
 				</tr>
             </tbody>
         </table>

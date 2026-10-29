@@ -316,6 +316,27 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 		}
 	}
 
+	// 같은 프로젝트 내 업무 진행단계 중복 확인
+	private void checkTaskLevel(ManageTaskDto dto, Long excludeTaskId) throws SQLException {
+		
+	    try {
+	    	Map<String, Object> map = new HashMap<>();
+	        
+	        map.put("projectId", dto.getProject_id());
+	        map.put("taskLevel", dto.getTask_level());
+	        map.put("excludeTaskId", excludeTaskId);
+
+	        int count = mapper.countDuplicateTaskLevel(map);
+	        if (count > 0) {
+	            throw new IllegalArgumentException("해당 프로젝트에 이미 " + dto.getTask_level() + "단계 업무가 있습니다. 다른 단계를 선택하세요.");
+	        }
+	    } catch (Exception e) {
+	        log.info("checkTaskLevel : ", e);
+	        
+	        throw e;
+	    }
+	}
+	
 	// 프로젝트 변경 잠금
 	private void lockProject(Map<String, Object> map) throws SQLException {
 		try {
@@ -347,7 +368,8 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 			if (!dto.getProject_id().equals(map.get("projectId"))) {
 				throw new IllegalArgumentException("프로젝트 정보가 일치하지 않습니다.");
 			}
-
+			
+			checkTaskLevel(dto, null);
 			checkTaskWeight(dto, map);
 			int result = mapper.insertManageTask(dto);
 
@@ -393,6 +415,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 			}
 			
 			checkTaskTL(dto);
+			checkTaskLevel(dto, dto.getTask_id());
 			checkTaskWeight(dto, map);
 			
 			int result = mapper.updateManageTask(dto);

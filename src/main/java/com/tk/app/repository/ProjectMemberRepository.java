@@ -15,6 +15,7 @@ public interface ProjectMemberRepository extends JpaRepository<ManageProjectMemb
         "SELECT " +
         "   wm.workspace_member_id AS workspaceMemberId, " +
         "   md.name AS name, " +
+        "   wm.role AS workspaceRole, " +
         "   wm.status AS status, " +
         "   pm.project_member_id AS projectMemberId, " +
         "   p.project_id AS projectId, " +

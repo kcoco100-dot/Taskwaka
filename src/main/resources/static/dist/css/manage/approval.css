@@ -31,7 +31,7 @@
 
 .approval-page .approval-filters {
     display: grid;
-    grid-template-columns: 160px 140px minmax(180px, 1fr) auto;
+    grid-template-columns: 160px minmax(0, 1fr) auto;
     align-items: end;
     gap: 14px;
     margin: 0 0 26px;

@@ -160,3 +160,105 @@
 .faq-header .faq-list-actions {
     margin: 0;
 }
+
+/* FAQ 질문과 답변 길이 제한 */
+.faq-preview {
+    display: block;
+    max-width: 350px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.faq-preview.faq-detail-link {
+    cursor: pointer;
+}
+
+.faq-preview.faq-detail-link:hover {
+    color: #5d7352;
+    text-decoration: underline;
+}
+
+/* FAQ 상세보기 모달 배경 */
+.faq-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+/* 모달 창 */
+.faq-modal-box {
+    background: #fff;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* 제목 영역 */
+.faq-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.faq-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.faq-modal-header button {
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* 질문과 답변 */
+.faq-modal-body {
+    padding: 20px 0;
+}
+
+.faq-modal-body h4 {
+    margin: 16px 0 8px;
+    font-size: 14px;
+    color: #777;
+}
+
+.faq-modal-body p {
+    margin: 0;
+    line-height: 1.7;
+    color: #43392f;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* 닫기 버튼 */
+.faq-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+/* FAQ 번호 아래 구분선 */
+.faq-modal-number {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee8e2;
+}
+
+/* 질문과 답변 사이 구분선 */
+.faq-modal-section:has(.faq-modal-question) {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee8e2;
+}

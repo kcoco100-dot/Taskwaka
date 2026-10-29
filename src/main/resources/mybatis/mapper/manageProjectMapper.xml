@@ -10,16 +10,37 @@
         WHERE domain_key = #{domainKey} AND active = 'Y'
     </select>
 
-    <!-- 최상위 프로젝트 담당자 조회 -->
+    <!-- 최상위 프로젝트 담당자 조회(DT 있으면 PM 제거) -->
     <sql id="projectManagerNameValue">
-        (SELECT CASE WHEN pm.role >= 70 THEN '[PM] ' WHEN pm.role >= 50 THEN '[DT] ' WHEN pm.role >= 30 THEN '[TL] ' ELSE '[AA] ' END || md.name
-         FROM project_members pm
-         JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
-         JOIN member_details md ON wm.member_id = md.member_id
-         WHERE pm.project_id = p.project_id AND pm.status = 0
-           AND wm.workspace_id = p.workspace_id AND wm.status = 0
-         ORDER BY pm.role DESC, md.name, wm.member_id
-         FETCH FIRST 1 ROW ONLY)
+		(SELECT
+		    CASE
+		        WHEN pm.role >= 70 THEN '[PM] '
+		        WHEN pm.role >= 50 THEN '[DT] '
+		        WHEN pm.role >= 30 THEN '[TL] '
+		        ELSE '[AA] '
+		    END || md.name
+		FROM project_members pm
+		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+		JOIN member_details md ON wm.member_id = md.member_id
+		WHERE pm.project_id = p.project_id
+		  AND pm.status = 0
+		  AND wm.workspace_id = p.workspace_id
+		  AND wm.status = 0
+		  AND (
+		      pm.role != 70
+		      OR NOT EXISTS (
+		          SELECT 1
+		          FROM project_members dt
+		          JOIN workspace_members dt_wm ON dt_wm.workspace_member_id = dt.workspace_member_id
+		          WHERE dt.project_id = pm.project_id
+		            AND dt.role = 50
+		            AND dt.status = 0
+		            AND dt_wm.workspace_id = p.workspace_id
+		            AND dt_wm.status = 0
+			  )
+		)
+		ORDER BY pm.role DESC, md.name, wm.member_id
+	    FETCH FIRST 1 ROW ONLY)
     </sql>
     
     <!-- 프로젝트 담당자 표시 -->
@@ -27,13 +48,26 @@
         <include refid="projectManagerNameValue"/> AS pm_name
     </sql>
 
-    <!-- 프로젝트 참여 인원 -->
-    <sql id="projectMemberCount">
-        (SELECT COUNT(*)
-            FROM project_members pm
-            WHERE pm.project_id = p.project_id
-              AND pm.status = 0
-        ) AS member_count
+    <!-- 프로젝트 참여 인원(DT 있으면 PM 제거) -->
+	    <sql id="projectMemberCount">
+	    (SELECT COUNT(*)
+	     FROM project_members pm
+	     WHERE pm.project_id = p.project_id
+	       AND pm.status = 0
+	       AND (
+	           pm.role != 70
+	           OR NOT EXISTS (
+	               SELECT 1
+	               FROM project_members dt
+	               JOIN workspace_members dt_wm ON dt_wm.workspace_member_id = dt.workspace_member_id
+	               WHERE dt.project_id = pm.project_id
+	                 AND dt.role = 50
+	                 AND dt.status = 0
+	                 AND dt_wm.workspace_id = p.workspace_id
+	                 AND dt_wm.status = 0
+	           )
+	       )
+	    ) AS member_count
     </sql>
 
     <!-- 프로젝트 담당자 검색 조건 -->
@@ -268,6 +302,16 @@
 	    	start_at = TO_DATE(#{start_date}, 'YYYY-MM-DD'), "END" = TO_DATE(#{end_date}, 'YYYY-MM-DD'), progress_weight = #{progress_weight}, updated = SYSDATE
 	    WHERE task_id = #{task_id} AND project_id = #{project_id} AND deleted IS NULL
 	</update>
+
+	<!-- 같은 프로젝트 내 업무 진행단계 중복 확인 -->
+	<select id="countDuplicateTaskLevel" parameterType="map" resultType="int">
+	    SELECT COUNT(*)
+	    FROM tasks
+	    WHERE project_id = #{projectId} AND task_level = #{taskLevel} AND deleted IS NULL
+	    <if test="excludeTaskId != null">
+	        AND task_id != #{excludeTaskId}
+	    </if>
+	</select>
 
     <!-- 업무 숨김 -->
     <update id="deleteManageTask" parameterType="map">

@@ -87,7 +87,7 @@
                     <a class="approval-button" th:if="${nextReport != null}" th:href="@{/{domainKey}/manage/approval/detail(domainKey=${domainKey},reportCategory=${nextReport.reportCategory},reportId=${nextReport.reportId},listCategory=${listCategory},reviewStatus=${reviewStatus},schType=${schType},kwd=${kwd},page=${page})}" th:text="|다음: ${nextReport.reportTitle}|"></a>
                 </div>
                 <div class="approval-detail-footer">
-                    <a th:if="${dto.reportCategory == 1}" class="approval-button" th:href="@{/{domainKey}/manage/approval/update/{id}(domainKey=${domainKey},id=${dto.reportId})}">수정</a>
+                    <a th:if="${dto.reportCategory == 1 and (dto.reviewStatus == 1 or dto.reviewStatus == 2)}" class="approval-button" th:href="@{/{domainKey}/manage/approval/update/{id}(domainKey=${domainKey},id=${dto.reportId})}">수정</a>
                     <form th:if="${dto.reportCategory == 1}" method="post" th:action="@{/{domainKey}/manage/approval/delete/{id}(domainKey=${domainKey},id=${dto.reportId})}" onsubmit="return confirm('보고서와 첨부파일을 삭제하시겠습니까?');">
                         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button type="submit" class="approval-button">삭제</button>

@@ -9,4 +9,5 @@ public interface ProjectTeamView {
     String getProjectName();
     Integer getRole();
     Integer getStatus();
+    Integer getWorkspaceRole();
 }
