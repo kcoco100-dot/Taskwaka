@@ -34,7 +34,7 @@ async function requestCreateSubTask(taskId) {
   endDateInput.value = nextWeek.toISOString().split('T')[0];
 
   statusBadge.className = 'badge-status badge-req';
-  statusText.textContent = '● 요청';
+  statusText.textContent = '● 예정';
 
   // 상위 업무에 배정된 참여 인원(task_members) 목록 조회하여 드롭다운 구성
   assigneeSelect.innerHTML = '<option value="">불러오는 중...</option>';

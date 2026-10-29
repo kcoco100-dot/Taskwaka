@@ -3,6 +3,7 @@
  * - 인라인 실시간 수정 제거 완료
  * - 기본 조회 모드(일반 텍스트 형태) + [수정] 버튼 클릭 시에만 수정 모드(.is-editing) 전환
  * - 하위업무 담당자 전용 일일 보고서(Daily Report) CRUD 지원
+ * - 업무 목록 탭(.task-tr / .subtask-tr) 및 간트차트 탭(.gantt-tree-row) 양방향 동기화 지원
  */
 
 let currentEntityType = 'TASK'; // 'TASK' | 'SUB_TASK'
@@ -16,10 +17,10 @@ let canEditCurrentSubTask = false;
 let originalDetailSnapshot = null;
 
 const DETAIL_STATUS_MAP = {
-	0: { text: '● 요청', cls: 'badge-req' },
+	0: { text: '● 예정', cls: 'badge-req' },
 	1: { text: '● 진행', cls: 'badge-prog' },
-	2: { text: '● 완료', cls: 'badge-done' },
-	3: { text: '● 보류', cls: 'badge-hold' }
+	2: { text: '● 검토', cls: 'badge-done' },
+	3: { text: '● 완료', cls: 'badge-hold' }
 };
 
 function getCsrfHeaders() {
@@ -42,7 +43,7 @@ function getTaskApiBaseUrl() {
 
 function getCurrentProjectMemberId() {
 	const panel = document.getElementById('taskDetailSidePanel');
-		return Number(panel.dataset.currentProjectMemberId);
+	return Number(panel?.dataset.currentProjectMemberId || 0);
 }
 
 /* ==========================================================================
@@ -54,7 +55,9 @@ async function openDetailPanel(taskId, rowElem) {
 	currentEntityType = 'TASK';
 	currentOpenTaskId = Number(taskId);
 	currentOpenSubTaskId = null;
-	currentDetailRowElem = rowElem || document.querySelector(`.task-tr[data-task-id="${taskId}"]`);
+	currentDetailRowElem = rowElem 
+		|| document.querySelector(`.task-tr[data-task-id="${taskId}"]`)
+		|| document.querySelector(`.gantt-tree-row[data-type="task"][data-id="${taskId}"]`);
 
 	highlightSelectedRow(currentDetailRowElem);
 
@@ -106,77 +109,78 @@ async function openDetailPanel(taskId, rowElem) {
 /* ==========================================================================
    2. 하위업무 상세 패널 열기 (기본 조회 모드 + [수정] 버튼 노출)
    ========================================================================== */
-   async function openSubTaskDetailPanel(subTaskId, rowElem) {
-   	if (!subTaskId) return;
+async function openSubTaskDetailPanel(subTaskId, rowElem) {
+	if (!subTaskId) return;
 
-   	currentEntityType = 'SUB_TASK';
-   	currentOpenSubTaskId = Number(subTaskId);
-   	currentDetailRowElem = rowElem || document.querySelector(`.subtask-tr[data-subtask-id="${subTaskId}"]`);
+	currentEntityType = 'SUB_TASK';
+	currentOpenSubTaskId = Number(subTaskId);
+	currentDetailRowElem = rowElem 
+		|| document.querySelector(`.subtask-tr[data-subtask-id="${subTaskId}"]`)
+		|| document.querySelector(`.gantt-tree-row[data-type="subtask"][data-id="${subTaskId}"]`);
 
-   	highlightSelectedRow(currentDetailRowElem);
+	highlightSelectedRow(currentDetailRowElem);
 
-   	const panel = document.getElementById('taskDetailSidePanel');
-   	if (!panel) return;
+	const panel = document.getElementById('taskDetailSidePanel');
+	if (!panel) return;
 
-   	// 데이터 로드 전에는 일단 수정 버튼을 숨겨둠 (조회 전용 상태로 초기화)
-   	canEditCurrentSubTask = false;
-   	exitDetailEditModeUI();
-   	setPanelReadonlyMode(true);
+	// 데이터 로드 전에는 일단 수정 버튼을 숨겨둠 (조회 전용 상태로 초기화)
+	canEditCurrentSubTask = false;
+	exitDetailEditModeUI();
+	setPanelReadonlyMode(true);
 
-   	const typeBadge = document.getElementById('detailEntityTypeBadge');
-   	if (typeBadge) {
-   		typeBadge.textContent = '하위 업무';
-   		typeBadge.classList.add('subtask-mode');
-   	}
+	const typeBadge = document.getElementById('detailEntityTypeBadge');
+	if (typeBadge) {
+		typeBadge.textContent = '하위 업무';
+		typeBadge.classList.add('subtask-mode');
+	}
 
-   	const subtasksSection = document.getElementById('detailSubtasksSection');
-   	if (subtasksSection) subtasksSection.style.display = 'none';
+	const subtasksSection = document.getElementById('detailSubtasksSection');
+	if (subtasksSection) subtasksSection.style.display = 'none';
 
-   	const dailyReportSection = document.getElementById('detailDailyReportSection');
-   	if (dailyReportSection) dailyReportSection.style.display = 'block';
+	const dailyReportSection = document.getElementById('detailDailyReportSection');
+	if (dailyReportSection) dailyReportSection.style.display = 'block';
 
-   	panel.classList.add('open');
+	panel.classList.add('open');
 
-   	try {
-   		const baseUrl = getTaskApiBaseUrl();
-   		const res = await fetch(`${baseUrl}/subtasks/${subTaskId}`);
-   		if (!res.ok) throw new Error('하위업무 상세 조회 실패');
+	try {
+		const baseUrl = getTaskApiBaseUrl();
+		const res = await fetch(`${baseUrl}/subtasks/${subTaskId}`);
+		if (!res.ok) throw new Error('하위업무 상세 조회 실패');
 
-   		const data = await res.json();
-   		const subTask = data.subTask || data;
-   		currentOpenTaskId = subTask.taskId || currentOpenTaskId;
-		console.log(subTask);
+		const data = await res.json();
+		const subTask = data.subTask || data;
+		currentOpenTaskId = subTask.taskId || currentOpenTaskId;
 
-   		let candidateMembers = data.taskMembers || [];
-   		if (candidateMembers.length === 0 && currentOpenTaskId) {
-   			const memRes = await fetch(`${baseUrl}/${currentOpenTaskId}/members`);
-   			if (memRes.ok) candidateMembers = await memRes.json();
-   		}
+		let candidateMembers = data.taskMembers || [];
+		if (candidateMembers.length === 0 && currentOpenTaskId) {
+			const memRes = await fetch(`${baseUrl}/${currentOpenTaskId}/members`);
+			if (memRes.ok) candidateMembers = await memRes.json();
+		}
 
-   		/*populateAssigneeOptions(candidateMembers, subTask.projectMemberId, subTask.assigneeName);*/
-   		bindDetailCommonFields(subTask);
+		/*populateAssigneeOptions(candidateMembers, subTask.projectMemberId, subTask.assigneeName);*/
+		bindDetailCommonFields(subTask);
 
-   		// [핵심] 로그인한 사용자가 해당 하위업무 담당자일 때만 수정 버튼 및 일일보고서 작성 폼 노출
-   		const loginPmId = getCurrentProjectMemberId();
-   		const isSubTaskAssignee = Number(subTask.assigneeMemberId) === Number(loginPmId);
-   		canEditCurrentSubTask = isSubTaskAssignee;
+		// [핵심] 로그인한 사용자가 해당 하위업무 담당자일 때만 수정 버튼 및 일일보고서 작성 폼 노출
+		const loginPmId = getCurrentProjectMemberId();
+		const isSubTaskAssignee = Number(subTask.assigneeMemberId || subTask.projectMemberId) === Number(loginPmId);
+		canEditCurrentSubTask = isSubTaskAssignee;
 
-   		// 담당자 본인이면 조회 전용 해제(수정 버튼 노출), 아니면 조회 전용 배지 노출
-   		setPanelReadonlyMode(!isSubTaskAssignee);
+		// 담당자 본인이면 조회 전용 해제(수정 버튼 노출), 아니면 조회 전용 배지 노출
+		setPanelReadonlyMode(!isSubTaskAssignee);
 
-   		const reportWriteBox = document.getElementById('dailyReportWriteFormBox');
-   		if (reportWriteBox) {
-   			reportWriteBox.style.display = isSubTaskAssignee ? 'flex' : 'none';
-   		}
-   		resetDailyReportForm();
-   		await loadDailyReports(subTaskId);
-   	} catch (err) {
-   		console.error('openSubTaskDetailPanel 에러:', err);
-   		if (currentDetailRowElem) {
-   			fallbackBindFromRow(currentDetailRowElem, 'SUB_TASK');
-   		}
-   	}
-   }
+		const reportWriteBox = document.getElementById('dailyReportWriteFormBox');
+		if (reportWriteBox) {
+			reportWriteBox.style.display = isSubTaskAssignee ? 'flex' : 'none';
+		}
+		resetDailyReportForm();
+		await loadDailyReports(subTaskId);
+	} catch (err) {
+		console.error('openSubTaskDetailPanel 에러:', err);
+		if (currentDetailRowElem) {
+			fallbackBindFromRow(currentDetailRowElem, 'SUB_TASK');
+		}
+	}
+}
 
 /* ==========================================================================
    3. 조회 전용 / 수정 모드 전환 및 일괄 저장 로직
@@ -300,7 +304,7 @@ function cancelDetailEditMode() {
 		const contentEl = document.getElementById('detailContentText');
 
 		if (titleEl) titleEl.value = originalDetailSnapshot.title;
-		if (assigneeEl) assigneeEl.value = originalDetailSnapshot.projectMemberId;
+		if (assigneeEl && assigneeEl.value !== undefined) assigneeEl.value = originalDetailSnapshot.projectMemberId;
 		if (startEl) startEl.value = originalDetailSnapshot.startAt;
 		if (endEl) endEl.value = originalDetailSnapshot.endAt;
 		if (progressEl) progressEl.value = originalDetailSnapshot.progress;
@@ -335,6 +339,7 @@ async function saveDetailEditMode() {
 		return;
 	}
 
+	const fieldsToCheck = ['title', 'status', 'startAt', 'endAt', 'progress', 'content'];
 	const baseUrl = getTaskApiBaseUrl();
 	try {
 		for (const field of fieldsToCheck) {
@@ -344,10 +349,11 @@ async function saveDetailEditMode() {
 					headers: getCsrfHeaders(),
 					body: JSON.stringify({
 						field: field,
-						value: String(newValues[field])
+						fieldName: field,
+						value: String(newValues[field]),
+						fieldValue: String(newValues[field])
 					})
 				});
-				console.log(res);
 				if (!res.ok) {
 					throw new Error(`${field} 업데이트 실패`);
 				}
@@ -357,22 +363,16 @@ async function saveDetailEditMode() {
 		currentDetailStatus = parseInt(newValues.status, 10) || 0;
 		updateDetailStatusBadgeUI(currentDetailStatus);
 
-		// 담당자 변경 시 상단 아바타/작성자명 갱신 및 일일보고서 폼 권한 갱신
+		// 담당자 변경 시 상단 아바타/작성자명 갱신
 		const assigneeSelect = document.getElementById('detailAssigneeSelect');
-		const selectedAssigneeName = assigneeSelect?.options[assigneeSelect.selectedIndex]?.text || '-';
+		const selectedAssigneeName = assigneeSelect?.options 
+			? (assigneeSelect.options[assigneeSelect.selectedIndex]?.text || '-')
+			: (assigneeSelect?.textContent?.trim() || '-');
 		if (selectedAssigneeName && selectedAssigneeName !== '-') {
 			const authorNameEl = document.getElementById('detailAuthorName');
 			const avatarEl = document.getElementById('detailAuthorAvatar');
 			if (authorNameEl) authorNameEl.textContent = selectedAssigneeName;
 			if (avatarEl) avatarEl.textContent = selectedAssigneeName.substring(0, 2);
-		}
-
-		const loginPmId = getCurrentProjectMemberId();
-		const isSubTaskAssignee = Number(newValues.assigneeMemberId) === Number(loginPmId);
-		canEditCurrentSubTask = isSubTaskAssignee; // [추가] 담당자가 다른 사람으로 바뀌었으면 수정 권한도 즉시 회수
-		const reportWriteBox = document.getElementById('dailyReportWriteFormBox');
-		if (reportWriteBox) {
-			reportWriteBox.style.display = isSubTaskAssignee ? 'flex' : 'none';
 		}
 
 		syncUpdatedSubTaskToRow(newValues, selectedAssigneeName);
@@ -385,46 +385,15 @@ async function saveDetailEditMode() {
 
 
 /* ==========================================================================
-   4. 공통 데이터 바인딩 및 좌측 목록 행 동기화
+   4. 공통 데이터 바인딩 및 좌측 목록 행 / 간트차트 동기화
    ========================================================================== */
-/*function populateAssigneeOptions(members, selectedPmId, fallbackName) {
-	const selectEl = document.getElementById('detailAssigneeSelect');
-	if (!selectEl) return;
-
-	selectEl.innerHTML = '';
-
-	if (Array.isArray(members) && members.length > 0) {
-		members.forEach(m => {
-			const opt = document.createElement('option');
-			opt.value = m.projectMemberId;
-			opt.textContent = m.name || m.memberName || `멤버 #${m.projectMemberId}`;
-			if (Number(m.projectMemberId) === Number(selectedPmId)) {
-				opt.selected = true;
-			}
-			selectEl.appendChild(opt);
-		});
-	} else if (selectedPmId) {
-		const opt = document.createElement('option');
-		opt.value = selectedPmId;
-		opt.textContent = fallbackName || `담당자 #${selectedPmId}`;
-		opt.selected = true;
-		selectEl.appendChild(opt);
-	} else {
-		const opt = document.createElement('option');
-		opt.value = '';
-		opt.textContent = '미배정';
-		selectEl.appendChild(opt);
-	}
-}
-*/
-
 function bindDetailCommonFields(item) {
 	const assigneeName = document.getElementById('detailAssigneeSelect'); 
 	const avatarEl = document.getElementById('detailAuthorAvatar');
 	const authorNameEl = document.getElementById('detailAuthorName');
 	const createdDateEl = document.getElementById('detailCreatedDate');
 	
-	const assigneeNameText = item.assigneeName;
+	const assigneeNameText = item.assigneeName || item.writerName || '미배정';
 	
 	if (avatarEl) avatarEl.textContent = assigneeNameText.substring(0, 2);
 	if (authorNameEl) authorNameEl.textContent = assigneeNameText;
@@ -432,7 +401,7 @@ function bindDetailCommonFields(item) {
 		createdDateEl.textContent = item.created ? `등록일 ${formatDateOnly(item.created)}` : '등록일 -';
 	}
 	
-	if(assigneeName) assigneeName.textContent = assigneeNameText || item.writerName || '미배정';
+	if (assigneeName) assigneeName.textContent = assigneeNameText;
 
 	const titleEl = document.getElementById('detailTaskTitle');
 	if (titleEl) titleEl.value = item.title || '';
@@ -472,32 +441,65 @@ function updateDetailStatusBadgeUI(statusCode) {
 }
 
 function syncUpdatedSubTaskToRow(newValues, assigneeName) {
-	const row = currentDetailRowElem || document.querySelector(`.subtask-tr[data-subtask-id="${currentOpenSubTaskId}"]`);
-	if (!row) return;
+	// 1. 일반 업무 목록 탭(.subtask-tr) 동기화
+	const taskRow = document.querySelector(`.subtask-tr[data-subtask-id="${currentOpenSubTaskId}"]`) 
+		|| (currentDetailRowElem && currentDetailRowElem.classList.contains('subtask-tr') ? currentDetailRowElem : null);
+	if (taskRow) {
+		const titleSpan = taskRow.querySelector('.task-name-text');
+		if (titleSpan) titleSpan.textContent = newValues.title;
 
-	const titleSpan = row.querySelector('.task-name-text');
-	if (titleSpan) titleSpan.textContent = newValues.title;
+		const statusBadge = taskRow.querySelector('.badge-status');
+		if (statusBadge) {
+			const info = DETAIL_STATUS_MAP[Number(newValues.status)] || DETAIL_STATUS_MAP[0];
+			statusBadge.className = `badge-status ${info.cls}`;
+			statusBadge.textContent = info.text;
+		}
 
-	const statusBadge = row.querySelector('.badge-status');
-	if (statusBadge) {
-		const info = DETAIL_STATUS_MAP[Number(newValues.status)] || DETAIL_STATUS_MAP[0];
-		statusBadge.className = `badge-status ${info.cls}`;
-		statusBadge.textContent = info.text;
+		const assigneeNameSpan = taskRow.querySelector('.assignee-name-text');
+		const avatarMini = taskRow.querySelector('.avatar-mini');
+		if (assigneeName && assigneeName !== '-') {
+			if (assigneeNameSpan) assigneeNameSpan.textContent = assigneeName;
+			if (avatarMini) avatarMini.textContent = assigneeName.substring(0, 2);
+		}
+
+		const dateCells = taskRow.querySelectorAll('.date-cell');
+		if (dateCells.length >= 1 && newValues.startAt) {
+			dateCells[0].textContent = newValues.startAt;
+		}
+		if (dateCells.length >= 2 && newValues.endAt) {
+			dateCells[1].textContent = newValues.endAt;
+		}
 	}
 
-	const assigneeNameSpan = row.querySelector('.assignee-name-text');
-	const avatarMini = row.querySelector('.avatar-mini');
-	if (assigneeName && assigneeName !== '-') {
-		if (assigneeNameSpan) assigneeNameSpan.textContent = assigneeName;
-		if (avatarMini) avatarMini.textContent = assigneeName.substring(0, 2);
-	}
+	// 2. 간트차트 탭(.gantt-tree-row & 타임라인 바) 동기화
+	const ganttRow = document.querySelector(`.gantt-tree-row[data-type="subtask"][data-id="${currentOpenSubTaskId}"]`)
+		|| (currentDetailRowElem && currentDetailRowElem.classList.contains('gantt-tree-row') ? currentDetailRowElem : null);
+	if (ganttRow) {
+		ganttRow.dataset.title = newValues.title;
+		ganttRow.dataset.status = newValues.status;
+		ganttRow.dataset.start = newValues.startAt;
+		ganttRow.dataset.end = newValues.endAt;
+		ganttRow.dataset.progress = newValues.progress;
 
-	const dateCells = row.querySelectorAll('.date-cell');
-	if (dateCells.length >= 1 && newValues.startAt) {
-		dateCells[0].textContent = newValues.startAt;
-	}
-	if (dateCells.length >= 2 && newValues.endAt) {
-		dateCells[1].textContent = newValues.endAt;
+		const gTitle = ganttRow.querySelector('.gantt-row-title');
+		if (gTitle) gTitle.textContent = newValues.title;
+
+		const gBadge = ganttRow.querySelector('.badge-status');
+		if (gBadge) {
+			const info = DETAIL_STATUS_MAP[Number(newValues.status)] || DETAIL_STATUS_MAP[0];
+			gBadge.className = `badge-status ${info.cls}`;
+			gBadge.textContent = info.text;
+		}
+
+		const gPeriod = ganttRow.querySelector('.col-g-period');
+		if (gPeriod) {
+			gPeriod.textContent = `${newValues.startAt || '-'} ~ ${newValues.endAt || '-'}`;
+		}
+
+		// 간트차트 타임라인 바 재렌더링
+		if (typeof calculateTimelineRange === 'function') calculateTimelineRange();
+		if (typeof renderTimelineHeader === 'function') renderTimelineHeader();
+		if (typeof renderTimelineBars === 'function') renderTimelineBars();
 	}
 }
 
@@ -529,7 +531,11 @@ function renderDetailSubTasksList(subTasks, parentTask) {
 		const itemDiv = document.createElement('div');
 		itemDiv.className = 'detail-subtask-item';
 		itemDiv.style.cursor = 'pointer';
-		itemDiv.onclick = () => openSubTaskDetailPanel(stId);
+		itemDiv.onclick = () => {
+			const targetRow = document.querySelector(`.subtask-tr[data-subtask-id="${stId}"]`)
+				|| document.querySelector(`.gantt-tree-row[data-type="subtask"][data-id="${stId}"]`);
+			openSubTaskDetailPanel(stId, targetRow);
+		};
 
 		itemDiv.innerHTML = `
 			<div class="detail-subtask-left">
@@ -742,6 +748,9 @@ function closeDetailPanel() {
 	document.querySelectorAll('.task-tr.selected-row, .subtask-tr.selected-row').forEach(tr => {
 		tr.classList.remove('selected-row');
 	});
+	document.querySelectorAll('.gantt-tree-row.selected-gantt-row, .gantt-grid-row.selected-gantt-row').forEach(el => {
+		el.classList.remove('selected-gantt-row');
+	});
 }
 
 function detailAddSubtaskClick() {
@@ -790,12 +799,38 @@ function highlightSelectedRow(rowElem) {
 	document.querySelectorAll('.task-tr.selected-row, .subtask-tr.selected-row').forEach(tr => {
 		tr.classList.remove('selected-row');
 	});
+	document.querySelectorAll('.gantt-tree-row.selected-gantt-row, .gantt-grid-row.selected-gantt-row').forEach(el => {
+		el.classList.remove('selected-gantt-row');
+	});
+
 	if (rowElem && rowElem.classList) {
-		rowElem.classList.add('selected-row');
+		if (rowElem.classList.contains('gantt-tree-row')) {
+			rowElem.classList.add('selected-gantt-row');
+			const type = rowElem.dataset.type;
+			const id = rowElem.dataset.id;
+			const gridRow = document.querySelector(`.gantt-grid-row[data-type="${type}"][data-id="${id}"]`);
+			if (gridRow) gridRow.classList.add('selected-gantt-row');
+		} else {
+			rowElem.classList.add('selected-row');
+		}
 	}
 }
 
 function fallbackBindFromRow(rowElem, type) {
+	// 간트차트 행(.gantt-tree-row)인 경우 dataset에서 우선 추출
+	if (rowElem.classList && rowElem.classList.contains('gantt-tree-row')) {
+		bindDetailCommonFields({
+			title: rowElem.dataset.title || rowElem.querySelector('.gantt-row-title')?.textContent?.trim() || '',
+			assigneeName: '미배정',
+			startAt: rowElem.dataset.start || '',
+			endAt: rowElem.dataset.end || '',
+			status: Number(rowElem.dataset.status || 0),
+			progress: Number(rowElem.dataset.progress || 0),
+			content: ''
+		});
+		return;
+	}
+
 	const titleText = rowElem.querySelector('.task-name-text')?.textContent?.trim() || '';
 	const assigneeText = rowElem.querySelector('.assignee-name-text')?.textContent?.trim() || '미배정';
 	const dateCells = rowElem.querySelectorAll('.date-cell');
@@ -830,7 +865,7 @@ function escapeHtml(str) {
 }
 
 function escapeBacktick(str) {
-	return String(str).replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+	return String(str).replace(/\\/g, '\\\\').replace(/`/g, '\`').replace(/\$/g, '\$');
 }
 
 /* ==========================================================================

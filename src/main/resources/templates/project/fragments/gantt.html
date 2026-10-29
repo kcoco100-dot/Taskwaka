@@ -58,8 +58,8 @@
 										</div>
 										<div class="col-g-status">
 											<span class="badge-status"
-											      th:classappend="${task.status == 1 or task.status == 3} ? 'badge-done' : (${task.status == 2} ? 'badge-feedback' : (${task.status == 4} ? 'badge-hold' : 'badge-req'))"
-											      th:text="${task.status == 1 ? '● 진행' : (task.status == 2 ? '● 피드백' : (task.status == 3 ? '● 완료' : (task.status == 4 ? '● 보류' : '● 요청')))}">● 요청</span>
+													th:classappend="${task.status == 0} ? 'badge-req' : (${task.status == 1} ? 'badge-done' : (${task.status == 2} ? 'badge-feedback' : 'badge-prog'))"
+													th:text="${task.status == 0 ? '● 예정' : (task.status == 1 ? '● 진행' : (task.status == 2 ? '● 검토' : '● 완료'))}">● 예정</span>
 										</div>
 										<div class="col-g-period" th:text="${(task.startAt != null ? task.startAt : '-') + ' ~ ' + (task.endAt != null ? task.endAt : '-')}">2026-10-01 ~ 2026-10-15</div>
 									</div>
@@ -76,8 +76,9 @@
 											</div>
 											<div class="col-g-status">
 												<span class="badge-status"
-												      th:classappend="${sub.status == 1 or sub.status == 3} ? 'badge-done' : (${sub.status == 2} ? 'badge-feedback' : (${sub.status == 4} ? 'badge-hold' : 'badge-req'))"
-												      th:text="${sub.status == 1 ? '● 진행' : (sub.status == 2 ? '● 피드백' : (sub.status == 3 ? '● 완료' : (sub.status == 4 ? '● 보류' : '● 요청')))}">● 요청</span>
+													th:classappend="${sub.status == 0} ? 'badge-req' : (${sub.status == 1} ? 'badge-done' : (${sub.status == 2} ? 'badge-feedback' : 'badge-prog'))"
+													th:text="${sub.status == 0 ? '● 예정' : (sub.status == 1 ? '● 진행' : (sub.status == 2 ? '● 검토' : '● 완료'))}">● 예정</span>
+
 											</div>
 											<div class="col-g-period" th:text="${(sub.startAt != null ? sub.startAt : '-') + ' ~ ' + (sub.endAt != null ? sub.endAt : '-')}">2026-10-02 ~ 2026-10-10</div>
 										</div>
@@ -105,115 +106,8 @@
 				</div>
 			</div>
 
-			<!-- ==========================================================================
-			     [우측 오버레이] 일정 상세 패널 (일정 바 또는 목록 행 클릭 시 오픈)
-			     ========================================================================== -->
-			<aside class="gantt-detail-panel" id="ganttDetailSidePanel">
-				<div class="pane-resizer-bar" id="ganttPaneResizerBar" title="좌우로 드래그하여 패널 너비 조절"></div>
-
-				<div class="detail-top-nav">
-					<div style="display:flex; align-items:center; gap:8px;">
-						<span>🌿</span>
-						<span id="ganttDetailProjectTitle" th:text="${projectName != null ? projectName : 'Taskwaka 시작가이드'}">Taskwaka 시작가이드</span>
-						<span class="detail-type-chip" id="ganttDetailTypeBadge">메인 업무</span>
-					</div>
-					<button type="button" class="detail-close-btn" onclick="closeGanttDetailPanel()" title="닫기 (ESC)">✕</button>
-				</div>
-
-				<div class="detail-content-scroll">
-					<!-- 작성자 및 생성일 메타 헤더 -->
-					<div class="detail-meta-header">
-						<div class="detail-author-box">
-							<div class="detail-avatar-badge" id="ganttDetailAuthorAvatar">담당</div>
-							<div>
-								<span class="detail-author-name" id="ganttDetailAuthorName">담당 멤버</span>
-								<span class="detail-created-date" id="ganttDetailCreatedDate">-</span>
-							</div>
-						</div>
-					</div>
-
-					<!-- 일정(업무/하위업무) 제목 실시간 수정 -->
-					<div class="detail-title-row">
-						<input type="text" class="detail-task-title-input" id="ganttDetailTitleInput" value="" placeholder="일정 제목을 입력하세요" onchange="onGanttDetailFieldChange('title', this.value)">
-					</div>
-
-					<!-- 주요 속성 카드 (상태, 담당자, 시작일, 마감일, 진척도) -->
-					<div class="detail-props-card">
-						<div class="detail-prop-row">
-							<span class="prop-label">상태</span>
-							<div>
-								<span class="badge-status badge-req" id="ganttDetailStatusBadge" onclick="cycleGanttDetailStatus()">
-									<span id="ganttDetailStatusText">● 요청</span> <span style="font-size:9px;">▾</span>
-								</span>
-							</div>
-						</div>
-
-						<div class="detail-prop-row">
-							<span class="prop-label">담당자</span>
-							<select class="inline-edit-select" id="ganttDetailAssigneeSelect" onchange="onGanttDetailFieldChange('projectMemberId', this.value)">
-								<option value="1">박혜림</option>
-								<option value="2">김철수</option>
-								<option value="3">이영희</option>
-							</select>
-						</div>
-
-						<div class="detail-prop-row">
-							<span class="prop-label">시작일</span>
-							<input type="date" class="inline-edit-date" id="ganttDetailStartDate" onchange="onGanttDetailFieldChange('startAt', this.value)">
-						</div>
-
-						<div class="detail-prop-row">
-							<span class="prop-label">마감일</span>
-							<input type="date" class="inline-edit-date" id="ganttDetailEndDate" onchange="onGanttDetailFieldChange('endAt', this.value)">
-						</div>
-
-						<div class="detail-prop-row">
-							<span class="prop-label">진척도</span>
-							<div class="detail-progress-control">
-								<input type="range" id="ganttDetailProgressRange" min="0" max="100" step="5" value="0"
-								       oninput="document.getElementById('ganttDetailProgressLabel').textContent = this.value + '%'"
-								       onchange="onGanttDetailFieldChange('progress', this.value)">
-								<span class="progress-val-text" id="ganttDetailProgressLabel">0%</span>
-							</div>
-						</div>
-					</div>
-
-					<!-- 상세 내용 -->
-					<div class="detail-section-block">
-						<label class="detail-block-title" for="ganttDetailContentText">
-							<span>📄 상세 내용</span>
-						</label>
-						<textarea class="detail-desc-textarea" id="ganttDetailContentText" placeholder="일정에 대한 상세 내용을 입력해 주세요..." onchange="onGanttDetailContentChange(this.value)"></textarea>
-					</div>
-
-					<!-- 첨부파일 -->
-					<div class="detail-section-block">
-						<div class="detail-block-title">
-							<span>📎 첨부파일</span>
-							<span style="font-size:11.5px; color:var(--text-muted);" id="ganttAttachedFileCount">(0)</span>
-						</div>
-						<div class="detail-file-dropzone">
-							<div class="file-upload-trigger-row">
-								<span style="font-size:12px; color:var(--text-sub);">파일을 끌어다 놓거나 선택하세요</span>
-								<label class="btn-upload-attach">
-									<span>＋ 파일 첨부</span>
-									<input type="file" style="display:none;" onchange="handleGanttFileUpload(this)">
-								</label>
-							</div>
-							<div class="file-list-box" id="ganttAttachedFileList"></div>
-						</div>
-					</div>
-
-					<!-- 하위업무 목록 섹션 (메인 업무 선택 시에만 노출) -->
-					<div class="detail-subtasks-section" id="ganttDetailSubtasksSection">
-						<div class="detail-section-title">
-							<span>ㄴ 하위업무 일정</span>
-							<span style="color:var(--text-muted); font-size:12px;" id="ganttDetailSubtaskCount">0</span>
-						</div>
-						<div class="detail-subtask-box" id="ganttDetailSubtaskBox"></div>
-					</div>
-				</div>
-			</aside>
+			<!-- [공통 우측 오버레이] 업무/하위업무 상세 패널 프래그먼트 연결 -->
+			<aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
 
 		</div>
 

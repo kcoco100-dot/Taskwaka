@@ -85,7 +85,7 @@
 									<div class="up-left">
 										<span class="badge-status"
 										      th:classappend="${item.status == 1} ? 'badge-done' : (${item.status == 2} ? 'badge-feedback' : 'badge-req')"
-										      th:text="${item.status == 1 ? '● 진행' : (item.status == 2 ? '● 피드백' : '● 요청')}">● 진행</span>
+										      th:text="${item.status == 0 ? '● 예정' : (item.status == 1 ? '● 진행' : (item.status == 2 ? '● 검토' :'● 완료' ))}">● 예정</span>
 										<span class="up-title task-title-text" th:text="${item.title}">업무명</span>
 									</div>
 									<div class="up-right">

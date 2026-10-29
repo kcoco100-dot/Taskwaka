@@ -36,11 +36,9 @@
 
 			<div>
 				<span class="badge-status"
-					th:classappend="${task.status == 1 or task.status == 3} ? 'badge-done' : (${task.status == 2} ? 'badge-feedback' : (${task.status == 4} ? 'badge-hold' : 'badge-req'))"
-					th:text="${task.status == 1 ? '● 진행' : (task.status == 2 ? '● 피드백' : (task.status == 3 ? '● 완료' : (task.status == 4 ? '● 보류' : '● 요청')))}">●
-					요청</span>
+					th:classappend="${task.status == 0} ? 'badge-req' : (${task.status == 1} ? 'badge-done' : (${task.status == 2} ? 'badge-feedback' : 'badge-prog'))"
+					th:text="${task.status == 0 ? '● 예정' : (task.status == 1 ? '● 진행' : (task.status == 2 ? '● 검토' : '● 완료'))}">● 예정</span>
 			</div>
-
 			<div class="col-assignee"
 				th:text="${task.assigneeName != null ? task.assigneeName : ('담당자#' + task.projectMemberId)}">담당자</div>
 			<div class="date-cell"
@@ -103,9 +101,8 @@
 
 		<div>
 			<span class="badge-status"
-				th:classappend="${subTask.status == 1 or subTask.status == 3} ? 'badge-done' : (${subTask.status == 2} ? 'badge-feedback' : (${subTask.status == 4} ? 'badge-hold' : 'badge-req'))"
-				th:text="${subTask.status == 1 ? '● 진행' : (subTask.status == 2 ? '● 피드백' : (subTask.status == 3 ? '● 완료' : (subTask.status == 4 ? '● 보류' : '● 요청')))}">●
-				요청</span>
+					th:classappend="${subTask.status == 0} ? 'badge-req' : (${subTask.status == 1} ? 'badge-done' : (${subTask.status == 2} ? 'badge-feedback' : 'badge-prog'))"
+					th:text="${subTask.status == 0 ? '● 예정' : (subTask.status == 1 ? '● 진행' : (subTask.status == 2 ? '● 검토' : '● 완료'))}">● 예정</span>
 		</div>
 
 		<div class="col-assignee"

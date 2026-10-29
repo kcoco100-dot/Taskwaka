@@ -1,30 +1,23 @@
 /* ==========================================================================
-   [JS] 간트차트 렌더링 & 일정 클릭 시 우측 상세 패널 연동 (async / await 기반)
+   [JS] 간트차트 렌더링 & 일정 클릭 시 공통 상세 패널(detail_panel) 연동
    ========================================================================== */
 const DAY_CELL_WIDTH = 36; // 하루당 픽셀 너비
 
+// detail_panel.js의 DETAIL_STATUS_MAP과 상태 코드 통일 (0:요청, 1:진행, 2:완료, 3:보류)
 const ganttStatusMap = [
   { code: 0, text: '● 요청', class: 'badge-req' },
-  { code: 1, text: '● 진행', class: 'badge-done' },
-  { code: 2, text: '● 피드백', class: 'badge-feedback' },
-  { code: 3, text: '● 완료', class: 'badge-done' },
-  { code: 4, text: '● 보류', class: 'badge-hold' }
+  { code: 1, text: '● 진행', class: 'badge-prog' },
+  { code: 2, text: '● 완료', class: 'badge-done' },
+  { code: 3, text: '● 보류', class: 'badge-hold' }
 ];
 
 let ganttMinDate = null;
 let ganttMaxDate = null;
 let ganttTotalDays = 0;
 
-// 현재 상세 패널에 열려 있는 일정 정보 ({ type: 'task' | 'subtask', id: number })
-let activeGanttContext = {
-  type: null,
-  id: null
-};
-
 document.addEventListener('DOMContentLoaded', async function() {
   await initializeGanttChart();
   initScrollSync();
-  initGanttResizer();
 });
 
 // ================= 1. 간트차트 초기화 및 데이터 로드 =================
@@ -49,7 +42,6 @@ async function loadTasksFromApiOrFallback() {
 
   try {
     const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks`);
-	
     if (res.ok) {
       tasks = await res.json();
     }
@@ -71,7 +63,7 @@ async function loadTasksFromApiOrFallback() {
         startAt: todayStr,
         endAt: plus10Str,
         subTasks: [
-          { subTaskId: 101, taskId: 1, title: '화면 설계서 작성', status: 3, progress: 100, startAt: todayStr, endAt: plus5Str },
+          { subTaskId: 101, taskId: 1, title: '화면 설계서 작성', status: 2, progress: 100, startAt: todayStr, endAt: plus5Str },
           { subTaskId: 102, taskId: 1, title: 'ERD 및 테이블 명세 확정', status: 1, progress: 40, startAt: plus5Str, endAt: plus10Str }
         ]
       }
@@ -81,7 +73,7 @@ async function loadTasksFromApiOrFallback() {
   leftBody.innerHTML = '';
   tasks.forEach(task => {
     const hasSub = task.subTasks && task.subTasks.length > 0;
-    const statusObj = ganttStatusMap.find(s => s.code === task.status) || ganttStatusMap[0];
+    const statusObj = ganttStatusMap.find(s => s.code === Number(task.status)) || ganttStatusMap[0];
 
     const mainRow = document.createElement('div');
     mainRow.className = 'gantt-tree-row main-row';
@@ -111,7 +103,7 @@ async function loadTasksFromApiOrFallback() {
 
     if (hasSub) {
       task.subTasks.forEach(sub => {
-        const subStatusObj = ganttStatusMap.find(s => s.code === sub.status) || ganttStatusMap[0];
+        const subStatusObj = ganttStatusMap.find(s => s.code === Number(sub.status)) || ganttStatusMap[0];
         const subRow = document.createElement('div');
         subRow.className = 'gantt-tree-row sub-row';
         subRow.dataset.type = 'subtask';
@@ -240,6 +232,9 @@ function renderTimelineBars() {
 
     const gridRow = document.createElement('div');
     gridRow.className = 'gantt-grid-row ' + (type === 'subtask' ? 'sub-grid-row' : 'main-grid-row');
+    if (row.classList.contains('selected-gantt-row')) {
+      gridRow.classList.add('selected-gantt-row');
+    }
     gridRow.dataset.type = type;
     gridRow.dataset.id = id;
     gridRow.dataset.parentId = parentId;
@@ -258,7 +253,7 @@ function renderTimelineBars() {
     bar.style.width = widthPx + 'px';
     bar.title = `${title} (${row.dataset.start || '-'} ~ ${row.dataset.end || '-'})`;
 
-    // 일정 막대(Bar) 클릭 시 상세 패널 오픈
+    // 일정 막대(Bar) 클릭 시 공통 상세 패널(detail_panel) 오픈
     bar.onclick = function(e) {
       e.stopPropagation();
       onGanttItemClick(type, id, row);
@@ -274,206 +269,32 @@ function renderTimelineBars() {
   });
 }
 
-// ================= 3. 일정 클릭 시 우측 상세 패널 오픈 및 데이터 바인딩 =================
+// ================= 3. 일정 클릭 시 공통 상세 패널(detail_panel.js) 오픈 =================
 async function onGanttItemClick(type, id, leftRowElem) {
-  // 선택 하이라이트 처리
+  if (!id) return;
+
+  const targetLeftRow = leftRowElem || document.querySelector(`.gantt-tree-row[data-type="${type}"][data-id="${id}"]`);
+
+  // 간트차트 좌측 트리 행 및 우측 타임라인 행 선택 하이라이트 처리
   document.querySelectorAll('.gantt-tree-row, .gantt-grid-row').forEach(el => el.classList.remove('selected-gantt-row'));
-  if (leftRowElem) leftRowElem.classList.add('selected-gantt-row');
+  if (targetLeftRow) targetLeftRow.classList.add('selected-gantt-row');
 
   const gridRow = document.querySelector(`.gantt-grid-row[data-type="${type}"][data-id="${id}"]`);
   if (gridRow) gridRow.classList.add('selected-gantt-row');
 
-  activeGanttContext = { type, id: Number(id) };
-
-  const panel = document.getElementById('ganttDetailSidePanel');
-  const typeBadge = document.getElementById('ganttDetailTypeBadge');
-  const subtasksSection = document.getElementById('ganttDetailSubtasksSection');
-
-  typeBadge.textContent = type === 'subtask' ? '하위 업무' : '메인 업무';
-  subtasksSection.style.display = type === 'task' ? 'flex' : 'none';
-
-  // 우선 DOM 데이터셋으로 즉시 패널 표시 (빠른 반응성)
-  if (leftRowElem) {
-    bindDetailPanelFields({
-      title: leftRowElem.dataset.title,
-      status: Number(leftRowElem.dataset.status || 0),
-      startAt: leftRowElem.dataset.start,
-      endAt: leftRowElem.dataset.end,
-      progress: Number(leftRowElem.dataset.progress || 0),
-      content: ''
-    });
-  }
-  panel.classList.add('active');
-
-  // 서버 API에서 최신 상세 데이터 비동기 조회
-  try {
-    if (type === 'task') {
-      const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${id}`);
-      if (res.ok) {
-        const task = await res.json();
-        bindDetailPanelFields(task);
-        renderDetailSubTasksList(task.subTasks || []);
-      }
-    } else if (type === 'subtask') {
-      const parentId = leftRowElem ? leftRowElem.dataset.parentId : null;
-      if (parentId) {
-        const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${parentId}`);
-        if (res.ok) {
-          const parentTask = await res.json();
-          const sub = (parentTask.subTasks || []).find(st => Number(st.subTaskId) === Number(id));
-          if (sub) bindDetailPanelFields(sub);
-        }
-      }
-    }
-  } catch (err) {
-    console.error('일정 상세 조회 오류:', err);
-  }
-}
-
-function bindDetailPanelFields(data) {
-  document.getElementById('ganttDetailTitleInput').value = data.title || '';
-  document.getElementById('ganttDetailCreatedDate').textContent = data.created || '';
-  document.getElementById('ganttDetailContentText').value = data.content || '';
-  document.getElementById('ganttDetailStartDate').value = data.startAt || '';
-  document.getElementById('ganttDetailEndDate').value = data.endAt || '';
-
-  const prog = data.progress != null ? Math.round(data.progress) : 0;
-  document.getElementById('ganttDetailProgressRange').value = prog;
-  document.getElementById('ganttDetailProgressLabel').textContent = prog + '%';
-
-  if (data.projectMemberId) {
-    document.getElementById('ganttDetailAssigneeSelect').value = String(data.projectMemberId);
-  }
-
-  const statusObj = ganttStatusMap.find(s => s.code === Number(data.status)) || ganttStatusMap[0];
-  const badge = document.getElementById('ganttDetailStatusBadge');
-  badge.className = 'badge-status ' + statusObj.class;
-  document.getElementById('ganttDetailStatusText').textContent = statusObj.text;
-}
-
-function renderDetailSubTasksList(subTasks) {
-  const box = document.getElementById('ganttDetailSubtaskBox');
-  const countSpan = document.getElementById('ganttDetailSubtaskCount');
-  box.innerHTML = '';
-  countSpan.textContent = subTasks.length;
-
-  if (subTasks.length === 0) {
-    box.innerHTML = '<div style="padding:10px 14px; font-size:12.5px; color:var(--text-muted);">등록된 하위업무 일정이 없습니다.</div>';
-    return;
-  }
-
-  subTasks.forEach(st => {
-    const stStatus = ganttStatusMap.find(s => s.code === st.status) || ganttStatusMap[0];
-    const row = document.createElement('div');
-    row.className = 'detail-subtask-row';
-    row.onclick = function() {
-      const targetLeftRow = document.querySelector(`.gantt-tree-row[data-type="subtask"][data-id="${st.subTaskId}"]`);
-      onGanttItemClick('subtask', st.subTaskId, targetLeftRow);
-    };
-    row.innerHTML = `
-      <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
-        <span class="badge-status ${stStatus.class}">${stStatus.text}</span>
-        <span style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${st.title}</span>
-      </div>
-      <span style="font-size:11.5px; color:var(--text-sub); flex-shrink:0;">${st.startAt || '-'} ~ ${st.endAt || '-'}</span>
-    `;
-    box.appendChild(row);
-  });
-}
-
-function closeGanttDetailPanel() {
-  document.getElementById('ganttDetailSidePanel').classList.remove('active');
-  document.querySelectorAll('.gantt-tree-row, .gantt-grid-row').forEach(el => el.classList.remove('selected-gantt-row'));
-  activeGanttContext = { type: null, id: null };
-}
-
-// ================= 4. 상세 패널 실시간 수정 연동 (PATCH / PUT) =================
-async function onGanttDetailFieldChange(fieldName, fieldValue) {
-  if (!activeGanttContext.id) return;
-  const { type, id } = activeGanttContext;
-
-  const url = type === 'subtask'
-    ? `/${currentDomainKey}/project/${currentProjectId}/api/tasks/subtasks/${id}/field`
-    : `/${currentDomainKey}/project/${currentProjectId}/api/tasks/${id}/field`;
-	
-
-  try {
-    await fetch(url, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fieldName, fieldValue })
-    });
-
-    // 좌측 트리 행 데이터셋 및 간트 바 즉시 갱신
-    const leftRow = document.querySelector(`.gantt-tree-row[data-type="${type}"][data-id="${id}"]`);
-    if (leftRow) {
-      if (fieldName === 'title') {
-        leftRow.dataset.title = fieldValue;
-        leftRow.querySelector('.gantt-row-title').textContent = fieldValue;
-      } else if (fieldName === 'startAt') {
-        leftRow.dataset.start = fieldValue;
-        leftRow.querySelector('.col-g-period').textContent = `${fieldValue || '-'} ~ ${leftRow.dataset.end || '-'}`;
-      } else if (fieldName === 'endAt') {
-        leftRow.dataset.end = fieldValue;
-        leftRow.querySelector('.col-g-period').textContent = `${leftRow.dataset.start || '-'} ~ ${fieldValue || '-'}`;
-      } else if (fieldName === 'progress') {
-        leftRow.dataset.progress = fieldValue;
-      }
-
-      calculateTimelineRange();
-      renderTimelineHeader();
-      renderTimelineBars();
-    }
-  } catch (err) {
-    console.error('간트 상세 필드 수정 오류:', err);
-  }
-}
-
-async function cycleGanttDetailStatus() {
-  if (!activeGanttContext.id) return;
-  const { type, id } = activeGanttContext;
-
-  const textSpan = document.getElementById('ganttDetailStatusText');
-  const badge = document.getElementById('ganttDetailStatusBadge');
-  const idx = ganttStatusMap.findIndex(s => s.text === textSpan.textContent.trim());
-  const next = ganttStatusMap[(idx + 1) % ganttStatusMap.length];
-
-  badge.className = 'badge-status ' + next.class;
-  textSpan.textContent = next.text;
-
-  await onGanttDetailFieldChange('status', next.code);
-
-  const leftRow = document.querySelector(`.gantt-tree-row[data-type="${type}"][data-id="${id}"]`);
-  if (leftRow) {
-    leftRow.dataset.status = next.code;
-    const rowBadge = leftRow.querySelector('.badge-status');
-    if (rowBadge) {
-      rowBadge.className = 'badge-status ' + next.class;
-      rowBadge.textContent = next.text;
-    }
-  }
-}
-
-async function onGanttDetailContentChange(val) {
-  if (!activeGanttContext.id) return;
-  const { type, id } = activeGanttContext;
-
+  // 공통 상세 패널(detail_panel.js) 함수 호출로 연결
   if (type === 'task') {
-    try {
-      await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: val.trim() })
-      });
-    } catch (err) {
-      console.error('상세 내용 수정 오류:', err);
+    if (typeof openDetailPanel === 'function') {
+      await openDetailPanel(id, targetLeftRow);
     }
-  } else {
-    await onGanttDetailFieldChange('content', val.trim());
+  } else if (type === 'subtask') {
+    if (typeof openSubTaskDetailPanel === 'function') {
+      await openSubTaskDetailPanel(id, targetLeftRow);
+    }
   }
 }
 
-// ================= 5. 그룹 접기/펼치기, 스크롤 동기화, 리사이저 바 =================
+// ================= 4. 그룹 접기/펼치기, 스크롤 동기화 =================
 function toggleGanttSubRows(btn) {
   const mainRow = btn.closest('.gantt-tree-row');
   const taskId = mainRow.dataset.id;
@@ -514,56 +335,7 @@ function initScrollSync() {
   });
 }
 
-function initGanttResizer() {
-  const resizerBar = document.getElementById('ganttPaneResizerBar');
-  const sidePanel = document.getElementById('ganttDetailSidePanel');
-  const splitWrapper = document.getElementById('ganttSplitViewWrapper');
-  let isDragging = false;
-
-  if (resizerBar && sidePanel && splitWrapper) {
-    resizerBar.addEventListener('mousedown', () => {
-      isDragging = true;
-      document.body.style.cursor = 'col-resize';
-    });
-    document.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      let newWidth = splitWrapper.getBoundingClientRect().right - e.clientX;
-      if (newWidth < 380) newWidth = 380;
-      if (newWidth > 860) newWidth = 860;
-      sidePanel.style.width = newWidth + 'px';
-    });
-    document.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        document.body.style.cursor = '';
-      }
-    });
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeGanttDetailPanel();
-  });
-}
-
-function handleGanttFileUpload(input) {
-  if (!input.files || input.files.length === 0) return;
-  const file = input.files[0];
-  const fileList = document.getElementById('ganttAttachedFileList');
-  const div = document.createElement('div');
-  div.className = 'attached-file-item';
-  div.innerHTML = `
-    <div class="attached-file-info">
-      <span>📁</span>
-      <span style="font-weight:600;">${file.name}</span>
-      <span style="color:var(--text-muted); font-size:11px;">(${(file.size / (1024 * 1024)).toFixed(1)} MB)</span>
-    </div>
-    <button type="button" class="btn-del-file" onclick="this.closest('.attached-file-item').remove()" title="삭제">✕</button>
-  `;
-  fileList.appendChild(div);
-  document.getElementById('ganttAttachedFileCount').textContent = `(${fileList.children.length})`;
-}
-
-// ================= 6. 날짜 유틸리티 함수 =================
+// ================= 5. 날짜 유틸리티 함수 =================
 function parseDateYMD(str) {
   if (!str || str === '-') return null;
   const parts = str.substring(0, 10).split('-');
