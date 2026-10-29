@@ -217,3 +217,13 @@
     font-size: 12px;
     cursor: pointer;
 }
+
+/* 기존 첨부파일 목록 간격 */
+.existing-upload-list {
+    margin: 0 0 12px;
+}
+
+/* 삭제 선택한 파일 행 숨김 */
+.pending-upload-list > .existing-file-row[hidden] {
+    display: none;
+}

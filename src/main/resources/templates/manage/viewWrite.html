@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/dist/css/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/css/manage/project-list.css}">
     <link rel="stylesheet" th:href="@{/dist/css/manage/viewWrite.css}">
+	<link rel="stylesheet" th:href="@{/dist/vendor/quill/css/quill.snow.css}">
 </th:block>
 
 <th:block layout:fragment="content">
@@ -65,8 +66,9 @@
                     </div>
 
                     <div class="project-form-group">
-                        <label for="content">프로젝트 상세 내용</label>
-                        <textarea id="content" th:field="*{content}" class="project-form-control project-textarea" placeholder="프로젝트의 목적, 주요 기능, 참고 사항 등을 자유롭게 작성해 주세요."></textarea>
+                            <label for="editor">프로젝트 상세 내용</label>
+						    <div id="editor" th:utext="*{content}"></div>
+						    <input type="hidden" id="content" th:field="*{content}">
                     </div>
 
                     <div class="form-actions">
@@ -79,4 +81,48 @@
         </section>
     </div>
 </th:block>
+
+<th:block layout:fragment="script">
+    <script th:src="@{/dist/vendor/quill/js/quill.js}"></script>
+    <script th:src="@{/dist/vendor/quill/js/resize.js}"></script>
+    <script th:src="@{/dist/posts/qeditor.js}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('project-article-form');
+            if (!form) {
+                return;
+            }
+
+            const contentInput = document.getElementById('content');
+            const originalContent = quill.root.innerHTML;
+
+            form.addEventListener('submit', function (event) {
+                const htmlViewEL = document.querySelector('textarea#html-view');
+                const htmlContent = htmlViewEL ? htmlViewEL.value : quill.root.innerHTML;
+
+                if (!hasContent(htmlContent)) {
+                    event.preventDefault();
+                    alert('프로젝트 상세 내용을 입력하세요.');
+
+                    if (htmlViewEL) {
+                        htmlViewEL.focus();
+                    } else {
+                        quill.focus();
+                    }
+                    return;
+                }
+
+                contentInput.value = htmlContent;
+            });
+
+            form.addEventListener('reset', function () {
+                setTimeout(function () {
+                    quill.clipboard.dangerouslyPasteHTML(originalContent);
+                }, 0);
+            });
+        });
+    </script>
+</th:block>
+
 </html>

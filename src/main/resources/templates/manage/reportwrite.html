@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/dist/css/manage/manage.css}">
     <link rel="stylesheet" th:href="@{/dist/css/manage/approval.css}">
     <link rel="stylesheet" th:href="@{/dist/css/manage/reportwrite.css}">
+    <link rel="stylesheet" th:href="@{/dist/vendor/quill/css/quill.snow.css}">
 </th:block>
 
 <th:block layout:fragment="content">
@@ -65,17 +66,21 @@
                         </div>
 
                         <div class="report-form-field full">
-                            <label for="reportContent">보고서 내용 <span aria-hidden="true">*</span></label>
-                            <textarea id="reportContent" th:field="*{content}"
-                                      placeholder="진행 현황, 주요 완료 업무, 향후 계획 등을 작성하세요" required></textarea>
+							<label for="editor">보고서 내용 <span aria-hidden="true">*</span>
+					    </label>
+					    <div id="editor" th:utext="*{content}"></div>
+					    <input type="hidden" id="reportContent" th:field="*{content}">
                         </div>
 
                         <div class="report-form-field full">
                             <label for="reportFiles">첨부파일</label>
-                            <div th:each="file : ${files}" class="report-helper">
-                                <label><input type="checkbox" name="deleteFileIds" th:value="${file.fileId}"> 삭제
-                                    <span th:text="${file.originalName}"></span></label>
-                            </div>
+                            <ul class="pending-upload-list existing-upload-list" th:if="${not #lists.isEmpty(files)}">
+							    <li th:each="file : ${files}" class="existing-file-row">
+							        <span class="pending-upload-name" th:text="${file.originalName}">파일명</span>
+							        <input type="hidden" name="deleteFileIds" th:value="${file.fileId}" disabled>
+							        <button type="button" class="pending-upload-remove existing-file-remove" th:attr="aria-label=|${file.originalName} 삭제|">삭제</button>
+							    </li>
+							</ul>
                             <div class="report-file-box">
                                 <input type="file" id="reportFiles" name="files" multiple>
                                 <span class="report-helper" id="fileSummary">선택된 파일 없음</span>
@@ -96,6 +101,9 @@
 </th:block>
 
 <th:block layout:fragment="script">
+<script th:src="@{/dist/vendor/quill/js/quill.js}"></script>
+<script th:src="@{/dist/vendor/quill/js/resize.js}"></script>
+<script th:src="@{/dist/posts/qeditor.js}"></script>
     <script>
     function renderPendingFiles(input, summary, list) {
         const selected = Array.from(input.files || []);
@@ -146,6 +154,27 @@
     
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('reportForm');
+        
+        // 기존 첨부파일 삭제 선택
+        form.querySelectorAll('.existing-file-remove').forEach(button => {
+            button.addEventListener('click', function () {
+                const row = button.closest('.existing-file-row');
+                const deleteInput = row.querySelector('input[name="deleteFileIds"]');
+
+                deleteInput.disabled = false;
+                row.hidden = true;
+            });
+        });
+
+        // 다시입력 시 삭제 선택 취소
+        form.addEventListener('reset', function () {
+            form.querySelectorAll('.existing-file-row').forEach(row => {
+                const deleteInput = row.querySelector('input[name="deleteFileIds"]');
+
+                deleteInput.disabled = true;
+                row.hidden = false;
+            });
+        });
         const project = document.getElementById('reportProject');
         const memberId = document.getElementById('projectMemberId');
         const files = document.getElementById('reportFiles');
@@ -179,12 +208,40 @@
         });
         form.addEventListener('submit', function (e) {
             syncProject();
+
             if (!project.value) {
                 e.preventDefault();
                 alert('등록할 수 있는 프로젝트를 선택해 주세요.');
+                return;
             }
+
+            const htmlViewEL = document.querySelector('textarea#html-view');
+            const htmlContent = htmlViewEL ? htmlViewEL.value : quill.root.innerHTML;
+
+            if (!hasContent(htmlContent)) {
+                e.preventDefault();
+                alert('보고서 내용을 입력하세요.');
+
+                if (htmlViewEL) {
+                    htmlViewEL.focus();
+                } else {
+                    quill.focus();
+                }
+                return;
+            }
+
+            document.getElementById('reportContent').value = htmlContent;
         });
         syncProject();
+        
+        const originalContent = quill.root.innerHTML;
+
+        form.addEventListener('reset', function () {
+            setTimeout(function () {
+                quill.clipboard.dangerouslyPasteHTML(originalContent);
+            }, 0);
+        });
+        
     });
     </script>
 </th:block>

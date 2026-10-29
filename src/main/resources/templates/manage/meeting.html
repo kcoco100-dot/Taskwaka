@@ -44,7 +44,8 @@
                                     <p class="meeting-title">
                                         <a href="#" @click.prevent="openMeetingDetail(meeting)">{{ meeting.title }}</a>
                                     </p>
-                                    <p class="meeting-summary">{{ meeting.summary || truncateContent(meeting.content) }}</p>
+	                                <p class="meeting-summary" v-if="hasMeetingImage(meeting.content)">본문은 상세 화면에서 확인해 주세요.</p>
+									<p class="meeting-summary" v-else> {{ meeting.summary || truncateContent(meeting.content) }}</p>
                                 </td>
                                 <td class="meeting-date">{{ meeting.meetingDate }}</td>
 								<td class="meeting-date">{{ meeting.createdDate || '-' }}</td>
@@ -79,7 +80,7 @@
                         <span>회의일 <strong>{{ currentMeeting.meetingDate }}</strong></span>
                         <span>작성자 <strong>{{ currentMeeting.authorName }}</strong></span>
                     </div>
-                    <div class="meeting-detail-body">{{ currentMeeting.content }}</div>
+                    <div class="meeting-detail-body ql-editor" v-html="currentMeeting.content"></div>
                     <div class="shell-actions" style="margin-top:24px;">
                         <button class="shell-action" type="button" :disabled="!currentMeeting.prevId" @click="openMeetingDetail({meetingMinuteId:currentMeeting.prevId})">이전: {{ currentMeeting.prevTitle || '없음' }}</button>
                         <button class="shell-action" type="button" :disabled="!currentMeeting.nextId" @click="openMeetingDetail({meetingMinuteId:currentMeeting.nextId})">다음: {{ currentMeeting.nextTitle || '없음' }}</button>
@@ -124,7 +125,7 @@
 </th:block>
 
 <th:block layout:fragment="script">
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script th:inline="javascript">
         const domainKey = /*[[${domainKey}]]*/ "";
@@ -167,6 +168,14 @@
                 const currentMeeting = ref(null);
                 const editMeetingData = reactive({ title: '', content: '' });
 
+                const hasMeetingImage = (content) => {
+                    if (!content) {
+                        return false;
+                    }
+
+                    return /<img\b[^>]*>/i.test(content);
+                };
+                
                 const truncateContent = (text) => {
                     if(!text) {
                         return '';
@@ -246,7 +255,7 @@
                 return {
                     currentUser, viewMode, searchParams, pageInfo, pageNumbers,
                     meetingList, currentMeeting, editMeetingData,
-                    truncateContent, fetchMeetingList, openMeetingDetail,
+                    truncateContent, hasMeetingImage, fetchMeetingList, openMeetingDetail,
                     openMeetingEdit, saveMeetingAction, deleteMeetingAction
                 };
             }
