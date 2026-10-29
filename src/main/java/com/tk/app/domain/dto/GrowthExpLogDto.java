@@ -26,4 +26,5 @@ public class GrowthExpLogDto {
 	private String earnedAt; // 지급 일시
 	private String revokedAt; // 회수 일시
 	private Long projectId; // 프로젝트 번호
+	private String projectName; // 활동과 연결된 프로젝트명
 }

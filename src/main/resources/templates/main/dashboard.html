@@ -151,7 +151,8 @@
 						        현재 참여 중인 프로젝트가 없습니다.
 						    </li>
 						
-						    <li class="overview-project-row" th:each="project : ${participatingProjects}">
+						    <li class="overview-project-row" th:each="project, projectStat : ${participatingProjects}"
+						        th:if="${projectStat.index < 5}">
 						        <span class="overview-project-avatar overview-avatar-java" aria-hidden="true">📁</span>
 						
 						        <div class="overview-project-copy">

@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.GrowthLevelDto;
 import com.tk.app.domain.dto.NoticeCreateResultDto;
+import com.tk.app.domain.dto.NoticeDeleteResultDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.NoticeFileDto;
 import com.tk.app.exception.StorageException;
@@ -294,7 +295,7 @@ public class NoticeService {
 		String errorMessage = validateNoticeFiles(files);
 		// 정상 파일이 아닐때 에러 메시지
 		if(errorMessage != null) {
-			throw new Exception(errorMessage);
+			throw new IllegalArgumentException(errorMessage);
 		}
 		
 		// 새 파일 갯수를 계산할 함수
@@ -313,7 +314,7 @@ public class NoticeService {
 		// 기존 5개중 2개를 삭제하고 새 파일 2개를 추가하면 5-2+2=5 이므로 통과
 		int totalFileCount = noticeFiles.size() - deleteFiles.size() + newFileCount;
 		if(totalFileCount > 5) {
-			throw new Exception("첨부파일은 5개까지만 등록할 수 있습니다.");
+			throw new IllegalArgumentException("첨부파일은 최대 5개까지 등록할 수 있습니다.");
 		}
 		
 		// 새 파일 처리를 위한 목록 두개 준비
@@ -391,19 +392,18 @@ public class NoticeService {
 	
 	// 공지사항 삭제
 	@Transactional(rollbackFor = Exception.class)
-	public int deleteNotice(long workspaceId, long noticeId) throws Exception {
+	public NoticeDeleteResultDto deleteNotice(long workspaceId, long noticeId) throws Exception {
 		
 		// 공지 삭제 시 경험치 회수
 		int deletedCount = noticeMapper.deleteNotice(workspaceId, noticeId);
 		if(deletedCount == 0) {
-			return 0;
+			return new NoticeDeleteResultDto(0, 0L);
 		} else if(deletedCount != 0 && deletedCount != 1) {
 			throw new IllegalStateException("공지를 정상적으로 삭제할 수 없습니다.");
-		} else if(deletedCount == 1) {
-			growthTreeService.revokeNoticeCreateExp(workspaceId, noticeId);
 		}
 		
-		return deletedCount;
+		long revokedExp = growthTreeService.revokeNoticeCreateExp(workspaceId, noticeId);
+		return new NoticeDeleteResultDto(deletedCount, revokedExp);
 		
 	}
 	

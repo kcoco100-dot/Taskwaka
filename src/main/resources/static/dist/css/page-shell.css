@@ -184,3 +184,221 @@
 .notice-create-section #noticeEditor .ql-editor {
     line-height: 1.7;
 }
+
+/* HOME 공지 수정: 회의록 화면과 같은 카드·색상 기준 */
+.home-layout > .shell-section:has(> #noticeEditForm) {
+    font-family: var(--default-font);
+}
+
+.shell-section:has(> #noticeEditForm) > :is(.page-heading, #noticeEditForm, .alert) {
+    width: 100%;
+    max-width: 960px;
+    margin-inline: auto;
+}
+
+.shell-section:has(> #noticeEditForm) .page-title {
+    color: #594331;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+}
+
+.shell-section:has(> #noticeEditForm) .page-description {
+    color: #887B6D;
+    line-height: 1.7;
+}
+
+#noticeEditForm {
+    flex: 0 0 auto;
+    padding: 30px;
+    border: 1px solid #E8E2D9;
+    border-radius: 18px;
+    background: #FFFFFF;
+    color: #594331;
+    box-shadow: 0 6px 24px rgba(89, 67, 49, 0.04);
+}
+
+#noticeEditForm .form-label {
+    margin-bottom: 10px;
+    color: #594331;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#noticeEditForm .form-control {
+    min-height: 46px;
+    padding: 11px 14px;
+    border: 1px solid #E4E1D9;
+    border-radius: 10px;
+    background: #FCFCFA;
+    color: #493B2F;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.7;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+#noticeEditForm .form-control:focus {
+    outline: none;
+    border-color: #71865B;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.12);
+}
+
+#noticeEditForm .ql-toolbar.ql-snow {
+    padding: 10px 12px;
+    border: 1px solid #E4E1D9;
+    border-radius: 10px 10px 0 0;
+    background: #F7F8F3;
+    font-family: inherit;
+}
+
+#noticeEditEditor.ql-container.ql-snow {
+    border: 1px solid #E4E1D9;
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    background: #FFFFFF;
+    color: #493B2F;
+}
+
+#noticeEditEditor .ql-editor {
+    min-height: 220px;
+    padding: 16px 18px;
+    overflow-wrap: anywhere;
+}
+
+#noticeEditEditor .ql-editor.ql-blank::before {
+    color: #A59B8E;
+    font-style: normal;
+}
+
+#noticeEditEditor:focus-within {
+    border-color: #71865B;
+    box-shadow: 0 3px 0 3px rgba(113, 134, 91, 0.10);
+}
+
+#noticeEditForm .notice-attachments {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 24px 0 16px;
+    padding: 18px;
+    border: 1px solid #EBE6DE;
+    border-radius: 12px;
+    background: #FAF9F6;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.7;
+}
+
+#noticeEditForm .notice-attachments > span {
+    color: #8A7C6D;
+    font-weight: 400;
+}
+
+#noticeEditForm .notice-attachments > span:has(label) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid #EAE5DC;
+    border-radius: 9px;
+    background: #FFFFFF;
+}
+
+#noticeEditForm .notice-attachments > span > span {
+    min-width: 0;
+    color: #665747;
+    overflow-wrap: anywhere;
+}
+
+#noticeEditForm .notice-attachments label {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: #9A6A60;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#noticeEditForm input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: #9A6A60;
+}
+
+#noticeEditForm .notice-attachments > span:has(input:checked) {
+    border-color: #E8CDC7;
+    background: #FFF7F4;
+}
+
+#noticeEditForm > label:has(input[type="file"]) {
+    display: block;
+    padding: 16px 18px;
+    border: 1px dashed #D6DCCB;
+    border-radius: 12px;
+    background: #F8FAF5;
+}
+
+#noticeEditForm input[type="file"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    color: #786B5E;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+#noticeEditForm input[type="file"]::file-selector-button {
+    margin-inline-end: 12px;
+    padding: 9px 14px;
+    border: 1px solid #D8E1CC;
+    border-radius: 8px;
+    background: #EDF3E6;
+    color: #4F6242;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#noticeEditForm input[type="file"]::file-selector-button:hover {
+    background: #E3EDD8;
+}
+
+#noticeEditForm .form-text {
+    margin: 8px 0 0;
+    color: #8A7C6D;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+#noticeEditForm .shell-actions {
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #EEE8E0;
+}
+
+#noticeEditForm .shell-action {
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.shell-section:has(> #noticeEditForm) > .alert {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border: 1px solid #E9CDC7;
+    border-radius: 12px;
+    background: #FFF5F2;
+    color: #985A4E;
+    font-size: 13px;
+    line-height: 1.7;
+}
+

@@ -253,6 +253,9 @@
 					        <div class="growth-history-detail">
 					        		<strong th:text="${activity.actionName}">활동 내용</strong>
 					        		<p class="growth-history-meta"
+					        		   th:if="${!#strings.isEmpty(activity.projectName)}"
+					        		   th:text="${activity.projectName}">프로젝트명</p>
+					        		<p class="growth-history-meta"
 					               th:text="|${activity.memberName} · ${activity.earnedAt}|">
 					            </p>
 					            <p class="growth-history-revoked-at"

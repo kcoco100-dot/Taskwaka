@@ -241,7 +241,7 @@ public class GrowthTreeService {
 	
 	// 미회수 지급이력 조회 및 회수 시간 기록
 	@Transactional(rollbackFor = Exception.class)
-	public void revokeNoticeCreateExp(long workspaceId, long noticeId) throws Exception {
+	public long revokeNoticeCreateExp(long workspaceId, long noticeId) throws Exception {
 		GrowthTreeDto growthTree = lockGrowthTree(workspaceId);
 		// revokeGrowthExp : 조회 조건을 담은 객체
 		GrowthExpLogDto revokeGrowthExp = new GrowthExpLogDto();
@@ -252,7 +252,7 @@ public class GrowthTreeService {
 		// revoke : 미회수 지급 이력
 		List<GrowthExpLogDto> revoke = growthTreeMapper.findUnrevokedNoticeCreateExpLogs(revokeGrowthExp);
 		if(revoke.isEmpty()) {
-			return;
+			return 0L;
 		}
 		
 		// 회수할 경험치 합계 계산
@@ -265,7 +265,10 @@ public class GrowthTreeService {
 				throw new IllegalStateException("경험치 회수 시간을 기록할 수 없습니다.");
 			}
 		}
+		// 회수 전후 누적 경험치 차이로 실제 차감량 계산
+		long previousTotalExp = growthTree.getTotalExp();
 		revokeGrowthExp(growthTree, totalRevokeExp);
+		return previousTotalExp - growthTree.getTotalExp();
 	}
 	
 	// 회원 초대 시 경험치 +5

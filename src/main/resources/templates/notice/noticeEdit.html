@@ -44,7 +44,8 @@
 				    <span th:each="file : ${noticeFile}">
 				    		<span th:text="${file.originalName}">파일명</span>
 				    		<label>
-				    			<input type="checkbox" name="deleteFileIds" th:value="${file.noticeFileId}">
+				    			<input type="checkbox" name="deleteFileIds" th:value="${file.noticeFileId}"
+				    			       th:checked="${deleteFileIds != null and #lists.contains(deleteFileIds, file.noticeFileId)}">
 				    			삭제
 				    		</label>
 				    	</span>
@@ -53,6 +54,8 @@
 				<label>
 					<input type="file" name="files" multiple="multiple">
 				</label>
+				<p class="form-text">삭제하지 않은 기존 파일과 새 파일을 합해 최대 5개까지 첨부할 수 있습니다.</p>
+				<p class="form-text" th:if="${errorMessage != null}">새로 첨부할 파일은 다시 선택해 주세요.</p>
 			
 			    <div class="shell-actions">
 			        <button type="submit" class="shell-action shell-action-primary">

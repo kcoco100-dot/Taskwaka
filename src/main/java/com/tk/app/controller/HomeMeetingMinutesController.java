@@ -2,6 +2,8 @@ package com.tk.app.controller;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
@@ -169,6 +171,8 @@ public class HomeMeetingMinutesController {
 				@RequestAttribute("workspace") WorkspaceDto workspace,
 				Model model) {
 			
+			model.addAttribute("meetingCreateDate",
+					LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
 			model.addAttribute("participatingProjects", 
 					participatingProjectService.findParticipatingProjects(
 							workspace.getWorkspaceId(), workspace.getMemberId()));

@@ -45,7 +45,7 @@
 						<thead>
 							<tr>
 								<th scope="col">회의 제목</th>
-								<th scope="col" class="meeting-date">회의일</th>
+								<th scope="col" class="meeting-date">작성일</th>
 								<th scope="col" class="meeting-writer">작성자</th>
 							</tr>
 						</thead>
@@ -63,7 +63,7 @@
 							           th:text="${#strings.isEmpty(summaryText) ? '본문은 상세 화면에서 확인해 주세요.' : summaryText}"></p>
 								</td>
 								
-								<td class="meeting-date" th:text="${meeting.meetingDate}"></td>
+								<td class="meeting-date" th:text="${meeting.createdDate}"></td>
 								<td class="meeting-writer" th:text="${meeting.authorName}"></td>
 							</tr>
 							

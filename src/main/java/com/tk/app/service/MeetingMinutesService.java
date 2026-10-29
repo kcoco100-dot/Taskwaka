@@ -60,6 +60,7 @@ public class MeetingMinutesService {
 			meeting.setMeetingMinuteId(view.getMeetingMinuteId());
 			meeting.setTitle(view.getTitle());
 			meeting.setMeetingDate(view.getMeetingDate());
+			meeting.setCreatedDate(view.getCreatedDate());
 			meeting.setAuthorName(view.getAuthorName());
 			
 			try {

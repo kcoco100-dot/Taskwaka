@@ -14,6 +14,7 @@ public class MeetingMinutesDto {
 	
 	private String summary; // 목록 표시
 	private String meetingDate; // 회의 일자
+	private String createdDate; // 작성일(최초 등록일)
 	private String authorName; // 작성자 이름
 	
 	private int canModify; // 수정, 삭제 가능 여부 1=가능, 0=불가능

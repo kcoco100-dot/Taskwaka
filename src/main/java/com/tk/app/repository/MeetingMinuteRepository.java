@@ -114,6 +114,7 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			SELECT m.meeting_minute_id AS "meetingMinuteId",
 			       m.title, m.content AS "summary",
 			       TO_CHAR(m.meeting, 'YYYY.MM.DD') AS "meetingDate",
+			       TO_CHAR(m.created, 'YYYY.MM.DD') AS "createdDate",
 			       md.name AS "authorName"
 			FROM meeting_minutes m
 			JOIN projects p ON p.project_id = m.project_id
@@ -138,8 +139,7 @@ public interface MeetingMinuteRepository extends JpaRepository<MeetingMinute, Lo
 			        	)
 			    )
 				AND (:kwd IS NULL OR m.title LIKE '%' || :kwd || '%')
-			ORDER BY m.meeting DESC NULLS LAST,
-			         m.created DESC,
+			ORDER BY m.created DESC,
 			         m.meeting_minute_id DESC
 			OFFSET :offset ROWS
 			FETCH FIRST :size ROWS ONLY

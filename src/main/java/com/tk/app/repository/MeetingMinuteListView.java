@@ -8,5 +8,6 @@ public interface MeetingMinuteListView {
 	String getTitle(); // 회의록 제목
 	Clob getSummary(); // 제목 아래에 표시할 본문
 	String getMeetingDate(); // 회의일
+	String getCreatedDate(); // 작성일
 	String getAuthorName(); // 회의록 작성자 이름
 }

@@ -23,6 +23,13 @@
 
             <form class="shell-content" id="meetingsCreateForm" method="post"
             		  th:action="@{/{domainKey}/home/meetingsIn(domainKey=${domainKey})}">
+	                <div class="meeting-detail-meta mb-3">
+	                    <span>
+	                        작성일
+	                        <strong th:text="${meetingCreateDate}"></strong>
+	                    </span>
+	                    <span>등록 시각에 자동으로 기록됩니다.</span>
+	                </div>
 	                <div class="mb-3">
 	                		
 	                		<div class="mb-3">

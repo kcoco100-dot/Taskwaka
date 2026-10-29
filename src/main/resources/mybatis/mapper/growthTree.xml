@@ -624,6 +624,7 @@
 			gel.workspace_id AS "workspaceId",
 			gel.member_id AS "memberId",
 			NVL(md.name, '알 수 없는 회원') AS "memberName",
+			p.project_id AS "projectId", p.subject AS "projectName",
 			gel.exp AS "exp", gel.action_type AS "actionType",
 			CASE gel.action_type
 				WHEN 'NOTICE_CREATE' THEN '공지사항 작성'
@@ -642,6 +643,35 @@
 		FROM growth_exp_logs gel
 		LEFT JOIN member_details md 
 			ON md.member_id = gel.member_id
+		LEFT JOIN daily_reports dr
+			ON dr.daily_report_id = gel.daily_report_id
+			AND gel.action_type IN ('DAILY_REPORT_CREATE', 'DAILY_REPORT_APPROVE')
+		LEFT JOIN sub_tasks st
+			ON st.sub_task_id = CASE
+				WHEN gel.action_type = 'SUBTASK_CREATE' THEN gel.sub_task_id
+				WHEN gel.action_type IN ('DAILY_REPORT_CREATE', 'DAILY_REPORT_APPROVE')
+					THEN dr.sub_task_id
+			END
+		LEFT JOIN tasks t
+			ON t.task_id = st.task_id
+			AND t.project_id = st.project_id
+		LEFT JOIN team_reports tr
+			ON tr.team_report_id = gel.team_report_id
+			AND gel.action_type IN ('TEAM_REPORT_CREATE', 'TEAM_REPORT_APPROVE')
+		LEFT JOIN project_reports pr
+			ON pr.project_report_id = gel.project_report_id
+			AND gel.action_type = 'PROJECT_REPORT_APPROVE'
+		LEFT JOIN projects p
+			ON p.project_id = CASE gel.action_type
+				WHEN 'SUBTASK_CREATE' THEN t.project_id
+				WHEN 'DAILY_REPORT_CREATE' THEN t.project_id
+				WHEN 'DAILY_REPORT_APPROVE' THEN t.project_id
+				WHEN 'TEAM_REPORT_CREATE' THEN tr.project_id
+				WHEN 'TEAM_REPORT_APPROVE' THEN tr.project_id
+				WHEN 'PROJECT_REPORT_APPROVE' THEN pr.project_id
+				WHEN 'PROJECT_COMPLETE' THEN gel.project_id
+			END
+			AND p.workspace_id = gel.workspace_id
 		WHERE gel.workspace_id = #{workspaceId}
 			AND gel.exp > 0
 		ORDER BY gel.earned_at DESC NULLS LAST,

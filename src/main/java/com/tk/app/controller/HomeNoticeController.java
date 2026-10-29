@@ -1,7 +1,5 @@
 package com.tk.app.controller;
 
-
-
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
@@ -25,6 +23,7 @@ import com.tk.app.common.PaginateUtil;
 import com.tk.app.common.RequestUtils;
 import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.NoticeCreateResultDto;
+import com.tk.app.domain.dto.NoticeDeleteResultDto;
 import com.tk.app.domain.dto.NoticeDto;
 import com.tk.app.domain.dto.NoticeFileDto;
 import com.tk.app.exception.StorageException;
@@ -434,6 +433,7 @@ public class HomeNoticeController {
 					model.addAttribute("notice", notice);
 					model.addAttribute("noticeFile", noticeFile);
 					model.addAttribute("errorMessage", "제목은 200자 이내로 입력하고, 내용은 빈칸없이 입력해 주세요.");
+					model.addAttribute("deleteFileIds", deleteFileIds);
 
 
 					return "notice/noticeEdit";
@@ -454,6 +454,25 @@ public class HomeNoticeController {
 				redirectAttributes.addFlashAttribute("editedNoticeId", noticeId);
 				
 				return "redirect:/" + domainKey + "/home/noticeDetail?noticeId=" + noticeId;
+			} catch (IllegalArgumentException e) {
+				// 첨부 검증 실패는 입력 내용을 유지한 수정 화면에서 안내
+				if (response.isCommitted()) {
+					return null;
+				}
+
+				NoticeDto notice = new NoticeDto();
+				notice.setNoticeId(noticeId);
+				notice.setTitle(title);
+				notice.setContent(content);
+
+				List<NoticeFileDto> noticeFile = noticeService.findWorkspaceFiles(
+						workspace.getWorkspaceId(), noticeId);
+				model.addAttribute("notice", notice);
+				model.addAttribute("noticeFile", noticeFile);
+				model.addAttribute("deleteFileIds", deleteFileIds);
+				model.addAttribute("errorMessage", e.getMessage());
+				response.setStatus(HttpStatus.BAD_REQUEST.value());
+				return "notice/noticeEdit";
 			} catch (DataAccessException e) {
 				log.error("saveNotice - DataAccessException", e);
 				if (response.isCommitted()) {
@@ -498,15 +517,24 @@ public class HomeNoticeController {
 				@PathVariable("domainKey") String domainKey,
 				@RequestAttribute("workspace") WorkspaceDto workspace, 
 				@RequestParam("noticeId") long noticeId,
-				HttpServletResponse response, Model model) {
+				HttpServletResponse response, Model model,
+				RedirectAttributes redirectAttributes) {
 
 			try {
-				int deletedCount = noticeService.deleteNotice(workspace.getWorkspaceId(), noticeId);
+				NoticeDeleteResultDto deleteResult = noticeService.deleteNotice(workspace.getWorkspaceId(), noticeId);
+				int deletedCount = deleteResult.getDeletedCount();
 
 				// 삭제할 공지가 없을 경우
 				if (deletedCount == 0) {
 					response.sendError(404, "삭제할 공지가 없습니다.");
 					return null;
+				}
+
+				// 공지 삭제 성공 후 실제 회수량이 있을 때만 토스트 메시지 전달
+				if (deletedCount == 1 && deleteResult.getRevokedExp() > 0) {
+					redirectAttributes.addFlashAttribute(
+							"growthExpMessage",
+							"공지 삭제로 " + deleteResult.getRevokedExp() + " EXP가 회수되었습니다.");
 				}
 
 				// 삭제한 공지는 수정 화면에서 다시 조회할 수 없기 때문에 수정과 리다이렉트 주소가 다름
