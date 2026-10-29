@@ -37,7 +37,7 @@
 	            </div>
 	
 	            <div class="inquiry-file-item" th:each="file : ${fileList}">
-	                <span class="inquiry-file-icon">📎</span>
+	                <span class="inquiry-file-icon">📄</span>
 	                <a th:href="@{/admin/inquiry/file/{id}/download(id=${file.inquiries_file_id})}" th:text="${file.original_name}">첨부파일</a>
 	            </div>
 	        </div>

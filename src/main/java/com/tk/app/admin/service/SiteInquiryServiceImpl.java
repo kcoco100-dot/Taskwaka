@@ -175,15 +175,37 @@ public class SiteInquiryServiceImpl implements SiteInquiryService{
 		}
 	}
 
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public int deleteInquiry(SiteInquiryDto dto) {
-		try {
-			return siteInquiryMapper.deleteInquiry(dto);
-			
-		} catch (Exception e) {
-			log.error("deleteInquiry : ",e);
-			throw e;
-		}
+	    try {
+	        if(!canEditInquiry(dto.getInquiry_id(), dto.getMember_id())) {
+	            return 0;
+	        }
+
+	        List<SiteInquiryFileDto> fileList = siteInquiryMapper.selectInquiryFileList(dto.getInquiry_id());
+
+	        siteInquiryMapper.deleteInquiryFiles(dto.getInquiry_id());
+
+	        int result = siteInquiryMapper.deleteInquiry(dto);
+
+	        if(result == 0) {
+	            throw new IllegalStateException("문의 삭제 실패");
+	        }
+
+	        for(SiteInquiryFileDto fileDto : fileList) {
+	            boolean deleted = storageService.deleteFile(fileDto.getFile_path(), fileDto.getStored_name());
+
+	            if(!deleted) {
+	                throw new IllegalStateException("첨부파일 삭제 실패");
+	            }
+	        }
+
+	        return result;
+	    } catch (Exception e) {
+	        log.error("deleteInquiry : ", e);
+	        throw e;
+	    }
 	}
 
 	@Transactional(rollbackFor = Exception.class)

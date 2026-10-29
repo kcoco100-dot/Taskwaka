@@ -5,6 +5,7 @@ const endDate = document.getElementById("endDate").value;
 flatpickr("#dateRange", {
     mode: "range",
     dateFormat: "Y-m-d",
+	locale: "ko",
 	defaultDate: startDate && endDate ? [startDate, endDate] : [],
     onChange: function(selectedDates, dateStr, instance) {
         if (selectedDates.length === 2) {

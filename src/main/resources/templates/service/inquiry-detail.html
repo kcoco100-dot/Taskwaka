@@ -58,7 +58,7 @@
                 <div class="site-inquiry-attachments" th:if="${fileList != null and !fileList.isEmpty()}">
 				    <h4>첨부파일</h4>
 				    <div class="site-inquiry-attachment" th:each="file : ${fileList}">
-					    <span class="site-inquiry-file-icon">📎</span>
+					    <span class="site-inquiry-file-icon">📄</span>
 					    <span th:text="${file.original_name}"></span>
 					</div>
 				</div>

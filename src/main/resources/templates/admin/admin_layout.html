@@ -11,18 +11,19 @@
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-user-detail.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-domain.css}">
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-stats.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/admin/admin-notice.css}">	
 	<link rel="stylesheet" th:href="@{/dist/css/admin/admin-responsive.css}">
 	<!-- Quill editor -->
 	<link rel="stylesheet" th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeDetail' or activeSection == 'noticeEdit'}"
 	 	th:href="@{/dist/vendor/quill/css/quill.snow.css}">
 	<link rel="stylesheet" th:if="${activeSection == 'noticeWrite' or activeSection == 'noticeDetail' or activeSection == 'noticeEdit'}"
 	 	th:href="@{/dist/vendor/quill/css/resize.css}">
-	 <link rel="stylesheet" th:href="@{/dist/css/admin/admin-notice.css}">	
 </th:block>
 <!-- Flatpickr 달력 디자인 -->
 <link th:if="${activeSection == 'stats'}" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <!-- Flatpickr 달력 기능 -->
 <script th:if="${activeSection == 'stats'}" src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script th:if="${activeSection == 'stats'}" src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
 </head>
 <body>
 

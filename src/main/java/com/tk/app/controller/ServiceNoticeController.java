@@ -37,7 +37,7 @@ public class ServiceNoticeController {
 			@RequestParam(defaultValue = "") String keyword,
 			@RequestParam(name = "page", defaultValue = "1") int current_page) {
 		try {
-			int size = 2;
+			int size = 5;
 			
 			int dataCount = siteNoticeService.dataCountPublicNotice(keyword);
 			

@@ -1,27 +1,105 @@
-/* 관리자 화면 너비 대응 */
-@media (max-width: 1200px) {
+/* 관리자 화면 기본 너비 */
+.app-frame,
+.main-viewport,
+.content-area {
+    min-width: 0;
+}
 
-    .main-viewport,
-    .content-area,
-    .panel-card {
+.content-area .panel-card {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* 테이블 글자 겹침 방지 */
+.content-area table.warm-table {
+    table-layout: auto;
+}
+
+/* 테이블이 있는 카드만 좌우 스크롤 */
+.content-area .panel-card:has(> table.warm-table) {
+    overflow-x: auto;
+}
+
+/* 열 개수에 따라 최소 너비 확보 */
+.content-area .warm-table:has(thead th:nth-child(8)) {
+    min-width: 1080px;
+}
+
+.content-area .warm-table:has(thead th:nth-child(6)):not(:has(thead th:nth-child(8))) {
+    min-width: 860px;
+}
+
+.content-area .warm-table:not(:has(thead th:nth-child(6))) {
+    min-width: 680px;
+}
+
+.content-area table.warm-table th,
+.content-area table.warm-table td {
+    white-space: nowrap;
+}
+
+/* 제목과 검색 버튼 정렬 */
+@media (max-width: 1100px) {
+    .content-area .panel-card-title {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .content-area .panel-card-title > span {
+        flex: 1 1 240px;
+        min-width: 180px;
+        word-break: keep-all;
+    }
+
+    .content-area .panel-card-title > div {
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+
+    .content-area .panel-card-title .warm-input {
+        flex: 1 1 190px;
         min-width: 0;
         max-width: 100%;
-        box-sizing: border-box;
     }
 
-    /* 테이블이 들어 있는 카드에서 가로 스크롤 */
-    .content-area .panel-card {
-        overflow-x: auto;
+    .stats-summary-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+/* 좁은 화면에서는 상단 탭 메뉴 사용 */
+@media (max-width: 900px) {
+    .sidebar {
+        display: none;
     }
 
-    /* 테이블 칸이 지나치게 좁아지는 문제 방지 */
-    .content-area table {
-        min-width: 950px;
-        border-collapse: collapse;
+    .content-area {
+        padding: 20px 16px;
     }
 
-    .content-area th,
-    .content-area td {
-        white-space: nowrap;
+    .admin-header {
+        padding: 16px 16px 0;
+    }
+
+    .panel-card {
+        padding: 16px;
+    }
+
+    .member-stats {
+        flex-wrap: wrap;
+    }
+
+    .member-stat-card {
+        min-width: 130px;
+    }
+
+    .stats-search-area,
+    .notice-search {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .tab-bar .tab-btn {
+        flex-shrink: 0;
     }
 }

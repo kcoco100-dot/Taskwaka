@@ -26,8 +26,8 @@
 			
 			<div class="notice-files" th:if="${fileList != null and !fileList.isEmpty()}">
 			    <div class="notice-files-header">
-			        <strong>📎 첨부파일 <span th:text="${fileList.size()}"></span>개</strong>
-			
+			        <strong>📄 첨부파일 <span th:text="${fileList.size()}"></span>개</strong>
+
 			        <a class="notice-download-all" th:href="@{/admin/notice/{notice_id}/downloadAll(notice_id=${detail.notice_id})}">
 			            전체 다운로드 ↓
 			        </a>
