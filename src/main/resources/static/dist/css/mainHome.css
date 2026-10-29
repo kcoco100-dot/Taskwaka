@@ -307,3 +307,30 @@
     background: #FFF5E5;
     box-shadow: 0 5px 16px rgba(101, 75, 50, 0.06);
 }
+
+/* 내 워크 목록의 정지 카드 */
+.mainHome.myHome-page .team-card.is-disabled,
+.mainHome.myHome-page .team-card.is-disabled:hover {
+    border-color: #D9DDD5;
+    background: #F3F4F1;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.mainHome.myHome-page .team-card.is-disabled .team-card-icon {
+    background: #E5E8E2;
+    color: #747C6D;
+}
+
+.mainHome.myHome-page .team-card.is-disabled .team-card-title {
+    color: #6C7365;
+}
+
+.mainHome.myHome-page .team-card.is-disabled .team-card-description {
+    color: #8D463D;
+}
+
+.mainHome.myHome-page .team-card.is-disabled .team-card-action {
+    background: #F2E3DF;
+    color: #8D463D;
+}

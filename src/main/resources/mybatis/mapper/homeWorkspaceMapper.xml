@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.HomeWorkspaceMapper">
+
+    <!-- 로그인 회원의 참여 워크 목록: 활성, 정지 모두 조회 -->
+    <select id="findWorkspaceList"
+            resultType="com.tk.app.domain.dto.HomeWorkspaceDto">
+        SELECT w.workspace_id AS "workspaceId",
+               wm.member_id AS "memberId",
+               w.subject AS "subject",
+               w.status AS "status",
+               wd.domain_key AS "domainKey",
+               wd.active AS "active",
+               wd.reason AS "reason"
+        FROM workspace_members wm
+        JOIN workspaces w
+          ON wm.workspace_id = w.workspace_id
+        JOIN workspace_domains wd
+          ON w.workspace_id = wd.workspace_id
+        WHERE wm.member_id = #{memberId}
+          AND wm.status = 0
+    </select>
+    
+</mapper>

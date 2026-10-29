@@ -33,7 +33,10 @@
                     <div th:if="${nextGrowthLevel == null}">
 					    <strong>최고 단계 달성</strong>
 					</div>
-                    <div>나무 상점 <strong>구매 기능 준비 중</strong></div>
+                    <div>사용 가능한 EXP
+                        <strong id="summaryAvailableExp" aria-live="polite"
+                                th:text="|${growthTree.totalExp > 400 ? growthTree.totalExp - 400 : 0} EXP|">0 EXP</strong>
+                    </div>
                 </div>
 
                 <!-- 나무 이미지와 커스텀 아이템 -->
@@ -53,7 +56,11 @@
                         </p>
                     </div>
 
-                <aside class="tree-shop" aria-labelledby="tree-shop-title">
+                <!-- 5단계 도달 여부와 화면에서 사용할 추가 경험치 전달 -->
+				<aside class="tree-shop"
+				       aria-labelledby="tree-shop-title"
+				       th:attr="data-shop-enabled=${growthTree.levelNo >= 5 and growthTree.totalExp >= 400},
+				                data-shop-exp=${growthTree.totalExp > 400 ? growthTree.totalExp - 400 : 0}">
                     <div class="tree-shop-heading">
                         <div class="tree-shop-title-row">
                             <h2 id="tree-shop-title"><span aria-hidden="true">🛍️</span> 나무 상점</h2>
@@ -61,7 +68,15 @@
                         </div>
                         <p>우리 팀의 정원을 꾸며보세요.</p>
                         <!-- aria-live="polite" : 현재 읽고 있는 내용을 마친 뒤 변경 내용을 안내하라 -->
-                        <div class="tree-shop-wallet"><span>상품·가격 안내</span><strong id="shopSelectedPrice" aria-live="polite">미리보기</strong></div>
+                        <!-- 성장에 필요한 400 EXP를 제외한 사용 가능 경험치 -->
+						<div class="tree-shop-wallet">
+						    <span>사용 가능한 EXP</span>
+						    <strong id="shopAvailableExp"
+						            aria-live="polite"
+						            th:text="|${growthTree.totalExp > 400 ? growthTree.totalExp - 400 : 0} EXP|">
+						        0 EXP
+						    </strong>
+						</div>
                     </div>
 
                     <div class="tree-shop-categories" role="group" aria-label="상점 아이템 분류">
@@ -85,26 +100,34 @@
                         		aria-labelledby="shop-background-title">
                             <h3 id="shop-background-title">배경 이미지 <span>4가지 풍경</span></h3>
                             <ul class="tree-shop-products">
-                                <li class="tree-shop-product is-equipped">
+                                <li class="tree-shop-product is-equipped"
+								    data-price="0"
+								    th:attr="data-background=@{/dist/tree/backgrounds/warm-cottage.png}">
                                     <div class="tree-shop-thumbnail">
                                     <img th:src="@{/dist/tree/backgrounds/warm-cottage.png}" alt="" loading="lazy">
                                     <span class="tree-shop-item-badge">기본</span></div>
                                     <strong class="tree-shop-item-name">따뜻한 집</strong>
                                     <span class="tree-shop-price is-default">✓ 적용 중</span>
                                 </li>
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product"
+								    data-price="10"
+								    th:attr="data-background=@{/dist/tree/backgrounds/green-forest.png}">
                                     <div class="tree-shop-thumbnail">
                                     <img th:src="@{/dist/tree/backgrounds/green-forest.png}" alt="" loading="lazy"></div>
                                     <strong class="tree-shop-item-name">초록 숲</strong>
                                     <span class="tree-shop-price">10 EXP</span>
                                 </li>
-                                <li class="tree-shop-product">
+								<li class="tree-shop-product"
+								    data-price="10"
+								    th:attr="data-background=@{/dist/tree/backgrounds/seaside.png}">
                                     <div class="tree-shop-thumbnail">
                                     <img th:src="@{/dist/tree/backgrounds/seaside.png}" alt="" loading="lazy"></div>
                                     <strong class="tree-shop-item-name">바닷가</strong>
                                     <span class="tree-shop-price">10 EXP</span>
                                 </li>
-                                <li class="tree-shop-product">
+								<li class="tree-shop-product"
+								    data-price="10"
+								    th:attr="data-background=@{/dist/tree/backgrounds/starry-night.png}">
                                     <div class="tree-shop-thumbnail">
                                     <img th:src="@{/dist/tree/backgrounds/starry-night.png}" alt="" loading="lazy"></div>
                                     <strong class="tree-shop-item-name">별빛 밤</strong>
@@ -208,7 +231,7 @@
                         </section>
                     </div>
 
-                   <div class="tree-shop-footer"><span>꾸미기 상품과 가격을 미리 살펴보세요.</span><small>상품 구매와 나무 적용 기능은 준비 중입니다.</small></div>
+                   <div class="tree-shop-footer"><span>꾸미기 상품과 가격을 미리 살펴보세요.</span></div>
                 </aside>
                 </div>
 
@@ -280,6 +303,11 @@
             </div>
         </div>
     </div>
+</th:block>
+
+<!-- 상점 구매 확인에 사용할 공통 확인창 -->
+<th:block layout:fragment="aside-container">
+    <th:block th:replace="~{common/util/confirm::confirm}"></th:block>
 </th:block>
 
 <th:block layout:fragment="script">
