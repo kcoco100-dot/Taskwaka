@@ -19,6 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const photoPlaceholder = document.getElementById("mypagePhotoPlaceholder");
         const photoSave = document.getElementById("mypagePhotoSave");
         const photoDelete = document.getElementById("mypagePhotoDelete");
+		
+		const profileUrl = profileSection.dataset.profileUrl;
 
         photoChange.addEventListener("click", () => {
             photoFile.click();
@@ -53,8 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("selectFile", file);
 
             photoSave.disabled = true;
-			
-			const profileUrl = profileSection.dataset.profileUrl
 
             try {
                 const response = await fetch(profileUrl, {
@@ -128,6 +128,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const clearAddress = document.getElementById("mypageAddressClear");
 
         const originalAddress = addressValue.value;
+		
+		const addressUrl = section.dataset.updateUrl;
 
         phone.value = formatPhone(phone.value);
 
@@ -191,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
         saveButton.addEventListener("click", async () => {
 
             saveButton.disabled = true;
-			const addressUrl = section.dataset.updateUrl
 
             try {
                 const response = await fetch(addressUrl, {
@@ -224,5 +225,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     }
+	
+
+	const pwdSection = document.querySelector("[data-pwd-url]");
+
+	if (pwdSection) {
+
+	    const currentPwd = document.getElementById("mypageCurrentPwd");
+	    const newPwd = document.getElementById("mypageNewPwd");
+	    const confirmPwd = document.getElementById("mypageConfirmPwd");
+	    const pwdSave = document.getElementById("mypagePwdSave");
+
+	    const pwdUrl = pwdSection.dataset.pwdUrl;
+
+	    pwdSave.addEventListener("click", async () => {
+
+	        pwdSave.disabled = true;
+
+	        try {
+	            const response = await fetch(pwdUrl, {
+	                method: "POST",
+	                headers: {
+	                    "Content-Type": "application/json"
+	                },
+	                body: JSON.stringify({
+	                    currentPwd: currentPwd.value,
+	                    newPwd: newPwd.value,
+	                    confirmPwd: confirmPwd.value
+	                })
+	            });
+
+	            const result = await response.json();
+
+	            if (response.ok && result.success) {
+
+	                alert(result.message || "비밀번호가 변경되었습니다.");
+
+	                currentPwd.value = "";
+	                newPwd.value = "";
+	                confirmPwd.value = "";
+
+	            } else {
+	                alert(result.message || "비밀번호 변경에 실패했습니다.");
+	            }
+
+	        } catch (e) {
+	            console.error("비밀번호 변경 오류", e);
+	            alert("서버 통신 중 오류가 발생했습니다.");
+
+	        } finally {
+	            pwdSave.disabled = false;
+	        }
+
+	    });
+	}
+
 
 });

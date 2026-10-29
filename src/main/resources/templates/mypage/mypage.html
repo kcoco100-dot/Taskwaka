@@ -56,8 +56,8 @@
 
             <strong class="mypage-sidebar-title">탈퇴 관리</strong>
 
-            <a th:href="@{/member/mypage/work-leave}"
-               th:classappend="${page == 'work-leave'} ? 'is-active' : ''">
+            <a th:href="@{/member/mypage/works}"
+               th:classappend="${page == 'works'} ? 'is-active' : ''">
                 워크 탈퇴
             </a>
 
@@ -69,9 +69,7 @@
         </nav>
 
         <div class="mypage-content">
-        
-            <section class="mypage-card" th:if="${page == 'profile'}"
-         		th:attr="data-profile-url=@{/member/mypage/profile}">
+			<section class="mypage-card" th:if="${page == 'overview'}">
          		
                 <div class="mypage-card-heading">
                     <h2>내 정보</h2>
@@ -81,13 +79,17 @@
                 <div class="mypage-info-section">
                     <h3>프로필 사진</h3>
                     <div class="mypage-profile">
-                        <div class="mypage-avatar" aria-label="기본 프로필">
-                            <span aria-hidden="true">👤</span>
-                        </div>
+						<div class="mypage-avatar" aria-label="프로필 사진">
+						    <img th:if="${!#strings.isEmpty(myInfo.profile)}"
+						         th:src="@{/uploads/member/{filename}(filename=${myInfo.profile})}"
+						         alt="프로필 사진">
+						
+						    <span th:if="${#strings.isEmpty(myInfo.profile)}"
+						          aria-hidden="true">👤</span>
+						</div>
 
                         <div class="mypage-profile-info">
 							<strong th:text="${#strings.isEmpty(myInfo.name) ? '' : myInfo.name}"></strong>
-
                             <p>프로필 사진은 왼쪽 메뉴에서 변경할 수 있습니다.</p>
                         </div>
                     </div>
@@ -305,82 +307,108 @@
 			    </div>
 			</section>
 
+  
+			<section class="mypage-card"
+			         th:if="${page == 'security' and isLocalAccount}"
+			         th:attr="data-pwd-url=@{/member/mypage/security}">
+			
+			    <div class="mypage-card-heading">
+			        <h2>보안 설정</h2>
+			        <p>로그인 비밀번호를 변경할 수 있습니다.</p>
+			    </div>
+			
+			    <div class="mypage-form-grid">
+			
+			        <div class="mypage-field mypage-field-full">
+			            <label for="mypageCurrentPwd">현재 비밀번호</label>
+			            <input type="password" id="mypageCurrentPwd">
+			        </div>
+			
+			        <div class="mypage-field mypage-field-full">
+			            <label for="mypageNewPwd">새 비밀번호</label>
+			            <input type="password" id="mypageNewPwd">
+			
+			            <p class="mypage-help">
+			                영문 대소문자, 숫자, 특수문자를 포함하여 8~20자로 입력하세요.
+			            </p>
+			        </div>
+			
+			        <div class="mypage-field mypage-field-full">
+			            <label for="mypageConfirmPwd">새 비밀번호 확인</label>
+			            <input type="password" id="mypageConfirmPwd">
+			        </div>
+			
+			    </div>
+			
+			    <div class="mypage-footer-actions">
+			        <button type="button" id="mypagePwdSave" class="mypage-button-primary">
+			            비밀번호 변경
+			        </button>
+			    </div>
+			</section>
 
-            <section class="mypage-card" th:if="${page == 'security' and isLocalAccount}">
+        
+			<section class="mypage-card" th:if="${page == 'works'}">
+			
+			    <div class="mypage-card-heading">
+			        <h2>워크 관리</h2>
+			        <p>소유 중인 워크를 삭제하거나 참여 중인 워크에서 탈퇴할 수 있습니다.</p>
+			    </div>
+			
+			    <div class="mypage-info-section">
+			        <h3>소유 중인 워크</h3>
+			
+			        <p class="mypage-help" th:if="${#lists.isEmpty(ownedWork)}">
+			            소유한 워크가 없습니다.
+			        </p>
+			
+			        <div class="mypage-info-box" th:each="work : ${ownedWork}">
+			            <strong th:text="${work.subject}"></strong>
+			            <p>직급: 사장</p>
+			
+			            <div class="mypage-actions">
+			                <button type="button" class="mypage-button-danger"
+			                        th:attr="data-work-id=${work.workId}" disabled>
+			                    워크 삭제
+			                </button>
+			            </div>
+			        </div>
+			
+			        <p class="mypage-help">
+			            워크를 삭제하면 참여자들이 해당 워크에 접근할 수 없습니다.
+			            삭제 전 관련 프로젝트와 참여 인원을 확인합니다.
+			        </p>
+			
+			    </div>
+			    <div class="mypage-separator"></div>
+			
+			    <div class="mypage-info-section">
+			        <h3>참여 중인 워크</h3>
+			
+			        <p class="mypage-help" th:if="${#lists.isEmpty(participateWork)}">
+			            탈퇴할 수 있는 참여 워크가 없습니다.
+			        </p>
+			
+			        <div class="mypage-info-box" th:each="work : ${participateWork}">
+			            <strong th:text="${work.subject}">워크명</strong>
+			            <p>참여 중인 워크</p>
+			
+			            <div class="mypage-actions">
+			                <button type="button" class="mypage-button-outline-danger"
+			                        th:attr="data-work-id=${work.workId}" disabled>
+			                    워크 탈퇴
+			                </button>
+			            </div>
+			
+			        </div>
+			
+			        <p class="mypage-help">
+			            워크에서 탈퇴하면 해당 워크의 접근 권한이 해제됩니다.
+			            재참여 시 이전 직급과 권한은 자동 복원되지 않습니다.
+			        </p>
+			    </div>
+			</section>
 
-                <div class="mypage-card-heading">
-                    <h2>보안 설정</h2>
-                    <p>로그인 비밀번호를 변경할 수 있습니다.</p>
-                </div>
-
-                <div class="mypage-form-grid">
-
-                    <div class="mypage-field mypage-field-full">
-                        <label for="mypageCurrentPassword">현재 비밀번호</label>
-                        <input type="password" id="mypageCurrentPassword" disabled>
-                    </div>
-
-                    <div class="mypage-field mypage-field-full">
-                        <label for="mypageNewPassword">새 비밀번호</label>
-                        <input type="password" id="mypageNewPassword" disabled>
-                    </div>
-
-                    <div class="mypage-field mypage-field-full">
-                        <label for="mypageConfirmPassword">새 비밀번호 확인</label>
-                        <input type="password" id="mypageConfirmPassword" disabled>
-                    </div>
-                </div>
-
-                <div class="mypage-footer-actions">
-                    <button type="button" id="mypagePasswordSave" class="mypage-button-primary" disabled>
-                        비밀번호 변경
-                    </button>
-                </div>
-
-            </section>
-
-
-            <section class="mypage-card" th:if="${page == 'work-leave'}">
-
-                <div class="mypage-card-heading">
-                    <h2>워크 탈퇴</h2>
-                    <p>현재 참여 중인 워크에서 탈퇴합니다.</p>
-                </div>
-
-                <div class="mypage-field">
-                    <label for="mypageWorkspaceSelect">탈퇴할 워크</label>
-                    <select id="mypageWorkspaceSelect" disabled>
-                        <option value="">
-                            참여 중인 워크 조회 예정
-                        </option>
-                    </select>
-                </div>
-
-                <div class="mypage-info-box">
-                    <strong>워크 탈퇴 전 확인사항</strong>
-
-                    <p>
-                        워크 탈퇴 시 해당 워크의 접근 권한이 해제됩니다.
-                    </p>
-
-                    <p>
-                        워크 소유자는 먼저 활성 회원에게 소유권을
-                        양도해야 합니다. 양도할 대상이 없다면
-                        워크 삭제 후 탈퇴할 수 있습니다.
-                    </p>
-
-                    <p>
-                        재참여 시 이전 직급과 권한은 자동 복원되지 않습니다.
-                    </p>
-                </div>
-
-                <div class="mypage-footer-actions">
-                    <button type="button" id="mypageWorkLeave" class="mypage-button-outline-danger" disabled>
-                        선택한 워크 탈퇴
-                    </button>
-                </div>
-
-            </section>
 
 
             <section class="mypage-card mypage-card-danger" th:if="${page == 'withdraw'}">

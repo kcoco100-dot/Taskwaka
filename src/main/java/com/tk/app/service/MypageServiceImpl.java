@@ -1,14 +1,19 @@
 package com.tk.app.service;
 
+import java.util.List;
+
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.MypageDto;
+import com.tk.app.domain.dto.MypagePwdDto;
+import com.tk.app.domain.dto.MypageWorkDto;
 import com.tk.app.mapper.MypageMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -22,15 +27,19 @@ public class MypageServiceImpl implements MypageService {
 	
 	private final MypageMapper mapper;
 	private final StorageService storageService;
+	private final PasswordEncoder passwordEncoder;
 
 	@Value("${file.upload-root}/member")
 	private String uploadPath;
 	
     private void deleteProfileFile(String filename) {
 	    try {
-	        if (filename == null || !filename.matches("[A-Za-z0-9_-]+\\.(?i:jpg|jpeg|png)")) {
+	        if (filename == null || ! filename.matches("[A-Za-z0-9_-]+\\.(?i:jpg|jpeg|png)")) {
 	            return;
 	        }
+	        
+	        storageService.deleteFile(uploadPath, filename);
+	        
 	    } catch (Exception e) {
 	        log.warn("프로필 사진 파일 삭제 오류: {}", filename, e);
 	    }
@@ -156,6 +165,7 @@ public class MypageServiceImpl implements MypageService {
             log.error("프로필 사진 변경 오류", e);
             throw e;
         }
+        
         deleteProfileFile(current.getProfile());
 
         return filename;
@@ -181,5 +191,73 @@ public class MypageServiceImpl implements MypageService {
 
         deleteProfileFile(current.getProfile());
     }
+    
+	 @Override
+	 @Transactional
+	 public String updatePwd(MypagePwdDto dto) throws Exception {
+	     if (dto == null || dto.getMemberId() == null) {
+	         throw new IllegalArgumentException("회원정보가 올바르지 않습니다.");
+	     }
+	
+	     if (isSnsMember(dto.getMemberId())) {
+	         throw new SecurityException("SNS 회원은 비밀번호를 변경할 수 없습니다.");
+	     }
+	
+	     String currentPwd = dto.getCurrentPwd();
+	     String newPwd = dto.getNewPwd();
+	     String confirmPwd = dto.getConfirmPwd();
+	
+	     if (currentPwd == null || currentPwd.isBlank()) {
+	         throw new IllegalArgumentException("현재 비밀번호를 입력해주세요.");
+	     }
+	
+	     if (newPwd == null || confirmPwd == null) {
+	         throw new IllegalArgumentException("새 비밀번호를 입력해주세요.");
+	     }
+	
+	     String savedPwd = mapper.findPwdByMemberId(dto.getMemberId());
+	
+	     if (savedPwd == null || savedPwd.isBlank()) {
+	         throw new IllegalStateException("회원 비밀번호를 조회할 수 없습니다.");
+	     }
+	
+	     if (! passwordEncoder.matches(currentPwd, savedPwd)) {
+	         throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+	     }
+	
+	     if (! newPwd.equals(confirmPwd)) {
+	         throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+	     }
+	
+	     if (! newPwd.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$")) {
+	         throw new IllegalArgumentException("영문 대소문자, 숫자, 특수문자를 포함해 8~20자로 입력해주세요.");
+	     }
+	
+	     if (passwordEncoder.matches(newPwd, savedPwd)) {
+	         throw new IllegalArgumentException("기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.");
+	     }
+	
+	     String encodedPwd = passwordEncoder.encode(newPwd);
+	     dto.setPwd(encodedPwd);
+	     
+	     int result = mapper.updatePwd(dto);
+	
+	     if (result != 1) {
+	         throw new IllegalStateException("비밀번호 변경에 실패했습니다.");
+	     }
+	
+	     return encodedPwd;
+	 }
+	 
+
+	@Override
+	public List<MypageWorkDto> findMyWorkspaces(Long memberId) throws Exception {
+	    if (memberId == null) {
+	        throw new IllegalArgumentException("회원정보가 올바르지 않습니다.");
+	    }
+	    return mapper.findMyWorkspaces(memberId);
+	}
+
+
 
 }

@@ -59,6 +59,42 @@
 	      )
 	</update>
 	
+	<select id="findPwdByMemberId" parameterType="Long" resultType="String">
+	    SELECT password pwd
+	    FROM members
+	    WHERE member_id = #{memberId}
+	      AND status = 0
+	</select>
+	
+	
+	<update id="updatePwd" parameterType="MypagePwdDto">
+	    UPDATE members SET password = #{pwd}, fail_cnt = 0, blocked_until = NULL
+	    WHERE member_id = #{memberId}
+	      AND status = 0
+	</update>
+	 
+
+	<select id="findMyWorkspaces" parameterType="Long" resultType="MypageWorkDto">
+	    SELECT w.workspace_id workId, wm.workspace_member_id AS workMemberId,
+	        w.subject, wm.role, wd.domain_key domainKey  
+	    FROM workspace_members wm
+	
+	    JOIN workspaces w ON wm.workspace_id = w.workspace_id
+	
+	    JOIN workspace_domains wd ON w.workspace_id = wd.workspace_id
+	
+	    JOIN members m ON wm.member_id = m.member_id
+	
+	    WHERE wm.member_id = #{memberId}
+	      AND wm.status = 0
+	      AND wd.active = 'Y'
+	      AND m.status = 0
+	    ORDER BY wm.role DESC, w.workspace_id DESC
+	</select>
+	
+	
+	
+	
 
 	
     

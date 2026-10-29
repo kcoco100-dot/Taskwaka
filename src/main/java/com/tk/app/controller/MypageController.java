@@ -1,5 +1,6 @@
 package com.tk.app.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.tk.app.domain.dto.MypageDto;
+import com.tk.app.domain.dto.MypagePwdDto;
+import com.tk.app.domain.dto.MypageWorkDto;
 import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.security.LoginMemberUtil;
 import com.tk.app.service.MypageService;
@@ -48,7 +51,7 @@ public class MypageController {
         SessionInfo member = getLoginMember();
 
         try {
-            return !service.isSnsMember(member.getMember_id());
+            return ! service.isSnsMember(member.getMember_id());
         } catch (Exception e) {
             log.error("SNS 회원 여부 조회 오류 : ", e);
 
@@ -242,15 +245,75 @@ public class MypageController {
 
         return "mypage/mypage";
     }
+    
+	 @PostMapping("/security")
+	 public ResponseEntity<?> updatePwd(@RequestBody MypagePwdDto dto) {
+	
+	     SessionInfo member = getLoginMember();
+	
+	     try {
+	         if (dto == null) {
+	             throw new IllegalArgumentException("비밀번호 정보가 없습니다.");
+	         }
+	
+	         dto.setMemberId(member.getMember_id());
+	
+	         String encodedPwd = service.updatePwd(dto);
+	
+	         member.setPassword(encodedPwd);
+	
+	         return ResponseEntity.ok(Map.of(
+	                 "success", true,
+	                 "message", "비밀번호가 변경되었습니다."
+	         ));
+	
+	     } catch (Exception e) {
+	         log.error("비밀번호 변경 오류 : ", e);
+	
+	         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+	
+	         if (e instanceof IllegalArgumentException) {
+	             status = HttpStatus.BAD_REQUEST;
+	         } else if (e instanceof SecurityException) {
+	             status = HttpStatus.FORBIDDEN;
+	         }
+	
+	         String message = status == HttpStatus.INTERNAL_SERVER_ERROR
+	                 ? "비밀번호 변경 중 오류가 발생했습니다."
+	                 : e.getMessage();
+	
+	         return ResponseEntity.status(status).body(Map.of(
+	                 "success", false,
+	                 "message", message
+	         ));
+	     }
+	 }
 
 
-    @GetMapping("/work-leave")
-    public String workLeave(Model model) {
 
-        model.addAttribute("page", "work-leave");
 
-        return "mypage/mypage";
-    }
+	@GetMapping("/works")
+	public String works(Model model) throws Exception {
+	
+	    SessionInfo member = getLoginMember();
+	
+	    List<MypageWorkDto> workList = service.findMyWorkspaces(member.getMember_id());
+	
+	    List<MypageWorkDto> ownedWork = workList.stream()
+	            .filter(work -> Integer.valueOf(70).equals(work.getRole()))
+	            .toList();
+	
+	    List<MypageWorkDto> participateWork = workList.stream()
+	            .filter(work -> work.getRole() != null && work.getRole() != 70)
+	            .toList();
+	
+	    model.addAttribute("page", "works");
+	    model.addAttribute("ownedWork", ownedWork);
+	    model.addAttribute("participateWork", participateWork);
+	
+	    return "mypage/mypage";
+	}
+
 
 
     @GetMapping("/withdraw")

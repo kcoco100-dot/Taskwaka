@@ -1,8 +1,12 @@
 package com.tk.app.service;
 
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tk.app.domain.dto.MypageDto;
+import com.tk.app.domain.dto.MypagePwdDto;
+import com.tk.app.domain.dto.MypageWorkDto;
 
 public interface MypageService {
 
@@ -12,5 +16,9 @@ public interface MypageService {
 	
 	public String updateProfile(Long memberId, MultipartFile file) throws Exception;
 	public void deleteProfile(Long memberId) throws Exception;
+	
+	public String updatePwd(MypagePwdDto dto) throws Exception;
+	
+	public List<MypageWorkDto> findMyWorkspaces(Long memberId) throws Exception;
 	
 }
