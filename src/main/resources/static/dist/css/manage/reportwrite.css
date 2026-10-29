@@ -183,3 +183,37 @@
         grid-column: 1;
     }
 }
+
+.pending-upload-list {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pending-upload-list > li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: 1px solid #e7e1d8;
+    border-radius: 8px;
+    background: #faf9f7;
+}
+
+.pending-upload-name {
+    color: #594331;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.pending-upload-remove {
+    padding: 5px 10px;
+    border: 1px solid #e4c9c3;
+    border-radius: 6px;
+    background: #fff;
+    color: #a45143;
+    font-size: 12px;
+    cursor: pointer;
+}

@@ -184,11 +184,10 @@
                                    multiple
                                    accept=".gif,.png,.txt,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx">
 
-                            <span id="fileNameDisplay" class="file-name-display">
-                                선택된 파일 없음
-                            </span>
-                        </div>
-                        <small>기존 파일을 포함하여 최대 5개까지 등록할 수 있습니다.</small>
+                            <span id="fileNameDisplay" class="file-name-display">선택된 파일 없음</span>
+						</div>
+						<ul id="selectedNoticeFiles" class="pending-upload-list" hidden></ul>
+						<small>기존 파일을 포함하여 최대 5개까지 등록할 수 있습니다.</small>
                     </div>
                 </div>
 
@@ -228,92 +227,139 @@
 
 <th:block layout:fragment="script">
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('notice-form');
-            if (!form) {
+    function renderPendingFiles(input, summary, list) {
+        const selected = Array.from(input.files || []);
+
+        summary.textContent = selected.length
+            ? selected.length + '개 파일 선택'
+            : '선택된 파일 없음';
+
+        list.replaceChildren();
+        list.hidden = selected.length === 0;
+
+        selected.forEach((file, index) => {
+            const item = document.createElement('li');
+
+            const name = document.createElement('span');
+            name.className = 'pending-upload-name';
+            name.textContent = file.name;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'pending-upload-remove';
+            removeButton.textContent = '삭제';
+            removeButton.setAttribute(
+                'aria-label', file.name + ' 첨부 취소');
+
+            removeButton.addEventListener('click', () => {
+                const transfer = new DataTransfer();
+
+                Array.from(input.files || []).forEach(
+                    (remainingFile, currentIndex) => {
+                        if (currentIndex !== index) {
+                            transfer.items.add(remainingFile);
+                        }
+                    }
+                );
+
+                input.files = transfer.files;
+
+                input.dispatchEvent(
+                    new Event('change', { bubbles: true })
+                );
+            });
+
+            item.append(name, removeButton);
+            list.appendChild(item);
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('notice-form');
+        if (!form) {
+            return;
+        }
+
+        const type = document.getElementById('noticeType');
+        const project = document.getElementById('projectId');
+        const task = document.getElementById('taskId');
+        const projectField = document.getElementById('projectField');
+        const taskField = document.getElementById('taskField');
+        const files = document.getElementById('noticeFiles');
+        const display = document.getElementById('fileNameDisplay');
+		const fileList = document.getElementById('selectedNoticeFiles');
+        
+        function filterTasks() {
+            if (!task || !project) {
                 return;
             }
 
-            const type = document.getElementById('noticeType');
-            const project = document.getElementById('projectId');
-            const task = document.getElementById('taskId');
-            const projectField = document.getElementById('projectField');
-            const taskField = document.getElementById('taskField');
-            const files = document.getElementById('noticeFiles');
-            const display = document.getElementById('fileNameDisplay');
-
-            function filterTasks() {
-                if (!task || !project) {
-                    return;
+            for (const option of task.options) {
+                if (!option.value) {
+                    continue;
                 }
 
-                for (const option of task.options) {
-                    if (!option.value) {
-                        continue;
-                    }
-
-                    const enabled = option.dataset.project === project.value;
-                    option.hidden = !enabled;
-                    option.disabled = !enabled;
-                }
-
-                if (task.selectedOptions[0] && task.selectedOptions[0].disabled) {
-                    task.value = '';
-                }
+                const enabled = option.dataset.project === project.value;
+                option.hidden = !enabled;
+                option.disabled = !enabled;
             }
 
-            function changeType() {
-                if (!type) {
-                    return;
-                }
+            if (task.selectedOptions[0] && task.selectedOptions[0].disabled) {
+                task.value = '';
+            }
+        }
 
-                const showProject = type.value === 'PROJECT' || type.value === 'TASK';
-                const showTask = type.value === 'TASK';
-
-                projectField.hidden = !showProject;
-                taskField.hidden = !showTask;
-
-                project.disabled = !showProject;
-                project.required = showProject;
-
-                task.disabled = !showTask;
-                task.required = showTask;
-
-                filterTasks();
+        function changeType() {
+            if (!type) {
+                return;
             }
 
-            if (type) {
-                type.addEventListener('change', function () {
-                    project.value = '';
-                    task.value = '';
-                    changeType();
-                });
+            const showProject = type.value === 'PROJECT' || type.value === 'TASK';
+            const showTask = type.value === 'TASK';
 
-                project.addEventListener('change', function () {
-                    task.value = '';
-                    filterTasks();
-                });
+            projectField.hidden = !showProject;
+            taskField.hidden = !showTask;
 
+            project.disabled = !showProject;
+            project.required = showProject;
+
+            task.disabled = !showTask;
+            task.required = showTask;
+
+            filterTasks();
+        }
+
+        if (type) {
+            type.addEventListener('change', function () {
+                project.value = '';
+                task.value = '';
                 changeType();
-            }
-
-            if (files) {
-                files.addEventListener('change', function () {
-                    display.textContent = this.files.length === 0
-                        ? '선택된 파일 없음'
-                        : this.files.length + '개 파일 선택';
-                });
-            }
-
-            form.addEventListener('reset', function () {
-                setTimeout(function () {
-                    changeType();
-                    if (display) {
-                        display.textContent = '선택된 파일 없음';
-                    }
-                }, 0);
             });
+
+            project.addEventListener('change', function () {
+                task.value = '';
+                filterTasks();
+            });
+
+            changeType();
+        }
+
+        if (files) {
+        	files.addEventListener('change', function () {
+                renderPendingFiles(files, display, fileList);
+            });
+        }
+
+        form.addEventListener('reset', function () {
+        	setTimeout(function () {
+                changeType();
+
+                if (files) {
+                    renderPendingFiles(files, display, fileList);
+                }
+            }, 0);
         });
+    });
     </script>
 </th:block>
 

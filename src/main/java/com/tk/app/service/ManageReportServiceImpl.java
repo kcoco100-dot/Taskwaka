@@ -177,6 +177,25 @@ public class ManageReportServiceImpl implements ManageReportService {
 				);
 			}
 			
+			if (dto.getReportCategory() == 1) {
+			    if (status == 3) {
+			        Map<String, Object> rewardContext = new HashMap<>(map);
+			        rewardContext.put("reportId", dto.getReportId());
+			        rewardContext.put("reviewId", dto.getReviewId());
+			        rewardContext.put("reportCategory", dto.getReportCategory());
+			        rewardContext.put(
+			                "reviewStatus",
+			                ((Number) map.get("reviewDbStatus")).intValue());
+
+			        growthTreeService.grantProjectReportApproveExp(rewardContext);
+			    } else if (status == 4) {
+			        growthTreeService.revokeProjectReportApproveExp(
+			                ((Number) map.get("workspaceId")).longValue(),
+			                dto.getReportId());
+			    }
+			}
+			
+			
 			if (dto.getReportCategory() == 2) {
 			    if (status == 3 && mapper.countRewardEligibleReviewer(map) == 1) {
 			        growthTreeService.grantTeamReportApproveExp(
@@ -191,9 +210,8 @@ public class ManageReportServiceImpl implements ManageReportService {
 			}
 
 			if (dto.getReportCategory() == 2) {
-
 				map.put("taskId", dto.getTaskId());
-
+				
 				int taskResult = mapper.updateTaskProgress(map);
 
 				if (taskResult != 1) {
@@ -206,7 +224,9 @@ public class ManageReportServiceImpl implements ManageReportService {
 					throw new IllegalStateException("프로젝트 진행률 갱신에 실패했습니다.");
 				}
 			}
-
+			
+			growthTreeService.grantProjectCompleteExp(dto.getProjectId());
+			
 		} catch (Exception e) {
 			log.info("updateReview : ", e);
 			throw new IllegalStateException(e.getMessage(), e);
@@ -256,6 +276,7 @@ public class ManageReportServiceImpl implements ManageReportService {
         }
         return result;
     }
+    
     // 보고서 첨부파일 목록 조회
     @Override
     public List<ManageFileDto> listReportFiles(Map<String, Object> map) {
@@ -269,6 +290,7 @@ public class ManageReportServiceImpl implements ManageReportService {
         }
         return result;
     }
+    
     // 이전 보고서 조회
     @Override
     public ManageReportDto selectPrevReport(Map<String, Object> map) {
@@ -281,6 +303,7 @@ public class ManageReportServiceImpl implements ManageReportService {
         }
         return result;
     }
+    
     // 다음 보고서 조회
     @Override
     public ManageReportDto selectNextReport(Map<String, Object> map) {
@@ -293,6 +316,7 @@ public class ManageReportServiceImpl implements ManageReportService {
         }
         return result;
     }
+    
     // 보고서 입력값 확인
     private void validateReport(ManageReportDto dto) {
         if (dto.getReportTitle() == null || dto.getReportTitle().isBlank()
@@ -302,11 +326,8 @@ public class ManageReportServiceImpl implements ManageReportService {
         if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new IllegalArgumentException("내용을 입력하세요.");
         }
-        Double progress = dto.getProgress();
-        if (progress == null || !Double.isFinite(progress) || progress < 0 || progress > 100) {
-            throw new IllegalArgumentException("진행률은 0~100 사이로 입력하세요.");
-        }
     }
+    
     // 보고서 변경 잠금
     private ManageReportDto lockProjectReport(Map<String, Object> map) {
         map.put("reportCategory", 1);
@@ -318,6 +339,7 @@ public class ManageReportServiceImpl implements ManageReportService {
         result = getReport(map);
         return result;
     }
+    
     // 보고서 첨부파일 저장
     private void saveReportFiles(Long reportId, List<MultipartFile> files) throws Exception {
         for (ManageFileDto file : fileStorage.save(files, uploadPath)) {
@@ -327,6 +349,7 @@ public class ManageReportServiceImpl implements ManageReportService {
             }
         }
     }
+    
     // 프로젝트 보고서 등록
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -352,6 +375,7 @@ public class ManageReportServiceImpl implements ManageReportService {
             throw e;
         }
     }
+    
     // 프로젝트 보고서 수정
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -389,6 +413,7 @@ public class ManageReportServiceImpl implements ManageReportService {
             throw e;
         }
     }
+    
     // 프로젝트 보고서 삭제
     @Override
     @Transactional(rollbackFor = Exception.class)

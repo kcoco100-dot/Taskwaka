@@ -39,10 +39,7 @@
                             <input th:if="${mode != 'write'}" type="hidden" th:field="*{projectId}">
                             <select id="reportProject" th:field="*{projectId}" th:disabled="${mode != 'write'}" required>
                                 <option value="">프로젝트를 선택하세요</option>
-                                <option th:each="p : ${projectOptions}"
-                                        th:value="${p.projectId}"
-                                        th:attr="data-member-id=${p.projectMemberId}"
-                                        th:text="${p.projectName}">프로젝트명</option>
+                                <option th:each="p : ${projectOptions}" th:value="${p.projectId}" th:attr="data-member-id=${p.projectMemberId},data-progress=${p.progress}" th:text="${p.projectName}">프로젝트명</option>
                             </select>
                             <p class="report-helper">현재 참여 중인 프로젝트만 선택할 수 있습니다.</p>
                         </div>
@@ -54,11 +51,13 @@
                         </div>
 
                         <div class="report-form-field">
-                            <label for="reportProgress">현재 진행률(%) <span aria-hidden="true">*</span></label>
-                            <input type="number" id="reportProgress" th:field="*{progress}"
-                                   min="0" max="100" step="0.01" placeholder="0 ~ 100" required>
-                            <p class="report-helper">프로젝트 진행 현황을 기록합니다. 실제 진행률은 승인된 업무 보고서와 업무 비중으로 계산됩니다.</p>
-                        </div>
+						    <label for="reportProgress">현재 프로젝트 진행률</label>
+						    <input type="text" id="reportProgress" value="프로젝트를 선택하세요" readonly>
+						    <p class="report-helper">
+						        업무 진행 현황으로 계산된 값입니다.
+						        프로젝트 보고서 작성·승인은 프로젝트 진행률을 변경하지 않습니다.
+						    </p>
+						</div>
 
                         <div class="report-form-field">
                             <label>보고서 유형</label>
@@ -81,7 +80,7 @@
                                 <input type="file" id="reportFiles" name="files" multiple>
                                 <span class="report-helper" id="fileSummary">선택된 파일 없음</span>
                             </div>
-                            <ul class="report-file-list" id="selectedFiles" hidden></ul>
+                            <ul class="pending-upload-list" id="selectedFiles" hidden></ul>
                         </div>
                     </div>
 
@@ -98,44 +97,95 @@
 
 <th:block layout:fragment="script">
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('reportForm');
-            const project = document.getElementById('reportProject');
-            const memberId = document.getElementById('projectMemberId');
-            const files = document.getElementById('reportFiles');
-            const summary = document.getElementById('fileSummary');
-            const fileList = document.getElementById('selectedFiles');
+    function renderPendingFiles(input, summary, list) {
+        const selected = Array.from(input.files || []);
 
-            function syncProject() {
-                const option = project.selectedOptions[0];
-                memberId.value = option && option.value ? (option.dataset.memberId || '') : '';
-            }
-            function syncFiles() {
-                fileList.replaceChildren();
-                const selected = Array.from(files.files || []);
-                summary.textContent = selected.length ? selected.length + '개 파일 선택' : '선택된 파일 없음';
-                fileList.hidden = selected.length === 0;
-                selected.forEach(file => {
-                    const li = document.createElement('li');
-                    li.textContent = file.name;
-                    fileList.appendChild(li);
-                });
-            }
+        summary.textContent = selected.length
+            ? selected.length + '개 파일 선택'
+            : '선택된 파일 없음';
 
-            project.addEventListener('change', syncProject);
-            files.addEventListener('change', syncFiles);
-            form.addEventListener('reset', function () {
-                setTimeout(function () { syncProject(); syncFiles(); }, 0);
+        list.replaceChildren();
+        list.hidden = selected.length === 0;
+
+        selected.forEach((file, index) => {
+            const item = document.createElement('li');
+
+            const name = document.createElement('span');
+            name.className = 'pending-upload-name';
+            name.textContent = file.name;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'pending-upload-remove';
+            removeButton.textContent = '삭제';
+            removeButton.setAttribute(
+                'aria-label', file.name + ' 첨부 취소');
+
+            removeButton.addEventListener('click', () => {
+                const transfer = new DataTransfer();
+
+                Array.from(input.files || []).forEach(
+                    (remainingFile, currentIndex) => {
+                        if (currentIndex !== index) {
+                            transfer.items.add(remainingFile);
+                        }
+                    }
+                );
+
+                input.files = transfer.files;
+
+                input.dispatchEvent(
+                    new Event('change', { bubbles: true })
+                );
             });
-            form.addEventListener('submit', function (e) {
-                syncProject();
-                if (!project.value) {
-                    e.preventDefault();
-                    alert('등록할 수 있는 프로젝트를 선택해 주세요.');
-                }
-            });
-            syncProject();
+
+            item.append(name, removeButton);
+            list.appendChild(item);
         });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('reportForm');
+        const project = document.getElementById('reportProject');
+        const memberId = document.getElementById('projectMemberId');
+        const files = document.getElementById('reportFiles');
+        const summary = document.getElementById('fileSummary');
+        const fileList = document.getElementById('selectedFiles');
+        const progressInput = document.getElementById('reportProgress');
+        
+        function syncProject() {
+            const option = project.selectedOptions[0];
+            if (!option || !option.value) {
+                memberId.value = '';
+                progressInput.value = '프로젝트를 선택하세요';
+                
+                return;
+            }
+
+            memberId.value = option.dataset.memberId || '';
+
+            const progress = Number(option.dataset.progress);
+            progressInput.value = (Number.isFinite(progress) ? progress : 0) + '%';
+        }
+        
+        function syncFiles() {
+            renderPendingFiles(files, summary, fileList);
+        }
+
+        project.addEventListener('change', syncProject);
+        files.addEventListener('change', syncFiles);
+        form.addEventListener('reset', function () {
+            setTimeout(function () { syncProject(); syncFiles(); }, 0);
+        });
+        form.addEventListener('submit', function (e) {
+            syncProject();
+            if (!project.value) {
+                e.preventDefault();
+                alert('등록할 수 있는 프로젝트를 선택해 주세요.');
+            }
+        });
+        syncProject();
+    });
     </script>
 </th:block>
 </html>

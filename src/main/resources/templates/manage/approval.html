@@ -139,7 +139,7 @@
                     </table>
                 </div>
 
-                <div class="approval-list-footer">
+                <div class="approval-list-footer" style="display:flex; justify-content:center; align-items:center;">
                     <nav class="approval-pagination" aria-label="목록 페이지" th:if="${totalPage > 0}">
                         <a class="manage-page-arrow" th:if="${page > 1}" th:href="${pageBaseUrl + (page - 1)}">이전</a>
                         <span class="manage-page-arrow disabled" th:unless="${page > 1}">이전</span>

@@ -454,27 +454,27 @@
 
 	<!-- 프로젝트 보고서 등록 -->
 	<insert id="insertReport" parameterType="com.tk.app.domain.dto.ManageReportDto">
-		<selectKey keyProperty="reportId" resultType="long" order="BEFORE">
-			SELECT seq_project_reports.NEXTVAL
-			FROM dual
-		</selectKey>
-		INSERT INTO project_reports(project_report_id, project_id, project_member_id, title, content,
-				progress, status, report_date, created)
-		SELECT #{reportId}, #{projectId}, #{projectMemberId},
-			#{reportTitle}, #{content}, NVL(p.progress, 0), 0, SYSDATE, SYSDATE
-		FROM project_members pm
-		JOIN projects p ON p.project_id = pm.project_id
-		WHERE pm.project_member_id = #{projectMemberId}
-			AND pm.project_id = #{projectId}
-			AND pm.status = 0
-			AND p.deleted IS NULL
+	    <selectKey keyProperty="reportId" resultType="long" order="BEFORE">
+	        SELECT seq_project_reports.NEXTVAL
+	        FROM dual
+	    </selectKey>
+	
+	    INSERT INTO project_reports (project_report_id, project_id, project_member_id,
+	        title, content, progress, status, report_date, created)
+	    SELECT #{reportId}, p.project_id, pm.project_member_id,
+	           #{reportTitle}, #{content}, NVL(p.progress, 0), 0, SYSDATE, SYSDATE
+	    FROM project_members pm
+	    JOIN projects p ON p.project_id = pm.project_id
+	    WHERE pm.project_member_id = #{projectMemberId}
+	      AND pm.project_id = #{projectId}
+	      AND pm.status = 0
+	      AND p.deleted IS NULL
 	</insert>
 
 	<!-- 보고서 등록용 프로젝트 조회 -->
 	<select id="listWritableProjects" parameterType="map" resultType="map">
-		SELECT p.project_id AS "projectId",
-			p.subject AS "projectName",
-			pm.project_member_id AS "projectMemberId"
+		SELECT p.project_id AS "projectId", p.subject AS "projectName", 
+			pm.project_member_id AS "projectMemberId", NVL(p.progress, 0) AS "progress"
 		FROM projects p
 		JOIN project_members pm
 			ON pm.project_id = p.project_id
@@ -511,16 +511,16 @@
 
 	<!-- 프로젝트 보고서 수정 -->
 	<update id="updateReport" parameterType="com.tk.app.domain.dto.ManageReportDto">
-		UPDATE project_reports
-		SET title = #{reportTitle}, content = #{content}, 
-			progress = (
-            SELECT NVL(p.progress, 0)
-            FROM projects p
-            WHERE p.project_id = pr.project_id
-                AND p.deleted IS NULL
-        	),
-			updated = SYSDATE
-		WHERE project_report_id = #{reportId} AND project_id = #{projectId}
+	    UPDATE project_reports
+	    SET title = #{reportTitle}, content = #{content},
+	        progress = (
+	            SELECT NVL(p.progress, 0)
+	            FROM projects p
+	            WHERE p.project_id = #{projectId}
+	              AND p.deleted IS NULL
+	        ),
+	        updated = SYSDATE
+	    WHERE project_report_id = #{reportId} AND project_id = #{projectId}
 	</update>
 
 	<!-- 보고서 검토 기록 삭제 -->
@@ -566,12 +566,9 @@
 	<!-- 보고서 첨부파일 등록 -->
 	<insert id="insertReportFile" parameterType="com.tk.app.domain.dto.ManageFileDto">
 		INSERT INTO report_files (report_file_id, project_report_id, original_name, stored_name,
-				path,
-				file_size,
-				uploaded)
+				path, file_size, uploaded)
 		VALUES (seq_report_files.NEXTVAL, #{reportId}, #{originalName}, #{storedName}, #{path},
-				#{fileSize},
-				SYSDATE)
+				#{fileSize}, SYSDATE)
 	</insert>
 
 	<!-- 보고서 첨부파일 삭제 -->

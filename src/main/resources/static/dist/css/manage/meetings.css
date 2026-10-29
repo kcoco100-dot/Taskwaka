@@ -253,3 +253,41 @@
     outline-offset: 3px;
 }
 
+/* Vue.js 렌더링 전 템플릿 깜빡임(raw mustache) 방지 */
+[v-cloak] {
+    display: none;
+}
+
+/* 회의록 상세 페이지 메인 카드 컨테이너 */
+.meetings-detail-container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #E8E2D9;
+}
+
+/* 회의록 상세 페이지 메인 제목 */
+.meeting-detail-title {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 24px;
+    color: #594331;
+}
+
+/* 회의록 메타 정보 (작성자, 작성일, 참석자 등) 영역 */
+.meeting-detail-meta {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #E8E2D9;
+    color: #786B5E;
+    font-size: 14px;
+}
+
+/* 회의록 본문 영역 (줄바꿈 및 공백 유지 설정) */
+.meeting-detail-body {
+    padding-top: 24px;
+    min-height: 200px;
+    white-space: pre-wrap; /* 줄바꿈과 연속 공백을 있는 그대로 표시 */
+    line-height: 1.6;
+}
