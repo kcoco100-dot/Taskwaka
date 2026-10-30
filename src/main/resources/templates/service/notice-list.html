@@ -33,13 +33,16 @@
             <ul class="site-notice-list" th:if="${noticeList != null and !#lists.isEmpty(noticeList)}">
                 <li th:each="notice : ${noticeList}">
                     <a class="site-notice-list-link" th:href="@{/service/notice/{id}(id=${notice.notice_id})}">
-                        <span class="site-notice-title" th:text="${notice.title}">공지사항 제목</span>
+                        <span class="site-notice-title">
+						    <span th:text="${notice.title}">공지사항 제목</span>
+						    <span class="site-notice-new" th:if="${notice.is_new == 1}">NEW</span>
+						</span>
                         <span class="site-notice-author" th:text="${notice.name}">작성자</span>
                         <time class="site-notice-date" th:datetime="${#dates.format(notice.created, 'yyyy-MM-dd')}" th:text="${#dates.format(notice.created, 'yyyy.MM.dd')}">2026.10.21</time>
                     </a>
                 </li>
-                <div class="site-notice-paging" th:if="${paging != null}" th:utext="${paging}"></div>
             </ul>
+                <div class="site-notice-paging" th:if="${paging != null}" th:utext="${paging}"></div>
         </section>
         <p class="site-notice-help">서비스 이용 중 궁금한 점이 있다면 고객지원 메뉴를 이용해 주세요.</p>
     </div>

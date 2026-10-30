@@ -30,8 +30,7 @@
                 			
                 		<label id="noticeContentLabel" class="form-label">공지 내용</label>
 					<div id="noticeEditor" class="editor"
-					     th:data-upload-url="@{/editor/upload}"
-					     th:text="${notice.content}"></div>
+					     th:data-upload-url="@{/editor/upload}"></div>
 					          
 	            		<textarea id="noticeContent" name="content" hidden
           					th:text="${notice.content}"></textarea>
@@ -90,6 +89,11 @@
 		noticeQuill.root.setAttribute('aria-labelledby', 'noticeContentLabel');
 		
 		const noticeContent = document.getElementById('noticeContent');
+		// 검증 실패로 돌아온 본문 HTML을 서식과 이미지로 복원
+		noticeQuill.clipboard.dangerouslyPasteHTML(noticeContent.value, 'silent');
+
+		// 복원한 내용이 실행 취소로 지워지지 않도록 기록 초기화
+		noticeQuill.history.clear();
 		let noticeImageUploadCount = 0;
 		
 		noticeContent.form.addEventListener('submit', (event) => {

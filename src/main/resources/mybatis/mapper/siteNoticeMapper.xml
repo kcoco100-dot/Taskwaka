@@ -94,7 +94,8 @@
 	    SELECT n.notice_id, n.member_id, d.name, n.title, n.content, n.status, n.created, n.updated,
 	        (SELECT COUNT(*)
 	         FROM site_notice_file f
-	         WHERE f.notice_id = n.notice_id) AS file_count
+	         WHERE f.notice_id = n.notice_id) AS file_count,
+	         CASE WHEN n.created BETWEEN SYSDATE - 3 AND SYSDATE THEN 1 ELSE 0 END AS is_new
 	    FROM site_notice n
 	    LEFT JOIN member_details d ON n.member_id = d.member_id
 	    <where>

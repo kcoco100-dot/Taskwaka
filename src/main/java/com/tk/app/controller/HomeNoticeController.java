@@ -203,8 +203,23 @@ public class HomeNoticeController {
 	
 		// 공지사항 등록
 		// 공지를 새로 등록할 때 워크번호나 회원번호로 조회&저장할 일이 없음
+		// binding = false : 서버에서 조회한 역할을 요청값으로 바인딩하지 않도록 지정
 		@GetMapping("/noticeCreate")
-		public String noticeCreate(Model model) {
+		public String noticeCreate(
+				@ModelAttribute(value = "manageWorkspaceRole", binding = false) int workspaceRole,
+				Model model,
+				HttpServletResponse response) {
+			
+			// 공지 등록은 PM과 DT만 허용
+			if (workspaceRole != 70 && workspaceRole != 50) {
+				
+				response.setStatus(HttpStatus.FORBIDDEN.value());
+				
+				model.addAttribute("title", "접근 권한이 없습니다.");
+				model.addAttribute("message", "공지 등록은 PM과 DT만 가능합니다.");
+				
+				return "error/error2";
+			}
 
 			// title, content 는 여기 DTO 에서 사용할 수 있음
 			model.addAttribute("notice", new NoticeDto());
@@ -221,7 +236,20 @@ public class HomeNoticeController {
 				@RequestParam("content") String content,
 				@RequestParam(value = "files", required = false) List<MultipartFile> files, // required = false 는 첨부파일이 선택사항이기 때문
 				RedirectAttributes redirectAttributes,
-				HttpServletResponse response, Model model) {
+				HttpServletResponse response, Model model,
+				@ModelAttribute(value = "manageWorkspaceRole", binding = false) int workspaceRole) {
+			
+			// 공지 등록은 PM과 DT만 허용
+			if (workspaceRole != 70 && workspaceRole != 50) {
+				
+				response.setStatus(HttpStatus.FORBIDDEN.value());
+				
+				model.addAttribute("title", "접근 권한이 없습니다.");
+				model.addAttribute("message", "공지 등록은 PM과 DT만 가능합니다.");
+				
+				return "error/error2";
+			}
+
 
 			try {
 				if (title.isBlank() || title.length() > 200 || content.isBlank()) {
@@ -358,7 +386,16 @@ public class HomeNoticeController {
 		public String noticeEdit(
 				@RequestAttribute("workspace") WorkspaceDto workspace,
 				@RequestParam("noticeId") long noticeId, Model model,
+				@ModelAttribute(value = "manageWorkspaceRole", binding = false) int workspaceRole,
 				HttpServletResponse response) {
+			
+			// 공지 수정은 DT만 허용
+			if (workspaceRole != 50) {
+				response.setStatus(HttpStatus.FORBIDDEN.value());
+				model.addAttribute("title", "접근 권한이 없습니다.");
+				model.addAttribute("message", "공지 수정은 DT만 가능합니다.");
+				return "error/error2";
+			}
 
 			try {
 				NoticeDto notice = noticeService.findWorkspaceDetailNotice(
@@ -368,6 +405,14 @@ public class HomeNoticeController {
 					response.setStatus(HttpStatus.NOT_FOUND.value());
 					model.addAttribute("title", "자료를 찾을 수 없습니다.");
 					model.addAttribute("message", "공지를 찾을 수 없습니다.");
+					return "error/error2";
+				}
+				
+				// 작성자 본인만 수정 화면에 접근 가능
+				if (!Long.valueOf(workspace.getMemberId()).equals(notice.getMemberId())) {
+					response.setStatus(HttpStatus.FORBIDDEN.value());
+					model.addAttribute("title", "접근 권한이 없습니다.");
+					model.addAttribute("message", "본인이 작성한 공지만 수정할 수 있습니다.");
 					return "error/error2";
 				}
 
@@ -415,11 +460,39 @@ public class HomeNoticeController {
 				@RequestParam("content") String content,
 				@RequestParam(required = false, name = "files") List<MultipartFile> files,
 				@RequestParam(required = false, name = "deleteFileIds") List<Long> deleteFileIds,
+				@ModelAttribute(value = "manageWorkspaceRole", binding = false) int workspaceRole,
 				RedirectAttributes redirectAttributes,
 				Model model,
 				HttpServletResponse response) {
+			
+			// 공지 수정은 DT만 허용
+			if (workspaceRole != 50) {
+				response.setStatus(HttpStatus.FORBIDDEN.value());
+				model.addAttribute("title", "접근 권한이 없습니다.");
+				model.addAttribute("message", "공지 수정은 DT만 가능합니다.");
+				return "error/error2";
+			}
 
 			try {
+				
+				// 요청으로 받은 작성자 정보 대신 DB에 저장된 작성자 확인
+				NoticeDto savedNotice = noticeService.findWorkspaceDetailNotice(
+						workspace.getWorkspaceId(), noticeId);
+
+				if (savedNotice == null) {
+					response.setStatus(HttpStatus.NOT_FOUND.value());
+					model.addAttribute("title", "자료를 찾을 수 없습니다.");
+					model.addAttribute("message", "공지를 찾을 수 없습니다.");
+					return "error/error2";
+				}
+
+				// 작성자 본인만 수정 저장 가능
+				if (!Long.valueOf(workspace.getMemberId()).equals(savedNotice.getMemberId())) {
+					response.setStatus(HttpStatus.FORBIDDEN.value());
+					model.addAttribute("title", "접근 권한이 없습니다.");
+					model.addAttribute("message", "본인이 작성한 공지만 수정할 수 있습니다.");
+					return "error/error2";
+				}
 				// 제목 DB에 200자 이내로
 				if (title.isBlank() || title.length() > 200 || content.isBlank()) {
 					NoticeDto notice = new NoticeDto();
@@ -517,10 +590,39 @@ public class HomeNoticeController {
 				@PathVariable("domainKey") String domainKey,
 				@RequestAttribute("workspace") WorkspaceDto workspace, 
 				@RequestParam("noticeId") long noticeId,
+				@ModelAttribute(value = "manageWorkspaceRole", binding = false) int workspaceRole,
 				HttpServletResponse response, Model model,
 				RedirectAttributes redirectAttributes) {
 
+			// 공지 삭제는 PM과 DT만 허용
+			if (workspaceRole != 70 && workspaceRole != 50) {
+				response.setStatus(HttpStatus.FORBIDDEN.value());
+				model.addAttribute("title", "접근 권한이 없습니다.");
+				model.addAttribute("message", "공지 삭제는 PM과 DT만 가능합니다.");
+				return "error/error2";
+			}
+			
 			try {
+				// 삭제 대상 공지와 작성자 확인
+				NoticeDto savedNotice = noticeService.findWorkspaceDetailNotice(
+						workspace.getWorkspaceId(), noticeId);
+
+				if (savedNotice == null) {
+					response.setStatus(HttpStatus.NOT_FOUND.value());
+					model.addAttribute("title", "자료를 찾을 수 없습니다.");
+					model.addAttribute("message", "공지를 찾을 수 없습니다.");
+					return "error/error2";
+				}
+
+				// DT는 본인 글만 삭제 가능하며, PM은 모든 공지 삭제 가능
+				if (workspaceRole == 50
+						&& !Long.valueOf(workspace.getMemberId()).equals(savedNotice.getMemberId())) {
+					response.setStatus(HttpStatus.FORBIDDEN.value());
+					model.addAttribute("title", "접근 권한이 없습니다.");
+					model.addAttribute("message", "DT는 본인이 작성한 공지만 삭제할 수 있습니다.");
+					return "error/error2";
+				}
+				
 				NoticeDeleteResultDto deleteResult = noticeService.deleteNotice(workspace.getWorkspaceId(), noticeId);
 				int deletedCount = deleteResult.getDeletedCount();
 

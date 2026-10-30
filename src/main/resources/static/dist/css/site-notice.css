@@ -360,3 +360,24 @@
     color: #4b5149;
     font-weight: 500;
 }
+
+/* 공지사항 NEW 배지 */
+.site-notice-new {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 5px;
+    border: 1px solid #f3c8c8;
+    border-radius: 4px;
+    background: #fffafa;
+    color: #e53935;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+    animation: siteNoticeNewGlow 2s ease-in-out infinite;
+}
+
+@keyframes siteNoticeNewGlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
