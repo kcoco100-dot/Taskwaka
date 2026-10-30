@@ -23,15 +23,38 @@
     min-width: 0;
 }
 
+
 .team-logo {
     flex-shrink: 0;
     color: #594331;
+    font-family: "Segoe UI", sans-serif;
     font-size: 23px;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.8px;
     display: inline-flex;
-	align-items: center;
-	gap: 10px;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+/* 페이지별 전역 CSS의 글꼴 지정 영향을 방지 */
+.team-logo > span {
+    font-family: inherit;
+    font-weight: inherit;
+    text-decoration: none;
+}
+
+.team-logo:hover,
+.team-logo:focus {
+    color: #72563E;
+    text-decoration: none;
+}
+
+
+.team-logo:hover,
+.team-logo:focus {
+    color: #72563E;
+    text-decoration: none;
 }
 
 .team-logo-image {
