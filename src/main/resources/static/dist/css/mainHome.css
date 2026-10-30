@@ -334,3 +334,11 @@
     background: #F2E3DF;
     color: #8D463D;
 }
+
+.mainHome.myHome-page .team-card-list .team-card-description {
+    margin-top: 4px;
+    color: #666F60;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-line;
+}

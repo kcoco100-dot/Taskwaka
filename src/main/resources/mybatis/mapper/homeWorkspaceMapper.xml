@@ -12,7 +12,8 @@
                w.status AS "status",
                wd.domain_key AS "domainKey",
                wd.active AS "active",
-               wd.reason AS "reason"
+               wd.reason AS "reason",
+               w.content AS "content"
         FROM workspace_members wm
         JOIN workspaces w
           ON wm.workspace_id = w.workspace_id

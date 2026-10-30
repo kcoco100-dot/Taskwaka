@@ -40,7 +40,7 @@
 				<span class="team-card-title"
 				      th:text="${work.subject}">워크 이름</span>
 				<span class="team-card-description"
-				      th:text="${work.active == 'Y' ? '참여 중인 팀과 팀의 일정을 확인해보세요.'
+				      th:text="${work.active == 'Y' ? (#strings.isEmpty(work.content) ? '등록된 소개가 없습니다.' : work.content)
 				          : '정지 사유: ' + (#strings.isEmpty(work.reason) ? '등록된 사유가 없습니다.' : work.reason)}">
 				</span>
 				<span class="team-card-action"
