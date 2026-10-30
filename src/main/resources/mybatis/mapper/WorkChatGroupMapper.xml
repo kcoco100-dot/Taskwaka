@@ -130,5 +130,52 @@
 	      )
 	</update>
 	
+	<select id="countActiveGroupRoomMembers" parameterType="Long" resultType="int" >
+	    SELECT COUNT(*)
+	    FROM chat_room_members
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND status = 0
+	</select>
+	
+	<delete id="deleteEmptyGroupRoomMessages" parameterType="Long">
+	    DELETE FROM chat_messages
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND EXISTS (
+	          SELECT 1 FROM chat_rooms
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND chat = 'GROUP'
+	      )
+	      AND NOT EXISTS (
+	          SELECT 1 FROM chat_room_members
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND status = 0
+	      )
+	</delete>
+	
+	<delete id="deleteEmptyGroupRoomMembers" parameterType="Long">
+	    DELETE FROM chat_room_members
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND EXISTS (
+	          SELECT 1 FROM chat_rooms
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND chat = 'GROUP'
+	      )
+	      AND NOT EXISTS (
+	          SELECT 1 FROM chat_room_members
+	          WHERE chat_room_id = #{chatRoomId}
+	            AND status = 0
+	      )
+	</delete>
+	
+	<delete id="deleteEmptyGroupRoom" parameterType="Long">
+	    DELETE FROM chat_rooms
+	    WHERE chat_room_id = #{chatRoomId}
+	      AND chat = 'GROUP'
+	      AND NOT EXISTS (
+	          SELECT 1 FROM chat_room_members
+	          WHERE chat_room_id = #{chatRoomId}
+	      )
+	</delete>
+	
 
 </mapper>

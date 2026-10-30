@@ -832,13 +832,28 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	    lockChatRoom(dto.getChatRoomId());
 	
 	    WorkChatMemberDto room = checkGroupRoomAccess(dto);
-	
-	    if (room.getMyWorkId().equals(room.getOwnerWorkMemberId())) {
-	
-	        throw new ResponseStatusException(
-	                HttpStatus.FORBIDDEN, "그룹 생성자는 채팅방을 나갈 수 없습니다.");
+
+	    int activeCount = groupmapper.countActiveGroupRoomMembers(dto.getChatRoomId());
+
+	    if (activeCount == 1) {
+	        dto.setWorkMemberId(room.getMyWorkId());
+	        if (groupmapper.leaveGroupRoom(dto) != 1) {
+	            throw new ResponseStatusException(HttpStatus.CONFLICT, "채팅방 나가기 처리에 실패했습니다.");
+	        }
+	        groupmapper.deleteEmptyGroupRoomMessages(dto.getChatRoomId());
+	        groupmapper.deleteEmptyGroupRoomMembers(dto.getChatRoomId());
+
+	        if (groupmapper.deleteEmptyGroupRoom(dto.getChatRoomId()) != 1) {
+	            throw new ResponseStatusException(HttpStatus.CONFLICT, "채팅방 삭제에 실패했습니다.");
+	        }
+	        return;
 	    }
-	    
+
+	    if (room.getMyWorkId().equals(room.getOwnerWorkMemberId())) {
+	        throw new ResponseStatusException(
+	                HttpStatus.FORBIDDEN, "다른 참여자에게 마스터를 위임한 후 나가주세요.");
+	    }
+	  
 	    WorkChatMessageDto authorDto = new WorkChatMessageDto();
 
 	    authorDto.setChatRoomId(dto.getChatRoomId());
@@ -847,8 +862,7 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	    Long authorRoomMemberId = mapper.findSenderRoomMemberId(authorDto);
 
 	    if (authorRoomMemberId == null) {
-	        throw new ResponseStatusException(
-	                HttpStatus.FORBIDDEN, "채팅방 참여 정보를 찾을 수 없습니다.");
+	        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "채팅방 참여 정보를 찾을 수 없습니다.");
 	    }
 
 	    List<WorkChatMemberDto> groupMembers = groupmapper.findGroupRoomMembers(dto.getChatRoomId());

@@ -288,9 +288,9 @@ public class MypageServiceImpl implements MypageService {
 	@Transactional
 	public void leaveWork(Long memberId, Long workId) {
 
-	    if (memberId == null || workId == null) {
-	        throw new IllegalArgumentException("잘못된 워크 탈퇴 요청입니다.");
-	    }
+		if (memberId == null || workId == null || workId <= 0) {
+		    throw new IllegalArgumentException("잘못된 워크 탈퇴 요청입니다.");
+		}
 	
 	    MypageWorkDto work = new MypageWorkDto();
 	    work.setMemberId(memberId);
@@ -322,6 +322,16 @@ public class MypageServiceImpl implements MypageService {
 	        if (mapper.lockMyChatRoom(chat.getChatRoomId()) == null) {
 	            continue;
 	        }
+	        
+	        MypageChatDto currentChat = mapper.findMyChatRoomForLeave(chat);
+
+	        if (currentChat == null) {
+	            continue;
+	        }
+
+	        chat = currentChat;
+	        chat.setWorkId(workId);
+	        chat.setWorkMemberId(work.getWorkMemberId());
 	
 	        boolean groupMaster =
 	                "GROUP".equals(chat.getChat())
@@ -331,7 +341,6 @@ public class MypageServiceImpl implements MypageService {
 	
 	        Long nextMaster = null;
 	
-
 			if (groupMaster) {
 			    nextMaster = mapper.findNextGroupMaster(chat);
 			

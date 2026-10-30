@@ -28,5 +28,14 @@ public interface WorkChatGroupMapper {
 	
 	public int transferGroupMaster(WorkChatMemberDto dto);
 	
+	
+	public int countActiveGroupRoomMembers(Long chatRoomId);
+
+	public int deleteEmptyGroupRoomMessages(Long chatRoomId);
+
+	public int deleteEmptyGroupRoomMembers(Long chatRoomId);
+
+	public int deleteEmptyGroupRoom(Long chatRoomId);
+	
 
 }

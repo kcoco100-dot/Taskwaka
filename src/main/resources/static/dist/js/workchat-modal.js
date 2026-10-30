@@ -430,7 +430,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	       renameToggle.hidden = ! activeRoomOwner;
 		   membersToggle.hidden = kind !== "GROUP";
 		   inviteToggle.hidden = ! activeRoomOwner;
-		   leaveToggle.hidden = kind !== "GROUP" || activeRoomOwner;
+		   leaveToggle.hidden = kind !== "GROUP";
 		   directLeaveToggle.hidden = kind !== "PERSONAL";
 
 		   
@@ -797,9 +797,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	   leaveToggle.addEventListener("click", async function() {
 
-	       if (activeChatKind !== "GROUP" || activeRoomOwner || activeChatRoomId == null) {
-	           return;
-	       }
+		if (activeChatKind !== "GROUP" || activeChatRoomId == null || leaveToggle.disabled) {
+		    return;
+		}
 
 	       const confirmed = confirm(
 	           "그룹 채팅방에서 나가시겠습니까?\n" +
@@ -1036,7 +1036,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 						   renameToggle.hidden = ! activeRoomOwner;
 						   inviteToggle.hidden = ! activeRoomOwner;
-						   leaveToggle.hidden = activeRoomOwner;
+						   leaveToggle.hidden = false;
 
 						   if (! activeRoomOwner) {
 						       renamePanel.hidden = true;

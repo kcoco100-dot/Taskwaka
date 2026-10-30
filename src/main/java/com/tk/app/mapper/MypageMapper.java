@@ -37,6 +37,7 @@ public interface MypageMapper {
   
     public List<MypageChatDto> findMyChatRooms(MypageWorkDto dto);
     public Long lockMyChatRoom(Long chatRoomId);
+    public MypageChatDto findMyChatRoomForLeave(MypageChatDto dto);
     public Long findNextGroupMaster(MypageChatDto dto);
     public int transferGroupMasterOnLeave(MypageChatDto dto);
     

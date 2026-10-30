@@ -254,6 +254,27 @@
 	    FOR UPDATE
 	</select>
 	
+	<select id="findMyChatRoomForLeave" parameterType="MypageChatDto" resultType="MypageChatDto">
+	    SELECT cr.chat_room_id chatRoomId, cr.workspace_member_id chatOwnerMemberId,
+	        cr.chat, crm.chat_room_member_id chatRoomMemberId, crm.status chatRoomMemberStatus
+	    FROM chat_rooms cr
+	
+	    JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	
+	    LEFT JOIN chat_room_members crm ON crm.chat_room_id = cr.chat_room_id
+	     AND crm.workspace_member_id = #{workMemberId}
+	
+	    WHERE cr.chat_room_id = #{chatRoomId}
+	      AND owner.workspace_id = #{workId}
+	      AND (
+	          crm.status = 0
+	          OR (
+	              cr.chat = 'GROUP'
+	              AND cr.workspace_member_id = #{workMemberId}
+	          )
+	      )
+	</select>
+	
 	
 	<select id="findNextGroupMaster" parameterType="MypageChatDto" resultType="Long">
 	    SELECT wm.workspace_member_id
