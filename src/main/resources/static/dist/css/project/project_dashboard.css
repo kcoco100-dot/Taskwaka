@@ -37,6 +37,7 @@
 	flex-direction: column;
 	gap: 16px;
 	box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03);
+	min-height: 100px;
 }
 
 .dash-card-header {
