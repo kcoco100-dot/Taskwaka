@@ -166,6 +166,7 @@
                                     <th scope="col">마감일</th>
                                     <th scope="col">상태</th>
                                     <th scope="col">진행률</th>
+                                    <th scope="col">남은기간</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -189,6 +190,12 @@
                                             <span th:text="${project.progress + '%'}">0%</span>
                                         </div>
                                     </td>
+                                    <td class="pmd-project-due" th:with="endDate=${project.end_date != null and project.end_date != '' ? T(java.time.LocalDate).parse(project.end_date) : null}, daysLeft=${endDate != null ? T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), endDate) : null}">
+									    <span th:if="${daysLeft == null}">미정</span>
+									    <span th:if="${daysLeft != null and daysLeft == 0}">D-day</span>
+									    <span th:if="${daysLeft != null and daysLeft > 0}" th:text="|D-${daysLeft}|"></span>
+									    <span th:if="${daysLeft != null and daysLeft < 0}" th:text="|D+${0 - daysLeft}|"></span>
+									</td>
                                 </tr>
                             </tbody>
                         </table>

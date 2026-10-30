@@ -62,7 +62,7 @@
             typeEl.textContent = type;
             titleEl.textContent = text(title);
             subtitleEl.textContent = text(subtitle, '');
-            contentEl.textContent = text(content, '등록된 내용이 없습니다.');
+            contentEl.innerHTML = text(content, '등록된 내용이 없습니다.')
             infoEl.replaceChildren();
             fields.forEach(function (field) { addInfo(field[0], field[1]); });
             relatedEl.replaceChildren();

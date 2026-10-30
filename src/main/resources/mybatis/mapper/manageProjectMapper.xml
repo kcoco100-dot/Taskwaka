@@ -14,10 +14,10 @@
     <sql id="projectManagerNameValue">
 		(SELECT
 		    CASE
-		        WHEN pm.role >= 70 THEN '[PM] '
-		        WHEN pm.role >= 50 THEN '[DT] '
-		        WHEN pm.role >= 30 THEN '[TL] '
-		        ELSE '[AA] '
+		        WHEN pm.role >= 70 THEN 'PM '
+		        WHEN pm.role >= 50 THEN 'DT '
+		        WHEN pm.role >= 30 THEN 'TL '
+		        ELSE 'AA '
 		    END || md.name
 		FROM project_members pm
 		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
@@ -250,7 +250,7 @@
 	    WHERE t.project_id = #{projectId} AND wd.domain_key = #{domainKey} AND wd.active = 'Y'
 	      AND p.deleted IS NULL AND t.deleted IS NULL
         <include refid="projectReadableForMember"/>
-	    ORDER BY t.task_id
+	    ORDER BY t.task_level ASC NULLS LAST, t.task_id ASC
 	</select>
 
     <!-- 업무 담당자 목록 조회 -->

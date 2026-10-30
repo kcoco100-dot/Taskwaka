@@ -399,7 +399,7 @@
             });
             document.getElementById('mgDetailPercent').textContent = '진행률 ' + item.progress + '%';
             document.getElementById('mgDetailProgress').value = item.progress;
-            document.getElementById('mgDetailContent').textContent = text(item.content, '등록된 내용이 없습니다.');
+            document.getElementById('mgDetailContent').innerHTML = text(item.content, '등록된 내용이 없습니다.');
             document.getElementById('mgProjectLink').href = String(data.detailBase || '') + '/' + encodeURIComponent(item.projectId);
             board.querySelectorAll('.mg-row').forEach(function (row) {
                 row.classList.toggle('mg-selected', row.dataset.key === item.key);

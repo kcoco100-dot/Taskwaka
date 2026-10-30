@@ -14,11 +14,7 @@
 
     <!-- 프로젝트 담당자 표시 -->
     <sql id="projectPmName">
-        (SELECT md.name FROM project_members pm
-         JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
-         JOIN member_details md ON md.member_id = wm.member_id
-         WHERE pm.project_id = p.project_id AND pm.status = 0 AND wm.status = 0 AND wm.workspace_id = p.workspace_id
-         ORDER BY pm.role DESC, md.name, wm.member_id FETCH FIRST 1 ROW ONLY) AS pm_name
+        <include refid="com.tk.app.mapper.ManageProjectMapper.projectManagerNameValue"/> AS pm_name
     </sql>
 
 	<!-- 프로젝트 참여 인원 -->

@@ -64,7 +64,7 @@
 
             <div class="pd-section">
                 <h3>프로젝트 상세 내용</h3>
-                <div class="content-box" th:text="${project.content != null and project.content != '' ? project.content : '등록된 상세 내용이 없습니다.'}">프로젝트 내용</div>
+                <div class="content-box" th:utext="${project.content != null and project.content != '' ? project.content : '등록된 상세 내용이 없습니다.'}">프로젝트 내용</div>
             </div>
 
             <div class="pd-integrated-task">
@@ -82,9 +82,10 @@
 
                     <div class="pd-simple-task" th:each="task, stat : ${taskList}">
                         <div class="pd-simple-task-top">
-                            <div class="pd-task-identity">
-                                <span class="pd-task-name" th:text="|${stat.count}. ${task.title}|">업무명</span>
-                                <small th:text="${task.tl_name != null ? task.tl_name : '담당자 미정'}">담당자 (TL 이상)</small>
+                            <div class="pd-task-identity" style="display:flex; flex-direction:column; gap:4px;">
+                                <span class="pd-task-name" th:text="${task.title}">업무명</span>
+                                <small th:text="${task.task_level != null and task.task_level > 0 ? '진행단계: ' + task.task_level + '단계' : '진행단계: 미정'}">진행단계: 0단계</small>
+                                <small th:text="${task.tl_name != null ? '담당자 : ' + task.tl_name : '담당자 미정'}">담당자 (TL 이상)</small>
                             </div>
                             <span class="pd-status-pill" th:classappend="${task.status == 3 ? ' approved' : ''}" th:text="${task.status == 0 ? '예정' : task.status == 1 ? '진행 중' : task.status == 2 ? '검토 중' : task.status == 3 ? '완료' : '상태 미정'}">예정</span>
                         </div>
@@ -100,7 +101,7 @@
                             <span class="pd-task-dates" th:text="|${task.start_date} ~ ${task.end_date}|">업무 기간</span>
                         </div>
 
-                        <div class="pd-task-content" th:if="${task.content != null and task.content != ''}" th:text="${task.content}">업무 내용</div>
+                        <div class="pd-task-content" th:if="${task.content != null and task.content != ''}" th:utext="${task.content}">업무 내용</div>
 
                         <div style="display: flex; gap: 15px; justify-content: flex-end; align-items: center; margin-top: 10px;">
                             
