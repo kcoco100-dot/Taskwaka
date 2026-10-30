@@ -17,10 +17,10 @@ let canEditCurrentSubTask = false;
 let originalDetailSnapshot = null;
 
 const DETAIL_STATUS_MAP = {
-	0: { text: '● 예정', cls: 'badge-req' },
-	1: { text: '● 진행', cls: 'badge-prog' },
-	2: { text: '● 검토', cls: 'badge-done' },
-	3: { text: '● 완료', cls: 'badge-hold' }
+	0: { text: '● 예정', cls: 'badge-req', },
+	1: { text: '● 진행', cls: 'badge-done' },
+	2: { text: '● 검토', cls: 'badge-feedback' },
+	3: { text: '● 완료', cls: 'badge-prog' }
 };
 
 function getCsrfHeaders() {

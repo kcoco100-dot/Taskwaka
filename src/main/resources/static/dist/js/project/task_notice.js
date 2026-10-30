@@ -212,10 +212,12 @@ async function submitNoticeForm() {
     return;
   }
 
+  const noticeType = 'TASK';
+  
   const payload = {
     currentProjectMemberId: currentProjectMemberId,
-    noticeType: 'TASK',
-    taskId: (noticeType === 'task' && taskId) ? Number(taskId) : null,
+    noticeType: noticeType,
+    taskId: (noticeType === 'TASK' && taskId) ? Number(taskId) : null,
     title: title,
     content: content,
     status: status

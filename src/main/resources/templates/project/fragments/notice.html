@@ -294,7 +294,7 @@
 			let paging = renderPaging(page, totalPage, url);
 		
 			document.querySelector('div.page-navigation').innerHTML = 
-				dataCount === 0 ? '등록된 게시물이 없습니다.' : paging;
+				dataCount === 0 ? '' : paging;
 			
 			const schType = '[[${schType}]]';
 			const kwd = '[[${kwd}]]';
