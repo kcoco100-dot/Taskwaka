@@ -21,4 +21,8 @@ public interface MypageService {
 	
 	public List<MypageWorkDto> findMyWorkspaces(Long memberId) throws Exception;
 	
+	public boolean hasOngoingWork(Long memberId, Long workId) throws Exception;
+	
+	public void leaveWork(Long memberId, Long workId);
+	
 }

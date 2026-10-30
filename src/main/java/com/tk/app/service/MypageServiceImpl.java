@@ -5,12 +5,15 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tk.app.chat.WorkChatMessageSavedEvent;
 import com.tk.app.common.StorageService;
+import com.tk.app.domain.dto.MypageChatDto;
 import com.tk.app.domain.dto.MypageDto;
 import com.tk.app.domain.dto.MypagePwdDto;
 import com.tk.app.domain.dto.MypageWorkDto;
@@ -28,6 +31,7 @@ public class MypageServiceImpl implements MypageService {
 	private final MypageMapper mapper;
 	private final StorageService storageService;
 	private final PasswordEncoder passwordEncoder;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Value("${file.upload-root}/member")
 	private String uploadPath;
@@ -257,7 +261,162 @@ public class MypageServiceImpl implements MypageService {
 	    }
 	    return mapper.findMyWorkspaces(memberId);
 	}
+	
+
+	@Override
+	public boolean hasOngoingWork(Long memberId, Long workId) throws Exception {
+	    if (memberId == null || workId == null || workId <= 0) {
+	        throw new IllegalArgumentException("워크 정보가 올바르지 않습니다.");
+	    }
+	
+	    MypageWorkDto target = mapper.findMyWorkspaces(memberId).stream()
+	            .filter(work -> workId.equals(work.getWorkId()))
+	            .findFirst()
+	            .orElse(null);
+	
+	    if (target == null || target.getRole() == null || target.getRole() == 70) {
+	        throw new SecurityException("해당 워크에서 탈퇴할 권한이 없습니다.");
+	    }
+	    
+	    boolean result = mapper.countMyOngoingWork(target.getWorkMemberId()) > 0;
+	
+	    return result;
+	}
+	
+
+	@Override
+	@Transactional
+	public void leaveWork(Long memberId, Long workId) {
+
+	    if (memberId == null || workId == null) {
+	        throw new IllegalArgumentException("잘못된 워크 탈퇴 요청입니다.");
+	    }
+	
+	    MypageWorkDto work = new MypageWorkDto();
+	    work.setMemberId(memberId);
+	    work.setWorkId(workId);
+	
+	    MypageWorkDto target = mapper.findWorkLeaveTarget(work);
+	
+	    if (target == null) {
+	        throw new SecurityException("해당 워크에서 탈퇴할 권한이 없습니다.");
+	    }
+	
+	    work.setWorkMemberId(target.getWorkMemberId());
+	
+	    MypageDto member = mapper.findMyInfo(memberId);
+	
+	    String memberName = member != null ? member.getName() : null;
+	
+	    if (memberName == null || memberName.isBlank()) {
+	        memberName = "UNKNOWN";
+	    }
+
+	    List<MypageChatDto> chatRooms = mapper.findMyChatRooms(work);
+	
+	    for (MypageChatDto chat : chatRooms) {
+	    	
+	        chat.setWorkId(workId);
+	        chat.setWorkMemberId(work.getWorkMemberId());
+	
+	        if (mapper.lockMyChatRoom(chat.getChatRoomId()) == null) {
+	            continue;
+	        }
+	
+	        boolean groupMaster =
+	                "GROUP".equals(chat.getChat())
+	                && work.getWorkMemberId().equals(chat.getChatOwnerMemberId());
+	
+	        boolean activeMember = Integer.valueOf(0).equals(chat.getChatRoomMemberStatus());
+	
+	        Long nextMaster = null;
+	
+
+			if (groupMaster) {
+			    nextMaster = mapper.findNextGroupMaster(chat);
+			
+			    if (nextMaster != null) {
+			        chat.setChatTargetMemberId(nextMaster);
+			
+			        if (mapper.transferGroupMasterOnLeave(chat) != 1) {
+			            throw new IllegalStateException("그룹 마스터 위임에 실패했습니다.");
+			        }
+			
+			        if (activeMember) {
+			            String nextMasterName = mapper.findChatMemberName(nextMaster);
+			
+			            if (nextMasterName == null || nextMasterName.isBlank()) {
+			                nextMasterName = "회원";
+			            }
+			
+			            chat.setSystemMessage(
+			                memberName + "님이 " + nextMasterName + "님에게 마스터 권한을 위임했습니다."
+			            );
+			
+			            if (mapper.insertWorkLeaveSystemMessage(chat) != 1) {
+			                throw new IllegalStateException("마스터 위임 메시지 저장에 실패했습니다.");
+			            }
+			        }
+			    }
+			}
+
+	        int leaveCount = mapper.leaveMyChatRoomMember(chat);
+
+	        if (activeMember && leaveCount != 1) {
+	            throw new IllegalStateException("채팅방 퇴장에 실패했습니다.");
+	        }
+	
+	        int remaining = mapper.countActiveMyChatRoomMembers(chat);
+	
+	        if (groupMaster && nextMaster == null && remaining > 0) {
+	            throw new IllegalStateException("그룹 마스터를 지정할 수 없습니다.");
+	        }
+	
+	        if (remaining == 0) {
+	            mapper.deleteMyChatRoomMessages(chat);
+	            mapper.deleteMyChatRoomMembers(chat);
+	
+	            if (mapper.deleteMyChatRoom(chat) != 1) {
+	                throw new IllegalStateException("채팅방 삭제에 실패했습니다.");
+	            }
 
 
+			} else {
+			
+			    if (activeMember) {
+			        chat.setSystemMessage(memberName + "님이 채팅방을 나갔습니다.");
+			
+			        if (mapper.insertWorkLeaveSystemMessage(chat) != 1) {
+			            throw new IllegalStateException("퇴장 메시지 저장에 실패했습니다.");
+			        }
+			    }
+			
+			    if (activeMember || (groupMaster && nextMaster != null)) {
+			
+			        List<Long> activeMemberIds = mapper.findActiveChatRoomMemberIds(chat);
+			
+			        if (!activeMemberIds.isEmpty()) {
+			            eventPublisher.publishEvent(new WorkChatMessageSavedEvent(
+			                    chat.getChatRoomId(),
+			                    memberId,
+			                    activeMemberIds
+			                )
+			            );
+			        }
+			    }
+			}
+	    }
 
+	        
+	    mapper.deleteMySubTaskMembers(work);
+	    mapper.deleteMyTaskMembers(work);
+	
+	    mapper.leaveMyProjectMembers(work);
+	
+	    if (mapper.leaveMyWorkMember(work) != 1) {
+	        throw new IllegalStateException("워크 탈퇴 처리에 실패했습니다.");
+	    }
+	}
 }
+
+

@@ -104,10 +104,10 @@
 	        JOIN project_members pm ON pm.project_id = p.project_id
 	        WHERE pm.workspace_member_id = #{workMemberId}
 	          AND pm.status = 0
-	          AND pm.left IS NULL
+	          AND pm."LEFT" IS NULL
 	          AND p.deleted IS NULL
 	          AND t.deleted IS NULL
-	          AND t.status = 1
+	          AND t.status IN (1, 2)
 	          AND (
 	              t.project_member_id = pm.project_member_id
 	              OR EXISTS (
@@ -123,16 +123,16 @@
 	        SELECT DISTINCT st.sub_task_id
 	        FROM sub_tasks st
 	        
-	        JOIN projects pON p.project_id = st.project_id
+	        JOIN projects p ON p.project_id = st.project_id
 	        
 	        JOIN project_members pm ON pm.project_id = p.project_id
 	        
 	        WHERE pm.workspace_member_id = #{workMemberId}
 	          AND pm.status = 0
-	          AND pm.left IS NULL
+	          AND pm."LEFT" IS NULL
 	          AND p.deleted IS NULL
 	          AND st.deleted IS NULL
-	          AND st.status = 1
+	          AND st.status IN (1, 2)
 	          AND (
 	              st.project_member_id = pm.project_member_id
 	              OR EXISTS (
@@ -145,11 +145,306 @@
 	    )
 	</select>
 	
+
+	<select id="findWorkLeaveTarget" parameterType="MypageWorkDto" resultType="MypageWorkDto">
+	    SELECT wm.workspace_member_id workMemberId, wm.workspace_id workId, wm.role
+	    FROM workspace_members wm
+	
+	    JOIN workspaces w ON w.workspace_id = wm.workspace_id
+	
+	    JOIN workspace_domains wd ON wd.workspace_id = w.workspace_id
+	
+	    JOIN members m ON m.member_id = wm.member_id
+	
+	    WHERE wm.workspace_id = #{workId}
+	      AND wm.member_id = #{memberId}
+	      AND wm.status = 0
+	      AND wm.role != 70
+	      AND w.member_id != #{memberId}
+	      AND wd.active = 'Y'
+	      AND m.status = 0
+	    FOR UPDATE OF wm.status
+	</select>
 	
 	
+	<delete id="deleteMySubTaskMembers" parameterType="MypageWorkDto">
+	    DELETE FROM sub_task_members stm
+	    WHERE EXISTS (
+	        SELECT 1
+	        FROM project_members pm
+	        JOIN projects p ON p.project_id = pm.project_id
+	        WHERE stm.project_member_id = pm.project_member_id
+	          AND pm.workspace_member_id = #{workMemberId}
+	          AND p.workspace_id = #{workId}
+	    )
+	</delete>
+
+
+	<delete id="deleteMyTaskMembers" parameterType="MypageWorkDto">
+	    DELETE FROM task_members tm
+	    WHERE EXISTS (
+	        SELECT 1
+	        FROM project_members pm
+	        JOIN projects p ON p.project_id = pm.project_id
+	        WHERE tm.project_member_id = pm.project_member_id
+	          AND pm.workspace_member_id = #{workMemberId}
+	          AND p.workspace_id = #{workId}
+	    )
+	</delete>
+	
+	
+	<update id="leaveMyProjectMembers" parameterType="MypageWorkDto">
+	    UPDATE project_members pm SET status = 1, "LEFT" = SYSDATE, updated = SYSDATE
+	    WHERE pm.workspace_member_id = #{workMemberId}
+	      AND pm.status = 0
+	      AND EXISTS (
+	          SELECT 1
+	          FROM projects p
+	          WHERE p.project_id = pm.project_id
+	            AND p.workspace_id = #{workId}
+	      )
+	</update>
+	
+	
+	<update id="leaveMyWorkMember" parameterType="MypageWorkDto">
+	    UPDATE workspace_members wm SET status = 1, "LEFT" = SYSDATE
+	    WHERE wm.workspace_member_id = #{workMemberId}
+	      AND wm.workspace_id = #{workId}
+	      AND wm.member_id = #{memberId}
+	      AND wm.status = 0
+	      AND wm.role != 70
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM workspaces w
+	          JOIN workspace_domains wd ON wd.workspace_id = w.workspace_id
+	          WHERE w.workspace_id = wm.workspace_id
+	            AND w.member_id != #{memberId}
+	            AND wd.active = 'Y'
+	      )
+	</update>
+	
+	
+	<select id="findMyChatRooms" parameterType="MypageWorkDto" resultType="MypageChatDto">
+	    SELECT cr.chat_room_id chatRoomId, cr.workspace_member_id chatOwnerMemberId,
+	        cr.chat, crm.chat_room_member_id chatRoomMemberId, crm.status chatRoomMemberStatus
+	    FROM chat_rooms cr
+	
+	    JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	
+	    LEFT JOIN chat_room_members crm ON crm.chat_room_id = cr.chat_room_id
+	     AND crm.workspace_member_id = #{workMemberId}
+	
+	    WHERE owner.workspace_id = #{workId}
+	      AND (
+	      	crm.status = 0
+	          OR (
+	              cr.chat = 'GROUP'
+	              AND cr.workspace_member_id = #{workMemberId}
+	          )
+	      )
+	    ORDER BY cr.chat_room_id
+	</select>
+	
+	
+	<select id="lockMyChatRoom" parameterType="Long" resultType="Long">
+	    SELECT chat_room_id
+	    FROM chat_rooms
+	    WHERE chat_room_id = #{chatRoomId}
+	    FOR UPDATE
+	</select>
+	
+	
+	<select id="findNextGroupMaster" parameterType="MypageChatDto" resultType="Long">
+	    SELECT wm.workspace_member_id
+	    FROM chat_room_members crm
+	
+	    JOIN workspace_members wm ON wm.workspace_member_id = crm.workspace_member_id
+	
+	    JOIN members m ON m.member_id = wm.member_id
+	
+	    JOIN chat_rooms cr ON cr.chat_room_id = crm.chat_room_id
+	
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND cr.chat = 'GROUP'
+	      AND crm.workspace_member_id != #{workMemberId}
+	      AND crm.status = 0
+	      AND wm.status = 0
+	      AND m.status = 0
+	      AND wm.workspace_id = #{workId}
+	
+	    ORDER BY crm.joined ASC, crm.chat_room_member_id ASC
+	    FETCH FIRST 1 ROW ONLY
+	</select>
+	
+	
+	<update id="transferGroupMasterOnLeave" parameterType="MypageChatDto">
+	    UPDATE chat_rooms cr SET workspace_member_id = #{chatTargetMemberId}
+	
+	    WHERE cr.chat_room_id = #{chatRoomId}
+	      AND cr.chat = 'GROUP'
+	      AND cr.workspace_member_id = #{workMemberId}
+	      AND #{chatTargetMemberId} != #{workMemberId}
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_room_members crm
+	
+	          JOIN workspace_members wm ON wm.workspace_member_id = crm.workspace_member_id
+	
+	          JOIN members m ON m.member_id = wm.member_id
+	
+	          WHERE crm.chat_room_id = cr.chat_room_id
+	            AND crm.workspace_member_id = #{chatTargetMemberId}
+	            AND crm.status = 0
+	            AND wm.status = 0
+	            AND wm.workspace_id = #{workId}
+	            AND m.status = 0
+	      )
+	</update>
+	
+	<update id="leaveMyChatRoomMember" parameterType="MypageChatDto">
+		UPDATE chat_room_members crm SET status = 1, "LEFT" = SYSDATE
+	
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND crm.workspace_member_id = #{workMemberId}
+	      AND crm.status = 0
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_rooms cr
+	          
+	          JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	          
+	          WHERE cr.chat_room_id = crm.chat_room_id 
+	          	AND owner.workspace_id = #{workId}
+	      )
+	</update>
+	
+	
+	<select id="countActiveMyChatRoomMembers" parameterType="MypageChatDto" resultType="int">
+		SELECT COUNT(*)
+		FROM chat_room_members crm
+	
+	    JOIN workspace_members wm ON wm.workspace_member_id = crm.workspace_member_id
+	
+	    JOIN chat_rooms cr ON cr.chat_room_id = crm.chat_room_id
+	
+	    JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	
+	    JOIN members m ON m.member_id = wm.member_id
+	
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND owner.workspace_id = #{workId}
+	      AND crm.status = 0
+	      AND wm.status = 0
+	      AND m.status = 0
+	</select>
+	
+	<insert id="insertWorkLeaveSystemMessage" parameterType="MypageChatDto">
+	    INSERT INTO chat_messages (message_id, chat_room_id, chat_room_member_id,
+	        content, message_type, sent)
+	        
+	    SELECT seq_chat_messages.NEXTVAL, cr.chat_room_id, crm.chat_room_member_id,
+	        #{systemMessage, jdbcType=CLOB}, 'SYSTEM', SYSDATE
+	    FROM chat_rooms cr
+	
+	    JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	
+	    JOIN chat_room_members crm ON crm.chat_room_id = cr.chat_room_id
+	
+	    WHERE cr.chat_room_id = #{chatRoomId}
+	      AND owner.workspace_id = #{workId}
+	      AND crm.chat_room_member_id = #{chatRoomMemberId}
+	      AND crm.workspace_member_id = #{workMemberId}
+	</insert>
+	
+	<select id="findChatMemberName" parameterType="Long" resultType="String">
+	    SELECT md.name
+	    FROM workspace_members wm
+	    
+	    JOIN member_details md ON md.member_id = wm.member_id
+	    WHERE wm.workspace_member_id = #{workMemberId}
+	</select>
+	
+	
+	<delete id="deleteMyChatRoomMessages" parameterType="MypageChatDto">
+	    DELETE FROM chat_messages cm
+	    WHERE cm.chat_room_id = #{chatRoomId}
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_rooms cr
+	          
+	          JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	          
+	          WHERE cr.chat_room_id = cm.chat_room_id
+	            AND owner.workspace_id = #{workId}
+	      )
+	</delete>
+	
+	
+	<delete id="deleteMyChatRoomMembers" parameterType="MypageChatDto">
+	    DELETE FROM chat_room_members crm
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM chat_rooms cr
+	          JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	          WHERE cr.chat_room_id = crm.chat_room_id
+	            AND owner.workspace_id = #{workId}
+	      )
+	</delete>
+	
+	
+	<delete id="deleteMyChatRoom" parameterType="MypageChatDto">
+	    DELETE FROM chat_rooms cr
+	    WHERE cr.chat_room_id = #{chatRoomId}
+	
+	      AND EXISTS (
+	          SELECT 1
+	          FROM workspace_members owner
+	          WHERE owner.workspace_member_id = cr.workspace_member_id
+	            AND owner.workspace_id = #{workId}
+	      )
+	      AND NOT EXISTS (
+	          SELECT 1
+	          FROM chat_room_members crm
+	          
+	          JOIN workspace_members wm ON wm.workspace_member_id = crm.workspace_member_id
+	          
+	          JOIN members m ON m.member_id = wm.member_id
+	          
+	          WHERE crm.chat_room_id = cr.chat_room_id
+	            AND crm.status = 0
+	            AND wm.status = 0
+	            AND m.status = 0
+	      )
+	</delete>
+	
+	
+	<select id="findActiveChatRoomMemberIds" parameterType="MypageChatDto" resultType="Long">
+	    SELECT DISTINCT wm.member_id
+	    FROM chat_room_members crm
+	
+	    JOIN workspace_members wm ON wm.workspace_member_id = crm.workspace_member_id
+	
+	    JOIN members m ON m.member_id = wm.member_id
+	
+	    JOIN chat_rooms cr ON cr.chat_room_id = crm.chat_room_id
+	
+	    JOIN workspace_members owner ON owner.workspace_member_id = cr.workspace_member_id
+	
+	    WHERE crm.chat_room_id = #{chatRoomId}
+	      AND owner.workspace_id = #{workId}
+	      AND crm.status = 0
+	      AND wm.status = 0
+	      AND m.status = 0
+	</select>
 	
 
 	
-    
-
+	
+	
 </mapper>

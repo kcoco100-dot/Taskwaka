@@ -279,6 +279,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	    });
 	}
+	
+
+	document.querySelectorAll(".mypage-work-leave").forEach(button => {
+
+	    button.addEventListener("click", async () => {
+
+	        button.disabled = true;
+
+	        try {
+	            const resInfo = await fetch(button.dataset.leaveInfoUrl);
+	            const info = await resInfo.json();
+
+	            if (! resInfo.ok || ! info.success) {
+	                alert(info.message || "워크 탈퇴 정보를 확인할 수 없습니다.");
+	                return;
+	            }
+
+	            const workName = button.closest(".mypage-info-box")?.querySelector("strong")?.textContent?.trim() || "해당 워크";
+
+	            const message = info.hasOngoingWork
+	                ? `"${workName}"에 진행 중이거나 검토 중인 업무가 있습니다.\n\n` +
+	                  "탈퇴하면 해당 워크와 프로젝트·업무에 대한 참여 권한이 해제됩니다.\n" +
+	                  "그래도 워크에서 탈퇴하시겠습니까?"
+	                : `"${workName}"에서 탈퇴하시겠습니까?\n\n` +
+	                  "탈퇴하면 해당 워크의 참여 권한이 해제됩니다.";
+
+	            if (!confirm(message)) return;
+
+	            const response = await fetch(button.dataset.leaveUrl, {
+	                method: "POST"
+	            });
+
+	            const result = await response.json();
+
+	            if (! response.ok || ! result.success) {
+	                alert(result.message || "워크 탈퇴에 실패했습니다.");
+	                return;
+	            }
+
+	            alert(result.message || "워크에서 탈퇴했습니다.");
+	            window.location.reload();
+
+	        } catch (e) {
+	            console.error("워크 탈퇴 오류", e);
+	            alert("워크 탈퇴 처리 중 오류가 발생했습니다.");
+
+	        } finally {
+	            button.disabled = false;
+	        }
+	    });
+	});
+
 
 
 });

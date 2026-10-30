@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -291,7 +292,6 @@ public class MypageController {
 
 
 
-
 	@GetMapping("/works")
 	public String works(Model model) throws Exception {
 	
@@ -313,6 +313,85 @@ public class MypageController {
 	
 	    return "mypage/mypage";
 	}
+	
+	
+	@GetMapping("/works/{workId}/leaveInfo")
+	public ResponseEntity<?> workLeaveInfo(@PathVariable Long workId) {
+	    SessionInfo member = getLoginMember();
+	
+	    try {
+	        boolean hasOngoingWork = service.hasOngoingWork(member.getMember_id(), workId);
+	
+	        return ResponseEntity.ok(Map.of(
+	                "success", true,
+	                "hasOngoingWork", hasOngoingWork
+	        ));
+	
+	    } catch (SecurityException e) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+	                Map.of(
+	                    "success", false,
+	                    "message", e.getMessage()
+	                )
+	        );
+	
+	    } catch (IllegalArgumentException e) {
+	        return ResponseEntity.badRequest().body(
+	                Map.of(
+	                    "success", false,
+	                    "message", e.getMessage()
+	                )
+	        );
+	
+	    } catch (Exception e) {
+	        log.error("워크 탈퇴 정보 조회 오류 : ", e);
+	
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of(
+	                    "success", false,
+	                    "message", "워크 탈퇴 정보를 확인할 수 없습니다."
+	                ));
+	    }
+	}
+	
+
+	@PostMapping("/works/{workId}/leave")
+	public ResponseEntity<?> leaveWork(@PathVariable Long workId) {
+	
+	    SessionInfo member = getLoginMember();
+	
+	    try {
+	        service.leaveWork(member.getMember_id(), workId);
+	
+	        return ResponseEntity.ok(Map.of(
+	                "success", true,
+	                "message", "워크에서 탈퇴했습니다."
+	        ));
+	
+	    } catch (SecurityException e) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                .body(Map.of("success", false, "message", e.getMessage()));
+	
+	    } catch (IllegalArgumentException e) {
+	        return ResponseEntity.badRequest()
+	                .body(Map.of("success", false, "message", e.getMessage()));
+	
+	    } catch (IllegalStateException e) {
+	        return ResponseEntity.status(HttpStatus.CONFLICT)
+	                .body(Map.of("success", false, "message", e.getMessage()));
+	
+	    } catch (Exception e) {
+	        log.error("워크 탈퇴 오류: ", e);
+	
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of(
+	                        "success", false,
+	                        "message", "워크 탈퇴 처리 중 오류가 발생했습니다."
+	                ));
+	    }
+	}
+
 
 
 
@@ -323,4 +402,8 @@ public class MypageController {
 
         return "mypage/mypage";
     }
+    
+
+	
+
 }

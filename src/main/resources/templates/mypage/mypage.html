@@ -393,14 +393,14 @@
 			            <strong th:text="${work.subject}">워크명</strong>
 			            <p>참여 중인 워크</p>
 			
-			            <div class="mypage-actions">
-			                <button type="button" class="mypage-button-outline-danger"
-			                        th:attr="data-work-id=${work.workId}" disabled>
-			                    워크 탈퇴
-			                </button>
-			            </div>
-			
-			        </div>
+					<button type="button"
+					        class="mypage-button-outline-danger mypage-work-leave"
+					        th:data-work-id="${work.workId}"
+					        th:data-leave-info-url="@{/member/mypage/works/{workId}/leaveInfo(workId=${work.workId})}"
+					        th:data-leave-url="@{/member/mypage/works/{workId}/leave(workId=${work.workId})}">
+					    워크 탈퇴
+					</button>
+			    </div>
 			
 			        <p class="mypage-help">
 			            워크에서 탈퇴하면 해당 워크의 접근 권한이 해제됩니다.
