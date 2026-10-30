@@ -10,7 +10,7 @@
 .notice-split-wrapper {
 	display: flex;
 	width: 100%;
-	height: calc(100vh - 154px);
+	height: calc(100vh - 250px);
 	position: relative;
 	overflow: hidden;
 	background: var(--bg-body, #FCFBF8);
@@ -107,8 +107,9 @@
 	background: #FFFFFF;
 	border: 1px solid var(--border-main, #E8E2D9);
 	border-radius: 14px;
-	overflow: hidden;
+	overflow: auto;
 	box-shadow: 0 2px 8px rgba(89, 67, 49, 0.03);
+	height: calc(100vh - 450px);
 }
 
 .notice-grid-cols {

@@ -10,7 +10,7 @@
 .cal-split-view-wrapper {
 	display: flex;
 	width: 100%;
-	height: calc(100vh - 154px);
+	height: calc(100vh - 250px);
 	position: relative;
 	overflow: hidden;
 	background: var(--bg-body, #FCFBF8);

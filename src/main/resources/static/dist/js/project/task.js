@@ -207,7 +207,7 @@ function toggleSubTasks(btn) {
 }
 
 // 3. 보고서 등록 모달 오픈
-async function requestCreateReport(taskId, isTask) {
+async function requestCreateReport(taskId, isTask, progress = 0) {
 	
   const modal = document.getElementById('reportCreateModal');
   const titleInput = document.getElementById('createReportTitleInput');
@@ -220,7 +220,7 @@ async function requestCreateReport(taskId, isTask) {
   isTaskInput.value = isTask;
   titleInput.value = '';
   contentInput.value = '';
-  progressInput.value = '';
+  progressInput.value = progress || 0;
 
   const today = new Date();
   dateInput.value = today.toISOString().split('T')[0];
