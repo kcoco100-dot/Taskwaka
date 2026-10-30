@@ -170,7 +170,7 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 	                HttpStatus.FORBIDDEN, "활성 워크 멤버만 채팅할 수 있습니다.");
 	    }
 	
-	    // 4. 두 멤버 행을 항상 같은 순서로 잠금
+	    // 두 멤버 행을 항상 같은 순서로 잠금
 	    Long first = Math.min(myWorkId, targetWorkId);
 	    Long second = Math.max(myWorkId, targetWorkId);
 	
@@ -427,8 +427,7 @@ public class WorkChatRoomServiceImpl implements WorkChatRoomService {
 			 }
 			 
 
-			List<Long> memberIds =
-			        mapper.findActiveRoomMemberIds(dto);
+			List<Long> memberIds = mapper.findActiveRoomMemberIds(dto);
 
 			
 			eventPublisher.publishEvent(new WorkChatMessageSavedEvent(

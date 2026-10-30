@@ -92,6 +92,59 @@
 	    ORDER BY wm.role DESC, w.workspace_id DESC
 	</select>
 	
+
+	<select id="countMyOngoingWork" parameterType="Long" resultType="int">
+	    SELECT COUNT(*)
+	    FROM (
+	        SELECT DISTINCT t.task_id
+	        FROM tasks t
+	        
+	        JOIN projects p ON p.project_id = t.project_id
+	        
+	        JOIN project_members pm ON pm.project_id = p.project_id
+	        WHERE pm.workspace_member_id = #{workMemberId}
+	          AND pm.status = 0
+	          AND pm.left IS NULL
+	          AND p.deleted IS NULL
+	          AND t.deleted IS NULL
+	          AND t.status = 1
+	          AND (
+	              t.project_member_id = pm.project_member_id
+	              OR EXISTS (
+	                  SELECT 1
+	                  FROM task_members tm
+	                  WHERE tm.task_id = t.task_id
+	                    AND tm.project_member_id = pm.project_member_id
+	              )
+	          )
+	
+	        UNION ALL
+	
+	        SELECT DISTINCT st.sub_task_id
+	        FROM sub_tasks st
+	        
+	        JOIN projects pON p.project_id = st.project_id
+	        
+	        JOIN project_members pm ON pm.project_id = p.project_id
+	        
+	        WHERE pm.workspace_member_id = #{workMemberId}
+	          AND pm.status = 0
+	          AND pm.left IS NULL
+	          AND p.deleted IS NULL
+	          AND st.deleted IS NULL
+	          AND st.status = 1
+	          AND (
+	              st.project_member_id = pm.project_member_id
+	              OR EXISTS (
+	                  SELECT 1
+	                  FROM sub_task_members stm
+	                  WHERE stm.sub_task_id = st.sub_task_id
+	                    AND stm.project_member_id = pm.project_member_id
+	              )
+	          )
+	    )
+	</select>
+	
 	
 	
 	
