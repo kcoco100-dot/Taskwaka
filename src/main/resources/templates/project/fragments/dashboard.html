@@ -13,7 +13,7 @@
 					<div class="dash-card-header">
 						<div>
 							<h3 class="dash-section-title">📊 현재 프로젝트 진행 현황</h3>
-							<p class="dash-section-sub">전체 업무 및 하위업무 기준 실시간 달성률입니다.</p>
+							<p class="dash-section-sub">전체 업무 기준 실시간 달성률입니다.</p>
 						</div>
 						<div class="dash-rate-highlight">
 							<span class="rate-label">전체 완료율</span>
@@ -84,7 +84,7 @@
 								    th:onclick="|openSubTaskDetailPanel(${item.subTaskId}, this)|">
 									<div class="up-left">
 										<span class="badge-status"
-										      th:classappend="${item.status == 1} ? 'badge-done' : (${item.status == 2} ? 'badge-feedback' : 'badge-req')"
+											  th:classappend="${item.status == 0} ? 'badge-req' : (${item.status == 1} ? 'badge-done' : (${item.status == 2} ? 'badge-feedback' : 'badge-prog'))"
 										      th:text="${item.status == 0 ? '● 예정' : (item.status == 1 ? '● 진행' : (item.status == 2 ? '● 검토' :'● 완료' ))}">● 예정</span>
 										<span class="up-title task-title-text" th:text="${item.title}">업무명</span>
 									</div>
@@ -102,6 +102,7 @@
 					<section class="dash-panel-card">
 						<div class="dash-panel-header">
 							<h4 class="dash-panel-title">📢 프로젝트 공지사항</h4>
+							<a class="btn-dash-more" th:href="@{|/${domainKey}/project/${projectId}?tab=notice|}">전체보기 →</a>
 						</div>
 
 						<div class="dash-list-body">
@@ -110,7 +111,7 @@
 							</div>
 
 							<ul class="dash-notice-list" th:if="${notices != null and !#lists.isEmpty(notices)}">
-								<li class="dash-notice-row" th:each="notice : ${notices}">
+								<li class="dash-notice-row" th:each="notice : ${notices}" >
 									<div class="notice-top">
 										<span class="notice-badge">공지</span>
 										<span class="notice-title" th:text="${notice.title}">공지 제목</span>

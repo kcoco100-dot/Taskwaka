@@ -68,7 +68,7 @@
 		<!-- ==========================================================================
 		     [모달 1] 일정 추가 모달 (calendar_events 테이블 연동)
 		     ========================================================================== -->
-		<div class="custom-modal-backdrop" id="personalEventCreateModal" onclick="if(event.target === this) closePersonalEventModal()">
+		<div class="custom-modal-backdrop" id="personalEventCreateModal" onclick="if(event.target === this) e.stopPropagation()">
 			<div class="cal-modal-card">
 				<div class="detail-top-nav">
 					<div style="display:flex; align-items:center; gap:6px;">
@@ -111,7 +111,7 @@
 		<!-- ==========================================================================
 		     [모달 2] 일정 상세 보기 & 삭제 모달
 		     ========================================================================== -->
-		<div class="custom-modal-backdrop" id="personalEventDetailModal" onclick="if(event.target === this) closePersonalDetailModal()">
+		<div class="custom-modal-backdrop" id="personalEventDetailModal" onclick="if(event.target === this) e.stopPropagation()">
 			<div class="cal-modal-card" style="width: 440px;">
 				<div class="detail-top-nav">
 					<div style="display:flex; align-items:center; gap:6px;">

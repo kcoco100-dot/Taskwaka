@@ -106,10 +106,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(readOnly = true)
     public List<TaskMemberDto> getSelectableMembersForTask(Long projectId, Long taskId) {
-        List<TaskMemberDto> list = taskMapper.selectTaskMembers(taskId);
-        if (list == null || list.isEmpty()) {
-            list = taskMapper.selectProjectMembers(projectId);
-        }
+        List<TaskMemberDto> list = taskMapper.selectProjectMembers(projectId);
         return list;
     }
 
@@ -142,7 +139,7 @@ public class TaskServiceImpl implements TaskService {
         dto.setProjectMemberId(projectMemberId);
         Double subTaskProgress = subTaskDto.getProgress();
         Double sumProgress = dto.getProgress() + subTaskProgress;
-        if (sumProgress >=100) return null;
+        if (sumProgress > 100) return null;
         taskMapper.updateSubTaskField(dto.getSubTaskId(), "progress", sumProgress);
         return taskMapper.selectDailyReportById(dto.getDailyReportId());
     }
@@ -268,7 +265,7 @@ public class TaskServiceImpl implements TaskService {
     	Double currentProgress = taskDto.getProgress();
     	Double addProgress = dto.getProgress();
     	taskMapper.insertTeamReport(dto);
-    	taskMapper.updateTaskField(taskId, "progress", currentProgress + addProgress);
+    	//taskMapper.updateTaskField(taskId, "progress", currentProgress + addProgress);
     }
     
     public void updateTeamReport(TeamReportDto dto) { 

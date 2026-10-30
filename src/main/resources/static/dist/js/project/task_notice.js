@@ -45,7 +45,7 @@ async function openNoticeDetailDrawer(noticeId, rowElem) {
 
   if (readView) readView.style.display = 'flex';
   if (formView) formView.style.display = 'none';
-  if (leaderBtns) leaderBtns.style.display = isTeamLeader ? 'flex' : 'none';
+  if (leaderBtns) leaderBtns.style.display = 'none';
 
   drawer.classList.add('active');
 
@@ -70,6 +70,15 @@ async function openNoticeDetailDrawer(noticeId, rowElem) {
 function bindNoticeReadView(data) {
   const typeBadge = document.getElementById('readNoticeTypeBadge');
   const isTaskType = (data.noticeType === 'task');
+  
+  const leaderBtns = document.getElementById('noticeLeaderActionBtns');
+  
+  if(leaderBtns){
+	const isWriter = Number(data.memberId) === Number(currentProjectMemberId);
+	leaderBtns.style.display = (isTeamLeader && isWriter) ? 'flex': 'none';
+  }
+
+  
   typeBadge.textContent = isTaskType ? '업무공지' : '프로젝트 공지';
   typeBadge.className = 'n-type-badge ' + (isTaskType ? 'type-task' : 'type-project');
 

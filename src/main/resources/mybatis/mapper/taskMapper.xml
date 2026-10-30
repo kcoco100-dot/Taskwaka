@@ -408,8 +408,6 @@
             ), 0) AS completionRate
         FROM (
             SELECT task_id AS id, status FROM tasks WHERE project_id = #{projectId} AND deleted IS NULL
-            UNION ALL
-            SELECT sub_task_id AS id, status FROM sub_tasks WHERE project_id = #{projectId} AND deleted IS NULL
         )
     </select>
 

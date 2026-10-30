@@ -158,7 +158,8 @@ function closeDeleteModal() {
 }
 
 function handleBackdropClick(e) {
-  if (e.target === document.getElementById('deleteConfirmModal')) closeDeleteModal();
+	if (e.target === document.getElementById('deleteConfirmModal'))
+	    e.stopPropagation();
 }
 
 async function executeConfirmedDelete() {
@@ -236,9 +237,9 @@ function closeCreateReportModal() {
 
 function handleCreateBackdropClick(e) {
   if (e.target === document.getElementById('taskCreateModal')) {
-    closeCreateTaskModal();
+    e.stopPropagation
   }else if(e.target === document.getElementById('reportCreateModal')){
-	closeCreateReportModal();
+	e.stopPropagation
   }
 }
 
