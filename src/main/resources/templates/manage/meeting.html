@@ -33,7 +33,6 @@
                         <thead>
                             <tr>
                                 <th scope="col">회의 제목</th>
-                                <th scope="col" class="meeting-date">회의일</th>
                                 <th scope="col" class="meeting-date">작성일</th>
                                 <th scope="col" class="meeting-writer">작성자</th>
                             </tr>
@@ -47,7 +46,6 @@
 	                                <p class="meeting-summary" v-if="hasMeetingImage(meeting.content)">본문은 상세 화면에서 확인해 주세요.</p>
 									<p class="meeting-summary" v-else> {{ meeting.summary || truncateContent(meeting.content) }}</p>
                                 </td>
-                                <td class="meeting-date">{{ meeting.meetingDate }}</td>
 								<td class="meeting-date">{{ meeting.createdDate || '-' }}</td>
                                 <td class="meeting-writer">{{ meeting.authorName }}</td>
                             </tr>

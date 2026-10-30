@@ -396,6 +396,29 @@ public class ManageController {
 			HomeDashboardDataDto dashboardData = myTaskService.calculateHomeDashboardData(myTasks);
 			
 			LocalDate today = dashboardData.getToday();
+			List<ManageDto> deadlineProjects = new ArrayList<>();
+
+			for (ManageDto project : projectList) {
+			    if (project.getStatus() != 0 && project.getStatus() != 1) {
+			        continue;
+			    }
+
+			    if (project.getEnd_date() == null || project.getEnd_date().isBlank()) {
+			        continue;
+			    }
+
+			    LocalDate endDate = LocalDate.parse(project.getEnd_date());
+
+			    if (!endDate.isBefore(today)) {
+			        deadlineProjects.add(project);
+			    }
+			}
+
+			deadlineProjects.sort(
+			    Comparator.comparing(ManageDto::getEnd_date)
+			        .thenComparing(ManageDto::getProject_id)
+			);
+			
 			LocalDate dueSoonDate = today.plusDays(7);
 			int dueSoonCount = 0;
 			for (MyTaskDto task : myTasks) {
@@ -440,7 +463,7 @@ public class ManageController {
 			List<ManageNoticeDto> noticeList = manageNoticeService.selectNoticeList(noticeMap);
 			
 			
-			model.addAttribute("projectList", projectList);
+			model.addAttribute("projectList", deadlineProjects);
 			model.addAttribute("totalProjectCount", totalProjectCount);
 			model.addAttribute("plannedProjectCount", plannedProjectCount);
 			model.addAttribute("inProgressProjectCount", inProgressProjectCount);

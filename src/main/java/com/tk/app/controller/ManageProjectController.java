@@ -219,7 +219,19 @@ public class ManageProjectController {
 			if (project == null) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "프로젝트를 찾을 수 없습니다.");
 			}
+			
+			List<ManageTaskDto> taskList = servive.listManageTasks(map);
 
+			double usedWeight = 0;
+
+			for (ManageTaskDto task : taskList) {
+			    if (task.getProgress_weight() != null) {
+			        usedWeight += task.getProgress_weight();
+			    }
+			}
+			
+			double remainingWeight = Math.max(0, 100 - usedWeight);
+			
 			model.addAttribute("project", project);
 			model.addAttribute("currentMemberId", map.get("memberId"));
 			model.addAttribute("canEditProject", servive.canManageProject(map));
@@ -232,11 +244,13 @@ public class ManageProjectController {
             model.addAttribute("schType", schType);
             model.addAttribute("kwd", kwd);
             model.addAttribute("page", page);
-            model.addAttribute("taskList",servive.listManageTasks(map));
-			model.addAttribute("tlList",servive.listManageTaskTL(map));
+            model.addAttribute("taskList", taskList);
+            model.addAttribute("remainingWeight", remainingWeight);
+            model.addAttribute("tlList", servive.listManageTaskTL(map));
 
 		} catch (Exception e) {
 			log.info("projectDetail : ", e);
+			
 			throw e;
 		}
         return "manage/projectDetail";

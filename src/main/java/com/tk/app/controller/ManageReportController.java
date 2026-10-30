@@ -121,13 +121,15 @@ public class ManageReportController {
 			}
 		} catch (Exception e) {
 			log.info("listReport : ", e);
+			
             throw e;
 		}
+		
 		model.addAttribute("domainKey", domainKey);
 		model.addAttribute("reportCategory", reportCategory);
 		model.addAttribute("reviewStatus", reviewStatus);
 		model.addAttribute("schType", schType);
-            model.addAttribute("kwd", kwd);
+        model.addAttribute("kwd", kwd);
 		model.addAttribute("list", list);
 		model.addAttribute("dataCount", dataCount);
 		model.addAttribute("page", current_page);
@@ -139,6 +141,7 @@ public class ManageReportController {
 		model.addAttribute("pendingCount", statusCounts.getOrDefault("pendingCount", 0));
 		model.addAttribute("approvedCount", statusCounts.getOrDefault("approvedCount", 0));
 		model.addAttribute("rejectedCount", statusCounts.getOrDefault("rejectedCount", 0));
+		
 		return "manage/approval";
 	}
 

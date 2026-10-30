@@ -70,23 +70,10 @@
                     <p class="pmd-stat-note" th:text="|할 일 ${view} · 진행 중 ${working} · 검토 중 ${preview}|">업무 상태별 개수</p>
                 </article>
                 <article class="pmd-stat">
-                    <span class="pmd-stat-label">마감 임박 업무</span>
-                    <span class="pmd-stat-icon pmd-icon-peach" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                            <circle cx="12" cy="13" r="8"/>
-                            <path d="M12 9v4l3 2M9 2h6M12 2v3M18 5l2 2"/>
-                        </svg>
-                    </span>
-                    <div class="pmd-stat-number">
-                        <strong th:text="${dueSoonCount}">0</strong>
-                        <small>건</small>
-                    </div>
-                    <p class="pmd-stat-note">7일 이내에 마감되는 나의 업무</p>
                 </article>
             </div>
 
             <div class="pmd-grid">
-
 				<!-- 공지사항 -->
                 <section class="pmd-card" aria-labelledby="pmd-notice-title">
                     <div class="pmd-card-head">
@@ -110,41 +97,6 @@
                             <time class="pmd-notice-date" th:datetime="${notice.created != null ? #strings.substring(notice.created, 0, 10) : null}" th:text="${notice.created != null ? #strings.substring(notice.created, 0, 10) : '-'}">작성일</time>
                         </li>
                     </ul>
-                </section>
-
-                <!-- 프로젝트 진행 현황 -->
-                <section class="pmd-card" aria-labelledby="pmd-status-title">
-                    <div class="pmd-card-head">
-                        <div>
-                            <h2 id="pmd-status-title" class="pmd-card-title">프로젝트 현황</h2>
-                            <p class="pmd-card-description">워크스페이스의 프로젝트 상태를 확인하세요.</p>
-                        </div>
-                        <span class="pmd-heading-label">전체 기준</span>
-                    </div>
-                    <div class="pmd-status-summary">
-                        <div class="pmd-status-total">전체 <strong th:text="${totalProjectCount}">0</strong>개 프로젝트</div>
-                        <span class="pmd-status-period">진행 상태별 분포</span>
-                    </div>
-                    <div class="pmd-distribution" role="img" aria-label="프로젝트 상태별 분포" style="gap: 0;">
-                        <span class="pmd-distribution-running" th:style="|width: ${totalProjectCount > 0 ? inProgressProjectCount * 100.0 / totalProjectCount : 0}%; flex-shrink: 0;|"></span>
-                        <span class="pmd-distribution-planned" th:style="|width: ${totalProjectCount > 0 ? plannedProjectCount * 100.0 / totalProjectCount : 0}%; flex-shrink: 0;|"></span>
-                        <span class="pmd-distribution-completed" th:style="|width: ${totalProjectCount > 0 ? completedProjectCount * 100.0 / totalProjectCount : 0}%; flex-shrink: 0;|"></span>
-                    </div>
-                    <ul class="pmd-status-legend">
-                        <li><span class="pmd-status-dot" aria-hidden="true"></span>진행 중<strong th:text="${inProgressProjectCount}">0</strong></li>
-                        <li><span class="pmd-status-dot pmd-dot-planned" aria-hidden="true"></span>예정<strong th:text="${plannedProjectCount}">0</strong></li>
-                        <li><span class="pmd-status-dot pmd-dot-completed" aria-hidden="true"></span>완료<strong th:text="${completedProjectCount}">0</strong></li>
-                    </ul>
-                    <h3 class="pmd-check-heading">다가오는 프로젝트 마감</h3>
-                    <p class="pmd-empty" th:if="${#lists.isEmpty(upcomingProjects)}">다가오는 프로젝트 마감이 없습니다.</p>
-                    <div class="pmd-check-line" th:each="project : ${upcomingProjects}" th:with="daysLeft=${#temporals.createDate(project.end_date).toEpochDay() - today.toEpochDay()}">
-                        <a class="pmd-project-name" th:text="${project.subject}" th:href="@{/{domainKey}/manage/detail/{projectId}(domainKey=${domainKey},projectId=${project.project_id})}">프로젝트명</a>
-                        <strong>
-                            <time th:datetime="${project.end_date}" th:text="${project.end_date}">마감일</time> 마감 ·
-                            <span th:if="${daysLeft == 0}">D-day</span>
-                            <span th:if="${daysLeft > 0}" th:text="|D-${daysLeft}|"></span>
-                        </strong>
-                    </div>
                 </section>
 
                 <!-- 프로젝트 목록 -->
@@ -252,7 +204,11 @@
                         </li>
                     </ul>
                 </section>
-  
+  				
+  				<!-- 프로젝트 진행 현황 -->
+                <section class="pmd-card" aria-labelledby="pmd-status-title">
+                </section>
+  				
             </div>
         </section>
     </div>

@@ -140,12 +140,12 @@
 
                                         <div class="pd-form-group">
                                             <label>시작일 *</label>
-                                            <input type="date" name="start_date" th:value="${task.start_date}" required>
+                                            <input type="date" name="start_date" th:value="${task.start_date}" th:min="${project.start_date}" th:max="${project.end_date}" required>
                                         </div>
 
                                         <div class="pd-form-group">
                                             <label>종료일 *</label>
-                                            <input type="date" name="end_date" th:value="${task.end_date}" required>
+                                            <input type="date" name="end_date" th:value="${task.end_date}" th:min="${project.start_date}" th:max="${project.end_date}" required>
                                         </div>
 
 										<div class="pd-form-group">
@@ -211,12 +211,12 @@
 
                                 <div class="pd-form-group">
                                     <label for="taskStart">시작일 *</label>
-                                    <input type="date" id="taskStart" name="start_date" required>
+									<input type="date" id="taskStart" name="start_date" th:min="${project.start_date}" th:max="${project.end_date}" required>
                                 </div>
 
                                 <div class="pd-form-group">
                                     <label for="taskEnd">종료일 *</label>
-                                    <input type="date" id="taskEnd" name="end_date" required>
+                                    <input type="date" id="taskEnd" name="end_date" th:min="${project.start_date}" th:max="${project.end_date}" required>
                                 </div>
 
                                 <div class="pd-form-group">
@@ -229,7 +229,7 @@
 
                                 <div class="pd-form-group">
                                     <label for="taskWeight">배정 비중 (%) *</label>
-                                    <input type="number" id="taskWeight" name="progress_weight" min="1" max="100" step="1" placeholder="예: 20" required>
+                                    <input type="number" id="taskWeight" name="progress_weight" min="1" max="100" step="1" th:placeholder="|현재: ${#numbers.formatDecimal(remainingWeight, 1, 0)}% 남았습니다|" required>
                                 </div>
                             </div>
 
