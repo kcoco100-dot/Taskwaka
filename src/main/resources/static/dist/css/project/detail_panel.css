@@ -421,18 +421,84 @@
 	box-shadow: 0 0 0 2px rgba(113, 134, 91, 0.12);
 }
 
-/* 첨부파일 드롭존 */
+/* ==========================================================================
+   5. 첨부파일 영역 (조회 모드: 업로드된 파일 목록만 표시 / 수정 모드: #fileDropzone 표시)
+   ========================================================================== */
+.file-list-box {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.empty-attached-msg {
+	padding: 10px 12px;
+	font-size: 12.5px;
+	color: #9E9284;
+	background: #F7F4EE;
+	border: 1px solid #E6E0D6;
+	border-radius: 8px;
+}
+
+.attached-file-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #FFFFFF;
+	border: 1px solid #E6E0D6;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-size: 12.5px;
+}
+
+.attached-file-link {
+	color: #2B241D;
+	text-decoration: none;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.attached-file-link:hover {
+	color: #4F6242;
+	text-decoration: underline;
+}
+
+/* 평소(조회 모드)에는 기존 파일 삭제 버튼 숨김, 수정 모드에서만 노출 */
+.btn-del-existing-file {
+	display: none;
+	border: none;
+	background: none;
+	color: #B84A39;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 600;
+	padding: 2px 6px;
+}
+.common-detail-panel.is-editing .btn-del-existing-file {
+	display: inline-block;
+}
+
+/* 평소(조회 모드)에는 #fileDropzone 숨김, 수정 모드(.is-editing)일 때만 노출 */
 .detail-file-dropzone {
+	display: none;
 	border: 1px dashed #D5CBBF;
 	background: #F7F4EE;
 	border-radius: 8px;
 	padding: 12px 14px;
+	margin-top: 8px;
+}
+.common-detail-panel.is-editing .detail-file-dropzone {
+	display: block;
 }
 
-.file-upload-trigger-row {
+.file-upload-trigger-row.drag-area {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	cursor: pointer;
 }
 
 .btn-upload-attach {
@@ -454,22 +520,38 @@
 	color: #4F6242;
 }
 
-.file-list-box {
+/* file-upload.js가 동적으로 생성하는 .file-upload-list 및 .file-item 스타일 */
+.detail-file-dropzone .file-upload-list {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 	margin-top: 8px;
 }
-
-.attached-file-item {
+.detail-file-dropzone .file-upload-list:empty {
+	margin-top: 0;
+}
+.detail-file-dropzone .file-item {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	background: #FFFFFF;
-	border: 1px solid #E6E0D6;
-	padding: 7px 10px;
+	border: 1px solid #DCD3C6;
+	padding: 6px 10px;
 	border-radius: 6px;
 	font-size: 12px;
+	color: #2B241D;
+}
+.detail-file-dropzone .file-item .file-name {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.detail-file-dropzone .file-item i {
+	color: #B84A39;
+	cursor: pointer;
+	font-size: 13px;
+	padding: 2px 4px;
 }
 
 /* 하위업무 목록 섹션 */

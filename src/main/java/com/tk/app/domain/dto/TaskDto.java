@@ -1,6 +1,9 @@
 package com.tk.app.domain.dto;
 
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.Data;
 
 @Data
@@ -19,7 +22,11 @@ public class TaskDto {
     private Double progress;
     private String created;
     private String updated;
-
+    
+//  private String saveFilename;
+//	private String originalFilename;
+//	private MultipartFile selectFile; // <input type='file' name='selectFile' ..
+	
     private List<SubTaskDto> subTasks;
     private List<TaskMemberDto> participants;
 }

@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
@@ -25,6 +27,10 @@ public class TaskApiController {
 
     private final TaskService taskService;
     private final GrowthTreeService growthTreeService;
+    private final StorageService storageService;
+    
+    @Value("${file.upload-root}/task")
+	private String uploadPath;
 
     // 1. 전체 업무 목록 조회
     @GetMapping
@@ -73,11 +79,27 @@ public class TaskApiController {
             @RequestBody TaskDto dto) {
         dto.setTaskId(taskId);
         taskService.updateTaskDetail(dto);
+        //storageService.uploadFileToServer(null, uploadPath);
 
         Map<String, Object> res = new HashMap<>();
         res.put("success", true);
         return ResponseEntity.ok(res);
     }
+    
+//    @PutMapping("/{taskId}/files")
+//    public ResponseEntity<>uploadTaskFiles(
+//    		@PathVariable("taskId") Long taskId,
+//    		
+//    		){
+//    	
+//    }
+//    @PutMapping("/subtasks/{subTaskId}/files")
+//    public ResponseEntity<>uploadSubTaskFiles(
+//    		@PathVariable("subTaskId") Long taskId,
+//    		
+//    		){
+//    	
+//    }
 
     // 7. 하위 업무 실시간 필드 수정 (우측 패널에서 호출)
     @PatchMapping("/subtasks/{subTaskId}/field")
@@ -100,7 +122,8 @@ public class TaskApiController {
             @RequestBody SubTaskDto dto) {
         dto.setSubTaskId(subTaskId);
         taskService.updateSubTaskDetail(dto);
-
+        //storageService.uploadFileToServer(null, uploadPath);
+        
         Map<String, Object> res = new HashMap<>();
         res.put("success", true);
         return ResponseEntity.ok(res);
@@ -110,10 +133,13 @@ public class TaskApiController {
     @DeleteMapping("/subtasks/{subTaskId}")
     public ResponseEntity<Map<String, Object>> deleteSubTask(@PathVariable("subTaskId") Long subTaskId) {
         taskService.deleteSubTask(subTaskId);
+        //storageService.deleteFile(uploadPath, null);
         Map<String, Object> res = new HashMap<>();
         res.put("success", true);
         return ResponseEntity.ok(res);
     }
+    
+    // 다운로드 링크 필요
 
     // 10. 일일 보고서 (daily_reports) CRUD API
     @GetMapping("/subtasks/{subTaskId}/daily-reports")
