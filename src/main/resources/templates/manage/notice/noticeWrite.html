@@ -13,7 +13,7 @@
 
 <th:block layout:fragment="content">
     <div class="home-layout manage-layout project-list-layout">
-        <nav th:replace="~{layout/pmSidebar::manageSidebar('projectView')}"></nav>
+        <nav th:replace="~{layout/pmSidebar::manageSidebar('noticeList')}"></nav>
 
         <section class="section project-list-page" th:with="canUseForm=${mode == 'write' ? currentRole >= 50 : (notice.status != 0 and ((notice.notice_type == 'WORKSPACE' and currentRole == 70) or ((notice.notice_type == 'PROJECT' or notice.notice_type == 'TASK') and currentRole >= 50)))}">
             <div class="page-heading">

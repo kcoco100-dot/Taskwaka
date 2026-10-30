@@ -150,10 +150,11 @@ public class ManageProjectController {
 
 		} catch (Exception e) {
 			log.info("projectView : ", e);
+			
 			throw e;
 		}
 
-		return "manage/view";
+		return "manage/project/view";
 	}
 
 	// 프로젝트 등록 화면
@@ -168,7 +169,7 @@ public class ManageProjectController {
 		model.addAttribute("mode", "write");
 		model.addAttribute("dto", new ManageDto());
 
-		return "manage/viewWrite";
+		return "manage/project/viewWrite";
 	}
 
 	// 프로젝트 등록
@@ -253,7 +254,7 @@ public class ManageProjectController {
 			
 			throw e;
 		}
-        return "manage/projectDetail";
+        return "manage/project/projectDetail";
 	}
 
 	// 프로젝트 수정 화면
@@ -275,7 +276,7 @@ public class ManageProjectController {
 			log.info("updateForm : ", e);
 			throw e;
 		}
-        return "manage/viewWrite";
+        return "manage/project/viewWrite";
 	}
 
 	// 프로젝트 수정

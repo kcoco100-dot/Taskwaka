@@ -16,4 +16,6 @@ public interface ManageMapper {
 	public List<ManageCalendarDto> listManageCalendarProjects(Map<String, Object> map) throws SQLException;
 	public List<ManageCalendarDto> listManageCalendarTasks(Map<String, Object> map) throws SQLException;
 	public Long getOwnWorkspaceMemberId(Map<String, Object> map);
+	public List<ManageCalendarDto> listManageAiProjects(Map<String, Object> map) throws SQLException;
+	public List<ManageCalendarDto> listManageAiTasks(Map<String, Object> map) throws SQLException;
 }

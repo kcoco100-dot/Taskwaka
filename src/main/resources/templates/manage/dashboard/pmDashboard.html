@@ -70,7 +70,22 @@
                     <p class="pmd-stat-note" th:text="|할 일 ${view} · 진행 중 ${working} · 검토 중 ${preview}|">업무 상태별 개수</p>
                 </article>
                 <article class="pmd-stat">
-                </article>
+				    <span class="pmd-stat-label">마감 임박 프로젝트</span>
+				
+				    <span class="pmd-stat-icon pmd-icon-peach" aria-hidden="true">
+				        <svg viewBox="0 0 24 24">
+				            <circle cx="12" cy="13" r="8"/>
+				            <path d="M12 9v4l3 2M9 2h6M12 2v3M18 5l2 2"/>
+				        </svg>
+				    </span>
+				    <div class="pmd-stat-number">
+				        <strong th:text="${dueSoonProjectCount}">0</strong>
+				        <small>개</small>
+				    </div>
+					<p class="pmd-stat-note">남은기간 7일 이내만 표시</p>
+				    
+				    
+				</article>
             </div>
 
             <div class="pmd-grid">
@@ -205,12 +220,133 @@
                     </ul>
                 </section>
   				
-  				<!-- 프로젝트 진행 현황 -->
-                <section class="pmd-card" aria-labelledby="pmd-status-title">
-                </section>
+  				<!-- AI 업무 도우미 -->
+				<section id="pmdAiArea" class="pmd-card" aria-labelledby="pmdAiTitle" th:data-url="@{/{domainKey}/manage/ai/briefing(domainKey=${domainKey})}" th:data-csrf-token="${_csrf != null ? _csrf.token : ''}" th:data-csrf-header="${_csrf != null ? _csrf.headerName : ''}">
+				    <div class="pmd-card-head">
+				        <div>
+				            <h2 id="pmdAiTitle" class="pmd-card-title">AI 업무 도우미</h2>
+				            <p class="pmd-card-description">본인 프로젝트와 업무를 기준으로 답변합니다.</p>
+				        </div>
+				    </div>
+				
+				    <form id="pmdAiForm" class="pmd-ai-form">
+				        <label for="pmdAiQuestion">프로젝트·업무 질문</label>
+				        <textarea id="pmdAiQuestion" name="question" rows="3" maxlength="1000" placeholder="예: 프로젝트를 요약하고 지연된 업무와 다음 처리할 업무를 알려줘." required></textarea>
+				        <div class="pmd-ai-actions">
+				            <span>질문할 때마다 현재 자료를 조회합니다.</span>
+				            <button type="submit" id="pmdAiButton" class="pmd-ai-button">질문하기</button>
+				        </div>
+				    </form>
+				    <p id="pmdAiStatus" class="pmd-ai-status" role="status" aria-live="polite">질문을 입력하고 질문하기를 눌러주세요.</p>
+				    <div id="pmdAiResult" class="pmd-ai-result" hidden></div>
+				</section>
   				
             </div>
         </section>
     </div>
+</th:block>
+
+<th:block layout:fragment="script">
+    <script>
+        (() => {
+            const area = document.getElementById('pmdAiArea');
+            if (!area) return;
+
+            const form = document.getElementById('pmdAiForm');
+            const questionInput = document.getElementById('pmdAiQuestion');
+            const button = document.getElementById('pmdAiButton');
+            const status = document.getElementById('pmdAiStatus');
+            const result = document.getElementById('pmdAiResult');
+
+            let requesting = false;
+            let limitReached = false;
+
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+
+                if (requesting || limitReached) return;
+
+                const question = questionInput.value.trim();
+
+                if (!question) {
+                    status.textContent = '질문을 입력해주세요.';
+                    questionInput.focus();
+                    return;
+                }
+
+                requesting = true;
+                button.disabled = true;
+                button.textContent = '답변 생성 중...';
+                questionInput.readOnly = true;
+
+                status.textContent = '현재 프로젝트와 업무 자료를 확인하고 있습니다.';
+                result.hidden = true;
+                result.textContent = '';
+                area.setAttribute('aria-busy', 'true');
+
+                const headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                };
+
+                if (area.dataset.csrfHeader && area.dataset.csrfToken) {
+                    headers[area.dataset.csrfHeader] = area.dataset.csrfToken;
+                }
+
+                try {
+                    const response = await fetch(area.dataset.url, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: headers,
+                        body: JSON.stringify({
+                            question: question
+                        })
+                    });
+
+                    const contentType =
+                            response.headers.get('content-type') || '';
+
+                    if (response.redirected
+                            || !contentType.includes('application/json')) {
+                        throw new Error(
+                            '로그인 상태와 요청 권한을 확인한 뒤 다시 시도해주세요.'
+                        );
+                    }
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        if (data.code === 'AI_LIMIT') {
+                            limitReached = true;
+                        }
+
+                        throw new Error(
+                            data.message || 'AI 답변 생성에 실패했습니다.'
+                        );
+                    }
+
+                    result.textContent =
+                            data.answer || '표시할 답변이 없습니다.';
+                    result.hidden = false;
+
+                    status.textContent =
+                            '답변이 생성되었습니다. 처리 제안은 실제 일정과 함께 확인해주세요.';
+                } catch (error) {
+                    status.textContent =
+                            error.message || '요청 중 오류가 발생했습니다.';
+                } finally {
+                    requesting = false;
+                    questionInput.readOnly = false;
+
+                    button.disabled = limitReached;
+                    button.textContent = limitReached
+                            ? '사용 제한'
+                            : '질문하기';
+
+                    area.setAttribute('aria-busy', 'false');
+                }
+            });
+        })();
+    </script>
 </th:block>
 </html>

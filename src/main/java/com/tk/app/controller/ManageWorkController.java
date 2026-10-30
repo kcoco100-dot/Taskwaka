@@ -71,7 +71,7 @@ public class ManageWorkController {
             throw e;
         }
         
-        return "manage/workspaceRoles";
+        return "manage/Team/workspaceRoles";
     }
     
     // 워크 직위 변경

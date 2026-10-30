@@ -142,7 +142,7 @@ public class ManageReportController {
 		model.addAttribute("approvedCount", statusCounts.getOrDefault("approvedCount", 0));
 		model.addAttribute("rejectedCount", statusCounts.getOrDefault("rejectedCount", 0));
 		
-		return "manage/approval";
+		return "manage/report/approval";
 	}
 
 	// 보고서 상세 조회
@@ -190,7 +190,7 @@ public class ManageReportController {
 			log.info("reportDetail : ", e);
             throw e;
 		}
-        return "manage/reportDetail";
+        return "manage/report/reportDetail";
 	}
 
 	// 보고서 승인 및 반려
@@ -243,7 +243,7 @@ public class ManageReportController {
             log.info("writeForm : ", e);
             throw e;
         }
-        return "manage/reportwrite";
+        return "manage/report/reportwrite";
     }
     // 보고서 등록
     @PostMapping("/write")
@@ -274,7 +274,7 @@ public class ManageReportController {
             log.info("updateForm : ", e);
             throw e;
         }
-        return "manage/reportwrite";
+        return "manage/report/reportwrite";
     }
     // 보고서 수정
     @PostMapping("/update/{reportId}")

@@ -144,7 +144,7 @@ public class ManageNoticeController {
         model.addAttribute("schType", schType);
         model.addAttribute("kwd", kwd);
 
-        return "manage/noticeList";
+        return "manage/notice/noticeList";
     }
 
     // 공지 상세 조회
@@ -196,7 +196,7 @@ public class ManageNoticeController {
             throw e;
         }
 
-        return "manage/noticeDetail";
+        return "manage/notice/noticeDetail";
     }
 
     // 공지 등록 화면
@@ -224,7 +224,7 @@ public class ManageNoticeController {
             throw e;
         }
 
-        return "manage/noticeWrite";
+        return "manage/notice/noticeWrite";
     }
 
     // 공지 등록
@@ -297,7 +297,7 @@ public class ManageNoticeController {
             throw e;
         }
 
-        return "manage/noticeWrite";
+        return "manage/notice/noticeWrite";
     }
 
     // 공지 수정

@@ -79,6 +79,79 @@
 
     <!-- 캘린더 업무 조회 -->
     <select id="listManageCalendarTasks" parameterType="map" resultType="com.tk.app.domain.dto.ManageCalendarDto">
+       SELECT t.task_id AS "taskId", t.project_id AS "projectId",
+               t.title AS "title", p.subject AS "projectName",
+               DBMS_LOB.SUBSTR(t.content, 1000, 1) AS "content",
+               TO_CHAR(t.start_at, 'YYYY-MM-DD') AS "startAt",
+               TO_CHAR(t."END", 'YYYY-MM-DD') AS "endAt",
+               t.status AS "status", t.progress AS "progress",
+               NVL(md.name, '미지정') AS "assignee"
+        FROM tasks t
+        JOIN projects p ON p.project_id = t.project_id
+        LEFT JOIN project_members pm ON pm.project_member_id = t.project_member_id
+            AND pm.project_id = p.project_id
+            AND pm.status = 0
+            AND pm."LEFT" IS NULL
+            AND EXISTS (
+                SELECT 1
+                FROM task_members tm
+                WHERE tm.task_id = t.task_id
+                  AND tm.project_member_id = pm.project_member_id
+            )
+        LEFT JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+            AND wm.workspace_id = p.workspace_id
+            AND wm.status = 0
+            AND wm."LEFT" IS NULL
+        LEFT JOIN member_details md ON md.member_id = wm.member_id
+        WHERE p.workspace_id = #{workspaceId}
+          AND p.deleted IS NULL
+          AND NVL(p.archive, 'N') = 'N'
+          AND t.deleted IS NULL
+        <include refid="manageCalendarVisibleProject"/>
+        ORDER BY t.start_at, t.task_id
+    </select>
+    
+    
+        <!-- AI 프로젝트 조회 범위: 사장은 워크 전체, 과장은 참여 프로젝트 -->
+    <sql id="manageAiVisibleProject">
+        AND EXISTS (
+            SELECT 1
+            FROM workspace_members actor
+            WHERE actor.workspace_id = p.workspace_id
+              AND actor.member_id = #{memberId}
+              AND actor.status = 0
+              AND (
+                  actor.role = 70
+                  OR (
+                      actor.role = 50
+                      AND EXISTS (
+                          SELECT 1
+                          FROM project_members own
+                          WHERE own.project_id = p.project_id
+                            AND own.workspace_member_id = actor.workspace_member_id
+                            AND own.status = 0
+                      )
+                  )
+              )
+        )
+    </sql>
+
+    <!-- AI 프로젝트 조회 -->
+    <select id="listManageAiProjects" parameterType="map" resultType="com.tk.app.domain.dto.ManageCalendarDto">
+        SELECT p.project_id AS "projectId", p.subject AS "projectName",
+               DBMS_LOB.SUBSTR(p.content, 1000, 1) AS "content",
+               TO_CHAR(p.start_at, 'YYYY-MM-DD') AS "startAt",
+               TO_CHAR(p."END", 'YYYY-MM-DD') AS "endAt",
+               p.status AS "status", p.progress AS "progress"
+        FROM projects p
+        WHERE p.workspace_id = #{workspaceId}
+          AND p.deleted IS NULL
+        <include refid="manageAiVisibleProject"/>
+        ORDER BY p.start_at, p.project_id
+    </select>
+
+    <!-- AI 업무 조회 -->
+    <select id="listManageAiTasks" parameterType="map" resultType="com.tk.app.domain.dto.ManageCalendarDto">
         SELECT t.task_id AS "taskId", t.project_id AS "projectId",
                t.title AS "title", p.subject AS "projectName",
                DBMS_LOB.SUBSTR(t.content, 1000, 1) AS "content",
@@ -90,14 +163,24 @@
         JOIN projects p ON p.project_id = t.project_id
         LEFT JOIN project_members pm ON pm.project_member_id = t.project_member_id
             AND pm.project_id = p.project_id
+            AND pm.status = 0
+            AND pm."LEFT" IS NULL
+            AND EXISTS (
+                SELECT 1
+                FROM task_members tm
+                WHERE tm.task_id = t.task_id
+                  AND tm.project_member_id = pm.project_member_id
+            )
         LEFT JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
             AND wm.workspace_id = p.workspace_id
+            AND wm.status = 0
+            AND wm."LEFT" IS NULL
         LEFT JOIN member_details md ON md.member_id = wm.member_id
         WHERE p.workspace_id = #{workspaceId}
           AND p.deleted IS NULL
-          AND NVL(p.archive, 'N') = 'N'
           AND t.deleted IS NULL
-        <include refid="manageCalendarVisibleProject"/>
+        <include refid="manageAiVisibleProject"/>
         ORDER BY t.start_at, t.task_id
     </select>
+    
 </mapper>

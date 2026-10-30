@@ -179,7 +179,7 @@ public class ManageController {
             throw new IllegalStateException(e);
 		}
 
-		return "manage/manage";
+		return "manage/Team/manage";
 	}
 
 	// 프로젝트 배정 및 직위 변경
@@ -294,7 +294,7 @@ public class ManageController {
 		if (info == null) {
 			throw new IllegalStateException("로그인 정보가 없습니다.");
 		}
-		return "manage/invitation";
+		return "manage/Team/invitation";
 	}
 
     // 캘린더 조회
@@ -316,7 +316,7 @@ public class ManageController {
             
             throw e;
         }
-        return "manage/manageCalender";
+        return "manage/calender/manageCalender";
     }
 
 	// 회의록 화면
@@ -332,7 +332,7 @@ public class ManageController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
 		}
 		
-		return "manage/meeting";
+		return "manage/meeting/meeting";
 	}
 
 
@@ -360,7 +360,7 @@ public class ManageController {
 			throw e;
 		}
 
-		return "manage/manageGantt";
+		return "manage/dashboard/manageGantt";
 	}
 	
 	// 대시보드 화면
@@ -420,19 +420,28 @@ public class ManageController {
 			);
 			
 			LocalDate dueSoonDate = today.plusDays(7);
-			int dueSoonCount = 0;
-			for (MyTaskDto task : myTasks) {
-				if (task.getStatus() == null || task.getStatus() == 3) {
-					continue;
-				}
-				if (task.getEndAt() == null || task.getEndAt().isBlank()) {
-					continue;
-				}
-				LocalDate endDate = LocalDate.parse(task.getEndAt());
-				if (!endDate.isBefore(today) && !endDate.isAfter(dueSoonDate)) {
-					dueSoonCount++;
-				}
+			
+			List<ManageDto> dueSoonProjects = new ArrayList<>();
+
+			for (ManageDto project : projectList) {
+			    if (project.getStatus() != 0 && project.getStatus() != 1) {
+			        continue;
+			    }
+
+			    if (project.getEnd_date() == null || project.getEnd_date().isBlank()) {
+			        continue;
+			    }
+
+			    LocalDate endDate = LocalDate.parse(project.getEnd_date());
+
+			    if (!endDate.isBefore(today) && !endDate.isAfter(dueSoonDate)) {
+			        dueSoonProjects.add(project);
+			    }
 			}
+
+			dueSoonProjects.sort(Comparator.comparing(ManageDto::getEnd_date));
+			int dueSoonProjectCount = dueSoonProjects.size();
+			List<ManageDto> dueSoonProjectPreview = new ArrayList<>(dueSoonProjects.subList(0, Math.min(2, dueSoonProjects.size())));
 			
 			List<ManageDto> upcomingProjects = new ArrayList<>();
 			for (ManageDto project : projectList) {
@@ -478,7 +487,8 @@ public class ManageController {
 			model.addAttribute("working", dashboardData.getWorking());
 			model.addAttribute("preview", dashboardData.getPreview());
 			
-			model.addAttribute("dueSoonCount", dueSoonCount);
+			model.addAttribute("dueSoonProjectCount", dueSoonProjectCount);
+			model.addAttribute("dueSoonProjects", dueSoonProjectPreview);
 			model.addAttribute("today", today);
 			
 			model.addAttribute("upcomingProjects", upcomingProjects);
@@ -490,7 +500,7 @@ public class ManageController {
 			
 			throw e;
 		}
-		return "manage/pmDashboard";
+		return "manage/dashboard/pmDashboard";
 		
 	}
 	
@@ -530,7 +540,7 @@ public class ManageController {
 	        
 	        throw e;
 	    }
-	    return "manage/projectTeam";
+	    return "manage/project/projectTeam";
 	}
 	
 	// 프로젝트 팀원 일괄 저장
@@ -559,6 +569,57 @@ public class ManageController {
 	        result.put("message", "저장에 실패했습니다. 배정 상태를 다시 확인하세요.");
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
 	    }
+	}
+	
+	
+	// 프로젝트·업무 자료에 대한 AI 질문
+	@PostMapping("/ai/briefing")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> aiBriefing(
+	        @PathVariable("domainKey") String domainKey,
+	        @RequestBody Map<String, Object> requestData) {
+
+	    ResponseEntity<Map<String, Object>> response;
+	    Map<String, Object> result = new HashMap<>();
+
+	    try {
+	        SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+	        if (info == null) {
+	            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+	        }
+
+	        Object questionValue = requestData.get("question");
+
+	        if (!(questionValue instanceof String)) {
+	            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "질문을 입력해주세요.");
+	        }
+
+	        String question = (String) questionValue;
+
+	        String answer = service.createAiBriefing(domainKey, info.getMember_id(), question);
+	        
+	        result.put("answer", answer);
+	        response = ResponseEntity.ok(result);
+	        
+	    } catch (ResponseStatusException e) {
+	    	
+	        result.put("message", e.getReason() == null ? "요청을 처리할 수 없습니다." : e.getReason());
+	        result.put("code", e.getStatusCode().value() == 429 ? "AI_LIMIT" : "AI_ERROR");
+
+	        response = ResponseEntity.status(e.getStatusCode()).body(result);
+	        
+	    } catch (Exception e) {
+	    	
+	        log.info("aiBriefing : ", e);
+
+	        result.put("message", "AI 답변 생성에 실패했습니다. 서버 로그와 API 설정을 확인해주세요.");
+	        result.put("code", "AI_ERROR");
+
+	        response = ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(result);
+	    }
+
+	    return response;
 	}
 	
 	

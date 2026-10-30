@@ -17,4 +17,5 @@ public interface ManageService {
 	
 	public Map<String, Object> getProjectMemberForm(String domainKey, Long actorId, Long projectId) throws Exception;
 	public int saveProjectMembers(String domainKey, Long actorId, Map<String, Object> map) throws Exception;
+	public String createAiBriefing(String domainKey, Long memberId, String question) throws Exception;
 }

@@ -1,0 +1,36 @@
+@charset "UTF-8";
+
+/* 업무 등록·수정 폼 너비 유지 */
+.pd-page .pd-task-editor {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.pd-page .pd-task-editor .pd-form-group {
+    min-width: 0;
+}
+
+/* 업무 등록·수정 내용 입력칸 크기 고정 */
+.pd-page .pd-task-editor textarea[name="content"] {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    height: 144px;
+    min-height: 144px;
+    max-height: 144px;
+    resize: none;
+    overflow-y: auto;
+}
+
+/* 업무 등록·수정 내용 입력칸 크기 고정 */
+.pd-page .pd-task-editor textarea {
+    box-sizing: border-box;
+    width: 100%;
+    height: 144px;
+    min-height: 144px;
+    max-height: 144px;
+    resize: none;
+    overflow-y: auto;
+}

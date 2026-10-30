@@ -63,7 +63,7 @@ public class ManageInviteController {
     @GetMapping("/view")
     public String invitationForm(@PathVariable("domainKey") String domainKey) {
         requireWorkspaceContext(domainKey);
-        return "manage/invitation";
+        return "manage/Team/invitation";
     }
 
     // 초대 대상 조회

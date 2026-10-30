@@ -839,3 +839,151 @@
     color: #948575;
     font-size: 12px;
 }
+
+.pmd-ai-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.pmd-ai-form > label {
+    color: #514334;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pmd-ai-form > textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #dfd4c7;
+    border-radius: 8px;
+    background: #fff;
+    color: #483b30;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+#pmdAiQuestion {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    height: 112px;
+    min-height: 112px;
+    max-height: 112px;
+    resize: none;
+    overflow-y: auto;
+}
+
+.pmd-ai-form > textarea:focus {
+    outline: 2px solid #b8c5a6;
+    outline-offset: 2px;
+}
+
+.pmd-ai-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.pmd-ai-actions > span {
+    color: #8b7d70;
+    font-size: 12px;
+}
+
+.pmd-ai-button {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #74865d;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.pmd-ai-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pmd-ai-status {
+    margin: 14px 0 0;
+    color: #806f60;
+    font-size: 13px;
+}
+
+.pmd-ai-result {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #e8dfd3;
+    border-radius: 8px;
+    background: #faf9f6;
+    color: #483b30;
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.pmd-ai-result[hidden] {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .pmd-ai-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.pmd-due-project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.pmd-due-project-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pmd-due-project-item > a {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: #806d59;
+    font-size: 12px;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pmd-due-project-item > a:hover {
+    color: #71865b;
+    text-decoration: underline;
+}
+
+.pmd-due-project-day {
+    flex-shrink: 0;
+    padding: 3px 7px;
+    border-radius: 5px;
+    background: #fbf0e9;
+    color: #a87555;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.pmd-due-project-empty {
+    margin-top: 10px;
+}
