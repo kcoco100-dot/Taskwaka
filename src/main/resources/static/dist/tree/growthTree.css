@@ -89,6 +89,31 @@
     object-fit: contain;
 }
 
+.tree-fruit-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.tree-fruit-layer[hidden] {
+    display: none;
+}
+
+.tree-fruit {
+    position: absolute;
+    width: 14%;
+    height: 14%;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+}
+
+.tree-fruit:nth-child(1) { left: 35%; top: 29%; }
+.tree-fruit:nth-child(2) { left: 63%; top: 23%; }
+.tree-fruit:nth-child(3) { left: 24%; top: 48%; }
+.tree-fruit:nth-child(4) { left: 51%; top: 43%; }
+.tree-fruit:nth-child(5) { left: 77%; top: 49%; }
+
 .tree-preview-description {
     position: absolute;
     bottom: 20px;

@@ -48,7 +48,13 @@
                             <img class="tree-image" src="/dist/tree/line/seed.png" th:alt="|${growthTree.levelName} 단계의 팀 성장나무|"
                                     th:src="@{${growthTree.treeImagePath}}" alt="씨앗 단계의 팀 성장나무">
 
-                        <!-- 추후 착용 아이템 이미지 여기에 추가 예정 -->
+                      	<!-- 착용한 열매 5개를 표시할 영역 -->
+						<div id="treeFruitLayer" class="tree-fruit-layer" hidden aria-hidden="true">
+						    <img th:each="fruitIndex : ${#numbers.sequence(1, 5)}"
+						         class="tree-fruit"
+						         th:src="@{/dist/tree/items/persimmon.png}"
+						         alt="">
+						</div>
                         </div>
 
                         <p class="tree-preview-description">
@@ -57,10 +63,13 @@
                     </div>
 
                 <!-- 5단계 도달 여부와 화면에서 사용할 추가 경험치 전달 -->
+                <!-- 저장키 구분할 부분 -->
 				<aside class="tree-shop"
 				       aria-labelledby="tree-shop-title"
 				       th:attr="data-shop-enabled=${growthTree.levelNo >= 5 and growthTree.totalExp >= 400},
-				                data-shop-exp=${growthTree.totalExp > 400 ? growthTree.totalExp - 400 : 0}">
+					         data-shop-exp=${growthTree.totalExp > 400 ? growthTree.totalExp - 400 : 0},
+					         data-member-id=${#authentication.principal.member.member_id},
+					         data-workspace-id=${workspace.workspaceId}">
                     <div class="tree-shop-heading">
                         <div class="tree-shop-title-row">
                             <h2 id="tree-shop-title"><span aria-hidden="true">🛍️</span> 나무 상점</h2>
@@ -140,7 +149,9 @@
                         <section id="shop-fruit" class="tree-shop-panel" data-shop-items="fruit" aria-labelledby="shop-fruit-title" hidden>
                             <h3 id="shop-fruit-title">열매 아이템 <span>한 세트에 5알</span></h3>
                             <ul class="tree-shop-products">
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product"
+								    data-price="30"
+								    th:attr="data-fruit=@{/dist/tree/items/persimmon.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-fruit">
 	                                		<img th:src="@{/dist/tree/items/persimmon.png}" alt="" loading="lazy">
 	                                		<span class="tree-shop-item-badge">5알</span>
@@ -150,7 +161,9 @@
                                 		<span class="tree-shop-price">30 EXP</span>
                                 	</li>
                                 	
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product"
+								    data-price="30"
+								    th:attr="data-fruit=@{/dist/tree/items/apple.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-fruit">
                                 			<img th:src="@{/dist/tree/items/apple.png}" alt="" loading="lazy">
                                 			<span class="tree-shop-item-badge">5알</span>
@@ -160,7 +173,9 @@
                                 			<span class="tree-shop-price">30 EXP</span>
                                 	</li>
                                 	
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product"
+								    data-price="30"
+								    th:attr="data-fruit=@{/dist/tree/items/orange.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-fruit">
                                 			<img th:src="@{/dist/tree/items/orange.png}" alt="" loading="lazy">
                                 			<span class="tree-shop-item-badge">5알</span>
@@ -170,7 +185,9 @@
                                 		<span class="tree-shop-price">30 EXP</span>
                                 	</li>
                                 	
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product"
+								    data-price="30"
+								    th:attr="data-fruit=@{/dist/tree/items/mandarin.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-fruit">
                                 			<img th:src="@{/dist/tree/items/mandarin.png}" alt="" loading="lazy">
                                 			<span class="tree-shop-item-badge">5알</span>
