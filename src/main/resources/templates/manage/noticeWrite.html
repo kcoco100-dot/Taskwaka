@@ -132,7 +132,23 @@
     <script>
     function renderPendingFiles(input, summary, list) {
         const selected = Array.from(input.files || []);
+		
+        const existingCount = input.form.querySelectorAll(
+                '.existing-file-row input[name="deleteFileIds"]:disabled'
+            ).length;
 
+            if (existingCount + selected.length > 5) {
+                const availableCount = Math.max(0, 5 - existingCount);
+
+                alert(
+                    '첨부파일은 기존 파일을 포함하여 최대 5개까지 가능합니다.\n'
+                    + '현재 추가 가능한 파일은 ' + availableCount + '개입니다.'
+                );
+
+                input.value = '';
+                selected = [];
+            }
+        
         summary.textContent = selected.length
             ? selected.length + '개 파일 선택'
             : '선택된 파일 없음';
