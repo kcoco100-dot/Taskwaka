@@ -36,7 +36,8 @@
                         </div>
                     </div>
 
-                    <a th:href="@{/{domainKey}/home/noticeCreate(domainKey=${domainKey})}"
+                    <a th:if="${manageWorkspaceRole == 70 or manageWorkspaceRole == 50}"
+                       th:href="@{/{domainKey}/home/noticeCreate(domainKey=${domainKey})}"
                        class="shell-action shell-action-primary">
 				       공지 등록하기
                     </a>

@@ -67,13 +67,16 @@
 			        목록으로
 			    </a>
 			
-			    <a th:href="@{/{domainKey}/home/noticeEdit(domainKey=${domainKey}, noticeId=${notice.noticeId})}"
+			   	<a th:if="${manageWorkspaceRole == 50 and notice.memberId == workspace.memberId}"
+			       th:href="@{/{domainKey}/home/noticeEdit(domainKey=${domainKey}, noticeId=${notice.noticeId})}"
 			       class="shell-action shell-action-primary">
 			        수정
 			    </a>
 			
-				<form method="post" th:action="@{/{domainKey}/home/noticeDelete(domainKey=${domainKey})}"
-					  onsubmit="return confirm('공지를 삭제하시겠습니까 ?');">
+				<form th:if="${manageWorkspaceRole == 70 or (manageWorkspaceRole == 50 and notice.memberId == workspace.memberId)}"
+				      method="post"
+				      th:action="@{/{domainKey}/home/noticeDelete(domainKey=${domainKey})}"
+				      onsubmit="return confirm('공지를 삭제하시겠습니까 ?');">
 				
 				<input type="hidden" name="noticeId" th:value="${notice.noticeId}">
 				

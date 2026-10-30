@@ -2,6 +2,7 @@ package com.tk.app.controller;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,7 @@ import com.tk.app.domain.dto.GrowthLevelDto;
 import com.tk.app.domain.dto.GrowthTreeDto;
 import com.tk.app.domain.dto.HomeDashboardDataDto;
 import com.tk.app.domain.dto.HomePersonalScheduleDto;
+import com.tk.app.domain.dto.HomeTodayScheduleDto;
 import com.tk.app.domain.dto.MyTaskDto;
 import com.tk.app.domain.dto.ParticipatingProjectDto;
 import com.tk.app.service.GrowthTreeService;
@@ -103,6 +105,40 @@ public class HomeDashboardController {
 			}
 		}
 		model.addAttribute("todayProjects", todayProjects);
+
+		// 오늘의 업무와 프로젝트를 같은 형태의 목록으로 합치기
+		List<HomeTodayScheduleDto> todaySchedules = new ArrayList<>();
+
+		for (MyTaskDto task : dashboardData.getTodayTasks()) {
+			
+			HomeTodayScheduleDto schedule = new HomeTodayScheduleDto();
+			
+			schedule.setScheduleType("TASK");
+			schedule.setTitle(task.getTitle());
+			schedule.setDescription(task.getSubject());
+			schedule.setEndAt(LocalDate.parse(task.getEndAt()));
+			schedule.setStatus(task.getStatus());
+
+			todaySchedules.add(schedule);
+		}
+
+		for (ParticipatingProjectDto project : todayProjects) {
+			HomeTodayScheduleDto schedule = new HomeTodayScheduleDto();
+			schedule.setScheduleType("PROJECT");
+			schedule.setTitle(project.getSubject());
+			schedule.setDescription(
+					project.getStartAt() + " ~ " + project.getEndAt());
+			schedule.setEndAt(LocalDate.parse(project.getEndAt()));
+
+			todaySchedules.add(schedule);
+		}
+
+		// 업무와 프로젝트를 합쳐 마감일이 가까운 순서로 정렬
+		todaySchedules.sort(Comparator.comparing(HomeTodayScheduleDto::getEndAt));
+
+		// 정렬한 목록에서 최대 5개만 화면에 전달
+		model.addAttribute("todaySchedules",
+				todaySchedules.subList(0, Math.min(5, todaySchedules.size())));
 		GrowthTreeDto growthTree = growthTreeService.findGrowthTree(worksapce.getWorkspaceId());
 		
 		// 목표 경험치를 찾기 위해 성장단계 목록 조회

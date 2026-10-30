@@ -209,35 +209,31 @@
 							</div>
 						</div>
 						<ul class="overview-schedule-list">
-							<!-- 오늘의 업무와 프로젝트가 모두 없을 때 표시 -->
-							<li th:if="${#lists.isEmpty(todayTasks) and #lists.isEmpty(todayProjects)}">
+							<!-- 오늘의 일정이 없을 때 표시 -->
+							<li th:if="${#lists.isEmpty(todaySchedules)}">
 								오늘에 해당하는 일정이 없습니다.
 							</li>
-							<li th:each="task:${todayTasks}">
-								<span class="overview-schedule-time">업무</span>
+
+							<!-- 마감일 순으로 정렬된 업무·프로젝트를 최대 5개 표시 -->
+							<li th:each="schedule : ${todaySchedules}">
+								<span class="overview-schedule-time"
+								      th:text="${schedule.scheduleType == 'TASK' ? '업무' : '프로젝트'}">
+								</span>
 								<span class="overview-schedule-line" aria-hidden="true"></span>
+
 								<div>
-									<h3 th:text="${task.title}">개발팀 주간 회의</h3>
-									<p th:text="${task.subject}">자바 프로젝트 · 회의실 A</p>
+									<h3 th:text="${schedule.title}">일정명</h3>
+									<p th:text="${schedule.description}">일정 설명</p>
 								</div>
-								
-								<th:block th:switch="${task.status}">
-						            <span th:case="0" class="overview-badge overview-badge-planned">할일</span>
-						            <span th:case="1" class="overview-badge overview-badge-ongoing">진행중</span>
-						            <span th:case="2" class="overview-badge overview-badge-review">검토중</span>
-						            <span th:case="3" class="overview-badge overview-badge-ongoing">완료</span>
-							     </th:block>
-							     
-							</li>
-							
-							<!-- 오늘이 프로젝트 기간에 포함되는 참여 프로젝트 표시 -->
-							<li th:each="project : ${todayProjects}">
-								<span class="overview-schedule-time">프로젝트</span>
-								<span class="overview-schedule-line" aria-hidden="true"></span>
-								<div>
-									<h3 th:text="${project.subject}">프로젝트명</h3>
-									<p th:text="|${project.startAt} ~ ${project.endAt}|">프로젝트 기간</p>
-								</div>
+
+								<!-- 업무 항목에만 진행 상태 표시 -->
+								<th:block th:if="${schedule.scheduleType == 'TASK'}"
+								          th:switch="${schedule.status}">
+									<span th:case="0" class="overview-badge overview-badge-planned">할일</span>
+									<span th:case="1" class="overview-badge overview-badge-ongoing">진행중</span>
+									<span th:case="2" class="overview-badge overview-badge-review">검토중</span>
+									<span th:case="3" class="overview-badge overview-badge-ongoing">완료</span>
+								</th:block>
 							</li>
 							
 						</ul>

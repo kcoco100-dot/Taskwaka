@@ -38,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	const backgroundProducts = shop.querySelectorAll(
 		'#shop-background .tree-shop-product'
 	);
+	// 구매한 배경은 현재 페이지에서만 기억하며 새로고침하면 초기화
+	const purchasedBackgrounds = new Set();
+	let purchasePending = false;
 
 	for (const product of backgroundProducts) {
 		product.addEventListener('click', async function () {
@@ -47,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			const itemName = product.querySelector('.tree-shop-item-name')
 				.textContent.trim();
 
-			// 다음 단계에서 이용 조건 검사와 구매 확인 처리 추가
 			// 5단계에 도달하지 않았으면 종료
 			if (!shopEnabled) {
 				alert('상점은 성장나무 5단계에 도달한 후 이용할 수 있습니다.');
@@ -59,22 +61,36 @@ document.addEventListener('DOMContentLoaded', function () {
 				return;
 			}
 
-			// 사용 가능한 경험치가 상품 가격보다 적으면 종료
-			if (shopExp < price) {
+			// 공통 확인창이 열려 있는 동안 중복 구매 요청 방지
+			if (purchasePending) {
+				return;
+			}
+
+			// 구매한 배경은 잔액과 관계없이 무료로 다시 적용
+			const purchasePrice = purchasedBackgrounds.has(background) ? 0 : price;
+
+			// 사용 가능한 경험치가 실제 차감 금액보다 적으면 종료
+			if (shopExp < purchasePrice) {
 				alert(
 					'경험치가 부족합니다.\n' +
-					'필요 경험치: ' + price + ' EXP\n' +
+					'필요 경험치: ' + purchasePrice + ' EXP\n' +
 					'사용 가능한 경험치: ' + shopExp + ' EXP'
 				);
 				return;
 			}
 
 			// 공통 확인창에서 확인·취소 응답 기다리기
-			const message = price === 0
-				? itemName + ' 배경을 적용하시겠습니까?'
-				: itemName + ' 배경을 ' + price + ' EXP로 구매하시겠습니까?';
+			const message = purchasePrice === 0
+				? itemName + ' 배경을 무료로 적용하시겠습니까?'
+				: itemName + ' 배경을 ' + purchasePrice + ' EXP로 구매하시겠습니까?';
 
-			const confirmed = await showConfirm(message);
+			let confirmed;
+			purchasePending = true;
+			try {
+				confirmed = await showConfirm(message);
+			} finally {
+				purchasePending = false;
+			}
 
 			// 취소하면 잔액과 배경 유지
 			if (!confirmed) {
@@ -82,7 +98,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 
 			// 화면에서 사용하는 잔액만 차감
-			shopExp -= price;
+			shopExp -= purchasePrice;
+			purchasedBackgrounds.add(background);
 			availableExpElement.textContent = shopExp + ' EXP';
 			summaryAvailableExpElement.textContent = shopExp + ' EXP';
 			shop.dataset.shopExp = String(shopExp);
@@ -90,12 +107,24 @@ document.addEventListener('DOMContentLoaded', function () {
 			// 왼쪽 미리보기 배경 변경
 			treePreview.style.backgroundImage = `url("${background}")`;
 
-			// 선택한 배경 카드에 적용 중 테두리 표시
+			// 배경 카드의 테두리와 적용 상태 문구 갱신
 			for (const backgroundProduct of backgroundProducts) {
-				backgroundProduct.classList.toggle(
-					'is-equipped',
-					backgroundProduct === product
-				);
+				const equipped = backgroundProduct === product;
+
+				backgroundProduct.classList.toggle('is-equipped', equipped);
+
+				const priceElement = backgroundProduct.querySelector('.tree-shop-price');
+				const originalPrice = Number(backgroundProduct.dataset.price);
+
+				priceElement.classList.toggle('is-default', equipped);
+
+				if (equipped) {
+					priceElement.textContent = '✓ 적용 중';
+				} else if (originalPrice === 0 || purchasedBackgrounds.has(backgroundProduct.dataset.background)) {
+					priceElement.textContent = '적용하기';
+				} else {
+					priceElement.textContent = originalPrice + ' EXP';
+				}
 			}
 		});
 	}

@@ -133,6 +133,7 @@
 	<!-- 워크 공지 상세 조회 -->
 	<select id="findWorkspaceDetailNotice" resultType="com.tk.app.domain.dto.NoticeDto">
 		SELECT n.notice_id AS "noticeId", n.title,
+			   n.member_id AS "memberId",
 		       n.content, md.name AS "authorName",
 		       TO_CHAR(n.created, 'YYYY-MM-DD') AS "createdAt",
 		       n.view_count AS "viewCount"
