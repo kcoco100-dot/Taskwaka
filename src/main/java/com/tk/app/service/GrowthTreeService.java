@@ -232,14 +232,16 @@ public class GrowthTreeService {
 		expLog.setActionType("NOTICE_CREATE");
 		
 		// 시연용 경험치 =========================================================================
-//		boolean demoGrowth = true;
-//		long noticeExp = 10L;
-//		// 나중에 false로 바꾸면 원래 공지 보상인 10 EXP를 지급
-//		if(demoGrowth == true) {
-//			noticeExp = Math.max(10L, 400L - growthTree.getTotalExp());
-//		}
-//		
-//		expLog.setExp(noticeExp);
+		boolean demoGrowth = true;
+		long noticeExp = 10L;
+		// 나중에 false로 바꾸면 원래 공지 보상인 10 EXP를 지급
+		if(demoGrowth == true) {
+			//noticeExp = Math.max(10L, 400L - growthTree.getTotalExp());
+			// 시연용
+			 noticeExp = 2000L;
+		}
+		
+		expLog.setExp(noticeExp);
 		
 		//======================================================================================
 		

@@ -58,7 +58,57 @@
 						
 						<!-- 착용템 중 모자 나무 위에 표시 -->
 						<img id="treeHatImage" class="tree-hat" alt="" th:src="@{/dist/tree/items/hat.png}" hidden aria-hidden="true">
+                        	<!-- 종류별로 착용한 장식 2개를 표시할 영역 -->
+							<div id="treeBaubleLayer"
+							     class="tree-decoration-layer tree-decoration-bauble"
+							     th:attr="data-decoration=@{/dist/tree/items/tree-bauble.png}"
+							     hidden aria-hidden="true">
+							    <img th:each="decorationIndex : ${#numbers.sequence(1, 2)}"
+							         class="tree-decoration"
+							         th:src="@{/dist/tree/items/tree-bauble.png}" alt="">
+							</div>
+							
+							<div id="treeGoldCharmLayer"
+							     class="tree-decoration-layer tree-decoration-gold"
+							     th:attr="data-decoration=@{/dist/tree/items/gold-charm.png}"
+							     hidden aria-hidden="true">
+							    <img th:each="decorationIndex : ${#numbers.sequence(1, 2)}"
+							         class="tree-decoration"
+							         th:src="@{/dist/tree/items/gold-charm.png}" alt="">
+							</div>
+							
+							<div id="treeSilverCharmLayer"
+							     class="tree-decoration-layer tree-decoration-silver"
+							     th:attr="data-decoration=@{/dist/tree/items/silver-charm.png}"
+							     hidden aria-hidden="true">
+							    <img th:each="decorationIndex : ${#numbers.sequence(1, 2)}"
+							         class="tree-decoration"
+							         th:src="@{/dist/tree/items/silver-charm.png}" alt="">
+							</div>
                         </div>
+                        
+                        <!-- 나무 주변에 배치할 펫 -->
+						<div id="treePetLayer" class="tree-pet-layer" hidden aria-hidden="true">
+						    <img class="tree-pet tree-pet-dog"
+						         th:attr="data-pet=@{/dist/tree/items/dog.png}"
+						         th:src="@{/dist/tree/items/dog.png}"
+						         alt="" hidden>
+						
+						    <img class="tree-pet tree-pet-quokka"
+						         th:attr="data-pet=@{/dist/tree/items/quokka.png}"
+						         th:src="@{/dist/tree/items/quokka.png}"
+						         alt="" hidden>
+						
+						    <img class="tree-pet tree-pet-turtle"
+						         th:attr="data-pet=@{/dist/tree/items/turtle.png}"
+						         th:src="@{/dist/tree/items/turtle.png}"
+						         alt="" hidden>
+						
+						    <img class="tree-pet tree-pet-cat"
+						         th:attr="data-pet=@{/dist/tree/items/cat.png}"
+						         th:src="@{/dist/tree/items/cat.png}"
+						         alt="" hidden>
+						</div>
 
                         <p class="tree-preview-description">
                             팀 활동으로 모은 경험치로 나무가 성장해요!
@@ -206,10 +256,26 @@
                         <section id="shop-accessory" class="tree-shop-panel" data-shop-items="accessory" aria-labelledby="shop-accessory-title" hidden>
                             <h3 id="shop-accessory-title">착용 아이템 <span>나무에 특별함을</span></h3>
                             <ul class="tree-shop-products">
-                                <li class="tree-shop-product" data-price="20" th:attr="data-hat=@{/dist/tree/items/hat.png}"><div class="tree-shop-icon tree-shop-icon-accessory"><img th:src="@{/dist/tree/items/hat.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">모자</strong><span class="tree-shop-price">20 EXP</span></li>
-                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-accessory"><img th:src="@{/dist/tree/items/tree-bauble.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">트리 장식</strong><span class="tree-shop-price">20 EXP</span></li>
-                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-gold"><img th:src="@{/dist/tree/items/gold-charm.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">금 장식</strong><span class="tree-shop-price">100 EXP</span></li>
-                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-silver"><img th:src="@{/dist/tree/items/silver-charm.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">은 장식</strong><span class="tree-shop-price">50 EXP</span></li>
+                                <li class="tree-shop-product" data-price="20" th:attr="data-hat=@{/dist/tree/items/hat.png}">
+	                                	<div class="tree-shop-icon tree-shop-icon-accessory"><img th:src="@{/dist/tree/items/hat.png}" alt="" loading="lazy">
+	                                </div>
+	                                <strong class="tree-shop-item-name">모자</strong><span class="tree-shop-price">20 EXP</span>
+                                </li>
+                                <li class="tree-shop-product" data-price="20" th:attr="data-decoration=@{/dist/tree/items/tree-bauble.png}">
+                                		<div class="tree-shop-icon tree-shop-icon-accessory"><img th:src="@{/dist/tree/items/tree-bauble.png}" alt="" loading="lazy">
+                                		</div>
+                                		<strong class="tree-shop-item-name">트리 장식</strong><span class="tree-shop-price">20 EXP</span>
+                                	</li>
+                                <li class="tree-shop-product" data-price="100" th:attr="data-decoration=@{/dist/tree/items/gold-charm.png}">
+                                		<div class="tree-shop-icon tree-shop-icon-gold"><img th:src="@{/dist/tree/items/gold-charm.png}" alt="" loading="lazy">
+                                		</div>
+                                		<strong class="tree-shop-item-name">금 장식</strong><span class="tree-shop-price">100 EXP</span>
+                                	</li>
+                                <li class="tree-shop-product" data-price="50" th:attr="data-decoration=@{/dist/tree/items/silver-charm.png}">
+                                		<div class="tree-shop-icon tree-shop-icon-silver"><img th:src="@{/dist/tree/items/silver-charm.png}" alt="" loading="lazy">
+                                		</div>
+                                		<strong class="tree-shop-item-name">은 장식</strong><span class="tree-shop-price">50 EXP</span>
+                                	</li>
                             </ul>
                         </section>
 
@@ -217,7 +283,8 @@
                         <section id="shop-pet" class="tree-shop-panel" data-shop-items="pet" aria-labelledby="shop-pet-title" hidden>
                             <h3 id="shop-pet-title">펫 <span>정원의 작은 친구</span></h3>
                             <ul class="tree-shop-products">
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product" data-price="200"
+   									 th:attr="data-pet=@{/dist/tree/items/dog.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-pet">
                                 			<img th:src="@{/dist/tree/items/dog.png}" alt="" loading="lazy">
                                 		</div>
@@ -225,7 +292,8 @@
                                 		<span class="tree-shop-price">200 EXP</span>
                                 	</li>
                                 	
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product" data-price="200"
+   									 th:attr="data-pet=@{/dist/tree/items/turtle.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-pet">
 	                                		<img th:src="@{/dist/tree/items/turtle.png}" alt="" loading="lazy">
                                 		</div>
@@ -233,7 +301,8 @@
                                 		<span class="tree-shop-price">200 EXP</span>
                                 	</li>
                                 	
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product" data-price="200"
+   									 th:attr="data-pet=@{/dist/tree/items/cat.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-pet">
                                 			<img th:src="@{/dist/tree/items/cat.png}" alt="" loading="lazy">
                                 		</div>
@@ -241,7 +310,8 @@
                                 		<span class="tree-shop-price">200 EXP</span>
                                 	</li>
                                 	
-                                <li class="tree-shop-product">
+                                <li class="tree-shop-product" data-price="400"
+   									 th:attr="data-pet=@{/dist/tree/items/quokka.png}">
                                 		<div class="tree-shop-icon tree-shop-icon-quokka">
                                 			<img th:src="@{/dist/tree/items/quokka.png}" alt="" loading="lazy">
                                 		</div><strong class="tree-shop-item-name">쿼카</strong>

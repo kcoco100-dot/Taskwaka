@@ -28,14 +28,14 @@ public class Home2Controller {
 	
 	// manage 페이지
 	@GetMapping("/manage")
-	public String manage() {
-		return "manage/manage";
+	public String manage(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/manage";
 	}
 
 	// manage - meetings 페이지
 	@GetMapping("/managemeetings")
-	public String managemeetings() {
-		return "manage/meetings";
+	public String managemeetings(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/meetings";
 	}
 
 	// box 페이지
@@ -52,8 +52,8 @@ public class Home2Controller {
 
 	// invitation 페이지
 	@GetMapping("/invitation")
-	public String invitation() {
-		return "team/invitation";
+	public String invitation(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/invitation";
 	}
 
 	// projectCreate 페이지
@@ -64,28 +64,29 @@ public class Home2Controller {
 
 	// projectView 페이지
 	@GetMapping({ "/manage/view", "/projectView" })
-	public String projectView() {
-		return "manage/view";
+	public String projectView(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/view";
 	}
 
 	@GetMapping({ "/manage/approval", "/approval" })
-	public String approval() {
-		return "manage/approval";
+	public String approval(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/approval";
 	}
 
 	@GetMapping("/pmDashboard")
-	public String pmDashboard() {
-		return "manage/pmDashboard";
+	public String pmDashboard(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/pmDashboard";
 	}
 
 	@GetMapping("/manage/meetings")
-	public String manageMeetings() {
-		return "manage/meetings";
+	public String manageMeetings(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/meetings";
 	}
 
+
 	@GetMapping("/manageCalender")
-	public String manageCalender() {
-		return "manage/manageCalender";
+	public String manageCalender(@PathVariable("domainKey") String domainKey) {
+	    return "redirect:/" + domainKey + "/manage/calender";
 	}
 
 	@GetMapping("/plan")

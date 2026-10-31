@@ -130,6 +130,80 @@
     display: none;
 }
 
+.tree-decoration-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.tree-decoration-layer[hidden] {
+    display: none;
+}
+
+.tree-decoration {
+    position: absolute;
+    width: 12%;
+    height: 14%;
+    object-fit: contain;
+    object-position: center top;
+    transform: translateX(-50%);
+}
+
+.tree-decoration-bauble .tree-decoration:nth-child(1) { left: 22%; top: 61%; }
+.tree-decoration-bauble .tree-decoration:nth-child(2) { left: 78%; top: 61%; }
+
+.tree-decoration-gold .tree-decoration:nth-child(1) { left: 32%; top: 65%; }
+.tree-decoration-gold .tree-decoration:nth-child(2) { left: 68%; top: 65%; }
+
+.tree-decoration-silver .tree-decoration:nth-child(1) { left: 40%; top: 56%; }
+.tree-decoration-silver .tree-decoration:nth-child(2) { left: 60%; top: 56%; }
+
+.tree-pet-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.tree-pet-layer[hidden],
+.tree-pet[hidden] {
+    display: none;
+}
+
+.tree-pet {
+    position: absolute;
+    width: 8%;
+    height: 14%;
+    object-fit: contain;
+    object-position: center bottom;
+    transform: translateX(-50%) scale(1.25);
+	transform-origin: center bottom;
+}
+
+.tree-pet-dog {
+    left: 32%;
+    bottom: 23%;
+}
+
+.tree-pet-quokka {
+    left: 22%;
+    bottom: 15%;
+    width: 7%;
+}
+
+.tree-pet-turtle {
+    left: 66%;
+    bottom: 28%;
+    width: 10%;
+}
+
+.tree-pet-cat {
+    left: 70%;
+    bottom: 13%;
+    width: 7.5%;
+}
+
 .tree-preview-description {
     position: absolute;
     bottom: 20px;
