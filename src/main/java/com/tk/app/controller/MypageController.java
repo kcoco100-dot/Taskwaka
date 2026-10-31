@@ -3,6 +3,12 @@ package com.tk.app.controller;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -281,7 +287,7 @@ public class MypageController {
 	
 	         String message = status == HttpStatus.INTERNAL_SERVER_ERROR
 	                 ? "비밀번호 변경 중 오류가 발생했습니다."
-	                 : e.getMessage();
+	                 : "비밀번호 정보를 확인해 주세요.";
 	
 	         return ResponseEntity.status(status).body(Map.of(
 	                 "success", false,
@@ -395,12 +401,96 @@ public class MypageController {
 
 
 
+
+    @GetMapping("/works/{workId}/deleteInfo")
+    public ResponseEntity<?> workDeleteInfo(@PathVariable Long workId) {
+        SessionInfo member = getLoginMember();
+
+        try {
+            boolean hasOtherMembers = service.hasOtherWorkMembers(member.getMember_id(), workId);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "hasOtherMembers", hasOtherMembers
+            ));
+
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("워크 삭제 정보 조회 오류 : ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("success", false, "message", "워크 삭제 정보를 확인할 수 없습니다."));
+        }
+    }
+
+    @PostMapping("/works/{workId}/delete")
+    public ResponseEntity<?> deleteOwnedWork(@PathVariable Long workId) {
+        SessionInfo member = getLoginMember();
+
+        try {
+            service.deleteOwnedWork(member.getMember_id(), workId);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "워크가 삭제되었습니다."
+            ));
+
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("워크 삭제 오류 : ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("success", false, "message", "워크 삭제 중 오류가 발생했습니다."));
+        }
+    }
+
     @GetMapping("/withdraw")
     public String withdraw(Model model) {
+        SessionInfo member = getLoginMember();
 
         model.addAttribute("page", "withdraw");
+        model.addAttribute("hasActiveWorkspaces", service.hasActiveWorkspaces(member.getMember_id()));
 
         return "mypage/mypage";
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> withdrawSite(HttpServletRequest request, HttpServletResponse response) {
+        SessionInfo member = getLoginMember();
+
+        try {
+            service.withdrawSite(member.getMember_id());
+
+            new SecurityContextLogoutHandler().logout(
+            		request, response, SecurityContextHolder.getContext().getAuthentication());
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "사이트 회원 탈퇴가 완료되었습니다."
+            ));
+
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    Map.of("success", false, "message", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("사이트 탈퇴 오류 : ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("success", false, "message", "사이트 탈퇴 처리 중 오류가 발생했습니다."));
+        }
     }
     
 

@@ -24,5 +24,11 @@ public interface MypageService {
 	public boolean hasOngoingWork(Long memberId, Long workId) throws Exception;
 	
 	public void leaveWork(Long memberId, Long workId);
+
+    public boolean hasOtherWorkMembers(Long memberId, Long workId);
+    public void deleteOwnedWork(Long memberId, Long workId);
+
+    public boolean hasActiveWorkspaces(Long memberId);
+    public void withdrawSite(Long memberId);
 	
 }

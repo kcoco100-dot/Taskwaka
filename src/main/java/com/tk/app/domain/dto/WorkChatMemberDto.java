@@ -16,6 +16,8 @@ public class WorkChatMemberDto {
 	private Integer role;
 	private String roleName;
 	private String profilePhoto;
+	private String email;
+	private String projectNames;
 	private Long workId;
 	private String domainKey;
 	

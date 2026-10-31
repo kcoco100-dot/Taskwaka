@@ -9,6 +9,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tk.app.chat.WorkChatMessageSavedEvent;
@@ -426,6 +428,101 @@ public class MypageServiceImpl implements MypageService {
 	        throw new IllegalStateException("워크 탈퇴 처리에 실패했습니다.");
 	    }
 	}
+
+    @Override
+    public boolean hasOtherWorkMembers(Long memberId, Long workId) {
+        if (memberId == null || workId == null || workId <= 0) {
+            throw new IllegalArgumentException("워크 정보가 올바르지 않습니다.");
+        }
+
+        MypageWorkDto work = new MypageWorkDto();
+        work.setMemberId(memberId);
+        work.setWorkId(workId);
+
+        if (mapper.findOwnedWorkForDelete(work) == null) {
+            throw new SecurityException("워크 삭제 권한이 없습니다.");
+        }
+
+        return mapper.countOtherActiveWorkMembers(workId) > 0;
+    }
+
+    @Override
+    @Transactional
+    public void deleteOwnedWork(Long memberId, Long workId) {
+        if (memberId == null || workId == null || workId <= 0) {
+            throw new IllegalArgumentException("워크 정보가 올바르지 않습니다.");
+        }
+
+        if (mapper.lockWorkForDelete(workId) == null) {
+            throw new IllegalStateException("이미 삭제되었거나 비활성화된 워크입니다.");
+        }
+
+        MypageWorkDto work = new MypageWorkDto();
+        work.setMemberId(memberId);
+        work.setWorkId(workId);
+
+        if (mapper.findOwnedWorkForDelete(work) == null) {
+            throw new SecurityException("워크 삭제 권한이 없습니다.");
+        }
+
+        if (mapper.countOtherActiveWorkMembers(workId) > 0) {
+            throw new IllegalStateException("다른 워크 회원이 있습니다. 사장 교체 신청 후 관리자 승인을 받아주세요.");
+        }
+
+        if (mapper.disableMyWorkspace(work) != 1) {
+            throw new IllegalStateException("워크 상태 변경에 실패했습니다.");
+        }
+
+        if (mapper.deleteMyWorkspaceDomain(work) < 1) {
+            throw new IllegalStateException("워크 도메인 비활성화에 실패했습니다.");
+        }
+    }
+
+    @Override
+    public boolean hasActiveWorkspaces(Long memberId) {
+        if (memberId == null) {
+            throw new IllegalArgumentException("회원정보가 올바르지 않습니다.");
+        }
+
+        return mapper.countActiveMemberWorkspaces(memberId) > 0;
+    }
+
+    @Override
+    @Transactional
+    public void withdrawSite(Long memberId) {
+        if (memberId == null) {
+            throw new IllegalArgumentException("회원정보가 올바르지 않습니다.");
+        }
+
+        if (mapper.lockMemberForWithdrawal(memberId) == null) {
+            throw new SecurityException("회원 탈퇴 권한이 없습니다.");
+        }
+
+        if (mapper.countActiveMemberWorkspaces(memberId) > 0) {
+            throw new IllegalStateException("활성 워크가 있습니다. 모든 워크에서 탈퇴하거나 소유 워크를 정리해주세요.");
+        }
+
+        MypageDto member = mapper.findMyInfo(memberId);
+        String filename = member != null ? member.getProfile() : null;
+
+        if (mapper.deleteMyMemberDetails(memberId) != 1) {
+            throw new IllegalStateException("회원 상세정보 삭제에 실패했습니다.");
+        }
+
+        if (mapper.withdrawMyMember(memberId) != 1) {
+            throw new IllegalStateException("회원 탈퇴 상태 변경에 실패했습니다.");
+        }
+
+        if (filename != null && ! filename.isBlank()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    deleteProfileFile(filename);
+                }
+            });
+        }
+    }
+
 }
 
 

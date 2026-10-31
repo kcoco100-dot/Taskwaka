@@ -75,7 +75,7 @@
 	 
 
 	<select id="findMyWorkspaces" parameterType="Long" resultType="MypageWorkDto">
-	    SELECT w.workspace_id workId, wm.workspace_member_id AS workMemberId,
+	    SELECT w.workspace_id workId, wm.workspace_member_id workMemberId,
 	        w.subject, wm.role, wd.domain_key domainKey  
 	    FROM workspace_members wm
 	
@@ -88,6 +88,7 @@
 	    WHERE wm.member_id = #{memberId}
 	      AND wm.status = 0
 	      AND wd.active = 'Y'
+	      AND w.status IN (0, 1)
 	      AND m.status = 0
 	    ORDER BY wm.role DESC, w.workspace_id DESC
 	</select>
@@ -468,4 +469,104 @@
 	
 	
 	
+
+    <!-- 워크 삭제 : 소유자 확인 및 다른 활성 회원 수 조회 -->
+    <select id="lockWorkForDelete" parameterType="Long" resultType="Long">
+        SELECT workspace_id
+        FROM workspaces
+        WHERE workspace_id = #{workId}
+          AND status IN (0, 1)
+        FOR UPDATE
+    </select>
+
+    <select id="findOwnedWorkForDelete" parameterType="MypageWorkDto" resultType="MypageWorkDto">
+        SELECT w.workspace_id workId, w.member_id memberId, wm.workspace_member_id workMemberId,
+            w.subject, wm.role
+        FROM workspaces w
+        JOIN workspace_members wm ON wm.workspace_id = w.workspace_id
+        JOIN members m ON m.member_id = w.member_id
+        WHERE w.workspace_id = #{workId}
+          AND w.member_id = #{memberId}
+          AND w.status IN (0, 1)
+          AND wm.member_id = #{memberId}
+          AND wm.role = 70
+          AND wm.status = 0
+          AND m.status = 0
+          AND EXISTS (
+              SELECT 1
+              FROM workspace_domains wd
+              WHERE wd.workspace_id = w.workspace_id
+                AND wd.active = 'Y'
+          )
+    </select>
+
+    <select id="countOtherActiveWorkMembers" parameterType="Long" resultType="int">
+        SELECT COUNT(DISTINCT wm.member_id)
+        FROM workspace_members wm
+        JOIN members m ON m.member_id = wm.member_id
+        JOIN workspaces w ON w.workspace_id = wm.workspace_id
+        WHERE wm.workspace_id = #{workId}
+          AND wm.member_id != w.member_id
+          AND wm.status = 0
+          AND m.status = 0
+    </select>
+
+    <!-- 워크 논리 삭제 : 다른 워크 데이터는 변경하지 않음 -->
+    <update id="disableMyWorkspace" parameterType="MypageWorkDto">
+        UPDATE workspaces
+        SET status = 2, updated = SYSDATE
+        WHERE workspace_id = #{workId}
+          AND member_id = #{memberId}
+          AND status IN (0, 1)
+    </update>
+
+    <update id="deleteMyWorkspaceDomain" parameterType="MypageWorkDto">
+        UPDATE workspace_domains
+        SET active = 'N', reason = 'DELETED'
+        WHERE workspace_id = #{workId}
+    </update>
+
+    <!-- 사이트 탈퇴 : 활성 워크 소속이나 소유 중인 경우 차단 -->
+    <select id="lockMemberForWithdrawal" parameterType="Long" resultType="Long">
+        SELECT member_id
+        FROM members
+        WHERE member_id = #{memberId}
+          AND status = 0
+        FOR UPDATE
+    </select>
+
+    <select id="countActiveMemberWorkspaces" parameterType="Long" resultType="int">
+        SELECT COUNT(*)
+        FROM workspaces w
+        WHERE w.status IN (0, 1)
+          AND EXISTS (
+              SELECT 1
+              FROM workspace_domains wd
+              WHERE wd.workspace_id = w.workspace_id
+                AND wd.active = 'Y'
+          )
+          AND (
+              w.member_id = #{memberId}
+              OR EXISTS (
+                  SELECT 1
+                  FROM workspace_members wm
+                  WHERE wm.workspace_id = w.workspace_id
+                    AND wm.member_id = #{memberId}
+                    AND wm.status = 0
+              )
+          )
+    </select>
+
+    <delete id="deleteMyMemberDetails" parameterType="Long">
+        DELETE FROM member_details
+        WHERE member_id = #{memberId}
+    </delete>
+
+    <update id="withdrawMyMember" parameterType="Long">
+        UPDATE members
+        SET status = 2
+        WHERE member_id = #{memberId}
+          AND status = 0
+    </update>
+
 </mapper>

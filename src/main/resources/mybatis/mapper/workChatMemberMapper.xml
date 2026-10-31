@@ -3,7 +3,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tk.app.mapper.WorkChatMemberMapper">
 	<select id="findMemberByWorkId" parameterType="Long" resultType="WorkChatMemberDto">
-		SELECT wm.member_id "memberId", md.name "name", wm.role "role", md.profile "profilePhoto", wm.workspace_id "workId"
+		SELECT wm.member_id memberId, md.name, wm.role,
+               md.profile profilePhoto, md.email, wm.workspace_id workId,
+               (SELECT LISTAGG(p.subject, ', ') WITHIN GROUP (ORDER BY p.subject)
+                  FROM project_members pm
+                  JOIN projects p ON p.project_id = pm.project_id
+                 WHERE pm.workspace_member_id = wm.workspace_member_id
+                   AND pm.status = 0 AND pm."LEFT" IS NULL
+                   AND p.deleted IS NULL) projectNames
 		FROM workspace_members wm
 		JOIN members m ON m.member_id = wm.member_id
 		JOIN member_details md ON m.member_id = md.member_id

@@ -12,8 +12,8 @@ html {
     background: #f6f8fb;
     color: #253047;
     font-family: "Pretendard", "Noto Sans KR", sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 15px;
+    line-height: 1.65;
 }
 
 .mypage-body button,
@@ -22,76 +22,61 @@ html {
     font-family: inherit;
 }
 
-/* 상단 헤더 */
-
-.mypage-topbar {
-    height: 74px;
-    padding: 0 6%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    background: #ffffff;
-    border-bottom: 1px solid #e8ebf0;
-}
-
-.mypage-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #263449;
-    font-size: 20px;
-    text-decoration: none;
-}
-
-.mypage-brand img {
-    width: 34px;
-    height: 34px;
-    object-fit: contain;
-}
-
+/* 상단 헤더는 공통 header.css의 team-header, team-logo를 사용 */
 .mypage-back {
-    color: #69758a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 24px;
+    border: 1px solid #d9e5d2;
+    border-radius: 10px;
+    background: #e9f0e4;
+    color: #516b44;
     font-size: 14px;
+    font-weight: 700;
     text-decoration: none;
+    transition: background .15s, color .15s;
 }
 
-.mypage-back:hover {
-    color: #287a60;
+.mypage-back:hover,
+.mypage-back:focus-visible {
+    background: #dce8d5;
+    color: #3b5538;
 }
 
 /* 전체 레이아웃 */
 
 .mypage-container {
-    max-width: 1120px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 54px 24px 90px;
+    padding: 48px 26px 80px;
 }
 
 .mypage-heading {
-    margin-bottom: 32px;
+    margin-bottom: 30px;
 }
 
 .mypage-eyebrow {
     color: #278365;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 750;
     letter-spacing: 2px;
 }
 
 .mypage-heading h1 {
     margin: 9px 0;
-    font-size: 30px;
+    font-size: 32px;
 }
 
 .mypage-heading p {
     margin: 0;
     color: #7b8797;
+    font-size: 15px;
 }
 
 .mypage-layout {
     display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-columns: 240px minmax(0, 1fr);
     gap: 26px;
     align-items: start;
 }
@@ -110,17 +95,17 @@ html {
 .mypage-sidebar-title {
     display: block;
     padding: 0 12px 14px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 750;
 }
 
 .mypage-sidebar a {
     display: block;
     margin: 3px 0;
-    padding: 12px 13px;
+    padding: 14px 15px;
     color: #657186;
     border-radius: 9px;
-    font-size: 14px;
+    font-size: 15px;
     text-decoration: none;
     transition: background .15s, color .15s;
 }
@@ -167,40 +152,40 @@ html {
 }
 
 .mypage-card-heading {
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 }
 
 .mypage-card-heading h2 {
     margin: 0 0 8px;
-    font-size: 21px;
+    font-size: 23px;
     font-weight: 750;
 }
 
 .mypage-card-heading p {
     margin: 0;
     color: #8993a2;
-    font-size: 13px;
+    font-size: 15px;
 }
 
 /* 첫 화면: 내 정보 */
 
 .mypage-info-section h3 {
     margin: 0 0 20px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
 }
 
 .mypage-separator {
     height: 1px;
-    margin: 30px 0;
+    margin: 36px 0;
     background: #edf0f3;
 }
 
 .mypage-info-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 30px;
-    row-gap: 24px;
+    column-gap: 34px;
+    row-gap: 28px;
 }
 
 .mypage-info-item {
@@ -216,18 +201,18 @@ html {
 
 .mypage-info-label {
     color: #8993a2;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
 }
 
 .mypage-info-label small {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 400;
 }
 
 .mypage-info-value {
     color: #344055;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 550;
     overflow-wrap: anywhere;
 }
@@ -240,7 +225,22 @@ html {
 .mypage-help {
     margin: 20px 0 0;
     color: #98a1ad;
-    font-size: 12px;
+    font-size: 14px;
+}
+
+/* 워크 탈퇴 주의 문구만 강조 */
+.mypage-help.mypage-help-important {
+    color: #302b26;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.75;
+}
+
+.mypage-help-important .mypage-important-label {
+    display: inline-block;
+    margin-right: 8px;
+    color: #a3433d;
+    font-weight: 800;
 }
 
 /* 프로필 */
@@ -249,25 +249,25 @@ html {
 .mypage-profile-edit {
     display: flex;
     align-items: center;
-    gap: 22px;
+    gap: 26px;
 }
 
 .mypage-avatar {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 88px;
-    height: 88px;
+    width: 104px;
+    height: 104px;
     border-radius: 50%;
     background: #e8f4ee;
     color: #347e63;
-    font-size: 34px;
+    font-size: 38px;
 }
 
 .mypage-avatar-large {
-    width: 120px;
-    height: 120px;
-    font-size: 45px;
+    width: 142px;
+    height: 142px;
+    font-size: 50px;
 }
 
 .mypage-profile-info {
@@ -278,21 +278,21 @@ html {
     display: block;
     margin-bottom: 7px;
     color: #344055;
-    font-size: 15px;
+    font-size: 18px;
 }
 
 .mypage-profile-info p {
     margin: 0;
     color: #8993a2;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.7;
 }
 
 .mypage-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
+    gap: 10px;
+    margin-top: 20px;
 }
 
 /* 수정 폼 */
@@ -300,13 +300,13 @@ html {
 .mypage-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
+    gap: 26px;
 }
 
 .mypage-field {
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 10px;
     min-width: 0;
 }
 
@@ -316,7 +316,7 @@ html {
 
 .mypage-field label {
     color: #344055;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 650;
 }
 
@@ -324,13 +324,13 @@ html {
 .mypage-field select {
     width: 100%;
     min-width: 0;
-    min-height: 45px;
-    padding: 12px 14px;
+    min-height: 48px;
+    padding: 14px 16px;
     background: #ffffff;
     border: 1px solid #e1e6ec;
     border-radius: 8px;
     color: #344055;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .mypage-field input::placeholder {
@@ -354,7 +354,7 @@ html {
 
 .mypage-form-subheading h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .mypage-optional {
@@ -362,14 +362,14 @@ html {
     background: #f0f3f6;
     border-radius: 6px;
     color: #8491a0;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 .mypage-form-description {
     grid-column: 1 / -1;
     margin: -12px 0 0;
     color: #8993a2;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .mypage-input-with-button {
@@ -388,13 +388,13 @@ html {
 /* 공통 버튼 */
 
 .mypage-card button {
-    min-height: 40px;
-    padding: 10px 16px;
+    min-height: 44px;
+    padding: 12px 20px;
     background: #eef6f1;
     border: 1px solid #dbe4e0;
     border-radius: 8px;
     color: #357a64;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 650;
     cursor: pointer;
 }
@@ -435,14 +435,14 @@ html {
 .mypage-footer-actions {
     display: flex;
     justify-content: flex-end;
-    margin-top: 28px;
+    margin-top: 34px;
 }
 
 /* 탈퇴 안내 */
 
 .mypage-info-box {
-    margin-top: 24px;
-    padding: 20px;
+    margin-top: 26px;
+    padding: 22px;
     background: #f9fafc;
     border: 1px solid #e7ebef;
     border-radius: 10px;
@@ -452,13 +452,13 @@ html {
     display: block;
     margin-bottom: 10px;
     color: #3b485b;
-    font-size: 13px;
+    font-size: 16px;
 }
 
 .mypage-info-box p {
     margin: 7px 0;
     color: #788496;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.8;
 }
 
@@ -497,23 +497,22 @@ html {
 
 @media (max-width: 900px) {
     .mypage-layout {
-        grid-template-columns: 190px minmax(0, 1fr);
-        gap: 18px;
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 20px;
     }
 }
 
 @media (max-width: 760px) {
-    .mypage-topbar {
-        height: 64px;
+    .mypage-body .team-header {
         padding: 0 16px;
     }
 
     .mypage-container {
-        padding: 30px 16px 65px;
+        padding: 34px 16px 68px;
     }
 
     .mypage-heading h1 {
-        font-size: 26px;
+        font-size: 30px;
     }
 
     .mypage-layout {
@@ -522,15 +521,15 @@ html {
 
     .mypage-sidebar {
         position: static;
-        padding: 18px;
+        padding: 20px;
     }
 
     .mypage-sidebar a {
-        padding: 10px 12px;
+        padding: 12px 14px;
     }
 
     .mypage-card {
-        padding: 24px;
+        padding: 26px;
     }
 
     .mypage-info-grid,
@@ -545,14 +544,14 @@ html {
     }
 
     .mypage-avatar {
-        width: 74px;
-        height: 74px;
+        width: 82px;
+        height: 82px;
         font-size: 30px;
     }
 
     .mypage-avatar-large {
-        width: 90px;
-        height: 90px;
+        width: 108px;
+        height: 108px;
         font-size: 36px;
     }
 }
@@ -586,4 +585,76 @@ html {
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+}
+
+/* 주소는 상세주소 구분자가 저장되지 않으므로 원문을 잘 보이게 표시 */
+.mypage-current-address {
+    margin: 8px 0 16px;
+    padding: 19px 21px;
+    border: 1px solid #e3e9e4;
+    border-radius: 10px;
+    background: #f7faf7;
+}
+.mypage-current-address strong { display: block; font-size: 15px; color: #657681; margin-bottom: 4px; }
+.mypage-current-address span { display: block; font-size: 17px; color: #2d3b31; font-weight: 650; line-height: 1.6; overflow-wrap: anywhere; }
+
+
+/* 사이트 탈퇴 안내창 */
+.mypage-withdraw-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(24, 35, 45, .55);
+}
+
+.mypage-withdraw-dialog[hidden] {
+    display: none;
+}
+
+.mypage-dialog-content {
+    width: 100%;
+    max-width: 480px;
+    padding: 32px;
+    border: 1px solid #e9edf1;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 18px 56px rgba(32, 42, 54, .18);
+}
+
+.mypage-dialog-content h3 {
+    margin: 0 0 12px;
+    color: #344055;
+    font-size: 20px;
+}
+
+.mypage-dialog-content p {
+    margin: 0;
+    color: #677488;
+    font-size: 15px;
+    line-height: 1.75;
+}
+
+.mypage-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+}
+
+@media (max-width: 420px) {
+    .mypage-dialog-content {
+        padding: 24px;
+    }
+
+    .mypage-dialog-actions {
+        flex-direction: column-reverse;
+    }
+
+    .mypage-dialog-actions button {
+        width: 100%;
+    }
 }

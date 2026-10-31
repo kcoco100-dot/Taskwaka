@@ -4,19 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>마이페이지 | TASKWAKA</title>
-    <link rel="stylesheet" th:href="@{/dist/css/mypage.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/header.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/mypage.css(v=12)}">
 </head>
 
 <body class="mypage-body">
 
-<header class="mypage-topbar">
-    <a th:href="@{/myHome}" class="mypage-brand">
-        <img th:src="@{/dist/images/taskwaka-bear-icon.png}" alt="">
-        <strong>TASKWAKA</strong>
-    </a>
-    <a th:href="@{/myHome}" class="mypage-back">
-        워크 목록으로
-    </a>
+<header class="site-header">
+    <div class="team-header">
+        <div class="team-header-left">
+            <a th:href="@{/myHome}" class="team-logo">
+                <img th:src="@{/dist/images/taskwaka-bear-icon.png}" class="team-logo-image" alt="">
+                <span>TASKWAKA</span>
+            </a>
+        </div>
+        <div class="team-header-right">
+            <a th:href="@{/myHome}" class="mypage-back">홈으로</a>
+        </div>
+    </div>
 </header>
 
 <main class="mypage-container">
@@ -194,7 +199,7 @@
 			        <div class="mypage-profile-info">
 			
 			            <strong th:text="${myInfo.name ?: ''}"></strong>
-			            <p>프로필 사진을 선택하거나 삭제할 수 있습니다.</p>
+			            <p>사진 삭제는 미리보기에만 반영되며 변경사항 저장을 눌러야 적용됩니다.</p>
 			
 			            <input type="file"
 			                   id="mypagePhotoFile"
@@ -250,6 +255,10 @@
 			            <h3>주소</h3>
 			            <span class="mypage-optional">선택 입력</span>
 			        </div>
+                    <div class="mypage-current-address">
+                        <strong>현재 등록된 주소</strong>
+                        <span id="mypageCurrentAddress" th:text="${#strings.isEmpty(myInfo.address) ? '등록된 주소가 없습니다.' : myInfo.address}"></span>
+                    </div>
 			
 			        <p class="mypage-form-description">
 			            주소를 변경하지 않으면 현재 등록된 주소가 유지됩니다.
@@ -279,11 +288,6 @@
 			                   placeholder="상세주소 (선택)" disabled>
 			        </div>
 			    </div>
-			
-			    <p class="mypage-help">
-			        현재 등록된 주소:
-			        <span id="mypageCurrentAddress" th:text="${myInfo.address ?: ''}"></span>
-			    </p>
 			    <input type="hidden" id="mypageAddressValue" th:value="${myInfo.address ?: ''}">
 			
 			    <p id="mypageAddressStatus" class="mypage-help" role="status">
@@ -367,16 +371,19 @@
 			            <p>직급: 사장</p>
 			
 			            <div class="mypage-actions">
-			                <button type="button" class="mypage-button-danger"
-			                        th:attr="data-work-id=${work.workId}" disabled>
+			                <button type="button" class="mypage-button-danger mypage-work-delete"
+                            th:data-delete-info-url="@{/member/mypage/works/{workId}/deleteInfo(workId=${work.workId})}"
+                            th:data-delete-url="@{/member/mypage/works/{workId}/delete(workId=${work.workId})}"
+                            th:data-roles-url="@{/{domainKey}/manage/workspaceRoles(domainKey=${work.domainKey})}">
 			                    워크 삭제
 			                </button>
 			            </div>
 			        </div>
 			
-			        <p class="mypage-help">
-			            워크를 삭제하면 참여자들이 해당 워크에 접근할 수 없습니다.
-			            삭제 전 관련 프로젝트와 참여 인원을 확인합니다.
+			        <p class="mypage-help mypage-help-important">
+                        <strong class="mypage-important-label">※ 중요</strong>
+                        다른 회원이 있으면 사장 교체 신청 후 관리자 승인이 필요합니다.
+                        소유자 혼자 남은 워크만 삭제할 수 있으며, 삭제된 워크는 비활성화됩니다.
 			        </p>
 			
 			    </div>
@@ -402,9 +409,10 @@
 					</button>
 			    </div>
 			
-			        <p class="mypage-help">
-			            워크에서 탈퇴하면 해당 워크의 접근 권한이 해제됩니다.
-			            재참여 시 이전 직급과 권한은 자동 복원되지 않습니다.
+			        <p class="mypage-help mypage-help-important">
+                        <strong class="mypage-important-label">※ 중요</strong>
+                        워크에서 탈퇴하면 해당 워크의 접근 권한이 해제됩니다.
+                        재참여 시 이전 직급과 권한은 자동 복원되지 않습니다.
 			        </p>
 			    </div>
 			</section>
@@ -432,8 +440,8 @@
                     </p>
 
                     <p>
-                        탈퇴 회원의 기존 작성 기록은 정책에 따라
-                        보존되며 작성자 이름은 UNKNOWN으로 표시됩니다.
+                        탈퇴 회원의 기존 작성 기록은 보존됩니다.
+                        작성자 표시는 각 화면의 조회 정책에 따라 달라질 수 있습니다.
                     </p>
 
                     <p>
@@ -443,9 +451,26 @@
                 </div>
 
                 <div class="mypage-footer-actions">
-                    <button type="button" id="mypageAccountWithdrawal" class="mypage-button-danger" disabled>
+                    <button type="button" id="mypageAccountWithdrawal" class="mypage-button-danger"
+                            th:data-has-active-workspaces="${hasActiveWorkspaces}"
+                            th:data-withdraw-url="@{/member/mypage/withdraw}">
                         사이트 회원 탈퇴
                     </button>
+                </div>
+
+                <div class="mypage-withdraw-dialog" id="mypageWithdrawalDialog" hidden>
+                    <div class="mypage-dialog-content" role="dialog" aria-modal="true"
+                         aria-labelledby="mypageWithdrawalTitle" aria-describedby="mypageWithdrawalMessage">
+                        <h3 id="mypageWithdrawalTitle">사이트 탈퇴 안내</h3>
+                        <p id="mypageWithdrawalMessage">
+                            활성 워크가 있습니다. 워크 탈퇴 메뉴에서 모든 워크를 먼저 정리해주세요.
+                        </p>
+                        <div class="mypage-dialog-actions">
+                            <button type="button" id="mypageWithdrawalCancel" class="mypage-button-light">취소</button>
+                            <button type="button" id="mypageWithdrawalGoWorks" class="mypage-button-primary"
+                                    th:data-works-url="@{/member/mypage/works}">워크 탈퇴로 이동</button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -454,7 +479,7 @@
 
 <script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
 
-<script th:src="@{/dist/js/mypage.js}" defer></script>
+<script th:src="@{/dist/js/mypage.js(v=12)}" defer></script>
 
 </body>
 </html>

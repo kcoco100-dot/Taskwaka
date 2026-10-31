@@ -34,6 +34,17 @@ public interface MypageMapper {
 
     public int leaveMyProjectMembers(MypageWorkDto dto);
     public int leaveMyWorkMember(MypageWorkDto dto);
+
+    public Long lockWorkForDelete(Long workId);
+    public MypageWorkDto findOwnedWorkForDelete(MypageWorkDto dto);
+    public int countOtherActiveWorkMembers(Long workId);
+    public int disableMyWorkspace(MypageWorkDto dto);
+    public int deleteMyWorkspaceDomain(MypageWorkDto dto);
+
+    public Long lockMemberForWithdrawal(Long memberId);
+    public int countActiveMemberWorkspaces(Long memberId);
+    public int deleteMyMemberDetails(Long memberId);
+    public int withdrawMyMember(Long memberId);
   
     public List<MypageChatDto> findMyChatRooms(MypageWorkDto dto);
     public Long lockMyChatRoom(Long chatRoomId);
