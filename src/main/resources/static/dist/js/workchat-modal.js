@@ -536,15 +536,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	               const name = document.createElement("strong");
 	               name.textContent = member.name;
+               // 이름, 직책, 위임 버튼의 열을 분리해 동일한 위치에 정렬한다.
+               const roleWrap = document.createElement("div");
+               roleWrap.className = "workchat-group-member-meta";
 
-	               const role = document.createElement("span");
-				   
-				   
-				   role.textContent = Number(member.canManage) === 1
-				       ? "마스터 · " + member.roleName
-				       : member.roleName;
+               const role = document.createElement("span");
+               role.className = "workchat-group-member-role";
+               role.textContent = member.roleName || "직급 미정";
+               roleWrap.appendChild(role);
 
-				   row.append(name, role);
+               if (Number(member.canManage) === 1) {
+                   const masterBadge = document.createElement("span");
+                   masterBadge.className = "workchat-group-member-master";
+                   masterBadge.textContent = "마스터";
+                   roleWrap.appendChild(masterBadge);
+               }
+
+               row.append(name, roleWrap);
 
 				   if (activeRoomOwner && Number(member.canManage) !== 1) {
 

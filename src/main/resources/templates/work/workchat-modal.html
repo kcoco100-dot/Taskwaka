@@ -180,7 +180,6 @@
               <strong>팀채팅 시작</strong><small>여러 멤버와 대화</small>
             </button>
           </div>
-          <span class="workchat-empty-footnote">채팅방 생성 기능은 준비 중입니다.</span>
         </div>
       </div>
 
@@ -229,74 +228,73 @@
           <div class="workchat-chat-heading">
             <strong id="workchatActiveRoomTitle">채팅방</strong>
             <small id="workchatActiveRoomSubtitle">채팅방을 선택해 주세요.</small>
+          </div>
+          <div class="workchat-header-actions" role="group" aria-label="채팅방 관리">
             <button type="button" id="workchatMembersToggle" class="workchat-back-button" hidden>
-				참여자
-			</button>
+              참여자
+            </button>
             <button type="button" id="workchatRenameToggle" class="workchat-back-button" hidden>
-				이름 변경
-			</button>
-			<button type="button" id="workchatDirectLeaveToggle" class="workchat-back-button" hidden>
-			    1:1 나가기
-			</button>
+              이름 변경
+            </button>
+            <button type="button" id="workchatDirectLeaveToggle" class="workchat-back-button" hidden>
+              1:1 나가기
+            </button>
           </div>
         </div>
         
 		<div id="workchatRenamePanel" class="workchat-rename-panel" hidden>
-		    <label for="workchatRenameInput" class="workchat-form-label">
-		        새로운 그룹 이름
-		    </label>
-		
-		    <input type="text" id="workchatRenameInput" class="workchat-form-input"
-		           maxlength="15" placeholder="변경할 그룹 이름을 입력하세요">
-		    <div class="workchat-rename-actions">
-		        <button type="button" id="workchatRenameSave" class="workchat-confirm-button">
-		            저장
-		        </button>
-		
-		        <button type="button" id="workchatRenameCancel" class="workchat-back-button">
-		            취소
-		        </button>
-		    </div>
+            <div class="workchat-panel-shell workchat-panel-shell--compact">
+              <strong class="workchat-panel-title">채팅방 이름 변경</strong>
+              <label for="workchatRenameInput" class="workchat-form-label">
+                  새로운 그룹 이름
+              </label>
+              <input type="text" id="workchatRenameInput" class="workchat-form-input workchat-form-input--compact"
+                     maxlength="15" placeholder="변경할 그룹 이름을 입력하세요">
+              <div class="workchat-rename-actions workchat-rename-actions--center">
+                  <button type="button" id="workchatRenameSave" class="workchat-confirm-button workchat-confirm-button--normal">
+                      저장
+                  </button>
+                  <button type="button" id="workchatRenameCancel" class="workchat-back-button workchat-back-button--normal">
+                      취소
+                  </button>
+              </div>
+            </div>
 		</div>
 		
 		<div id="workchatMembersPanel" class="workchat-rename-panel" hidden>
-		
-		    <div class="workchat-rename-actions">
-		        <strong>그룹 참여자</strong>
-		        <button type="button" id="workchatInviteToggle" class="workchat-back-button" hidden>
-				    회원 초대
-				</button>
-				<button type="button" id="workchatLeaveToggle" class="workchat-back-button" hidden>
-				    그룹 나가기
-				</button>
-		        <button type="button" id="workchatMembersClose" class="workchat-back-button">
-		            닫기
-		        </button>
-		    </div>
-		    
-		    
-			<div id="workchatMembersList" class="workchat-group-members"></div>
-			
-			<div id="workchatInvitePanel" class="workchat-group-invite-panel"hidden>
-			    <label for="workchatInviteSearch" class="workchat-form-label">
-			        초대할 워크 회원
-			    </label>
-			
-			    <input type="text" id="workchatInviteSearch" class="workchat-form-input"
-			           placeholder="이름 또는 직급 검색" autocomplete="off">
-			
-			    <div id="workchatInviteCandidates" class="workchat-group-invite-list"></div>
-			
-			    <div class="workchat-group-invite-actions">
-			        <button type="button" id="workchatInviteSubmit" class="workchat-confirm-button" disabled>
-			            선택한 회원 초대
-			        </button>
-			
-			        <button type="button" id="workchatInviteCancel" class="workchat-back-button">
-			            취소
-			        </button>
-			    </div>
-			</div>
+            <div class="workchat-panel-shell">
+              <div class="workchat-panel-shell-header">
+                  <strong class="workchat-panel-title">그룹 참여자</strong>
+                  <div class="workchat-panel-shell-actions">
+                    <button type="button" id="workchatInviteToggle" class="workchat-back-button workchat-back-button--normal" hidden>
+                        회원 초대
+                    </button>
+                    <button type="button" id="workchatLeaveToggle" class="workchat-back-button workchat-back-button--normal" hidden>
+                        그룹 나가기
+                    </button>
+                    <button type="button" id="workchatMembersClose" class="workchat-back-button workchat-back-button--normal">
+                        닫기
+                    </button>
+                  </div>
+              </div>
+              <div id="workchatMembersList" class="workchat-group-members"></div>
+              <div id="workchatInvitePanel" class="workchat-group-invite-panel" hidden>
+                  <label for="workchatInviteSearch" class="workchat-form-label">
+                      초대할 워크 회원
+                  </label>
+                  <input type="text" id="workchatInviteSearch" class="workchat-form-input workchat-form-input--compact"
+                         placeholder="이름 또는 직급 검색" autocomplete="off">
+                  <div id="workchatInviteCandidates" class="workchat-group-invite-list"></div>
+                  <div class="workchat-group-invite-actions workchat-rename-actions--center">
+                      <button type="button" id="workchatInviteSubmit" class="workchat-confirm-button workchat-confirm-button--normal" disabled>
+                          선택한 회원 초대
+                      </button>
+                      <button type="button" id="workchatInviteCancel" class="workchat-back-button workchat-back-button--normal">
+                          취소
+                      </button>
+                  </div>
+              </div>
+            </div>
 		</div>
 		
         

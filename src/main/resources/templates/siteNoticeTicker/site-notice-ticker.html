@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="siteNoticeTicker" class="tw-site-notice-ticker" id="twSiteNoticeTicker" hidden
+     th:data-list-url="@{/member/api/site-notice-ticker}" th:data-detail-base="@{/service/notice/}">
+    <span class="tw-site-notice-label">공지사항</span>
+    <a class="tw-site-notice-current" id="twSiteNoticeCurrent" href="#" title="새 공지사항"></a>
+    <button type="button" class="tw-site-notice-expand" id="twSiteNoticeExpand"
+            aria-label="새 공지사항 목록 열기" aria-controls="twSiteNoticeDropdown" aria-expanded="false">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+        </svg>
+    </button>
+    <div class="tw-site-notice-dropdown" id="twSiteNoticeDropdown" hidden>
+        <div class="tw-site-notice-dropdown-head">
+            <strong>NEW 공지사항</strong>
+            <a th:href="@{/service/notice}">전체 보기</a>
+        </div>
+        <ul class="tw-site-notice-items" id="twSiteNoticeItems"></ul>
+    </div>
+</div>
+</body>
+</html>

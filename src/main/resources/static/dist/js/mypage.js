@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const detailAddress = document.getElementById("mypageDetailAddress");
         const addressValue = document.getElementById("mypageAddressValue");
         const addressStatus = document.getElementById("mypageAddressStatus");
+        const currentAddressBox = document.getElementById("mypageCurrentAddressBox");
         const saveButton = document.getElementById("mypageContactSave");
 
         const searchAddress = document.getElementById("mypageAddressSearch");
@@ -109,6 +110,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const clearAddress = document.getElementById("mypageAddressClear");
 
         const originalAddress = addressValue.value;
+        let isAddressDeletePending = false;
+
+        // 삭제 예정일 때는 동일 버튼이 '삭제 취소' 동작을 수행한다.
+        function setAddressDeletePending(pending) {
+            isAddressDeletePending = pending;
+            clearAddress.textContent = pending ? "삭제 취소" : "현재 주소 삭제";
+            clearAddress.setAttribute("aria-pressed", String(pending));
+        }
+
+        // 주소는 저장 전까지 DB에 반영하지 않고, 화면에만 예정 상태를 표시한다.
+        function showAddressStatus(message, isDeletePending = false) {
+            addressStatus.textContent = message;
+            addressStatus.classList.toggle("is-delete-pending", isDeletePending);
+            currentAddressBox.classList.toggle("is-delete-pending", isDeletePending);
+        }
 		
 		const addressUrl = section.dataset.updateUrl;
 
@@ -129,8 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     detailAddress.disabled = false;
 
                     updateAddress();
-
-                    addressStatus.textContent = "새 주소가 선택되었습니다. 저장 시 변경됩니다.";
+                    setAddressDeletePending(false);
+                    showAddressStatus("변경사항을 저장하면 새 주소로 변경됩니다.");
 
                     detailAddress.focus();
                 }
@@ -143,7 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 : "";
         }
 
-        detailAddress.addEventListener("input", updateAddress);
+        detailAddress.addEventListener("input", () => {
+            updateAddress();
+            if (baseAddress.value) showAddressStatus("변경사항을 저장하면 새 주소로 변경됩니다.");
+        });
 
         function resetAddress() {
             postcode.value = "";
@@ -152,23 +171,29 @@ document.addEventListener("DOMContentLoaded", () => {
             detailAddress.disabled = true;
         }
 
-        clearAddress.addEventListener("click", () => {
+        function restoreSavedAddress() {
+            resetAddress();
+            addressValue.value = originalAddress;
+            setAddressDeletePending(false);
+            showAddressStatus("주소를 변경하지 않으면 현재 등록된 주소가 유지됩니다.");
+        }
 
-            if (! confirm("등록된 주소를 삭제하시겠습니까?")) return;
+        clearAddress.addEventListener("click", () => {
+            if (isAddressDeletePending) {
+                // 아직 저장하지 않은 주소 삭제 예약만 취소한다.
+                restoreSavedAddress();
+                return;
+            }
+
+            if (!confirm("등록된 주소를 삭제하시겠습니까?")) return;
 
             resetAddress();
             addressValue.value = "";
-
-            addressStatus.textContent = "주소 삭제가 선택되었습니다. 저장 시 반영됩니다.";
+            setAddressDeletePending(true);
+            showAddressStatus("변경사항을 저장하면 현재 주소는 지워집니다.", true);
         });
 
-        cancelAddress.addEventListener("click", () => {
-
-            resetAddress();
-            addressValue.value = originalAddress;
-
-            addressStatus.textContent = "주소 변경을 취소했습니다. 기존 주소가 유지됩니다.";
-        });
+        cancelAddress.addEventListener("click", restoreSavedAddress);
 
 
         saveButton.addEventListener("click", async () => {

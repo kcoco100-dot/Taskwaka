@@ -1,0 +1,238 @@
+/* 프로젝트 조직도 헤더 모달 */
+.tw-org-overlay[hidden], .tw-org-panel[hidden] { display: none !important; }
+.tw-org-overlay, .tw-org-overlay * { box-sizing: border-box; }
+.tw-org-overlay { position: fixed; inset: 0; z-index: 20010; display: flex; justify-content: center;
+    align-items: center; padding: 24px; background: rgba(39,35,30,.44); backdrop-filter: blur(4px); }
+.tw-org-dialog { width: min(1000px, 100%); height: min(690px, calc(100dvh - 48px));
+    display: flex; flex-direction: column; overflow: hidden; border-radius: 22px;
+    border: 1px solid #eae5df; background: #fff; color: #42392f;
+    box-shadow: 0 22px 70px rgba(42,34,26,.26); }
+.tw-org-header { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 22px 9px; gap: 14px; }
+.tw-org-kicker { color: #899e7d; font-weight: 800; font-size: 11.3333px; letter-spacing: .14em; }
+.tw-org-header h2 { margin: 3px 0; font-size: 23.3333px; font-weight: 800; letter-spacing: -.045em; }
+.tw-org-header p { margin: 0; color: #998e81; font-size: 13.3333px; }
+.tw-org-close { width: 36px; height: 36px; border: 1px solid #eee7df; border-radius: 10px;
+    background: #faf9f7; font-size: 26.3333px; color: #74685d; cursor: pointer; }
+.tw-org-close:hover { background: #f0ebe5; }
+.tw-org-panel { display: grid; grid-template-columns: 250px minmax(0,1fr); flex: 1; min-height: 0; }
+.tw-org-project-picker { background: #fbfaf7; padding: 16px;
+    overflow-y: auto; min-width: 0; border-right: 1px solid #eee9e3; }
+.tw-org-project-picker label { display: block; font-size: 13.3333px; font-weight: 800; margin-bottom: 11px; }
+.tw-org-project-picker select { width: 100%; border-radius: 10px; border: 1px solid #e6e1d9;
+    background: #fff; color: #493e34; padding: 11px 12px; font: inherit; font-size: 14.3333px; }
+.tw-org-help { display: block; margin: 12px 0 17px; font-size: 12.3333px; line-height: 1.65; color: #978c7f; }
+.tw-org-main { min-width: 0; min-height: 0; overflow-y: auto; padding: 16px 18px; }
+.tw-org-main { display: flex; flex-direction: column; overflow: hidden; }
+.tw-org-status { padding: 8px 6px; font-size: 14.3333px; color: #8e8175; line-height: 1.7; }
+.tw-org-status:empty { display: none; }
+.tw-org-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+.tw-org-section-heading h3 { margin: 0; font-size: 18.3333px; font-weight: 800; }
+.tw-org-section-heading span { color: #819375; font-size: 13.3333px; font-weight: 800; }
+.tw-org-member-list { display: flex; flex-direction: column; gap: 7px; }
+.tw-org-overlay button:focus-visible, .tw-org-overlay select:focus-visible { outline: 2px solid #8aa578; outline-offset: 2px; }
+@media (max-width: 700px) { .tw-org-overlay {padding: 10px;} .tw-org-dialog {height: calc(100dvh - 20px); border-radius: 14px;}
+    .tw-org-header {padding: 12px 16px 7px;}
+    .tw-org-panel {display: flex; flex-direction: column;} .tw-org-project-picker { flex: 0 0 auto;
+    max-height: 40%; overflow-y:auto; border-right:0; border-bottom:1px solid #eee9e3; padding:15px; }
+    .tw-org-project-picker {max-height: 38%;} .tw-org-tree-scroll {min-height:160px;} }
+
+/* 프로젝트 조직도: 프로젝트 > 업무 > 하위업무 */
+.tw-org-dialog { padding: 0; margin: 0; min-height: 0; justify-content: flex-start; }
+.tw-org-member-heading { margin: 17px 0 9px; }
+.tw-org-member-heading h3 { font-size: 14.3333px; }
+.tw-org-person { display: flex; flex-direction: column; gap: 5px;
+    padding: 9px 11px; background: #fff; border: 1px solid #efeae3; border-radius: 9px; }
+.tw-org-person-line { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tw-org-person-line strong { font-size: 13.3333px; font-weight: 750; overflow-wrap: anywhere; }
+.tw-org-person-line .tw-org-role { margin: 0; }
+.tw-org-person-tasks { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; font-size: 11.3333px; color: #81776b; line-height: 1.5; }
+.tw-org-main > .tw-org-status { flex: 0 0 auto; margin: 0; }
+.tw-org-tree-scroll { flex: 1; min-height: 0; overflow: auto; padding: 14px 12px 20px; }
+.tw-org-tree { display: flex; flex-direction: column; align-items: center; width: 100%; min-width: 0; }
+.tw-org-tree-root { position: relative; display: flex; justify-content: center; }
+.tw-org-tree-root:has(+ .tw-org-task-branches)::after { content: ''; position: absolute;
+    left: 50%; top: 100%; height: 24px; border-left: 1px solid #aab6a4; }
+.tw-org-tree-card { width: 100%; display: flex; flex-direction: column; gap: 7px;
+    padding: 15px; background: #fff; border: 1px solid #bfd9c2; border-radius: 12px;
+    text-align: left; white-space: normal; overflow-wrap: anywhere; }
+.tw-org-tree-card--project { border-color: #80b48b; background: #eff7ef; width: 220px; }
+.tw-org-tree-card--task { border-color: #a2c7ab; background: #f8fbf8; }
+.tw-org-tree-card--subtask { border-color: #d2dccb; background: #fff; }
+.tw-org-tree-label { font-size: 11.3333px; color: #6e8e73; font-weight: 800; }
+.tw-org-tree-title { font-size: 14.3333px; color: #394c3e; line-height: 1.45; }
+.tw-org-tree-assignee { font-size: 12.3333px; color: #746b61; line-height: 1.55; }
+.tw-org-tree-info { color: #8b9986; font-size: 11.3333px; }
+.tw-org-task-branches { position: relative; display: grid; width: 100%; align-items: start;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
+    gap: 24px 17px; margin-top: 24px; padding-top: 24px; }
+.tw-org-task-branches::before { content: ''; position: absolute; top: 0;
+    left: var(--tw-line-left, 12%); right: var(--tw-line-right, 12%);
+    border-top: 1px solid #aab6a4; }
+.tw-org-task-branch { position: relative; min-width: 0; }
+.tw-org-task-branch::before { content: ''; position: absolute; left: 50%; top: -24px;
+    height: 24px; border-left: 1px solid #aab6a4; }
+.tw-org-task-toggle { display: block; width: 100%; margin: 0; padding: 0; border: 0;
+    background: none; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.tw-org-task-toggle:hover .tw-org-tree-card, .tw-org-task-toggle[aria-expanded="true"] .tw-org-tree-card {
+    border-color: #719c7b; background: #f1f8f2; box-shadow: 0 3px 13px rgba(82,116,87,.09); }
+.tw-org-task-toggle .tw-org-tree-info::after { content: '  ·  눌러서 펼치기'; color: #60866a; }
+.tw-org-task-toggle[aria-expanded="true"] .tw-org-tree-info::after { content: '  ·  눌러서 접기'; }
+/* 업무를 선택하면 하위업무를 해당 업무 바로 아래에 세로 배치 */
+
+.tw-org-task-branches.is-wrapped .tw-org-task-branch:not(.is-first-row)::before { display: none !important; }
+.tw-org-task-branches.is-one-top::before { display: none; }
+.tw-org-task-branches:has(> .tw-org-task-branch:only-child)::before { display: none; }
+.tw-org-tree-empty { margin: 23px 0; padding: 10px; color: #877e73; font-size: 13.3333px; }
+
+/* 기존 페이지 전역 section 및 header 스타일 영향 방지 */
+#organizationModal { margin: 0; max-width: none; min-height: 0; }
+#organizationModal .tw-org-dialog { position: relative; top: auto; bottom: auto; margin: 0; }
+#organizationModal .tw-org-header { min-height: 0; }
+#organizationModal .tw-org-project-picker select { min-height: 0; height: auto; }
+#organizationModal .tw-org-role { font-size: 12.3333px; font-weight: 700; color: #617953; }
+#organizationModal .tw-org-tree-scroll { padding-top: 10px; }
+
+
+/* 1-4: 조직도 모달 화면 확장 */
+#organizationModal { padding: 12px; }
+#organizationModal .tw-org-dialog {
+    width: min(1560px, 100%);
+    height: min(900px, calc(100dvh - 24px));
+}
+#organizationModal .tw-org-panel { grid-template-columns: 260px minmax(0,1fr); }
+
+/* 프로젝트 선택은 고정하고 참여 인원 목록만 스크롤 */
+#organizationModal .tw-org-project-picker {
+    display: flex; flex-direction: column; min-height: 0;
+    overflow: hidden; padding: 0;
+}
+#organizationModal .tw-org-project-filter {
+    flex: 0 0 auto; padding: 17px 15px 16px;
+    border-bottom: 1px solid #e7e5df;
+}
+#organizationModal .tw-org-project-filter label { margin-bottom: 11px; }
+#organizationModal .tw-org-members-section {
+    display: flex; flex-direction: column; flex: 1; min-height: 0;
+    padding: 14px 10px 12px 15px;
+}
+#organizationModal .tw-org-member-heading { flex: 0 0 auto; margin: 0 6px 10px 0; }
+#organizationModal .tw-org-member-scroll {
+    flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+    overscroll-behavior: contain; scrollbar-gutter: stable;
+}
+#organizationModal .tw-org-member-list { padding: 1px 5px 5px 0; }
+#organizationModal .tw-org-member-scroll:focus-visible {
+    outline: 2px solid #8aa578; outline-offset: -2px;
+}
+
+/* 모달 너비가 좁아지면 업무 카드를 자동 줄바꿈 */
+@media (max-width: 700px) {
+    #organizationModal { padding: 8px; }
+    #organizationModal .tw-org-dialog { height: calc(100dvh - 16px); }
+    #organizationModal .tw-org-panel { display: flex; flex-direction: column; }
+    #organizationModal .tw-org-project-picker {
+        flex: 0 0 auto; height: min(310px, 42dvh); max-height: none;
+        border-right: 0; border-bottom: 1px solid #eee9e3;
+    }
+    #organizationModal .tw-org-project-filter { padding: 12px 15px; }
+    #organizationModal .tw-org-members-section { padding-top: 10px; }
+    #organizationModal .tw-org-main { flex: 1; min-height: 0; }
+}
+
+/* 1-5: 상단 닫기 버튼, 글자 크기, 분기 트리 정리 */
+#organizationModal .tw-org-dialog { font-size: 17.3333px; }
+#organizationModal .tw-org-header { padding-right: 78px; }
+#organizationModal .tw-org-close {
+    position: absolute; top: 11px; right: 16px; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; padding: 0;
+    background: #fff; border: 1px solid #dce6d8; border-radius: 12px;
+    color: #6e8168; box-shadow: 0 2px 5px rgba(45,65,45,.05);
+    transition: background .15s ease, border-color .15s ease;
+}
+#organizationModal .tw-org-close:hover { background: #eaf1e7; border-color: #90af86; color: #435c3b; }
+#organizationModal .tw-org-close svg { flex: 0 0 auto; }
+#organizationModal .tw-org-close:focus-visible { outline: 2px solid #78996d; outline-offset: 3px; }
+#organizationModal .tw-org-main .tw-org-tree-scroll { overflow-x: hidden; }
+@media (max-width: 700px) {
+    #organizationModal .tw-org-close { top: 9px; right: 11px; }
+    #organizationModal .tw-org-header { padding-right: 62px; }
+    #organizationModal .tw-org-task-branches { grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr)); }
+}
+
+/* 1-6: 하위업무 세로 펼치기 및 마지막 연결선 끝 처리 */
+#organizationModal .tw-org-task-branches {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    gap: 30px 18px;
+}
+#organizationModal .tw-org-subtask-list {
+    position: relative; display: flex; flex-direction: column;
+    gap: 17px; margin-left: 12px; padding: 18px 0 0 18px;
+}
+#organizationModal .tw-org-subtask-list::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    height: 18px; border-left: 1px solid #aab6a4;
+}
+#organizationModal .tw-org-subtask-item { position: relative; min-width: 0; }
+#organizationModal .tw-org-subtask-item::before {
+    content: ''; position: absolute; top: -12px; bottom: -12px;
+    left: -18px; border-left: 1px solid #aab6a4;
+}
+#organizationModal .tw-org-subtask-item:last-child::before { bottom: 50%; }
+#organizationModal .tw-org-subtask-item::after {
+    content: ''; position: absolute; top: 50%; left: -18px;
+    width: 18px; border-top: 1px solid #aab6a4;
+}
+#organizationModal .tw-org-subtask-list[hidden] { display: none !important; }
+#organizationModal .tw-org-subtask-item .tw-org-tree-card {
+    min-height: 0; padding: 8px 12px; gap: 3px;
+}
+
+
+/* 1-8: 스크롤바 발생 시 조직도 너비와 카드 배치 유지 */
+#organizationModal .tw-org-tree-scroll {
+    overflow-y: auto; overflow-x: hidden;
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain;
+}
+#organizationModal .tw-org-tree {
+    width: 100%; min-width: 0;
+}
+#organizationModal .tw-org-task-branches {
+    min-width: 0;
+}
+
+/* 업무 및 하위업무 진행 상태 */
+#organizationModal .tw-org-tree-card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 6px; min-width: 0;
+}
+#organizationModal .tw-org-state {
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto; padding: 2px 5px; border-radius: 5px;
+    font-size: 11px; font-weight: 700; line-height: 1.45;
+    white-space: nowrap; background: #f1f1ed; color: #77746e;
+}
+#organizationModal .tw-org-state--0 { background: #f0efe8; color: #7b7868; }
+#organizationModal .tw-org-state--1 { background: #e8f2fb; color: #396d97; }
+#organizationModal .tw-org-state--2 { background: #fff4df; color: #946b27; }
+#organizationModal .tw-org-state--3 { background: #DCEBDD; color: #41694B; }
+
+/* 1-12: 프로젝트명은 줄바꿈 없이 내용만큼 카드 너비 확장 */
+#organizationModal .tw-org-tree-card--project {
+    width: max-content;
+    min-width: 220px;
+    max-width: none;
+}
+#organizationModal .tw-org-tree-card--project .tw-org-tree-title {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: keep-all;
+}
+/* 매우 긴 프로젝트명은 카드가 잘리지 않도록 조직도 영역에서만 가로 스크롤 */
+#organizationModal .tw-org-main .tw-org-tree-scroll {
+    overflow-x: auto;
+}
+

@@ -27,8 +27,15 @@
 		</div>
 		
 		
+		<th:block th:if="${!inWork and area != 'admin' and #authentication != null and #authentication.principal instanceof T(com.tk.app.security.CustomUserDetails)}">
+			<th:block th:replace="~{siteNoticeTicker/site-notice-ticker :: siteNoticeTicker}"></th:block>
+		</th:block>
 		<div class="team-header-right">
 		    <th:block th:replace="${actions}"></th:block>
+		    <button type="button" id="organizationToggle" class="header-action-button" th:if="${inWork}"
+                aria-controls="organizationModal" aria-expanded="false" title="프로젝트 조직도 열기">
+                <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>프로젝트</span>
+            </button>
 		    <button type="button" id="workchatToggle" class="header-action-button header-action-button--chat" th:if="${inWork}" aria-controls="workchatModal" aria-expanded="false" title="워크챗 열기"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 0 1-8 8c-1 0-2.1-.2-3.1-.6L4 20l1-4.2A8 8 0 1 1 20 11.5Z"/></svg><span>워크챗</span><span id="workchatHeaderUnread" class="workchat-header-unread" hidden aria-label="안 읽은 메시지 0개"></span></button>
 		
 		    <div class="profile-dropdown"
@@ -73,14 +80,19 @@
 		</div>
 	</div>
 
-<link th:if="${inWork}" rel="stylesheet" th:href="@{/dist/css/workchat-modal.css(v=20)}">
+<link th:if="${inWork}" rel="stylesheet" th:href="@{/dist/css/workchat-modal.css(v=24)}">
 <link rel="stylesheet" th:href="@{/dist/css/header-profile.css(v=9)}">
+<link th:if="${inWork}" rel="stylesheet" th:href="@{/dist/css/organization-modal.css(v=6)}">
+<link th:if="${!inWork and area != 'admin'}" rel="stylesheet" th:href="@{/dist/css/site-notice-ticker.css(v=1)}">
 
 <th:block th:if="${inWork}">
 	<th:block th:replace="~{work/workchat-modal :: workchatModal}"></th:block>
+	<th:block th:replace="~{organization/organization-modal :: organizationModal}"></th:block>
 </th:block>
 
 <script type="text/javascript" th:src="@{/dist/js/header.js}"></script>
-<script th:if="${inWork}" th:src="@{/dist/js/workchat-modal.js(v=19)}"></script>
+<script th:if="${inWork}" th:src="@{/dist/js/workchat-modal.js(v=20)}"></script>
+<script th:if="${inWork}" th:src="@{/dist/js/organization-modal.js(v=6)}"></script>
+<script th:if="${!inWork and area != 'admin'}" th:src="@{/dist/js/site-notice-ticker.js(v=1)}"></script>
 </th:block>
 </html>

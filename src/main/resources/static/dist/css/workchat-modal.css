@@ -1715,3 +1715,486 @@ body > #workchatModal .workchat-member-overview {
     z-index: 1;
 }
 #workchatToggle .workchat-header-unread[hidden] { display: none; }
+
+
+
+/* ======================================================================
+ * 워크챗 모달 UX 정리 (시각 요소 전용, 기존 JS/API 및 ID 유지)
+ * 이전 CSS에서 높이/여백을 !important로 강제하므로 동일 모달에만 범위 한정.
+ * ====================================================================== */
+body > #workchatModal {
+  --wc-text: #413a32;
+  --wc-muted: #80786c;
+  --wc-border: #e9e5dc;
+  --wc-surface: #fbfaf7;
+  --wc-green: #668358;
+}
+
+/* 1. 좌/우 공통 헤더: 멤버 헤더와 채팅방 헤더 같은 높이 */
+body > #workchatModal .workchat-main .workchat-view--members .workchat-chat-header,
+body > #workchatModal .workchat-main .workchat-view--chats .workchat-chat-header {
+  box-sizing: border-box;
+  flex: 0 0 84px !important;
+  height: 84px !important;
+  min-height: 84px !important;
+  padding: 14px 26px !important;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--wc-border);
+}
+body > #workchatModal .workchat-view--chats .workchat-chat-heading {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+body > #workchatModal .workchat-view--chats .workchat-chat-heading strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 750;
+  line-height: 1.35;
+  color: var(--wc-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body > #workchatModal .workchat-view--chats .workchat-chat-heading small {
+  display: block;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--wc-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body > #workchatModal .workchat-member-header .workchat-chat-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+body > #workchatModal .workchat-member-header .workchat-chat-heading strong {
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: .14em;
+  color: #75936d;
+}
+
+/* 2. 참여자/이름변경 버튼을 헤더 제목 블록에서 완전히 분리 */
+body > #workchatModal .workchat-header-actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-left: auto;
+  padding-left: 8px;
+}
+body > #workchatModal .workchat-header-actions .workchat-back-button {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 0;
+  height: 34px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid #dedfd6;
+  border-radius: 8px;
+  background: #fff;
+  color: #5e6756;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.4;
+  transition: background-color .16s, border-color .16s;
+}
+body > #workchatModal .workchat-header-actions .workchat-back-button:hover {
+  background: #f2f6ee;
+  border-color: #cbd9c4;
+}
+body > #workchatModal .workchat-header-actions #workchatDirectLeaveToggle {
+  color: #a8574c;
+  border-color: #ead5d0;
+}
+body > #workchatModal .workchat-header-actions #workchatDirectLeaveToggle:hover {
+  background: #fff2ef;
+}
+
+/* 3. 두 패널 모두 같은 카드/라벨/버튼 규격 */
+body > #workchatModal .workchat-rename-panel {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--wc-border);
+  background: var(--wc-surface);
+}
+body > #workchatModal .workchat-panel-shell {
+  width: 100%;
+  max-width: 860px;
+  margin-inline: auto;
+}
+body > #workchatModal .workchat-panel-shell--compact {
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+}
+body > #workchatModal .workchat-panel-title {
+  display: block;
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--wc-text);
+}
+body > #workchatModal .workchat-panel-shell--compact .workchat-panel-title {
+  text-align: center;
+  margin-bottom: 16px;
+}
+body > #workchatModal .workchat-panel-shell--compact .workchat-form-label {
+  margin-bottom: 8px;
+  text-align: left;
+  color: #655d52;
+}
+body > #workchatModal .workchat-form-input--compact {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  max-width: 400px;
+  margin-inline: auto;
+  border: 1px solid #d9ddd3;
+  background: #fff;
+  border-radius: 9px;
+  font-size: 13px;
+}
+body > #workchatModal .workchat-rename-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 15px;
+}
+body > #workchatModal .workchat-rename-actions--center {
+  justify-content: center;
+}
+body > #workchatModal .workchat-confirm-button--normal,
+body > #workchatModal .workchat-back-button--normal {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 82px;
+  height: 36px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
+  white-space: nowrap;
+}
+body > #workchatModal .workchat-confirm-button--normal {
+  border: 1px solid #cbd9c3;
+  background: #e5efdf;
+  color: #456b3d;
+  cursor: pointer;
+}
+body > #workchatModal .workchat-confirm-button--normal:hover:not(:disabled) {
+  background: #d8e8d1;
+}
+body > #workchatModal .workchat-confirm-button--normal:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+body > #workchatModal .workchat-back-button--normal {
+  border: 1px solid #e3ded7;
+  background: #fff;
+  color: #776c5f;
+}
+
+/* 4. 참여자 목록 — 이름/직급/위임 버튼을 줄마다 같은 위치에 */
+body > #workchatModal .workchat-panel-shell-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+body > #workchatModal .workchat-panel-shell-header .workchat-panel-title {
+  margin: 0;
+}
+body > #workchatModal .workchat-panel-shell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+body > #workchatModal .workchat-panel-shell-actions .workchat-back-button--normal {
+  min-width: 0;
+  padding-inline: 12px;
+}
+body > #workchatModal #workchatLeaveToggle {
+  color: #a8574c;
+  border-color: #eddad4;
+  background: #fff;
+}
+body > #workchatModal #workchatLeaveToggle:hover {
+  background: #fff2ef;
+}
+body > #workchatModal .workchat-group-members {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 0;
+  max-height: min(38vh, 295px);
+  padding-right: 3px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+body > #workchatModal .workchat-group-member {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(95px, auto) auto;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 1px solid #eae7e0;
+  border-radius: 11px;
+  background: #fff;
+}
+body > #workchatModal .workchat-group-member strong {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 750;
+  color: #4c453c;
+  overflow-wrap: anywhere;
+}
+body > #workchatModal .workchat-group-member span {
+  display: inline-flex;
+  justify-content: center;
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: #f0f3ed;
+  color: #65745e;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+/* JS가 동적으로 생성하는 마스터 위임 버튼 — 전용 디자인 */
+body > #workchatModal .workchat-master-transfer {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  width: auto;
+  height: 33px;
+  min-width: 88px;
+  padding: 0 12px;
+  border: 1px solid #c9d8c2;
+  border-radius: 8px;
+  background: #f0f6eb;
+  color: #527249;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .16s, border-color .16s, color .16s;
+}
+body > #workchatModal .workchat-master-transfer:hover:not(:disabled) {
+  background: #e1edda;
+  border-color: #a9c39d;
+  color: #3e6335;
+}
+body > #workchatModal .workchat-master-transfer:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+body > #workchatModal .workchat-master-transfer:focus-visible,
+body > #workchatModal .workchat-rename-panel button:focus-visible {
+  outline: 2px solid #789968;
+  outline-offset: 2px;
+}
+body > #workchatModal .workchat-group-invite-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--wc-border);
+}
+body > #workchatModal .workchat-group-invite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+}
+body > #workchatModal .workchat-group-invite-actions .workchat-confirm-button--normal {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+  /* 모바일에서는 두 헤더 모두 같은 기본 높이, 채팅방 액션은 다음 줄 */
+  body > #workchatModal .workchat-main .workchat-view--members .workchat-chat-header {
+    flex: 0 0 60px !important;
+    min-height: 60px !important;
+    height: 60px !important;
+    padding: 12px 16px !important;
+  }
+  body > #workchatModal .workchat-main .workchat-view--chats .workchat-chat-header {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 60px !important;
+    padding: 12px 16px !important;
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 7px 11px;
+  }
+  body > #workchatModal .workchat-view--chats .workchat-chat-heading strong {
+    font-size: 15px;
+  }
+  body > #workchatModal .workchat-view--chats .workchat-chat-heading small {
+    font-size: 11px;
+  }
+  body > #workchatModal .workchat-header-actions {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 6px;
+    margin: 2px 0 0;
+    padding: 0;
+  }
+  body > #workchatModal .workchat-header-actions .workchat-back-button {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+  body > #workchatModal .workchat-rename-panel {
+    padding: 16px 14px;
+  }
+  body > #workchatModal .workchat-panel-shell--compact {
+    max-width: 100%;
+  }
+  body > #workchatModal .workchat-panel-title {
+    font-size: 15px;
+  }
+  body > #workchatModal .workchat-group-member {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px 9px;
+    padding: 9px 10px;
+  }
+  body > #workchatModal .workchat-group-member .workchat-master-transfer {
+    grid-column: 1 / -1;
+    justify-self: end;
+    height: 30px;
+  }
+  body > #workchatModal .workchat-panel-shell-actions {
+    justify-content: flex-start;
+  }
+  body > #workchatModal .workchat-group-invite-panel .workchat-form-input--compact {
+    max-width: 100%;
+  }
+}
+
+/* 2026-11-01: 그룹 참여자 우측 정보 정렬 — 역할 바로 옆에 위임 버튼 */
+body > #workchatModal #workchatMembersList .workchat-group-member {
+  width: calc(100% - 32px);
+  max-width: 770px;
+  margin-inline: auto;
+  grid-template-columns: minmax(0, 1fr) 42px 100px;
+  column-gap: 8px;
+  row-gap: 6px;
+  padding: 10px 14px;
+}
+body > #workchatModal #workchatMembersList .workchat-group-member-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: max-content;
+  max-width: none;
+  flex-wrap: nowrap;
+  justify-self: start;
+  overflow: visible;
+}
+body > #workchatModal #workchatMembersList .workchat-group-member-role,
+body > #workchatModal #workchatMembersList .workchat-group-member-master {
+  flex: 0 0 auto;
+  display: inline-flex;
+  width: auto;
+  max-width: none;
+  justify-self: auto;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+body > #workchatModal #workchatMembersList .workchat-group-member-role {
+  background: #f0f3ed;
+  color: #65745e;
+}
+body > #workchatModal #workchatMembersList .workchat-group-member-master {
+  padding-inline: 7px;
+  background: #e6efdf;
+  color: #547148;
+  border: 1px solid #d4e3cb;
+  font-size: 10px;
+}
+body > #workchatModal #workchatMembersList .workchat-master-transfer {
+  grid-column: 3;
+  justify-self: end;
+}
+/* 모바일에서도 역할과 위임 버튼을 한 줄에 고정하되 이름 칸만 유연하게 축소 */
+@media (max-width: 700px) {
+  body > #workchatModal #workchatMembersList .workchat-group-member {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 42px 92px;
+    column-gap: 6px;
+    padding: 9px 11px;
+  }
+  body > #workchatModal #workchatMembersList .workchat-group-member-meta {
+    width: max-content;
+    min-width: 0;
+  }
+  body > #workchatModal #workchatMembersList .workchat-master-transfer {
+    grid-column: 3;
+    justify-self: end;
+    min-width: 84px;
+  }
+}
+@media (max-width: 380px) {
+  body > #workchatModal #workchatMembersList .workchat-group-member {
+    grid-template-columns: minmax(0, 1fr) 40px 90px;
+    column-gap: 5px;
+    padding-inline: 8px;
+  }
+  body > #workchatModal #workchatMembersList .workchat-group-member-meta {
+    width: max-content;
+    gap: 4px;
+  }
+  body > #workchatModal #workchatMembersList .workchat-group-member-role,
+  body > #workchatModal #workchatMembersList .workchat-group-member-master {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+}

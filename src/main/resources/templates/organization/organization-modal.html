@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="organizationModal" class="tw-org-overlay" id="organizationModal" hidden
+     th:attr="data-domain-key=${domainKey != null ? domainKey : workspace.domainKey}">
+    <div class="tw-org-dialog" role="dialog" aria-modal="true" aria-labelledby="twOrgTitle" tabindex="-1">
+        <div class="tw-org-header">
+            <div>
+                <span class="tw-org-kicker">TASKWAKA WORKSPACE</span>
+                <h2 id="twOrgTitle">프로젝트 조직도</h2>
+                <p>참여 중인 프로젝트의 업무 조직도와 참여 인원을 확인하세요.</p>
+            </div>
+            <button type="button" class="tw-org-close" id="twOrgClose" aria-label="프로젝트 조직도 닫기" title="닫기">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="tw-org-panel" id="twOrgProjectPanel" >
+            <aside class="tw-org-project-picker">
+                <div class="tw-org-project-filter">
+                    <label for="twOrgProjectSelect">내가 참여한 프로젝트</label>
+                    <select id="twOrgProjectSelect"><option value="">프로젝트 불러오는 중...</option></select>
+                </div>
+                <div class="tw-org-members-section">
+                    <div class="tw-org-section-heading tw-org-member-heading">
+                        <h3>프로젝트 참여 인원</h3><span id="twOrgMemberCount"></span>
+                    </div>
+                    <div class="tw-org-member-scroll" id="twOrgMemberScroll" role="region"
+                         aria-label="프로젝트 참여 인원 목록" tabindex="0">
+                        <div class="tw-org-member-list" id="twOrgMembers"></div>
+                    </div>
+                </div>
+            </aside>
+            <div class="tw-org-main">
+                <div class="tw-org-section-heading">
+                    <h3 id="twOrgProjectName">프로젝트 업무 조직도</h3>
+                    <span id="twOrgTaskCount"></span>
+                </div>
+                <p class="tw-org-status" id="twOrgMemberStatus">프로젝트를 선택해 주세요.</p>
+                <div class="tw-org-tree-scroll">
+                    <div class="tw-org-tree" id="twOrgTree"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

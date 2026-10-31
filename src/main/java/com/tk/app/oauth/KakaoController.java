@@ -85,8 +85,8 @@ public class KakaoController {
 
     @GetMapping("/oauth/kakao/callback")
     public ResponseEntity<String> kakaoCallback(
-            @RequestParam(required = false) String code,
-            @RequestParam(required = false) String state,
+            @RequestParam(name = "code", required = false) String code,
+            @RequestParam(name = "state",required = false) String state,
             HttpSession session,
             HttpServletRequest request,
             HttpServletResponse response) {

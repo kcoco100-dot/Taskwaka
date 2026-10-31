@@ -564,7 +564,8 @@
 
     <update id="withdrawMyMember" parameterType="Long">
         UPDATE members
-        SET status = 2
+        SET status = 2,
+            withdrawn = SYSDATE
         WHERE member_id = #{memberId}
           AND status = 0
     </update>

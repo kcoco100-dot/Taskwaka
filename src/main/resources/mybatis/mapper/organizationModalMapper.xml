@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.OrganizationModalMapper">
+
+	<!-- 로그인 회원의 활성 워크 확인 -->
+	<select id="findActiveWorkId" parameterType="OrganizationModalDto" resultType="Long">
+		SELECT w.workspace_id
+		FROM workspaces w
+		JOIN workspace_domains wd ON w.workspace_id = wd.workspace_id
+		JOIN workspace_members wm ON w.workspace_id = wm.workspace_id
+		JOIN members m ON wm.member_id = m.member_id
+		WHERE wd.domain_key = #{domainKey}
+			AND wd.active = 'Y'
+			AND w.status IN (0, 1)
+			AND wm.member_id = #{memberId}
+			AND wm.status = 0
+			AND wm."LEFT" IS NULL
+			AND m.status = 0
+	</select>
+
+	<!-- 본인이 참여 중인 프로젝트 -->
+	<select id="findMyProjects" parameterType="OrganizationModalDto" resultType="OrganizationModalDto">
+		SELECT p.project_id projectId, p.subject,
+			TO_CHAR(p.start_at, 'YYYY-MM-DD') startAt,
+			TO_CHAR(p."END", 'YYYY-MM-DD') endAt
+		FROM projects p
+		JOIN project_members pm ON p.project_id = pm.project_id
+		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+		WHERE p.workspace_id = #{workId}
+			AND p.deleted IS NULL
+			AND pm.status = 0
+			AND pm."LEFT" IS NULL
+			AND wm.member_id = #{memberId}
+			AND wm.status = 0
+			AND wm."LEFT" IS NULL
+		ORDER BY p.project_id DESC
+	</select>
+
+	<!-- 프로젝트 상세 요청 시 권한 재검사 -->
+	<select id="countAccessibleProject" parameterType="OrganizationModalDto" resultType="int">
+		SELECT COUNT(*)
+		FROM projects p
+		JOIN project_members pm ON p.project_id = pm.project_id
+		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+		WHERE p.workspace_id = #{workId}
+			AND p.project_id = #{projectId}
+			AND p.deleted IS NULL
+			AND pm.status = 0
+			AND pm."LEFT" IS NULL
+			AND wm.member_id = #{memberId}
+			AND wm.status = 0
+			AND wm."LEFT" IS NULL
+	</select>
+
+	<!-- 프로젝트 전체 참여 인원 -->
+	<select id="findProjectMembers" parameterType="OrganizationModalDto" resultType="OrganizationModalDto">
+		SELECT pm.project_member_id projectMemberId, md.name, pm.role
+		FROM project_members pm
+		JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+		JOIN members m ON wm.member_id = m.member_id
+		JOIN member_details md ON wm.member_id = md.member_id
+		WHERE pm.project_id = #{projectId}
+			AND pm.status = 0
+			AND pm."LEFT" IS NULL
+			AND wm.workspace_id = #{workId}
+			AND wm.status = 0
+			AND wm."LEFT" IS NULL
+			AND m.status = 0
+		ORDER BY pm.role DESC, md.name ASC
+	</select>
+
+	<!-- 프로젝트 업무 목록 -->
+	<select id="findProjectTasks" parameterType="OrganizationModalDto" resultType="OrganizationTaskDto">
+		SELECT t.task_id taskId, t.project_member_id projectMemberId,
+			t.title, t.status, md.name assigneeName
+		FROM tasks t
+		LEFT JOIN project_members pm ON t.project_member_id = pm.project_member_id
+		LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+		LEFT JOIN member_details md ON wm.member_id = md.member_id
+		WHERE t.project_id = #{projectId}
+			AND t.deleted IS NULL
+		ORDER BY t.task_id
+	</select>
+
+	<!-- 각 업무의 하위업무 목록 -->
+	<select id="findProjectSubTasks" parameterType="OrganizationModalDto" resultType="OrganizationTaskDto">
+		SELECT st.sub_task_id subTaskId, st.task_id parentTaskId,
+			st.project_member_id projectMemberId, st.title, st.status, md.name assigneeName
+		FROM sub_tasks st
+		JOIN tasks t ON st.task_id = t.task_id
+		LEFT JOIN project_members pm ON st.project_member_id = pm.project_member_id
+		LEFT JOIN workspace_members wm ON pm.workspace_member_id = wm.workspace_member_id
+		LEFT JOIN member_details md ON wm.member_id = md.member_id
+		WHERE st.project_id = #{projectId}
+			AND t.project_id = #{projectId}
+			AND t.deleted IS NULL
+			AND st.deleted IS NULL
+		ORDER BY st.task_id, st.sub_task_id
+	</select>
+
+	<!-- 업무 추가 참여자 -->
+	<select id="findTaskMembers" parameterType="OrganizationModalDto" resultType="OrganizationTaskDto">
+		SELECT tm.project_member_id projectMemberId, t.task_id taskId, t.title
+		FROM task_members tm
+		JOIN tasks t ON tm.task_id = t.task_id
+		WHERE t.project_id = #{projectId}
+			AND t.deleted IS NULL
+		ORDER BY t.task_id
+	</select>
+
+	<!-- 하위업무 추가 참여자 -->
+	<select id="findSubTaskMembers" parameterType="OrganizationModalDto" resultType="OrganizationTaskDto">
+		SELECT sm.project_member_id projectMemberId, st.sub_task_id subTaskId, st.title
+		FROM sub_task_members sm
+		JOIN sub_tasks st ON sm.sub_task_id = st.sub_task_id
+		JOIN tasks t ON st.task_id = t.task_id
+		WHERE st.project_id = #{projectId}
+			AND t.project_id = #{projectId}
+			AND t.deleted IS NULL
+			AND st.deleted IS NULL
+		ORDER BY st.sub_task_id
+	</select>
+
+</mapper>

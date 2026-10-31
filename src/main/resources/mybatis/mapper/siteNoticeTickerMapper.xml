@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.siteNoticeTicker.SiteNoticeTickerMapper">
+
+    <!-- 기존 SITE_NOTICE 공개(1) / NEW(등록 후 3일 이내) 정책 재사용 -->
+    <select id="findNewNotices" resultType="com.tk.app.siteNoticeTicker.SiteNoticeTickerDto">
+        SELECT notice_id noticeId, title
+        FROM site_notice
+        WHERE status = 1
+          AND created BETWEEN SYSDATE - 3 AND SYSDATE
+        ORDER BY created DESC, notice_id DESC
+        FETCH FIRST 20 ROWS ONLY
+    </select>
+
+</mapper>

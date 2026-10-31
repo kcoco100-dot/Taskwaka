@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>마이페이지 | TASKWAKA</title>
     <th:block th:replace="~{layout/header :: headerFooterAssets}"></th:block>
-    <link rel="stylesheet" th:href="@{/dist/css/mypage.css(v=12)}">
+    <link rel="stylesheet" th:href="@{/dist/css/mypage.css(v=16)}">
     <link rel="stylesheet" th:href="@{/dist/css/sidebar.css}">
 </head>
 
@@ -244,7 +244,7 @@
 	
 			    <div class="mypage-card-heading">
 			        <h2>연락처 및 주소 수정</h2>
-			        <p>연락처와 선택 입력 항목인 주소를 관리합니다.</p>
+			        <p>연락처와 주소를 관리합니다.</p>
 			    </div>
 			    <div class="mypage-form-grid">
 			        <div class="mypage-field mypage-field-full">
@@ -257,12 +257,12 @@
 			            <h3>주소</h3>
 			            <span class="mypage-optional">선택 입력</span>
 			        </div>
-                    <div class="mypage-current-address">
+                    <div class="mypage-current-address" id="mypageCurrentAddressBox">
                         <strong>현재 등록된 주소</strong>
                         <span id="mypageCurrentAddress" th:text="${#strings.isEmpty(myInfo.address) ? '등록된 주소가 없습니다.' : myInfo.address}"></span>
                     </div>
 			
-			        <p class="mypage-form-description">
+			        <p id="mypageAddressStatus" class="mypage-form-description" role="status" aria-live="polite">
 			            주소를 변경하지 않으면 현재 등록된 주소가 유지됩니다.
 			        </p>
 			
@@ -292,17 +292,14 @@
 			    </div>
 			    <input type="hidden" id="mypageAddressValue" th:value="${myInfo.address ?: ''}">
 			
-			    <p id="mypageAddressStatus" class="mypage-help" role="status">
-			        주소를 변경하지 않으면 기존 주소가 유지됩니다.
-			    </p>
 			
 			    <div class="mypage-actions">
 			        <button type="button" id="mypageAddressClear" class="mypage-button-light">
-			            주소 삭제
+			            현재 주소 삭제
 			        </button>
 			
 			        <button type="button" id="mypageAddressCancel" class="mypage-button-light">
-			            주소 변경 취소
+			            입력 초기화
 			        </button>
 			    </div>
 			
@@ -484,7 +481,7 @@
 
 <script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
 
-<script th:src="@{/dist/js/mypage.js(v=12)}" defer></script>
+<script th:src="@{/dist/js/mypage.js(v=14)}" defer></script>
 
 </body>
 </html>

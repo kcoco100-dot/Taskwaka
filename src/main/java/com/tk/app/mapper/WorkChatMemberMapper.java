@@ -10,6 +10,7 @@ import com.tk.app.domain.dto.WorkChatMemberDto;
 public interface WorkChatMemberMapper {
 
 	public List<WorkChatMemberDto> findMemberByWorkId(Long workId);
+	public List<WorkChatMemberDto> findMemberProjectsByWorkId(Long workId);
 	
 	
 }

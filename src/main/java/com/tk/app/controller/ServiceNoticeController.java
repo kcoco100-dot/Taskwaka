@@ -34,7 +34,7 @@ public class ServiceNoticeController {
 
 	@GetMapping("/notice")
 	public String noticeList(Model model,
-			@RequestParam(defaultValue = "") String keyword,
+			@RequestParam(name = "keyword", defaultValue = "") String keyword,
 			@RequestParam(name = "page", defaultValue = "1") int current_page) {
 		try {
 			int size = 5;

@@ -1,6 +1,10 @@
 package com.tk.app.service;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -59,8 +63,24 @@ public class WorkChatMemberServiceImpl implements WorkChatMemberService {
 		if(! isMember) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 워크 접근 권한이 없습니다.");	
 		}
-		
-		
+
+		List<WorkChatMemberDto> projectRows = mapper.findMemberProjectsByWorkId(workId);
+		Map<Long, Set<String>> projectMap = new LinkedHashMap<>();
+
+		for(WorkChatMemberDto project : projectRows) {
+			if(project.getMemberId() == null || project.getProjectNames() == null) {
+				continue;
+			}
+
+			projectMap.computeIfAbsent(project.getMemberId(), key -> new LinkedHashSet<>())
+					.add(project.getProjectNames());
+		}
+
+		for(WorkChatMemberDto member : members) {
+			Set<String> projectNames = projectMap.get(member.getMemberId());
+			member.setProjectNames(projectNames == null ? null : String.join(", ", projectNames));
+		}
+
 		return members;
 	}
 
