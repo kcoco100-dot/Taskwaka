@@ -173,6 +173,7 @@ public class ManageServiceImpl implements ManageService{
                     5. partial이 true이면 일부 자료 기준임을 명시하세요.
                     6. 상태가 null이면 상태를 확인할 수 없다고 설명하세요.
                     7. assignee는 조회된 업무 담당자이며 전체 참여자 명단은 아닙니다.
+                    8. 답변할때 글자 적을때는 테이블 이름, 컬럼이름의 직접적인 이름은 적지 말아야 합니다.
 
                     프로젝트 상태:
                     0 예정, 1 진행 중, 2 완료, 3 보류
