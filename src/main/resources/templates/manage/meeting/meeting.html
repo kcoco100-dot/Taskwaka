@@ -44,7 +44,7 @@
                                         <a href="#" @click.prevent="openMeetingDetail(meeting)">{{ meeting.title }}</a>
                                     </p>
 	                                <p class="meeting-summary" v-if="hasMeetingImage(meeting.content)">본문은 상세 화면에서 확인해 주세요.</p>
-									<p class="meeting-summary" v-else> {{ meeting.summary || truncateContent(meeting.content) }}</p>
+									<p class="meeting-summary" v-else>{{ truncateContent(meeting.summary || meeting.content) }}</p>
                                 </td>
 								<td class="meeting-date">{{ meeting.createdDate || '-' }}</td>
                                 <td class="meeting-writer">{{ meeting.authorName }}</td>
@@ -174,10 +174,15 @@
                     return /<img\b[^>]*>/i.test(content);
                 };
                 
-                const truncateContent = (text) => {
-                    if(!text) {
+                const truncateContent = (content) => {
+                    if(!content) {
                         return '';
                     }
+                    const template = document.createElement('template');
+                    template.innerHTML = String(content)
+                        .replace(/<br\b[^>]*>|<\/(?:p|div|li|h[1-6])\s*>/gi, ' $& ');
+                    template.content.querySelectorAll('script, style').forEach(element => element.remove());
+                    const text = (template.content.textContent || '').replace(/\s+/g, ' ').trim();
                     return text.length > 50 ? text.substring(0, 50) + '...' : text;
                 };
 

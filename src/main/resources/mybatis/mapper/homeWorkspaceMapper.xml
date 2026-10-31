@@ -19,8 +19,9 @@
           ON wm.workspace_id = w.workspace_id
         JOIN workspace_domains wd
           ON w.workspace_id = wd.workspace_id
-        WHERE wm.member_id = #{memberId}
-          AND wm.status = 0
+       WHERE wm.member_id = #{memberId}
+		  AND wm.status = 0
+		  AND (wd.reason IS NULL OR wd.reason != 'DELETED')
     </select>
     
 </mapper>
