@@ -6,8 +6,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TASKWAKA</title>
-<!-- Favicons -->
-<link th:href="@{/dist/images/taskwaka-bear-icon.png}" type="image/png" rel="icon">
   
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,11 +24,6 @@
 <link rel="stylesheet" th:href="@{/dist/css/main.css}" type="text/css">
 <!-- Form CSS Files -->
 <link rel="stylesheet" th:href="@{/dist/css/forms.css}" type="text/css">
-<!-- Header CSS Files -->
-<link rel="stylesheet" th:href="@{/dist/css/header.css}">
-<!-- footer CSS Files -->
-<link rel="stylesheet" th:href="@{/dist/css/footer.css}">
-<link rel="stylesheet" th:href="@{/dist/css/task-modal.css}">
 <!-- chatbot -->
 <link rel="stylesheet" th:href="@{/dist/css/faq-chatbots.css}">
 <!-- dashboard CSS Files -->
@@ -39,9 +32,9 @@
 <link rel="stylesheet" th:href="@{/dist/css/projects.css}">
 
 <link rel="stylesheet" th:href="@{/dist/css/project/layout.css}">
-<link rel="stylesheet" th:href="@{/dist/css/header.css}">
-<link rel="stylesheet" th:href="@{/dist/css/footer.css}">
-<link rel="stylesheet" th:href="@{/dist/css/task-modal.css}">
+<th:block th:replace="~{layout/header :: headerFooterAssets}"></th:block>
+<link rel="stylesheet" th:href="@{/dist/css/sidebar.css}">
+<link rel="stylesheet" th:if="${activeTab != 'notice'}" th:href="@{/dist/css/project/task-dialogs.css}">
 </head>
 <body>
 
@@ -52,27 +45,46 @@
 
 	<div class="app-frame">
 		<!-- 좌측 사이드바 -->
-		<aside class="sidebar">
-			<div class="menu-group">
-				<div class="menu-toggle">
-					<span>모아보기</span> <span style="font-size: 10px;">▼</span>
-				</div>
-				<ul class="submenu">
-					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='dashboard')}">📊 대시보드</a></li>
-					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='task')}">📋 전체 업무</a></li>
-					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='gantt')}">📉 간트차트</a></li>
-					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='calendar')}">📅 캘린더</a></li>
-					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='document')}">📄 문서함</a></li>
-					<li><a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='notice')}">📢 업무 공지</a></li>
-				</ul>
-			</div>
-			
-			<div class="menu-group">
-				<div class="return-home">
-					<a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}"> 홈으로 돌아가기 </a>
-				</div>
-			</div>
-		</aside>
+		<nav class="sidebar tw-sidebar" aria-label="프로젝트 메뉴">
+		    <div class="tw-nav-groups">
+		        <details class="tw-nav-group" open>
+		            <summary th:replace="~{layout/sidebarUi :: heading('🗂️', '모아보기')}"></summary>
+		            <ul class="tw-nav-items">
+		                <li>
+		                    <a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='dashboard')}"
+		                       th:attr="aria-current=${activeTab == 'dashboard' ? 'page' : null}">
+		                        <th:block th:replace="~{layout/sidebarUi :: label('📚', '대시보드')}"></th:block>
+		                    </a>
+		                </li>
+		                <li>
+		                    <a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='task')}"
+		                       th:attr="aria-current=${activeTab == 'task' ? 'page' : null}">
+		                        <th:block th:replace="~{layout/sidebarUi :: label('📋', '전체 업무')}"></th:block>
+		                    </a>
+		                </li>
+		                <li>
+		                    <a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='gantt')}"
+		                       th:attr="aria-current=${activeTab == 'gantt' ? 'page' : null}">
+		                        <th:block th:replace="~{layout/sidebarUi :: label('📉', '간트차트')}"></th:block>
+		                    </a>
+		                </li>
+		                <li>
+		                    <a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='calendar')}"
+		                       th:attr="aria-current=${activeTab == 'calendar' ? 'page' : null}">
+		                        <th:block th:replace="~{layout/sidebarUi :: label('🗓️', '캘린더')}"></th:block>
+		                    </a>
+		                </li>
+		                <li>
+		                    <a th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='notice')}"
+		                       th:attr="aria-current=${activeTab == 'notice' ? 'page' : null}">
+		                        <th:block th:replace="~{layout/sidebarUi :: label('📢', '업무 공지')}"></th:block>
+		                    </a>
+		                </li>
+		            </ul>
+		        </details>
+		        <a th:replace="~{layout/sidebarUi :: back}"></a>
+		    </div>
+		</nav>
 
 		<!-- 우측 메인 뷰포트 -->
 		<main class="main-viewport">
@@ -98,10 +110,7 @@
 					<a
 						th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='calendar')}"
 						class="tab-btn"
-						th:classappend="${activeTab == 'calendar'} ? 'active'">캘린더</a> 
-					<a
-						th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='document')}"
-						class="tab-btn" th:classappend="${activeTab == 'document'} ? 'active'">문서</a>
+						th:classappend="${activeTab == 'calendar'} ? 'active'">캘린더</a>
 					<a
 						th:href="@{/{domainKey}/project/{projectId}(domainKey=${domainKey}, projectId=${projectId}, tab='notice')}"
 						class="tab-btn" th:classappend="${activeTab == 'notice'} ? 'active'">업무 공지</a>
@@ -124,10 +133,6 @@
 						<div th:replace="~{project/fragments/calendar :: content}"></div>
 					</div>
 					
-					<div th:case="'document'">
-						<div th:replace="~{project/fragments/document :: content}"></div>
-					</div>
-					
 					<div th:case="'notice'">
 						<div th:replace="~{project/fragments/notice :: content}"></div>
 					</div>
@@ -136,7 +141,32 @@
 		</main>
 	</div>
 	
-	<footer class="team-footer">
+	<div class="project-task-dialogs" th:if="${activeTab != 'notice'}">
+		<div th:replace="~{project/fragments/task_items :: taskCreateModal}"></div>
+		<th:block th:if="${activeTab == 'task'}">
+			<div th:replace="~{project/fragments/task_items :: reportSubmitModal}"></div>
+		</th:block>
+
+		<!-- 삭제 확인 모달 -->
+		<div class="custom-modal-backdrop" id="deleteConfirmModal" onclick="handleBackdropClick(event)">
+			<div class="custom-modal-card">
+				<div class="modal-header-area">
+					<div class="modal-icon-badge">⚠️</div>
+					<div class="modal-title-group">
+						<div class="modal-main-title" id="modalTargetTitle">하위업무 삭제 확인</div>
+						<div class="modal-desc-text" id="modalDescNotice">선택한 하위업무를 영구 삭제하시겠습니까?</div>
+					</div>
+				</div>
+				<div class="modal-actions-area">
+					<button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">취소</button>
+					<button type="button" class="btn-modal-confirm" onclick="executeConfirmedDelete()">삭제하기</button>
+				</div>
+			</div>
+		</div>
+		<script th:src="@{/dist/js/project/task.js}"></script>
+	</div>
+
+	<footer>
 		<div th:replace="~{layout/footer:: footer}"></div>
 	</footer>
 

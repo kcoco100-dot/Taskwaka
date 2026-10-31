@@ -1,7 +1,21 @@
 package com.tk.app.service;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,55 +46,76 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    // 팀원 초대 및 메일 전송
+    @Value("${taskwaka.public-base-url:}")
+    private String publicBaseUrl;
+    private final PlatformTransactionManager transactions;
+
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void sendInvitesAndMail(Map<String, Object> map) throws Exception {
-        String domainKey = (String) map.get("domainKey");
-        Long workspaceId = (Long) map.get("workspaceId");
-        Long inviterId = (Long) map.get("inviterId");
-        if (workspaceId == null || inviterId == null) {
-            throw new SecurityException("초대자 정보가 없습니다.");
+    public List<Long> sendInvitesAndMail(Map<String, Object> map) {
+        URI base;
+        try {
+            base = URI.create(publicBaseUrl);
+            if (!Set.of("https", "http").contains(base.getScheme()) || base.getHost() == null ||
+                    base.getUserInfo() != null || base.getQuery() != null || base.getFragment() != null)
+                throw new IllegalArgumentException();
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "팀 서버의 공개 주소(taskwaka.public-base-url)를 설정해 주세요.");
         }
-        
-        @SuppressWarnings("unchecked")
-        List<Integer> targetMemberIds = (List<Integer>) map.get("targetMemberIds");
-        
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-
-        for (Integer rawMemberId : targetMemberIds) {
-            Long memberId = Long.valueOf(rawMemberId);
-
-            ManageInviteDto targetInfo = mapper.selectMemberInfoForInvite(memberId);
-            if (targetInfo == null || targetInfo.getEmail() == null) {
-                continue;
+        var ids = (List<?>) map.get("targetMemberIds");
+        var targets = new LinkedHashSet<Long>();
+        for (Object value : ids) {
+            if (!(value instanceof Number n) || n.longValue() <= 0)
+                throw new IllegalArgumentException("초대 대상을 확인하세요.");
+            targets.add(n.longValue());
+        }
+        var failures = new ArrayList<Long>();
+        var retry = new HashSet<Long>();
+        if (map.get("retryIds") instanceof List<?> previous) {
+            for (Object id : previous) if (id instanceof Number n) retry.add(n.longValue());
+        }
+        boolean resend = Boolean.TRUE.equals(map.get("resend"));
+        var tx = new TransactionTemplate(transactions);
+        tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        for (long id : targets) {
+            try {
+                Dispatch dispatch = tx.execute(status -> {
+                    if (mapper.lockActiveInviteMember(id) == null) throw new IllegalArgumentException("대상 계정이 없습니다.");
+                    var target = mapper.selectMemberInfoForInvite(id);
+                    if (target == null || target.getEmail() == null || target.getEmail().isBlank())
+                        throw new IllegalArgumentException("초대할 이메일이 없습니다.");
+                    target.setWorkspaceId((Long) map.get("workspaceId"));
+                    target.setInviterId((Long) map.get("inviterId"));
+                    String pending = mapper.pendingKey(target);
+                    if (pending != null) {
+                        target.setInviteKey(pending);
+                        return new Dispatch(target, resend || retry.contains(id));
+                    }
+                    target.setInviteKey(UUID.randomUUID().toString());
+                    target.setExpires(LocalDateTime.now().plusDays(7)
+                            .format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
+                    target.setStatus(0);
+                    target.setInviteStatus(0);
+                    mapper.insertManageInvite(target);
+                    return new Dispatch(target, true);
+                });
+                if (dispatch.send()) {
+                    var invite = dispatch.invite();
+                    sendMail(invite.getEmail(), invite.getName(), invite.getInviteKey());
+                }
+            } catch (RuntimeException e) {
+                failures.add(id);
             }
-
-            String inviteKey = UUID.randomUUID().toString();
-            
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DATE, 7);
-            String expiresStr = sdf.format(cal.getTime());
-
-            ManageInviteDto inviteDto = new ManageInviteDto();
-            inviteDto.setInviteKey(inviteKey);
-            inviteDto.setWorkspaceId(workspaceId);
-            inviteDto.setInviterId(inviterId);
-            inviteDto.setEmail(targetInfo.getEmail());
-            inviteDto.setName(targetInfo.getName());
-            inviteDto.setStatus(0);
-            inviteDto.setExpires(expiresStr);
-            inviteDto.setInviteStatus(0);
-            mapper.insertManageInvite(inviteDto);
-
-            sendMail(domainKey, targetInfo.getEmail(), targetInfo.getName(), inviteKey);
         }
+        return failures;
     }
 
-    // 초대 메일 전송
-    private void sendMail(String domainKey, String toEmail, String name, String inviteKey) {
-        String inviteLink = "http://localhost:9090/main?inviteKey=" + inviteKey;
-        
+    private record Dispatch(ManageInviteDto invite, boolean send) {}
+
+    private void sendMail(String toEmail, String name, String inviteKey) {
+        String inviteLink = UriComponentsBuilder.fromUriString(publicBaseUrl)
+                .pathSegment("member", "invite").queryParam("inviteKey", inviteKey).build().toUriString();
+        name = HtmlUtils.htmlEscape(name == null ? "" : name);
         Mail mail = new Mail();
         mail.setReceiverEmail(toEmail);
         mail.setSenderEmail(mailUsername); 
@@ -104,7 +139,7 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
     // 초대 대상 검색
     @Override
     public List<ManageInviteDto> getSearchEligibleMembers(Map<String, Object> map) {
-        List<ManageInviteDto> result = new java.util.ArrayList<>();
+        List<ManageInviteDto> result = new ArrayList<>();
         try {
             result = mapper.selectSearchEligibleMembers(map);
         } catch (Exception e) {
@@ -145,7 +180,7 @@ public class ManageWorkspaceInviteServiceImpl implements ManageWorkspaceInviteSe
                     || !invite.getWorkspaceId().equals(mapper.selectWorkspaceIdByDomainKey(domainKey))) {
                 throw new IllegalArgumentException("초대된 워크의 주소가 올바르지 않습니다.");
             }
-            Map<String, Object> memberMap = new java.util.HashMap<>();
+            Map<String, Object> memberMap = new HashMap<>();
             memberMap.put("workspaceId", invite.getWorkspaceId());
             memberMap.put("memberId", memberId);
             ManageInviteDto existing = mapper.selectInviteWorkspaceMember(memberMap);

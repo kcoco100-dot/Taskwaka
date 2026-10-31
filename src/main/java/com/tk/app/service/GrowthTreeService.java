@@ -1,5 +1,9 @@
 package com.tk.app.service;
 
+import com.tk.app.mapper.TreeShopMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,10 +24,12 @@ public class GrowthTreeService {
 	
 	private final GrowthTreeMapper growthTreeMapper;
 	private final TaskService taskService;
+    private final TreeShopMapper shop;
 	
 	public GrowthTreeService(
 			GrowthTreeMapper growthTreeMapper, 
-			TaskService taskService) {
+			TaskService taskService, TreeShopMapper shop) {
+        this.shop = shop;
 		
 		this.growthTreeMapper = growthTreeMapper;
 		this.taskService = taskService;
@@ -116,14 +122,17 @@ public class GrowthTreeService {
 		
 		// 계산된 경험치와 성장 단계 DB 에 저장
 		saveGrowthTree(growthTree, "성장나무 경험치와 단계를 저장할 수 없습니다.");
-		return levelUp ? selectedLevel : null;
+		shop.credit(growthTree.getWorkspaceId(), expLog.getExpLogId(), expLog.getExp(), newTotalExp);
+        shop.transaction(shop.transactionId(), "EARN", expLog.getExp(), expLog.getExpLogId());
+        return levelUp ? selectedLevel : null;
 	}
 	
 	// 경험치 회수
 	private void revokeGrowthExp(GrowthTreeDto growthTree, long totalRevokeExp) {
 		// 차감 후 경험치 계산하고 최소 0 적용하기
 		// 현재 경험치가 5이고 회수 대상이 10이라면 결과는 0으로 만든다.
-		long newTotalExp = calculateTotalExpAfterRevoke(growthTree.getTotalExp(), totalRevokeExp);
+		long previousTotalExp = growthTree.getTotalExp();
+        long newTotalExp = calculateTotalExpAfterRevoke(growthTree.getTotalExp(), totalRevokeExp);
 		growthTree.setTotalExp(newTotalExp);
 		// 새 누적 경험치에 해당하는 성장 단계 찾기
 		GrowthLevelDto selectedLevel = findGrowthLevelByExp(newTotalExp);
@@ -132,6 +141,11 @@ public class GrowthTreeService {
 		
 		// 계산한 경험치와 단계를 DB에 저장
 		saveGrowthTree(growthTree, "회수 후 성장나무 경험치와 단계를 저장할 수 없습니다.");
+        Long logId = shop.lastLog(growthTree.getWorkspaceId());
+        if (logId == null) throw new IllegalStateException("회수할 경험치 이력이 없습니다.");
+        long delta = newTotalExp - previousTotalExp;
+        shop.credit(growthTree.getWorkspaceId(), logId, delta, newTotalExp);
+        shop.transaction(shop.transactionId(), "REVOKE", delta, logId);
 	}
 	
 	// 로그인 조회와 NULL 검사, 로그인 여부를 확인하고 SessionInfo 를 반환
@@ -468,7 +482,7 @@ public class GrowthTreeService {
 		context = growthTreeMapper.selectDailyReportDeleteContext(params);
 		// 작성 권한이 없거나 유효하지 않은 대상
 		if(context == null) {
-			throw new IllegalStateException("삭제 권한이 없거나 삭제할 수 없는 보고서입니다.");
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 열람했거나 변경할 수 없는 보고서입니다.");
 		}
 		
 		context.put("memberId", loginMember.getMember_id());

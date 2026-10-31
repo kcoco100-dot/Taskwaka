@@ -224,7 +224,6 @@ async function submitNoticeForm() {
   const noticeType = 'TASK';
   
   const payload = {
-    currentProjectMemberId: currentProjectMemberId,
     noticeType: noticeType,
     taskId: (noticeType === 'TASK' && taskId) ? Number(taskId) : null,
     title: title,
@@ -274,7 +273,7 @@ async function deleteCurrentNotice() {
 
   const noticeId = activeNoticeData.noticeId;
   try {
-    const res = await fetch(`${getNoticeApiBaseUrl()}/${noticeId}?currentProjectMemberId=${currentProjectMemberId}`, {
+    const res = await fetch(`${getNoticeApiBaseUrl()}/${noticeId}`, {
       method: 'DELETE'
     });
     const result = await res.json();

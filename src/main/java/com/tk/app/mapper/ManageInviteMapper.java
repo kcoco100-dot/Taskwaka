@@ -9,6 +9,9 @@ import com.tk.app.domain.dto.ManageInviteDto;
 
 @Mapper
 public interface ManageInviteMapper {
+    int previewInvite(@org.apache.ibatis.annotations.Param("token") String token, @org.apache.ibatis.annotations.Param("memberId") long memberId);
+    String pendingKey(ManageInviteDto invite);
+
     
     public Long selectWorkspaceIdByDomainKey(String domainKey);
 	public List<ManageInviteDto> selectEligibleMembers(Map<String, Object> map);

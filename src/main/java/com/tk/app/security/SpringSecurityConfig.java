@@ -1,5 +1,8 @@
 package com.tk.app.security;
 
+import com.tk.app.controller.InviteAcceptanceController;
+import org.springframework.security.core.session.SessionRegistry;
+
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,12 +75,19 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SpringSecurityConfig {
+    private static final java.util.regex.Pattern PUBLIC_IMAGE = java.util.regex.Pattern.compile(
+            "/uploads/(?:member|editor)/[^/]+\\.(?:png|jpe?g|gif|webp)", java.util.regex.Pattern.CASE_INSENSITIVE);
 	private final MemberService memberService;
 	private final MemberStatusFilter memberStatusFilter;
 	private final LoginHistoryService loginHistoryService;
 
+    @Bean
+    static LoginSessionRegistry taskwakaSessions() {
+        return new LoginSessionRegistry();
+    }
+
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http, LoginSessionPolicy policy, SessionRegistry sessions) throws Exception {
 
 		http
 				// 1. 주소별 로그인 권한 설정
@@ -85,11 +95,15 @@ public class SpringSecurityConfig {
 						.requestMatchers("/", "/member/login", "/member/register", "/member/account", "/member/idFind", "/member/pwdFind", 
 								"/member/expired", "/member/check-id", "/member/email/send", "/member/email/verify", "/member/reset-password",
 								"/member/registerComplete", "/oauth/kakao", "/oauth/kakao/callback",
-								"/dist/**", "/uploads/**", "/css/**", "/js/**", "/images/**",
+								"/dist/**", "/css/**", "/js/**", "/images/**",
 								"/favicon.ico", "/error/**")
 						.permitAll()
 
 						// 관리자만 접근
+						.requestMatchers(request -> ("GET".equals(request.getMethod()) || "HEAD".equals(request.getMethod()))
+                                && PUBLIC_IMAGE.matcher(request.getRequestURI().substring(request.getContextPath().length())).matches())
+                        .permitAll()
+                        .requestMatchers("/uploads/**").denyAll()
 						.requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
 
 						// 그 외 주소는 로그인 필요
@@ -122,7 +136,7 @@ public class SpringSecurityConfig {
 						            ? "/admin"
 						            : "/main";
 
-						    response.sendRedirect(request.getContextPath() + target);
+						    response.sendRedirect(request.getContextPath() + InviteAcceptanceController.afterLogin(request, response, target));
 						})
 						.failureHandler(new LoginFailureHandler(memberService)))
 
@@ -132,6 +146,8 @@ public class SpringSecurityConfig {
 
 				.sessionManagement(session -> session
 				        .maximumSessions(1)
+                        .maximumSessions(policy::maximum)
+                        .sessionRegistry(sessions)
 				        .maxSessionsPreventsLogin(false)
 				        .expiredUrl("/member/login"))
 

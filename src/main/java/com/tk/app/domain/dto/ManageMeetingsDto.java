@@ -1,5 +1,6 @@
 package com.tk.app.domain.dto;
 
+import com.tk.app.common.MyUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,4 +24,8 @@ public class ManageMeetingsDto {
     private String prevTitle;
     private Long nextId;
     private String nextTitle;
+
+    public void setContent(String content) {
+        this.content = MyUtil.sanitize(content);
+    }
 }

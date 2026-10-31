@@ -143,4 +143,15 @@
 	    WHERE workspace_id = #{workspaceId} AND member_id = #{memberId}
 	</select>
 	
+    <select id="previewInvite" resultType="int">
+        SELECT COUNT(*) FROM workspace_invites i JOIN member_details m ON LOWER(TRIM(m.email)) = LOWER(TRIM(i.email))
+        JOIN workspace_domains wd ON wd.workspace_id = i.workspace_id AND wd.active = 'Y'
+        WHERE i.invite_key = #{token} AND m.member_id = #{memberId} AND i.status = 0 AND i.expires > SYSDATE
+          AND (i.invite_status = 0 OR (i.invite_status = 1 AND i.accepted_member_id = m.member_id))
+    </select>
+    <select id="pendingKey" resultType="string">
+        SELECT invite_key FROM workspace_invites WHERE workspace_id = #{workspaceId} AND LOWER(email) = LOWER(#{email})
+          AND invite_status = 0 AND status = 0 AND expires > SYSDATE
+        ORDER BY created DESC FETCH FIRST 1 ROW ONLY
+    </select>
 </mapper>

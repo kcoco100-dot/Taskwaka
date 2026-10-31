@@ -39,10 +39,6 @@ public class Home2Controller {
 	}
 
 	// box 페이지
-	@GetMapping("/documentBox")
-	public String documentBox() {
-		return "box/documentBox";
-	}
 
 	// mail 페이지
 	@GetMapping("/mail")
@@ -87,15 +83,5 @@ public class Home2Controller {
 	@GetMapping("/manageCalender")
 	public String manageCalender(@PathVariable("domainKey") String domainKey) {
 	    return "redirect:/" + domainKey + "/manage/calender";
-	}
-
-	@GetMapping("/plan")
-	public String plan() {
-		return "plan/plan";
-	}
-
-	@GetMapping("/planPayment")
-	public String planPayment() {
-		return "plan/planPayment";
 	}
 }

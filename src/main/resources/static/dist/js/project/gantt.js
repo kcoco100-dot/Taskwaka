@@ -27,7 +27,7 @@ async function initializeGanttChart() {
 
   // SSR로 렌더링된 행이 없다면 API에서 업무 목록을 가져와 렌더링 시도
   if (existingRows.length === 0) {
-    await loadTasksFromApiOrFallback();
+    await loadTasksFromApi();
   }
 
   calculateTimelineRange();
@@ -36,38 +36,23 @@ async function initializeGanttChart() {
   scrollToToday();
 }
 
-async function loadTasksFromApiOrFallback() {
+async function loadTasksFromApi() {
   const leftBody = document.getElementById('ganttLeftBody');
-  let tasks = [];
-
+  let tasks;
   try {
     const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks`);
-    if (res.ok) {
-      tasks = await res.json();
-    }
+    if (!res.ok) throw new Error('업무 목록 조회 실패');
+    tasks = await res.json();
+    if (!Array.isArray(tasks)) throw new Error('잘못된 업무 목록 응답');
   } catch (err) {
-    console.warn('API 목록 조회 실패 또는 데이터 없음. 샘플 일정으로 초기화합니다.', err);
+    console.warn('간트차트 업무 목록 조회 실패', err);
+    leftBody.textContent = '업무 목록을 불러오지 못했습니다. 새로고침해 다시 시도하세요.';
+    return;
   }
 
-  // DB 데이터가 비어있을 경우 확인용 기본 일정 세팅
-  if (!tasks || tasks.length === 0) {
-    const todayStr = formatDateYMD(new Date());
-    const plus5Str = formatDateYMD(addDays(new Date(), 5));
-    const plus10Str = formatDateYMD(addDays(new Date(), 10));
-    tasks = [
-      {
-        taskId: 1,
-        title: '기획 및 요구사항 정의',
-        status: 1,
-        progress: 60,
-        startAt: todayStr,
-        endAt: plus10Str,
-        subTasks: [
-          { subTaskId: 101, taskId: 1, title: '화면 설계서 작성', status: 2, progress: 100, startAt: todayStr, endAt: plus5Str },
-          { subTaskId: 102, taskId: 1, title: 'ERD 및 테이블 명세 확정', status: 1, progress: 40, startAt: plus5Str, endAt: plus10Str }
-        ]
-      }
-    ];
+  if (tasks.length === 0) {
+    leftBody.textContent = '등록된 업무가 없습니다.';
+    return;
   }
 
   leftBody.innerHTML = '';
@@ -92,13 +77,15 @@ async function loadTasksFromApiOrFallback() {
         ${hasSub 
           ? `<span class="btn-gantt-toggle" onclick="event.stopPropagation(); toggleGanttSubRows(this)">－</span>` 
           : `<span class="btn-gantt-toggle-empty"></span>`}
-        <span class="gantt-row-title">${task.title}</span>
+        <span class="gantt-row-title"></span>
       </div>
       <div class="col-g-status">
         <span class="badge-status ${statusObj.class}">${statusObj.text}</span>
       </div>
-      <div class="col-g-period">${task.startAt || '-'} ~ ${task.endAt || '-'}</div>
+      <div class="col-g-period"></div>
     `;
+    mainRow.querySelector('.gantt-row-title').textContent = mainRow.dataset.title;
+    mainRow.querySelector('.col-g-period').textContent = `${task.startAt || '-'} ~ ${task.endAt || '-'}`;
     leftBody.appendChild(mainRow);
 
     if (hasSub) {
@@ -119,13 +106,15 @@ async function loadTasksFromApiOrFallback() {
         subRow.innerHTML = `
           <div class="col-g-name indent-sub">
             <span class="sub-branch-icon">ㄴ</span>
-            <span class="gantt-row-title">${sub.title}</span>
+            <span class="gantt-row-title"></span>
           </div>
           <div class="col-g-status">
             <span class="badge-status ${subStatusObj.class}">${subStatusObj.text}</span>
           </div>
-          <div class="col-g-period">${sub.startAt || '-'} ~ ${sub.endAt || '-'}</div>
+          <div class="col-g-period"></div>
         `;
+        subRow.querySelector('.gantt-row-title').textContent = subRow.dataset.title;
+        subRow.querySelector('.col-g-period').textContent = `${sub.startAt || '-'} ~ ${sub.endAt || '-'}`;
         leftBody.appendChild(subRow);
       });
     }
@@ -259,10 +248,13 @@ function renderTimelineBars() {
       onGanttItemClick(type, id, row);
     };
 
-    bar.innerHTML = `
-      <div class="gantt-bar-progress" style="width: ${Math.min(100, Math.max(0, progress))}%;"></div>
-      <span class="gantt-bar-label">${title} (${Math.round(progress)}%)</span>
-    `;
+    const fill = document.createElement('div');
+    fill.className = 'gantt-bar-progress';
+    fill.style.width = Math.min(100, Math.max(0, progress)) + '%';
+    const label = document.createElement('span');
+    label.className = 'gantt-bar-label';
+    label.textContent = `${title} (${Math.round(progress)}%)`;
+    bar.append(fill, label);
 
     gridRow.appendChild(bar);
     barsContainer.appendChild(gridRow);

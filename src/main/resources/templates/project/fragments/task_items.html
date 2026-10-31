@@ -24,10 +24,10 @@
 
 				<!-- 권한 제어(th:if): 메인 업무 담당자에게만 하위업무 추가 버튼 표시 -->
 				<span class="inline-action-bundle"
-					th:if="${task.assigneeMemberId == currentProjectMemberId}"
+					th:if="${isTeamLeader}"
 					onclick="event.stopPropagation();">
 					<button type="button" class="btn-action-tool btn-action-add"
-						th:onclick="|requestCreateReport(${task.taskId}, 'task', ${task.progress})|" title="업무 보고서 작성">📋</button>
+						th:if="${task.assigneeMemberId == currentProjectMemberId}" th:onclick="|requestCreateReport(${task.taskId}, 'task', ${task.progress})|" title="업무 보고서 작성">📋</button>
 					<button type="button" class="btn-action-tool btn-action-add"
 						th:onclick="|requestCreateSubTask(${task.taskId})|"
 						title="하위업무 추가">＋</button>
@@ -81,14 +81,14 @@
 		<div class="col-task-name indent-sub">
 			<span style="color: var(--text-muted); font-size: 12px;">ㄴ</span> <span
 				class="task-title-text" th:text="${subTask.title}">하위업무명</span>
-			<div th:if="${subTask.assigneeMemberId == currentProjectMemberId}">
+			<div th:if="${isTeamLeader or subTask.assigneeMemberId == currentProjectMemberId}">
 				<span class="inline-action-bundle"
 					onclick="event.stopPropagation();">
 					<button type="button" class="btn-action-tool btn action-del"
-						th:onclick="|requestCreateReport(${subTask.subTaskId}, 'subTask', ${subTask.progress})|"
+						th:if="${subTask.assigneeMemberId == currentProjectMemberId}" th:onclick="|requestCreateReport(${subTask.subTaskId}, 'subTask', ${subTask.progress})|"
 						title="하위업무 보고서 작성">📋</button>
 					<button type="button" class="btn-action-tool btn-action-del"
-						th:onclick="|openDeleteModal('subtask', ${subTask.subTaskId}, this)|"
+						th:if="${isTeamLeader}" th:onclick="|openDeleteModal('subtask', ${subTask.subTaskId}, this)|"
 						title="하위업무 삭제">
 						<svg viewBox="0 0 24 24">
 						<polyline points="3 6 5 6 21 6"></polyline>
@@ -130,7 +130,7 @@
 
 	<!-- 하위업무 등록 모달 -->
 	<div th:fragment="taskCreateModal" class="custom-modal-backdrop"
-		id="taskCreateModal" onclick="handleCreateBackdropClick(event)">
+		id="taskCreateModal" onclick="handleBackdropClick(event)">
 		<div class="task-create-modal-card">
 			<!-- 모달 헤더 -->
 			<div class="modal-card-header">
@@ -164,7 +164,8 @@
 					<div class="modal-prop-row">
 						<span class="modal-prop-label">담당자<span class="req-star">*</span></span>
 						<div class="modal-prop-control">
-							<select class="modal-form-select" id="createAssigneeSelect"></select>
+							<select class="modal-form-select" id="createAssigneeSelect" disabled></select>
+							<button type="button" id="retryCreateAssignees" onclick="loadSubTaskAssignees()" hidden>다시 조회</button>
 						</div>
 					</div>
 
@@ -199,7 +200,7 @@
 			<div class="create-modal-footer">
 				<button type="button" class="btn-modal-cancel"
 					onclick="closeCreateTaskModal()">취소</button>
-				<button type="button" class="btn-modal-submit"
+				<button type="button" class="btn-modal-submit" id="createSubTaskSubmit" disabled
 					onclick="submitCreateSubTaskModal()">하위업무 등록</button>
 			</div>
 		</div>
@@ -207,7 +208,7 @@
 
 	<!-- 보고서 등록 모달 -->
 	<div th:fragment="reportSubmitModal" class="custom-modal-backdrop"
-		id="reportCreateModal" onclick="handleCreateBackdropClick(event)">
+		id="reportCreateModal" onclick="handleBackdropClick(event)">
 		<div class="task-create-modal-card">
 			<!-- 모달 헤더 -->
 			<div class="modal-card-header">
@@ -232,8 +233,8 @@
 				</div>
 
 				<div class="modal-prop-row">
-					<span class="modal-prop-label">진행률: </span> <input type="text"
-						id="createReportProgressInput" placeholder="진행률을 입력하세요...">
+					<label class="modal-prop-label" id="createReportProgressLabel" for="createReportProgressInput">진행률 (%)</label>
+					<input type="text" id="createReportProgressInput" placeholder="0">
 				</div>
 
 				<div class="modal-prop-row">

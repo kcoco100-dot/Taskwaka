@@ -1,0 +1,115 @@
+@charset "UTF-8";
+
+/* 화면별 너비와 반응형 배치는 각 레이아웃에서 관리합니다. */
+.tw-nav-groups {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    min-width: 0;
+    flex-shrink: 0;
+}
+
+.tw-nav-group,
+.tw-sidebar .tw-nav-return {
+    min-width: 0;
+    border: 1px solid #E8E2D9;
+    border-radius: 12px;
+    background: #FCFAF6;
+}
+
+.tw-nav-group {
+    overflow: hidden;
+}
+
+.tw-nav-group > summary,
+.tw-sidebar .tw-nav-return,
+.tw-nav-items a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+
+.tw-nav-group > summary,
+.tw-sidebar .tw-nav-return {
+    padding: 13px 14px;
+    background: #EEF4E6;
+    color: #4F6242;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+.tw-nav-group > summary {
+    list-style: none;
+    cursor: pointer;
+}
+.tw-nav-group > summary::-webkit-details-marker {
+    display: none;
+}
+.tw-nav-group > summary::after {
+    content: "";
+    flex: 0 0 7px;
+    width: 7px;
+    height: 7px;
+    margin: 0 2px 0 auto;
+    border: solid currentColor;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(-45deg);
+}
+.tw-nav-group[open] > summary::after {
+    transform: translateY(-2px) rotate(45deg);
+}
+.tw-nav-group > summary:hover,
+.tw-sidebar .tw-nav-return:hover {
+    background: #E3EDD8;
+}
+
+.tw-sidebar .tw-nav-items {
+    display: grid;
+    gap: 4px;
+    padding: 8px;
+    margin: 0;
+    list-style: none;
+}
+.tw-nav-items a {
+    padding: 9px 10px;
+    border-radius: 8px;
+    color: #786B5E;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+.tw-nav-items a:hover {
+    background: #F0E9DF;
+    color: #594331;
+}
+.tw-nav-items a[aria-current="page"] {
+    background: #EEF4E6;
+    color: #4F6242;
+    font-weight: 700;
+}
+.tw-nav-items .tw-nav-danger a {
+    color: #A14444;
+}
+.tw-nav-items .tw-nav-danger a:hover,
+.tw-nav-items .tw-nav-danger a[aria-current="page"] {
+    background: #FFF0F0;
+}
+.tw-sidebar summary:focus-visible,
+.tw-sidebar a:focus-visible {
+    outline: 2px solid #71865B;
+    outline-offset: -2px;
+}
+
+.tw-sidebar .tw-nav-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 23px;
+    height: 23px;
+    font: 15px/1 "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+}
+.tw-nav-group > summary .tw-nav-icon {
+    flex-basis: 20px;
+    font-size: 16px;
+}

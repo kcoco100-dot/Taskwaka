@@ -1,5 +1,7 @@
 package com.tk.app.domain.dto;
 
+import java.util.Map;
+
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +27,7 @@ public class SubTaskDto {
     
     private String saveFilename;
 	private String originalFilename;
+	private List<Map<String,Object>> files;
 	private List<MultipartFile> selectFile; // <input type='file' name='selectFile' ..
 
     private List<TaskMemberDto> participants;

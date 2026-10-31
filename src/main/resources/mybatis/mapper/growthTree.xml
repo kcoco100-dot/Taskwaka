@@ -279,7 +279,7 @@
 	    JOIN tasks t ON t.project_id = st.project_id
 	        AND t.task_id = st.task_id
 	    JOIN projects p ON p.project_id = t.project_id
-	    JOIN project_members pm ON pm.project_member_id = st.project_member_id
+	    JOIN project_members pm ON pm.project_member_id = dr.project_member_id
 	        AND pm.project_id = p.project_id
 	    JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
 	        AND wm.workspace_id = p.workspace_id

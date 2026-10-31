@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><title>워크 초대</title>
+<link th:replace="~{layout/header :: favicon}">
+</head>
+<body><main><h1>워크 초대</h1><p>현재 로그인한 계정으로 이 워크에 참여하시겠습니까?</p>
+<form method="post" th:action="@{/member/invite}">
+<input type="hidden" name="confirmation" th:value="${confirmation}"><button type="submit">초대 수락</button>
+<a th:href="@{/main}">나중에</a></form></main></body></html>

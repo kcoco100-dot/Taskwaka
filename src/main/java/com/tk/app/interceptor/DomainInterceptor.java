@@ -48,6 +48,10 @@ public class DomainInterceptor implements HandlerInterceptor {
         String domainKey =
                 path.substring(1).split("/")[0];
 
+        if ("GET".equals(request.getMethod()) && path.matches("^/[a-zA-Z0-9-]+/manage/invite/accept$")) {
+            return true; // 기존 초대 링크를 읽기 전용 미리보기로 연결한다.
+        }
+
         // 4. 도메인 키 형식 검사
         if (!domainKey.matches("[a-zA-Z0-9-]+")) {
             response.sendError(403);

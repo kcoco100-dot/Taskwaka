@@ -22,31 +22,11 @@ html {
     font-family: inherit;
 }
 
-/* 상단 헤더는 공통 header.css의 team-header, team-logo를 사용 */
-.mypage-back {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 11px 24px;
-    border: 1px solid #d9e5d2;
-    border-radius: 10px;
-    background: #e9f0e4;
-    color: #516b44;
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background .15s, color .15s;
-}
-
-.mypage-back:hover,
-.mypage-back:focus-visible {
-    background: #dce8d5;
-    color: #3b5538;
-}
 
 /* 전체 레이아웃 */
 
 .mypage-container {
+    min-height: calc(100vh - 128px);
     max-width: 1180px;
     margin: 0 auto;
     padding: 48px 26px 80px;
@@ -85,57 +65,11 @@ html {
 
 .mypage-sidebar {
     position: sticky;
-    top: 20px;
-    padding: 24px 16px;
-    background: #ffffff;
-    border: 1px solid #e9edf1;
-    border-radius: 15px;
-}
-
-.mypage-sidebar-title {
-    display: block;
-    padding: 0 12px 14px;
-    font-size: 16px;
-    font-weight: 750;
-}
-
-.mypage-sidebar a {
-    display: block;
-    margin: 3px 0;
-    padding: 14px 15px;
-    color: #657186;
-    border-radius: 9px;
-    font-size: 15px;
-    text-decoration: none;
-    transition: background .15s, color .15s;
-}
-
-.mypage-sidebar a:hover,
-.mypage-sidebar a:focus-visible {
-    background: #f0f7f3;
-    color: #228364;
-}
-
-.mypage-sidebar a.is-active {
-    background: #eaf6f0;
-    color: #228364;
-    font-weight: 700;
-}
-
-.mypage-sidebar-divider {
-    height: 1px;
-    margin: 20px 12px 23px;
-    background: #edf0f3;
-}
-
-.mypage-sidebar a.mypage-sidebar-danger {
-    color: #ad5656;
-}
-
-.mypage-sidebar a.mypage-sidebar-danger:hover,
-.mypage-sidebar a.mypage-sidebar-danger.is-active {
-    background: #fff0f0;
-    color: #a14444;
+    top: 64px;
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    padding: 24px 14px;
+    border-right: 1px solid #E8E2D9;
 }
 
 /* 공통 카드 */
@@ -503,10 +437,6 @@ html {
 }
 
 @media (max-width: 760px) {
-    .mypage-body .team-header {
-        padding: 0 16px;
-    }
-
     .mypage-container {
         padding: 34px 16px 68px;
     }
@@ -521,11 +451,7 @@ html {
 
     .mypage-sidebar {
         position: static;
-        padding: 20px;
-    }
-
-    .mypage-sidebar a {
-        padding: 12px 14px;
+        max-height: none;
     }
 
     .mypage-card {
@@ -569,9 +495,6 @@ html {
         width: 100%;
     }
 
-    .mypage-back {
-        font-size: 12px;
-    }
 }
 
 /* 프로필 이미지 */

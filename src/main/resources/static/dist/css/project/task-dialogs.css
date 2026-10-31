@@ -1,0 +1,420 @@
+/* 하위업무 등록 모달 & 삭제 확인 모달 */
+.project-task-dialogs .custom-modal-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(60, 48, 38, 0.38);
+	backdrop-filter: blur(2px);
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+}
+
+.project-task-dialogs .custom-modal-backdrop.show { display: flex; opacity: 1; }
+
+.project-task-dialogs .custom-modal-card {
+	width: 400px;
+	max-width: 90vw;
+	background: #FFFFFF;
+	border: 1px solid var(--border-main, #E8E2D9);
+	border-radius: 16px;
+	box-shadow: 0 16px 36px rgba(89, 67, 49, 0.16);
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.project-task-dialogs .task-create-modal-card {
+	width: 540px;
+	max-width: 92vw;
+	max-height: 88vh;
+	background: #FFFFFF;
+	border: 1px solid var(--border-main, #E8E2D9);
+	border-radius: 16px;
+	box-shadow: 0 20px 44px rgba(89, 67, 49, 0.18);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+
+.project-task-dialogs .create-modal-body {
+	padding: 22px 26px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.project-task-dialogs .create-title-input {
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--text-main, #594331);
+	border: 1px solid var(--border-main, #E8E2D9);
+	border-radius: 10px;
+	padding: 10px 14px;
+	outline: none;
+	width: 100%;
+	background: #FFFFFF;
+	font-family: inherit;
+}
+
+.project-task-dialogs .create-title-input::placeholder {
+	color: var(--text-muted, #A89B8C);
+	font-weight: 400;
+}
+
+.project-task-dialogs .create-title-input:focus {
+	border-color: var(--accent-green, #71865B);
+	box-shadow: 0 0 0 3px var(--primary-green-light, #EEF4E6);
+}
+
+.project-task-dialogs .create-props-card {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 14px 16px;
+	background: var(--bg-card-sub, #FCFAF6);
+	border-radius: 12px;
+	border: 1px solid var(--border-main, #E8E2D9);
+}
+
+.project-task-dialogs .req-star {
+	color: var(--status-danger, #D9534F);
+	margin-left: 2px;
+	font-weight: 800;
+}
+
+.project-task-dialogs .create-modal-footer {
+	padding: 14px 24px;
+	border-top: 1px solid var(--border-main, #E8E2D9);
+	background: var(--bg-card-sub, #FCFAF6);
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.project-task-dialogs .btn-modal-submit {
+	padding: 9px 20px;
+	border-radius: 8px;
+	border: 1px solid var(--primary-green, #4F6242);
+	background: var(--primary-green, #4F6242);
+	color: #FFFFFF;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.project-task-dialogs .btn-modal-cancel {
+	padding: 9px 16px;
+	border-radius: 8px;
+	border: 1px solid var(--border-main, #E8E2D9);
+	background: #FFFFFF;
+	color: var(--text-main, #594331);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.project-task-dialogs .btn-modal-confirm {
+	padding: 9px 18px;
+	border-radius: 8px;
+	border: 1px solid #DC2626;
+	background: #DC2626;
+	color: #FFFFFF;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.project-task-dialogs .modal-header-area {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.project-task-dialogs .modal-icon-badge {
+	width: 38px;
+	height: 38px;
+	border-radius: 10px;
+	background: #FDF2F2;
+	border: 1px solid #FECACA;
+	color: var(--status-danger, #D9534F);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.project-task-dialogs .modal-title-group {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.project-task-dialogs .modal-main-title {
+	font-size: 16px;
+	font-weight: 800;
+	color: var(--text-main, #594331);
+}
+
+.project-task-dialogs .modal-desc-text {
+	font-size: 13px;
+	color: var(--text-sub, #786B5E);
+	line-height: 1.5;
+}
+
+.project-task-dialogs .modal-actions-area {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 6px;
+}
+
+/* ==========================================================================
+   [Taskwaka] 하위업무 등록 모달 전용 스타일 (독립 클래스)
+   ========================================================================== */
+
+/* 모달 백드롭 배경 */
+.project-task-dialogs .custom-modal-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(43, 36, 29, 0.45);
+	backdrop-filter: blur(2px);
+	display: none; /* 기본 숨김, JS 오픈 시 flex로 변경 */
+	align-items: center;
+	justify-content: center;
+	z-index: 2000;
+}
+
+/* 모달 카드 컨테이너 */
+.project-task-dialogs .task-create-modal-card {
+	width: 520px;
+	max-width: 92vw;
+	background: #FCFBF8;
+	border-radius: 12px;
+	border: 1px solid #E6E0D6;
+	box-shadow: 0 16px 40px rgba(59, 45, 31, 0.22);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	animation: modalSlideUp 0.2s ease-out;
+}
+
+@keyframes modalSlideUp {
+	from { opacity: 0; transform: translateY(12px) scale(0.98); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 모달 상단 헤더 */
+.project-task-dialogs .modal-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 20px;
+	border-bottom: 1px solid #EFEAE1;
+	background: #FAF7F2;
+}
+
+.project-task-dialogs .modal-header-title-box {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #4F6242;
+}
+
+.project-task-dialogs .modal-close-btn {
+	background: transparent;
+	border: none;
+	color: #9E9284;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px 6px;
+	border-radius: 4px;
+	line-height: 1;
+}
+.project-task-dialogs .modal-close-btn:hover {
+	background: #EAE3D6;
+	color: #2B241D;
+}
+
+/* 모달 본문 */
+.project-task-dialogs .create-modal-body {
+	padding: 20px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+/* 제목 입력 */
+.project-task-dialogs .modal-title-row {
+	width: 100%;
+}
+
+.project-task-dialogs .modal-title-input {
+	width: 100%;
+	font-size: 16px;
+	font-weight: 700;
+	color: #2B241D;
+	background: #FFFFFF;
+	border: 1px solid #DCD3C6;
+	border-radius: 8px;
+	padding: 10px 14px;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+.project-task-dialogs .modal-title-input:focus {
+	border-color: #71865B;
+	box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.15);
+}
+
+/* 속성 카드 영역 */
+.project-task-dialogs .modal-props-card {
+	background: #F7F4EE;
+	border-radius: 10px;
+	border: 1px solid #E6E0D6;
+	padding: 14px 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.project-task-dialogs .modal-prop-row {
+	display: grid;
+	grid-template-columns: 85px 1fr;
+	align-items: center;
+	font-size: 13px;
+}
+
+.project-task-dialogs .modal-prop-label {
+	color: #786B5E;
+	font-weight: 600;
+	font-size: 12.5px;
+}
+
+.project-task-dialogs .modal-prop-control {
+	display: flex;
+	align-items: center;
+}
+
+.project-task-dialogs .req-star {
+	color: #B84A39;
+	margin-left: 2px;
+}
+
+/* 입력 필드 공통 (담당자, 시작일, 마감일) */
+.project-task-dialogs .modal-form-select,
+.project-task-dialogs .modal-form-date {
+	font-family: inherit;
+	font-size: 13px;
+	color: #2B241D;
+	background: #FFFFFF;
+	border: 1px solid #DCD3C6;
+	border-radius: 6px;
+	padding: 6px 10px;
+	outline: none;
+	cursor: pointer;
+	transition: border-color 0.15s;
+}
+
+.project-task-dialogs .modal-form-select {
+	width: 200px;
+}
+
+.project-task-dialogs .modal-form-date {
+	width: 160px;
+}
+
+.project-task-dialogs .modal-form-select:focus,
+.project-task-dialogs .modal-form-date:focus {
+	border-color: #71865B;
+}
+
+/* 상세 내용 입력 */
+.project-task-dialogs .modal-section-block {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.project-task-dialogs .modal-section-label {
+	font-size: 13px;
+	font-weight: 700;
+	color: #594331;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.project-task-dialogs .modal-form-textarea {
+	width: 100%;
+	min-height: 110px;
+	background: #FFFFFF;
+	border: 1px solid #DCD3C6;
+	border-radius: 8px;
+	padding: 10px 12px;
+	color: #2B241D;
+	font-size: 13px;
+	line-height: 1.5;
+	resize: vertical;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.15s;
+}
+.project-task-dialogs .modal-form-textarea:focus {
+	border-color: #71865B;
+	box-shadow: 0 0 0 2px rgba(113, 134, 91, 0.12);
+}
+
+/* 모달 하단 푸터 */
+.project-task-dialogs .create-modal-footer {
+	padding: 14px 24px;
+	border-top: 1px solid #EFEAE1;
+	background: #FAF7F2;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.project-task-dialogs .btn-modal-cancel {
+	padding: 7px 14px;
+	border-radius: 6px;
+	border: 1px solid #DCD3C6;
+	background: #FFFFFF;
+	color: #786B5E;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.project-task-dialogs .btn-modal-cancel:hover {
+	background: #F3EFE8;
+}
+
+.project-task-dialogs .btn-modal-submit {
+	padding: 7px 16px;
+	border-radius: 6px;
+	border: none;
+	background: #4F6242;
+	color: #FFFFFF;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+.project-task-dialogs .btn-modal-submit:hover {
+	background: #3E4E33;
+}

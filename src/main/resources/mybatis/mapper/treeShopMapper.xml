@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.app.mapper.TreeShopMapper">
+    <select id="catalog" resultType="com.tk.app.service.TreeShopService$Item">
+        SELECT s.item_id, s.image_path, s.slot_type, s.price_exp, o.item_id AS owned_id,
+               CASE WHEN e.item_id IS NULL THEN 0 ELSE 1 END AS equipped
+        FROM tree_shop_items s
+        LEFT JOIN tree_items o ON o.workspace_id = #{work} AND o.item_id2 = s.item_id
+        LEFT JOIN tree_equipped_items e ON e.workspace_id = #{work} AND e.item_id = o.item_id
+        WHERE s.active_yn = 'Y' AND s.price_exp >= 0 ORDER BY s.item_id
+    </select>
+    <select id="balance" resultType="long">
+        SELECT COALESCE((SELECT balance_exp FROM exp_wallets WHERE workspace_id = #{work}),
+            GREATEST(0, NVL((SELECT total_exp FROM growth_tree WHERE workspace_id = #{work}),0) -
+            NVL((SELECT SUM(paid_exp) FROM tree_items WHERE workspace_id = #{work}),0))) FROM dual
+    </select>
+    <select id="lastLog" resultType="long">SELECT MAX(exp_log_id) FROM growth_exp_logs WHERE workspace_id = #{work}</select>
+    <select id="transactionId" resultType="long">SELECT seq_exp_transactions.NEXTVAL FROM dual</select>
+    <insert id="transaction">
+        INSERT INTO exp_transactions(transaction_id, transaction_type, amount_exp, created_at, exp_log_id)
+        VALUES (#{id}, #{type}, #{amount}, SYSDATE, #{log,jdbcType=NUMERIC})
+    </insert>
+    <update id="credit">
+        MERGE INTO exp_wallets w USING (SELECT CAST(#{work} AS NUMBER(19)) AS workspace_id FROM dual) src ON (w.workspace_id = src.workspace_id)
+        WHEN MATCHED THEN UPDATE SET w.balance_exp = GREATEST(0, COALESCE(w.balance_exp,
+            GREATEST(0, #{total} - #{delta} - NVL((SELECT SUM(paid_exp) FROM tree_items WHERE workspace_id = #{work}),0))) + #{delta}), w.exp_log_id = #{log}, w.updated_at = SYSDATE
+        WHEN NOT MATCHED THEN INSERT (workspace_id, balance_exp, exp_log_id, updated_at)
+        VALUES (#{work}, GREATEST(0, #{total} - NVL((SELECT SUM(paid_exp) FROM tree_items WHERE workspace_id = #{work}),0)), #{log}, SYSDATE)
+    </update>
+    <update id="charge">
+        UPDATE exp_wallets SET balance_exp = balance_exp - #{price}, updated_at = SYSDATE
+        WHERE workspace_id = #{work} AND balance_exp >= #{price}
+    </update>
+    <insert id="purchase">
+        INSERT INTO tree_items(item_id, workspace_id, item_id2, member_id, paid_exp, transaction_id, purchased_at)
+        VALUES(seq_tree_items.NEXTVAL, #{work}, #{item}, #{member}, #{price}, #{tx}, SYSDATE)
+    </insert>
+    <delete id="unequip">DELETE FROM tree_equipped_items WHERE workspace_id = #{work} AND item_id = #{item}</delete>
+    <delete id="clearSlot">
+        DELETE FROM tree_equipped_items WHERE workspace_id = #{work} AND item_id IN
+          (SELECT o.item_id FROM tree_items o JOIN tree_shop_items s ON s.item_id = o.item_id2
+           WHERE o.workspace_id = #{work} AND s.slot_type = #{slot})
+    </delete>
+    <insert id="equip">
+        INSERT INTO tree_equipped_items(tree_equipped_items, workspace_id, item_id, member_id, equipped_at)
+        VALUES(seq_tree_equipped_items.NEXTVAL, #{work}, #{owned}, #{member}, SYSDATE)
+    </insert>
+</mapper>

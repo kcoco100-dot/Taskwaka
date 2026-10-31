@@ -8,6 +8,7 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tk.app.common.MyUtil;
 import com.tk.app.domain.dto.MeetingMinutesDto;
 import com.tk.app.mapper.MeetingMinutesMapper;
 import com.tk.app.repository.MeetingMinuteListView;
@@ -105,7 +106,7 @@ public class MeetingMinutesService {
 			long workspaceId, long memberId, long meetingMinuteId,
 			String title, String content) {
 		
-		return meetingMinuteRepository.meetingsEdit(workspaceId, meetingMinuteId, memberId, title, content);
+		return meetingMinuteRepository.meetingsEdit(workspaceId, meetingMinuteId, memberId, title, MyUtil.sanitize(content));
 	}
 	
 	// 워크 회의록 삭제

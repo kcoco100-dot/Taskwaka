@@ -78,7 +78,7 @@ public class StorageServiceImpl implements StorageService {
 			}
 			
 			// 확장자
-			String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+			String extension = storageExtension(originalFilename);
 			// 서버에 저장할 새로운 파일명
 			String saveFilename = fileManager.generateUniqueFileName(directoryPath, extension);
 			
@@ -133,7 +133,7 @@ public class StorageServiceImpl implements StorageService {
 			}
 			
 			// 확장자
-			String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+			String extension = storageExtension(originalFilename);
 			// 서버에 저장할 새로운 파일명
 			String saveFilename = fileManager.generateUniqueFileName(directoryPath, extension);
 			
@@ -150,6 +150,12 @@ public class StorageServiceImpl implements StorageService {
 		}
 	}
 	
+	private static String storageExtension(String filename) {
+		String basename = filename.substring(Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\')) + 1);
+		int dot = basename.lastIndexOf('.');
+		return dot > 0 && dot < basename.length() - 1 ? basename.substring(dot) : "";
+	}
+
 	/**
 	 * 파일 다운로드
 	 * @param directoryPath

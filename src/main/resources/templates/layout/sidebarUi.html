@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="label(icon, text)">
+    <span class="tw-nav-icon" aria-hidden="true" th:text="${icon}"></span>
+    <span th:text="${text}"></span>
+</th:block>
+<summary th:fragment="heading(icon, text)">
+    <th:block th:replace="~{layout/sidebarUi :: label(${icon}, ${text})}"></th:block>
+</summary>
+<a th:fragment="back" class="tw-nav-return" th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}">
+    <th:block th:replace="~{layout/sidebarUi :: label('↩️', '홈으로 돌아가기')}"></th:block>
+</a>
+</body>
+</html>

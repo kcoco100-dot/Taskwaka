@@ -1,5 +1,7 @@
 package com.tk.app.domain.dto;
 
+import com.tk.app.common.MyUtil;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,4 +40,7 @@ public class ManageNoticeDto {
 
     private String domainKey;
     private Long requester_member_id;
+    public void setContent(String content) {
+        this.content = MyUtil.sanitize(content);
+    }
 }

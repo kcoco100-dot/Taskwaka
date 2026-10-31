@@ -11,6 +11,7 @@ let currentOpenSubTaskId = null;
 let currentDetailRowElem = null;
 let currentDetailStatus = 0;
 let canEditCurrentSubTask = false;
+let detailViewVersion = 0;
 
 // 수정 취소 시 원래 값 복원을 위한 스냅샷 객체
 let originalDetailSnapshot = null;
@@ -50,6 +51,28 @@ function getTaskApiBaseUrl() {
 	return '/api/tasks';
 }
 
+function renderAttachedFilesList(files) {
+    const list = document.getElementById('attachedFileList');
+    if (!list) return;
+    list.replaceChildren();
+    const count = document.getElementById('attachedFileCount');
+    if (count) count.textContent = `(${files.length})`;
+    if (!files.length) list.textContent = '등록된 첨부파일이 없습니다.';
+    files.forEach(file => {
+        const link = document.createElement('a');
+        link.href = getTaskApiBaseUrl() + '/subtasks/' + currentOpenSubTaskId + '/files/' + file.fileId;
+        link.textContent = file.originalName;
+        list.append(link, document.createElement('br'));
+    });
+}
+
+// 업무를 전환하거나 편집을 끝내면 이전 요청 결과와 첨부 선택을 폐기한다.
+function resetDetailDraft() {
+	document.getElementById('detailFileUploadForm')?.reset();
+	originalDetailSnapshot = null;
+	return ++detailViewVersion;
+}
+
 function getCurrentProjectMemberId() {
 	const panel = document.getElementById('taskDetailSidePanel');
 	return Number(panel?.dataset.currentProjectMemberId || 0);
@@ -60,6 +83,8 @@ function getCurrentProjectMemberId() {
    ========================================================================== */
 async function openDetailPanel(taskId, rowElem) {
 	if (!taskId) return;
+	const version = resetDetailDraft();
+	renderAttachedFilesList([]);
 	
 	currentEntityType = 'TASK';
 	currentOpenTaskId = Number(taskId);
@@ -100,6 +125,7 @@ async function openDetailPanel(taskId, rowElem) {
 
 		if (!detailRes.ok) throw new Error('메인 업무 상세 조회 실패');
 		const data = await detailRes.json();
+		if (version !== detailViewVersion) return;
 		const task = data.task || data;
 		const subTasks = data.subTasks || task.subTasks || [];
 		//const taskMembers = membersRes.ok ? await membersRes.json() : [];
@@ -108,6 +134,7 @@ async function openDetailPanel(taskId, rowElem) {
 		bindDetailCommonFields(task);
 		renderDetailSubTasksList(subTasks, task);
 	} catch (err) {
+		if (version !== detailViewVersion) return;
 		console.error('openDetailPanel 에러:', err);
 		if (currentDetailRowElem) {
 			fallbackBindFromRow(currentDetailRowElem, 'TASK');
@@ -120,6 +147,8 @@ async function openDetailPanel(taskId, rowElem) {
    ========================================================================== */
 async function openSubTaskDetailPanel(subTaskId, rowElem) {
 	if (!subTaskId) return;
+	const version = resetDetailDraft();
+	renderAttachedFilesList([]);
 
 	currentEntityType = 'SUB_TASK';
 	currentOpenSubTaskId = Number(subTaskId);
@@ -157,7 +186,9 @@ async function openSubTaskDetailPanel(subTaskId, rowElem) {
 		if (!res.ok) throw new Error('하위업무 상세 조회 실패');
 
 		const data = await res.json();
+		if (version !== detailViewVersion) return;
 		const subTask = data.subTask || data;
+        renderAttachedFilesList(subTask.files || []);
 		currentOpenTaskId = subTask.taskId || currentOpenTaskId;
 
 		let candidateMembers = data.taskMembers || [];
@@ -167,15 +198,16 @@ async function openSubTaskDetailPanel(subTaskId, rowElem) {
 		}
 
 		/*populateAssigneeOptions(candidateMembers, subTask.projectMemberId, subTask.assigneeName);*/
+		if (version !== detailViewVersion) return;
 		bindDetailCommonFields(subTask);
 
 		// [핵심] 로그인한 사용자가 해당 하위업무 담당자일 때만 수정 버튼 및 일일보고서 작성 폼 노출
 		const loginPmId = getCurrentProjectMemberId();
 		const isSubTaskAssignee = Number(subTask.assigneeMemberId || subTask.projectMemberId) === Number(loginPmId);
-		canEditCurrentSubTask = isSubTaskAssignee;
+		canEditCurrentSubTask = isSubTaskAssignee || document.getElementById('taskDetailSidePanel')?.dataset.leader === 'true';
 
 		// 담당자 본인이면 조회 전용 해제(수정 버튼 노출), 아니면 조회 전용 배지 노출
-		setPanelReadonlyMode(!isSubTaskAssignee);
+		setPanelReadonlyMode(!canEditCurrentSubTask); // 담당자 또는 프로젝트 리더
 
 		const reportWriteBox = document.getElementById('dailyReportWriteFormBox');
 		if (reportWriteBox) {
@@ -184,6 +216,7 @@ async function openSubTaskDetailPanel(subTaskId, rowElem) {
 		resetDailyReportForm();
 		await loadDailyReports(subTaskId);
 	} catch (err) {
+		if (version !== detailViewVersion) return;
 		console.error('openSubTaskDetailPanel 에러:', err);
 		if (currentDetailRowElem) {
 			fallbackBindFromRow(currentDetailRowElem, 'SUB_TASK');
@@ -252,7 +285,6 @@ function enterDetailEditMode() {
 		projectMemberId: document.getElementById('detailAssigneeSelect')?.value || '',
 		startAt: document.getElementById('detailStartDate')?.value || '',
 		endAt: document.getElementById('detailEndDate')?.value || '',
-		progress: document.getElementById('detailProgressRange')?.value || '0',
 		content: document.getElementById('detailContentText')?.value || ''
 	};
 
@@ -271,7 +303,10 @@ function enterDetailEditMode() {
 
 	if (editBtn) editBtn.style.display = 'none';
 	if (delBtn) delBtn.style.display = 'none';
-	if (saveBtn) saveBtn.style.display = 'inline-block';
+	if (saveBtn) {
+		saveBtn.disabled = false;
+		saveBtn.style.display = 'inline-block';
+	}
 	if (cancelBtn) cancelBtn.style.display = 'inline-block';
 
 	document.getElementById('detailTaskTitle')?.focus();
@@ -293,7 +328,7 @@ function exitDetailEditModeUI() {
 	const readonlyBadge = document.getElementById('detailReadonlyBadge');
 
 	if (editBtn) editBtn.style.display = showEditBtns ? 'inline-block' : 'none';
-	if (delBtn) delBtn.style.display = showEditBtns ? 'inline-block' : 'none';
+	if (delBtn) delBtn.style.display = showEditBtns && document.getElementById('taskDetailSidePanel')?.dataset.leader === 'true' ? 'inline-block' : 'none';
 	if (saveBtn) saveBtn.style.display = 'none';
 	if (cancelBtn) cancelBtn.style.display = 'none';
 	if (readonlyBadge) readonlyBadge.style.display = showEditBtns ? 'none' : 'inline-flex';
@@ -308,21 +343,18 @@ function cancelDetailEditMode() {
 		const assigneeEl = document.getElementById('detailAssigneeSelect');
 		const startEl = document.getElementById('detailStartDate');
 		const endEl = document.getElementById('detailEndDate');
-		const progressEl = document.getElementById('detailProgressRange');
-		const progressLabel = document.getElementById('detailProgressLabel');
 		const contentEl = document.getElementById('detailContentText');
 
 		if (titleEl) titleEl.value = originalDetailSnapshot.title;
 		if (assigneeEl && assigneeEl.value !== undefined) assigneeEl.value = originalDetailSnapshot.projectMemberId;
 		if (startEl) startEl.value = originalDetailSnapshot.startAt;
 		if (endEl) endEl.value = originalDetailSnapshot.endAt;
-		if (progressEl) progressEl.value = originalDetailSnapshot.progress;
-		if (progressLabel) progressLabel.textContent = originalDetailSnapshot.progress + '%';
 		if (contentEl) contentEl.value = originalDetailSnapshot.content;
 
 		currentDetailStatus = parseInt(originalDetailSnapshot.status, 10) || 0;
 		updateDetailStatusBadgeUI(currentDetailStatus);
 	}
+	resetDetailDraft();
 	exitDetailEditModeUI();
 }
 
@@ -331,6 +363,9 @@ function cancelDetailEditMode() {
  */
 async function saveDetailEditMode() {
 	if (currentEntityType !== 'SUB_TASK' || !currentOpenSubTaskId) return;
+	const version = detailViewVersion;
+	const saveButton = document.getElementById('btnDetailSaveEdit');
+	if (saveButton?.disabled) return;
 
 	const newValues = {
 		title: document.getElementById('detailTaskTitle')?.value.trim() || '',
@@ -338,7 +373,6 @@ async function saveDetailEditMode() {
 		projectMemberId: document.getElementById('detailAssigneeSelect')?.value || '',
 		startAt: document.getElementById('detailStartDate')?.value || '',
 		endAt: document.getElementById('detailEndDate')?.value || '',
-		progress: document.getElementById('detailProgressRange')?.value || '0',
 		content: document.getElementById('detailContentText')?.value || ''
 	};
 
@@ -355,7 +389,6 @@ async function saveDetailEditMode() {
 	formData.append('status', newValues.status);
 	formData.append('startAt', newValues.startAt);
 	formData.append('endAt', newValues.endAt);
-	formData.append('progress', newValues.progress);
 	formData.append('content', newValues.content);
 	if (newValues.projectMemberId) {
 		formData.append('projectMemberId', newValues.projectMemberId);
@@ -368,7 +401,8 @@ async function saveDetailEditMode() {
 			formData.append('selectFile', file); // List<MultipartFile> selectFile
 		}
 	}
-		const baseUrl = getTaskApiBaseUrl();
+	const baseUrl = getTaskApiBaseUrl();
+	if (saveButton) saveButton.disabled = true;
 	try {
 		// 3. 단 한 번의 요청으로 텍스트 + 파일 동시 전송 (POST 또는 PUT)
 		const res = await fetch(`${baseUrl}/subtasks/${currentOpenSubTaskId}`, {
@@ -381,17 +415,13 @@ async function saveDetailEditMode() {
 			throw new Error('하위업무 수정 및 파일 업로드 실패');
 		}
 
-		const result = await res.json().catch(() => ({}));
-
-		// 서버에서 최신 파일 목록을 내려주면 렌더링, 아니면 화면에 즉시 추가
-		if (result.files || result.attachments) {
-			renderAttachedFilesList(result.files || result.attachments);
-		} else if (fileInput && fileInput.files.length > 0) {
-			appendNewlyUploadedFilesToUI(fileInput.files);
-		}
-
-		// 업로드 대기열 초기화
-		clearPendingUploadFiles();
+		const result = await res.json();
+		if (version !== detailViewVersion) return;
+		if (!result.success) throw new Error('하위업무 저장 실패');
+		renderAttachedFilesList(result.files || []);
+		document.getElementById('detailFileUploadForm')?.reset();
+		newValues.progress = result.progress;
+		renderDetailProgress(result.progress);
 
 		currentDetailStatus = parseInt(newValues.status, 10) || 0;
 		updateDetailStatusBadgeUI(currentDetailStatus);
@@ -404,8 +434,11 @@ async function saveDetailEditMode() {
 		syncUpdatedSubTaskToRow(newValues, selectedAssigneeName);
 		exitDetailEditModeUI();
 	} catch (err) {
+		if (version !== detailViewVersion) return;
 		console.error('saveDetailEditMode 오류:', err);
 		alert('수정 내용을 저장하는 중 오류가 발생했습니다.');
+	} finally {
+		if (version === detailViewVersion && saveButton) saveButton.disabled = false;
 	}
 }
 
@@ -443,14 +476,18 @@ function bindDetailCommonFields(item) {
 	if (startEl) startEl.value = formatDateOnly(item.startAt || item.start);
 	if (endEl) endEl.value = formatDateOnly(item.endAt || item.end);
 
-	const progVal = Number(item.progress || 0);
+	renderDetailProgress(item.progress);
+
+	const contentEl = document.getElementById('detailContentText');
+	if (contentEl) contentEl.value = item.content || '';
+}
+
+function renderDetailProgress(value) {
+	const progVal = Number(value || 0);
 	const progRange = document.getElementById('detailProgressRange');
 	const progLabel = document.getElementById('detailProgressLabel');
 	if (progRange) progRange.value = progVal;
 	if (progLabel) progLabel.textContent = `${progVal}%`;
-
-	const contentEl = document.getElementById('detailContentText');
-	if (contentEl) contentEl.value = item.content || '';
 }
 
 function updateDetailStatusBadgeUI(statusCode) {
@@ -468,11 +505,15 @@ function updateDetailStatusBadgeUI(statusCode) {
 
 function syncUpdatedSubTaskToRow(newValues, assigneeName) {
 	// 1. 일반 업무 목록 탭(.subtask-tr) 동기화
-	const taskRow = document.querySelector(`.subtask-tr[data-subtask-id="${currentOpenSubTaskId}"]`) 
+	const taskRow = document.querySelector(`.task-item-row.sub-task[data-subtask-id="${currentOpenSubTaskId}"], .subtask-tr[data-subtask-id="${currentOpenSubTaskId}"]`)
 		|| (currentDetailRowElem && currentDetailRowElem.classList.contains('subtask-tr') ? currentDetailRowElem : null);
 	if (taskRow) {
-		const titleSpan = taskRow.querySelector('.task-name-text');
+		const titleSpan = taskRow.querySelector('.task-title-text, .task-name-text');
 		if (titleSpan) titleSpan.textContent = newValues.title;
+		const fill = taskRow.querySelector('.progress-bar-fill');
+		const progressText = taskRow.querySelector('.progress-text');
+		if (fill) fill.style.width = newValues.progress + '%';
+		if (progressText) progressText.textContent = newValues.progress + '%';
 
 		const statusBadge = taskRow.querySelector('.badge-status');
 		if (statusBadge) {
@@ -580,7 +621,10 @@ function renderDetailSubTasksList(subTasks, parentTask) {
 /* ==========================================================================
    5. 일일 업무 보고서 (Daily Report) CRUD
    ========================================================================== */
+let reportListSequence = 0;
 async function loadDailyReports(subTaskId) {
+	const version = detailViewVersion;
+	const sequence = ++reportListSequence;
 	const listBox = document.getElementById('dailyReportListBox');
 	const countEl = document.getElementById('dailyReportCount');
 	if (!listBox) return;
@@ -591,6 +635,7 @@ async function loadDailyReports(subTaskId) {
 		if (!res.ok) throw new Error('일일 보고서 목록 조회 실패');
 
 		const reports = await res.json();
+		if (version !== detailViewVersion || sequence !== reportListSequence || Number(subTaskId) !== currentOpenSubTaskId) return;
 		if (countEl) countEl.textContent = `(${reports.length})`;
 
 		if (!Array.isArray(reports) || reports.length === 0) {
@@ -655,7 +700,7 @@ function resetDailyReportForm() {
 
 	if (idInput) idInput.value = '';
 	if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
-	if (progInput) progInput.value = document.getElementById('detailProgressRange')?.value || 0;
+	if (progInput) progInput.value = 0;
 	if (contentInput) contentInput.value = '';
 	if (titleSpan) titleSpan.textContent = '새 일일 보고서 작성';
 	if (cancelBtn) cancelBtn.style.display = 'none';
@@ -683,8 +728,38 @@ function startEditDailyReport(reportId, reportDate, progress, content) {
 	if (submitBtn) submitBtn.textContent = '보고서 수정 저장';
 }
 
+let reportRefreshSequence = 0;
+async function refreshDailyReportState(subTaskId, version) {
+	if (version !== detailViewVersion || currentOpenSubTaskId !== subTaskId) return;
+	const sequence = ++reportRefreshSequence;
+	try {
+		const response = await fetch(`${getTaskApiBaseUrl()}/subtasks/${subTaskId}`);
+		if (!response.ok) throw new Error();
+		const detail = await response.json();
+		if (version !== detailViewVersion || sequence !== reportRefreshSequence) return;
+		const progress = (detail.subTask || detail).progress;
+		renderDetailProgress(progress);
+		const row = document.querySelector(`.task-item-row[data-subtask-id="${subTaskId}"]`);
+		const fill = row?.querySelector('.progress-bar-fill');
+		const label = row?.querySelector('.progress-text');
+		if (fill) fill.style.width = progress + '%';
+		if (label) label.textContent = progress + '%';
+		const gantt = document.querySelector(`.gantt-tree-row[data-type="subtask"][data-id="${subTaskId}"]`);
+		if (gantt) {
+			gantt.dataset.progress = progress;
+			renderTimelineBars();
+		}
+	} catch {
+		if (version !== detailViewVersion || sequence !== reportRefreshSequence) return;
+		alert('보고서는 반영됐지만 진행률을 불러오지 못했습니다. 상세 패널을 다시 열어 주세요.');
+	}
+	await loadDailyReports(subTaskId);
+}
+
 async function submitDailyReportForm() {
 	if (!currentOpenSubTaskId) return;
+	const subTaskId = currentOpenSubTaskId;
+	const version = detailViewVersion;
 
 	const editingId = document.getElementById('editingDailyReportId')?.value;
 	const reportDate = document.getElementById('dailyReportDateInput')?.value;
@@ -724,14 +799,9 @@ async function submitDailyReportForm() {
 			throw new Error(errData.message || '보고서 저장에 실패했습니다.');
 		}
 
-		// 하위업무 진척도 표시 갱신
-		const progRange = document.getElementById('detailProgressRange');
-		const progLabel = document.getElementById('detailProgressLabel');
-		if (progRange) progRange.value = progress;
-		if (progLabel) progLabel.textContent = `${progress}%`;
-
+		if (version !== detailViewVersion) return;
 		resetDailyReportForm();
-		await loadDailyReports(currentOpenSubTaskId);
+		await refreshDailyReportState(subTaskId, version);
 	} catch (err) {
 		console.error('submitDailyReportForm 에러:', err);
 		alert(err.message || '일일 보고서 처리 중 오류가 발생했습니다.');
@@ -739,6 +809,8 @@ async function submitDailyReportForm() {
 }
 
 async function deleteDailyReport(dailyReportId) {
+	const subTaskId = currentOpenSubTaskId;
+	const version = detailViewVersion;
 	if (!dailyReportId || !confirm('이 일일 보고서를 삭제하시겠습니까?\n(상급자가 이미 열람/검토한 보고서는 삭제할 수 없습니다.)')) {
 		return;
 	}
@@ -755,7 +827,7 @@ async function deleteDailyReport(dailyReportId) {
 			throw new Error(errData.message || '상급자가 이미 확인하여 삭제할 수 없습니다.');
 		}
 
-		await loadDailyReports(currentOpenSubTaskId);
+		await refreshDailyReportState(subTaskId, version);
 	} catch (err) {
 		console.error('deleteDailyReport 에러:', err);
 		alert(err.message);
@@ -766,6 +838,8 @@ async function deleteDailyReport(dailyReportId) {
    6. 패널 닫기 / 하위업무 모달 연동 / 유틸리티
    ========================================================================== */
 function closeDetailPanel() {
+	resetDetailDraft();
+	currentOpenSubTaskId = null;
 	const panel = document.getElementById('taskDetailSidePanel');
 	if (panel) {
 		panel.classList.remove('open');
@@ -781,17 +855,12 @@ function closeDetailPanel() {
 
 function detailAddSubtaskClick() {
 	if (!currentOpenTaskId) return;
-	if (typeof openSubtaskModal === 'function') {
-		openSubtaskModal(currentOpenTaskId);
-	}
+	requestCreateSubTask(currentOpenTaskId);
 }
 
 function requestDeleteCurrentSubTask() {
 	if (!currentOpenSubTaskId) return;
-	if (typeof openDeleteSubTaskModal === 'function') {
-		const titleVal = document.getElementById('detailTaskTitle')?.value || '하위업무';
-		openDeleteSubTaskModal(currentOpenSubTaskId, titleVal);
-	}
+	openDeleteModal('subtask', currentOpenSubTaskId, null);
 }
 
 /*function handleFileUpload(inputElem) {

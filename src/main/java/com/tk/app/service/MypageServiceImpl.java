@@ -119,14 +119,8 @@ public class MypageServiceImpl implements MypageService {
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String updateProfile(Long memberId, MultipartFile file) throws Exception {
-        MypageDto current = mapper.findMyInfo(memberId);
-
-        if (current == null) {
-            throw new IllegalStateException("회원정보를 찾을 수 없습니다.");
-        }
-
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("사진을 선택해주세요.");
         }
@@ -146,34 +140,12 @@ public class MypageServiceImpl implements MypageService {
             throw new IllegalArgumentException("JPG 또는 PNG 이미지만 가능합니다.");
         }
 
-        String filename = null;
-
-        try {
-            filename = storageService.uploadFileToServer(file, uploadPath);
-
-            if (filename == null || filename.isBlank()) {
-                throw new IllegalStateException("사진 업로드에 실패했습니다.");
-            }
-
-            MypageDto dto = new MypageDto();
-            dto.setMemberId(memberId);
-            dto.setProfile(filename);
-
-            if (mapper.updateProfile(dto) != 1) {
-                throw new IllegalStateException("프로필 사진 변경에 실패했습니다.");
-            }
-
-        } catch (Exception e) {
-            if (filename != null) {
-                deleteProfileFile(filename);
-            }
-            
-            log.error("프로필 사진 변경 오류", e);
-            throw e;
+        MypageDto current = findProfileForUpdate(memberId);
+        String filename = storageService.uploadFileToServer(file, uploadPath);
+        if (filename == null || filename.isBlank()) {
+            throw new IllegalStateException("사진 업로드에 실패했습니다.");
         }
-        
-        deleteProfileFile(current.getProfile());
-
+        changeProfile(current, filename);
         return filename;
     }
 
@@ -181,21 +153,41 @@ public class MypageServiceImpl implements MypageService {
     @Override
     @Transactional
     public void deleteProfile(Long memberId) throws Exception {
-        MypageDto current = mapper.findMyInfo(memberId);
+        changeProfile(findProfileForUpdate(memberId), null);
+    }
 
+    private MypageDto findProfileForUpdate(Long memberId) {
+        // 같은 회원의 사진 교체·삭제·탈퇴가 직전 파일명을 동시에 읽지 않도록 한다.
+        if (mapper.lockMemberForWithdrawal(memberId) == null) {
+            throw new IllegalStateException("회원정보를 찾을 수 없습니다.");
+        }
+        MypageDto current = mapper.findMyInfo(memberId);
         if (current == null) {
             throw new IllegalStateException("회원정보를 찾을 수 없습니다.");
         }
+        return current;
+    }
 
+    private void changeProfile(MypageDto current, String filename) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status == STATUS_COMMITTED) {
+                    deleteProfileFile(current.getProfile());
+                } else if (status == STATUS_ROLLED_BACK) {
+                    deleteProfileFile(filename);
+                } else {
+                    log.warn("프로필 변경 트랜잭션 결과 확인 필요: memberId={}, 이전={}, 신규={}",
+                            current.getMemberId(), current.getProfile(), filename);
+                }
+            }
+        });
         MypageDto dto = new MypageDto();
-        dto.setMemberId(memberId);
-        dto.setProfile(null);
-
+        dto.setMemberId(current.getMemberId());
+        dto.setProfile(filename);
         if (mapper.updateProfile(dto) != 1) {
-            throw new IllegalStateException("프로필 사진 삭제에 실패했습니다.");
+            throw new IllegalStateException("프로필 사진 변경에 실패했습니다.");
         }
-
-        deleteProfileFile(current.getProfile());
     }
     
 	 @Override

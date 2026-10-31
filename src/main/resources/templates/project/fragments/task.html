@@ -33,43 +33,16 @@
 			<aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
 		</div>
 		
-		<div th:replace="~{project/fragments/task_items :: taskCreateModal}"></div>
-		<div th:replace="~{project/fragments/task_items :: reportSubmitModal}"></div>
-
-		<!-- 삭제 확인 모달 -->
-		<div class="custom-modal-backdrop" id="deleteConfirmModal" onclick="handleBackdropClick(event)">
-			<div class="custom-modal-card">
-				<div class="modal-header-area">
-					<div class="modal-icon-badge">⚠️</div>
-					<div class="modal-title-group">
-						<div class="modal-main-title" id="modalTargetTitle">하위업무 삭제 확인</div>
-						<div class="modal-desc-text" id="modalDescNotice">선택한 하위업무를 영구 삭제하시겠습니까?</div>
-					</div>
-				</div>
-				<div class="modal-actions-area">
-					<button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">취소</button>
-					<button type="button" class="btn-modal-confirm" onclick="executeConfirmedDelete()">삭제하기</button>
-				</div>
-			</div>
-		</div>
 		<script th:inline="javascript">
 			/*<![CDATA[*/
 			const currentDomainKey = /*[[${domainKey}]]*/ 'apple';
 			const currentProjectId = /*[[${projectId}]]*/ 1;
 			const currentProjectMemberId = /*[[${currentProjectMemberId}]]*/ 1;
 			/*]]>*/
-			
-			modalBackground.addEventListener('click', (e) => {
-			  if (e.target === modalBackground) {
-			    e.stopPropagation(); 
-			  }
-			});
-			
 		</script>
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>	
 		<script type="text/javascript" src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 		<script type="text/javascript" th:src="@{/dist/vendor/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
-		<script th:src="@{/dist/js/project/task.js}"></script>
 	</div>
 </body>
 </html>

@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"><body>
+<section th:fragment="content"><h2>중복 로그인 정책</h2>
+<form method="post" th:action="@{/admin/security}">
+<input type="hidden" name="nonce" th:value="${policyNonce}">
+<label><input type="radio" name="limited" value="true" th:checked="${limited}"> 한 계정당 한 세션 · 새 로그인 시 이전 세션 종료</label>
+<label><input type="radio" name="limited" value="false" th:checked="${!limited}"> 여러 기기에서 로그인 허용</label>
+<button type="submit">정책 저장</button></form></section></body></html>

@@ -1,5 +1,11 @@
 package com.tk.app.admin.controller;
 
+import com.tk.app.security.LoginSessionPolicy;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.UUID;
+import org.springframework.http.HttpStatus;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
@@ -35,6 +41,7 @@ public class AdminController {
 	private final PaginateUtil paginateUtil;
 	private final LoginHistoryService loginHistoryService;
 	private final AdminStatsService adminStatsService;
+    private final LoginSessionPolicy sessionPolicy;
 
     @GetMapping
     public String adminMain() {
@@ -284,8 +291,30 @@ public class AdminController {
     }
 
     @GetMapping("/security")
-    public String security(Model model) {
+    public String security(Model model, HttpSession session) {
+        String nonce = UUID.randomUUID().toString();
+        session.setAttribute("adminSessionPolicyNonce", nonce);
+        model.addAttribute("policyNonce", nonce);
+        model.addAttribute("limited", sessionPolicy.isLimited());
         return adminPage("security", model);
+    }
+
+    @PostMapping("/security")
+    public String changeSecurity(@RequestParam("limited") boolean limited, @RequestParam("nonce") String nonce,
+                                 HttpSession session, jakarta.servlet.http.HttpServletResponse response) throws IOException {
+        if (!nonce.equals(session.getAttribute("adminSessionPolicyNonce"))) {
+            response.sendError(403);
+            return null;
+        }
+        try {
+            sessionPolicy.change(limited);
+        } catch (IOException ex) {
+            log.error("세션 정책을 저장하지 못했습니다.", ex);
+            response.sendError(500);
+            return null;
+        }
+        session.removeAttribute("adminSessionPolicyNonce");
+        return "redirect:/admin/security";
     }
 
     private String adminPage(String section, Model model) {

@@ -38,8 +38,10 @@ public class ChatController {
 	}
 	
 	@MessageMapping("/chat.whisper")
-	public void privateMessage(ChatMessage message) {
-		messagingTemplate.convertAndSend("/queue/private/" + message.getReceiver(), message);
+	public void privateMessage(ChatMessage message, Principal principal) {
+        if (principal == null || message.getReceiver() == null || message.getReceiver().isBlank()) return;
+        message.setSender(principal.getName());
+        messagingTemplate.convertAndSendToUser(message.getReceiver(), "/queue/private", message);
 	}
 	
 	@MessageMapping("/chat.test")

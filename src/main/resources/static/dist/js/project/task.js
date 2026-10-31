@@ -3,10 +3,7 @@
    ========================================================================== */
 let pendingDeleteContext = null;
 
-let createSubModalContext = {
-  parentTaskId: null,
-  statusCode: 0
-};
+let createSubModalContext = null;
 
 // 1. 하위업무 등록 모달 오픈 (상위 업무의 task_members 동적 로드)
 async function requestCreateSubTask(taskId) {
@@ -18,7 +15,6 @@ async function requestCreateSubTask(taskId) {
   const modal = document.getElementById('taskCreateModal');
   const titleInput = document.getElementById('createTaskTitleInput');
   const contentInput = document.getElementById('createTaskContentInput');
-  const assigneeSelect = document.getElementById('createAssigneeSelect');
   const startDateInput = document.getElementById('createStartDateInput');
   const endDateInput = document.getElementById('createEndDateInput');
   const statusBadge = document.getElementById('createStatusBadge');
@@ -36,54 +32,55 @@ async function requestCreateSubTask(taskId) {
   statusBadge.className = 'badge-status badge-req';
   statusText.textContent = '● 예정';
 
-  // 상위 업무에 배정된 참여 인원(task_members) 목록 조회하여 드롭다운 구성
-  assigneeSelect.innerHTML = '<option value="">불러오는 중...</option>';
-  try {
-    const res = await fetch(`/${currentDomainKey}/project/${currentProjectId}/api/tasks/${taskId}/members`);
-	console.log(res);
-    if (res.ok) {
-      const members = await res.json();
-      assigneeSelect.innerHTML = '';
-      if (members && members.length > 0) {
-        members.forEach(m => {
-          const opt = document.createElement('option');
-          opt.value = m.projectMemberId;
-          opt.textContent = m.memberName;
-          assigneeSelect.appendChild(opt);
-        });
-      } else {
-        assigneeSelect.innerHTML = '<option value="1">기본 담당자 (#1)</option>';
-      }
-    }
-  } catch (err) {
-    console.error('참여 인원 조회 실패:', err);
-    assigneeSelect.innerHTML = '<option value="1">기본 담당자 (#1)</option>';
-  }
-
   modal.classList.add('show');
-  setTimeout(() => titleInput.focus(), 50);
+  titleInput.focus();
+  await loadSubTaskAssignees();
+}
+
+async function loadSubTaskAssignees() {
+  const context = createSubModalContext;
+  if (!context) return;
+  const select = document.getElementById('createAssigneeSelect');
+  const submit = document.getElementById('createSubTaskSubmit');
+  const retry = document.getElementById('retryCreateAssignees');
+  select.disabled = submit.disabled = true;
+  retry.hidden = true;
+  select.replaceChildren(new Option('불러오는 중...', ''));
+  try {
+    const res = await fetch(`${getTaskApiBaseUrl()}/${context.parentTaskId}/members`);
+    if (!res.ok) throw new Error('담당자 조회 실패');
+    const members = await res.json();
+    if (context !== createSubModalContext) return;
+    if (!members.length) {
+      select.replaceChildren(new Option('배정 가능한 담당자가 없습니다.', ''));
+      retry.hidden = false;
+      return;
+    }
+    select.replaceChildren(...members.map(m => new Option(m.memberName, m.projectMemberId)));
+    select.disabled = submit.disabled = false;
+  } catch (err) {
+    if (context !== createSubModalContext) return;
+    console.error('참여 인원 조회 실패:', err);
+    select.replaceChildren(new Option('담당자를 불러오지 못했습니다.', ''));
+    retry.hidden = false;
+  }
 }
 
 function closeCreateTaskModal() {
+  createSubModalContext = null;
   const modal = document.getElementById('taskCreateModal');
   if (modal) modal.classList.remove('show');
 }
 
-function handleCreateBackdropClick(e) {
-  if (e.target === document.getElementById('taskCreateModal')) {
-    closeCreateTaskModal();
-  }
+function cycleCreateModalStatus() {
+  createSubModalContext.statusCode = (createSubModalContext.statusCode + 1) % Object.keys(DETAIL_STATUS_MAP).length;
+  const next = DETAIL_STATUS_MAP[createSubModalContext.statusCode];
+  document.getElementById('createStatusBadge').className = 'badge-status ' + next.cls;
+  document.getElementById('createStatusText').textContent = next.text;
 }
 
-function cycleCreateModalStatus() {
-  createSubModalContext.statusCode = (createSubModalContext.statusCode + 1) % panelStatusMap.length;
-  const next = panelStatusMap[createSubModalContext.statusCode];
-  document.getElementById('createStatusBadge').className = 'badge-status ' + next.class;
-  document.getElementById('createStatusText').textContent = next.text;
-}//panelStatusMap 정의 필요 ... 
-
 async function submitCreateSubTaskModal() {
-  const taskId = createSubModalContext.parentTaskId;
+  const taskId = createSubModalContext?.parentTaskId;
   if (!taskId) return;
 
   const titleInput = document.getElementById('createTaskTitleInput');
@@ -99,7 +96,7 @@ async function submitCreateSubTaskModal() {
   const endAt = endDateInput.value;
 
   if (!title) { alert('하위업무 제목을 입력해 주세요.'); titleInput.focus(); return; }
-  if (!projectMemberId) { alert('하위업무 담당자를 선택해 주세요.'); assigneeSelect.focus(); return; }
+  if (assigneeSelect.disabled || !projectMemberId) { alert('하위업무 담당자를 선택해 주세요.'); assigneeSelect.focus(); return; }
   if (!content) { alert('상세 내용을 입력해 주세요.'); contentInput.focus(); return; }
 
   const formData = new URLSearchParams();
@@ -120,7 +117,11 @@ async function submitCreateSubTaskModal() {
     if (!res.ok) throw new Error('하위 업무 생성 요청 실패');
 
     const htmlFragment = await res.text();
-    const branchLi = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (!document.getElementById('taskTreeMainPage')) {
+      location.reload();
+      return;
+    }
+    const branchLi = document.querySelector(`.task-branch[data-task-id="${taskId}"]`);
     if (branchLi) {
       const subTaskList = branchLi.querySelector('.sub-task-list');
       subTaskList.insertAdjacentHTML('beforeend', htmlFragment);
@@ -138,6 +139,9 @@ async function submitCreateSubTaskModal() {
       }
     }
     closeCreateTaskModal();
+    if (currentEntityType === 'TASK' && currentOpenTaskId === Number(taskId)) {
+      await openDetailPanel(taskId, currentDetailRowElem);
+    }
   } catch (err) {
     console.error('하위업무 등록 오류:', err);
     alert('하위업무 등록 중 오류가 발생했습니다.');
@@ -158,8 +162,7 @@ function closeDeleteModal() {
 }
 
 function handleBackdropClick(e) {
-	if (e.target === document.getElementById('deleteConfirmModal'))
-	    e.stopPropagation();
+  if (e.target === e.currentTarget) e.stopPropagation();
 }
 
 async function executeConfirmedDelete() {
@@ -173,6 +176,10 @@ async function executeConfirmedDelete() {
     if (!res.ok) throw new Error('하위업무 삭제 실패');
     await res.json();
 
+    if (!document.getElementById('taskTreeMainPage')) {
+      location.reload();
+      return;
+    }
     const subLi = btnElement
       ? btnElement.closest('.task-item-row.sub-task')
       : document.querySelector(`.task-item-row.sub-task[data-subtask-id="${targetId}"]`);
@@ -193,6 +200,7 @@ async function executeConfirmedDelete() {
     closeDeleteModal();
   } catch (err) {
     console.error('하위업무 삭제 오류:', err);
+    alert('하위업무를 삭제하지 못했습니다.');
   }
 }
 
@@ -221,7 +229,9 @@ async function requestCreateReport(taskId, isTask, progress = 0) {
   isTaskInput.value = isTask;
   titleInput.value = '';
   contentInput.value = '';
-  progressInput.value = progress || 0;
+  const dailyReport = isTask === 'subTask';
+  document.getElementById('createReportProgressLabel').textContent = dailyReport ? '오늘 증가분 (%)' : '진행률 (%)';
+  progressInput.value = dailyReport ? 0 : (progress || 0);
 
   const today = new Date();
   dateInput.value = today.toISOString().split('T')[0];
@@ -233,14 +243,6 @@ async function requestCreateReport(taskId, isTask, progress = 0) {
 function closeCreateReportModal() {
   const modal = document.getElementById('reportCreateModal');
   if (modal) modal.classList.remove('show');
-}
-
-function handleCreateBackdropClick(e) {
-  if (e.target === document.getElementById('taskCreateModal')) {
-    e.stopPropagation
-  }else if(e.target === document.getElementById('reportCreateModal')){
-	e.stopPropagation
-  }
 }
 
 // 4. 보고서 submit
@@ -256,6 +258,7 @@ async function submitCreateReportModal() {
   const content = contentInput.value.trim();
   const projectMemberId = memberIdInput.value;
   const isTask = document.getElementById('isTaskInput').value;
+  const panelVersion = detailViewVersion;
 
   if (!title) { alert('보고서 제목을 입력해 주세요.'); titleInput.focus(); return; }
   if (!content) { alert('상세 내용을 입력해 주세요.'); contentInput.focus(); return; }
@@ -309,6 +312,9 @@ async function submitCreateReportModal() {
 	}
 
     closeCreateReportModal();
+    if (isTask === 'subTask') {
+      await refreshDailyReportState(Number(taskId), panelVersion);
+    }
   } catch (err) {
     console.error('보고서 작성 실패:', err);
     alert('보고서 작성 중 오류가 발생했습니다.');
@@ -317,9 +323,10 @@ async function submitCreateReportModal() {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    if (!document.querySelector('.project-task-dialogs .custom-modal-backdrop.show')) return;
+    e.stopImmediatePropagation();
 	closeCreateReportModal();
     closeCreateTaskModal();
     closeDeleteModal();
-    closeDetailPanel();
   }
-});
+}, true);

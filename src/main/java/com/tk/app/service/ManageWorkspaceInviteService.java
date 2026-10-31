@@ -5,7 +5,7 @@ import java.util.Map;
 import com.tk.app.domain.dto.ManageInviteDto;
 
 public interface ManageWorkspaceInviteService {
-    void sendInvitesAndMail(Map<String, Object> map) throws Exception;
+    List<Long> sendInvitesAndMail(Map<String, Object> map) throws Exception;
     List<ManageInviteDto> getSearchEligibleMembers(Map<String, Object> map);
     void acceptInvite(Map<String, Object> map) throws Exception;
 }

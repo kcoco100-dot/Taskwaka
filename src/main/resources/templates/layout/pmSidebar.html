@@ -1,76 +1,101 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-<nav th:fragment="manageSidebar(activeMenu)" id="sidemenu" class="sidemenu" aria-label="PM 메뉴">
-    <ul class="manage-menu">
-        <li class="menu-group">
-            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="dashboard-submenu">
-                대시보드<span aria-hidden="true">⌄</span>
-            </button>
-            <ul id="dashboard-submenu" class="submenu">
-                <li><a th:href="@{/{domainKey}/manage/pmDashboard(domainKey=${domainKey})}" th:classappend="${activeMenu == 'pmDashboard' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'pmDashboard' ? 'page' : null}">대시보드</a></li>
+<nav th:fragment="manageSidebar(activeMenu)" id="sidemenu" class="sidemenu tw-sidebar" aria-label="PM 메뉴">
+    <div class="tw-nav-groups manage-menu">
+        <details class="tw-nav-group" open>
+            <summary th:replace="~{layout/sidebarUi :: heading('📚', '대시보드')}"></summary>
+            <ul class="tw-nav-items">
+                <li>
+                    <a th:href="@{/{domainKey}/manage/pmDashboard(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'pmDashboard' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📚', '대시보드')}"></th:block>
+                    </a>
+                </li>
                 <li>
                     <a th:href="@{/{domainKey}/manage/gantt(domainKey=${domainKey})}"
-                       th:classappend="${activeMenu == 'gantt' ? 'active' : ''}"
-                       th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">프로젝트 간트차트</a>
+                       th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📉', '프로젝트 간트차트')}"></th:block>
+                    </a>
                 </li>
             </ul>
-        </li>
-        <li class="menu-group">
-            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="member-submenu">
-                팀원관리<span aria-hidden="true">⌄</span>
-            </button>
-            <ul id="member-submenu" class="submenu">
-            	<li th:if="${manageWorkspaceRole == 70}"><a th:href="@{/{domainKey}/manage/workspaceRoles(domainKey=${domainKey})}" th:classappend="${activeMenu == 'workspaceRoles' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'workspaceRoles' ? 'page' : null}">워크 직위 관리</a></li>
-				<li><a id="member-info-btn" class="manage-menu-button" th:href="@{/{domainKey}/manage/manage(domainKey=${domainKey})}" th:classappend="${activeMenu == 'manage' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'manage' ? 'page' : null}"> 팀원 정보 조회</a></li>
-                <li th:if="${manageWorkspaceRole >= 50}"><a th:href="@{/{domainKey}/manage/invitation(domainKey=${domainKey})}" th:classappend="${activeMenu == 'invitation' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'invitation' ? 'page' : null}">팀원 초대하기</a></li>
+        </details>
+        <details class="tw-nav-group" open>
+            <summary th:replace="~{layout/sidebarUi :: heading('👥', '팀원관리')}"></summary>
+            <ul class="tw-nav-items">
+                <li th:if="${manageWorkspaceRole == 70}">
+                    <a th:href="@{/{domainKey}/manage/workspaceRoles(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'workspaceRoles' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('🏷️', '워크 직위 관리')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a id="member-info-btn" th:href="@{/{domainKey}/manage/manage(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'manage' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('👥', '팀원 정보 조회')}"></th:block>
+                    </a>
+                </li>
+                <li th:if="${manageWorkspaceRole >= 50}">
+                    <a th:href="@{/{domainKey}/manage/invitation(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'invitation' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('✉️', '팀원 초대하기')}"></th:block>
+                    </a>
+                </li>
             </ul>
-        </li>
-        <li class="menu-group">
-            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="project-submenu">
-                프로젝트 관리<span aria-hidden="true">⌄</span>
-            </button>
-            <ul id="project-submenu" class="submenu">
-                <li><a th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}" th:classappend="${activeMenu == 'view' or activeMenu == 'projectView' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'view' or activeMenu == 'projectView' ? 'page' : null}">프로젝트 조회</a></li>
-                <li><a th:href="@{/{domainKey}/manage/projectMembers(domainKey=${domainKey})}" th:classappend="${activeMenu == 'projectMembers' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projectMembers' ? 'page' : null}">프로젝트 인원관리</a></li>
-                <li><a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}" th:classappend="${activeMenu == 'approval' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'approval' ? 'page' : null}">보고서 결재</a></li>
-                <li><a th:href="@{/{domainKey}/manage/meetings(domainKey=${domainKey})}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'meetings' ? 'page' : null}">회의록</a></li>
+        </details>
+        <details class="tw-nav-group" open>
+            <summary th:replace="~{layout/sidebarUi :: heading('📁', '프로젝트 관리')}"></summary>
+            <ul class="tw-nav-items">
+                <li>
+                    <a th:href="@{/{domainKey}/manage/view(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'view' or activeMenu == 'projectView' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📁', '프로젝트 조회')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/manage/projectMembers(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'projectMembers' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('👥', '프로젝트 인원관리')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/manage/approval(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'approval' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('✅', '보고서 결재')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/manage/meetings(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'meetings' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📝', '회의록')}"></th:block>
+                    </a>
+                </li>
             </ul>
-        </li>
-
-		<li class="menu-group">
-		    <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="calendar-submenu">캘린더<span aria-hidden="true">⌄</span></button>
-		
-		    <ul id="calendar-submenu" class="submenu">
-		        <li><a th:href="@{/{domainKey}/manage/calender(domainKey=${domainKey})}" th:classappend="${activeMenu == 'calender' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'calender' ? 'page' : null}">프로젝트 캘린더</a></li>
-		    </ul>
-		</li>
-
-        <li class="menu-group">
-            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="notice-submenu">
-                공지사항<span aria-hidden="true">⌄</span>
-            </button>
-            <ul id="notice-submenu" class="submenu">
-                 <li><a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}" th:classappend="${activeMenu == 'noticeList' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'noticeList' ? 'page' : null}">공지사항 조회</a></li>
+        </details>
+        <details class="tw-nav-group" open>
+            <summary th:replace="~{layout/sidebarUi :: heading('🗓️', '캘린더')}"></summary>
+            <ul class="tw-nav-items">
+                <li>
+                    <a th:href="@{/{domainKey}/manage/calender(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'calender' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('🗓️', '프로젝트 캘린더')}"></th:block>
+                    </a>
+                </li>
             </ul>
-        </li>
-        <li class="menu-group">
-            <button type="button" class="menu-toggle" aria-expanded="true" aria-controls="plan-submenu">
-                요금제 관리<span aria-hidden="true">⌄</span>
-            </button>
-            <ul id="plan-submenu" class="submenu">
-                <li><a th:href="@{/plan}" th:classappend="${activeMenu == 'plan' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'plan' ? 'page' : null}">요금제 조회</a></li>
-                <li><a th:href="@{/planPayment}" th:classappend="${activeMenu == 'planPayment' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'planPayment' ? 'page' : null}">요금제 결제</a></li>
+        </details>
+        <details class="tw-nav-group" open>
+            <summary th:replace="~{layout/sidebarUi :: heading('📢', '공지사항')}"></summary>
+            <ul class="tw-nav-items">
+                <li>
+                    <a th:href="@{/{domainKey}/manage/noticeList(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'noticeList' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📢', '공지사항 조회')}"></th:block>
+                    </a>
+                </li>
             </ul>
-        </li>
-        
-		<div class="menu-group">
-			<div class="return-home">
-				<a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}"> 홈으로 돌아가기 </a>
-			</div>
-		</div>
-        
-    </ul>
+        </details>
+        <a th:replace="~{layout/sidebarUi :: back}"></a>
+    </div>
 </nav>
 </body>
 </html>

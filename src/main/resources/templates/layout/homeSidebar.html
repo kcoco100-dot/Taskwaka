@@ -1,17 +1,61 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-<nav th:fragment="homeSidebar(activeMenu)" id="sidemenu" class="sidemenu" aria-label="HOME 메뉴">
-    <ul class="project-menu-group">
-        <li><a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}" th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'dashboard' ? 'page' : null}">📚대시보드</a></li>
-        <li><a th:href="@{/{domainKey}/home/calendar(domainKey=${domainKey})}" th:classappend="${activeMenu == 'calendar' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'calendar' ? 'page' : null}">🗓️캘린더</a></li>
-        <li><a th:href="@{/{domainKey}/home/gantt(domainKey=${domainKey})}" th:classappend="${activeMenu == 'gantt' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">📉간트차트</a></li>
-        <li><a th:href="@{/{domainKey}/home/growthTree(domainKey=${domainKey})}" th:classappend="${activeMenu == 'growthTree' ? 'active' : ''}">🌳팀 성장나무</a></li>
-        <li><a th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}" th:classappend="${activeMenu == 'meetings' ? 'active' : ''}">📝회의록</a></li>
-        <li><a th:href="@{/{domainKey}/home/projects(domainKey=${domainKey})}" th:classappend="${activeMenu == 'projects' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'projects' ? 'page' : null}">📃참여 프로젝트</a></li>
-        <li><a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}" th:classappend="${activeMenu == 'notice' ? 'active' : ''}" th:attr="aria-current=${activeMenu == 'notice' ? 'page' : null}">📢공지사항</a></li>
-    		<li th:if="${manageWorkspaceRole == 50 or manageWorkspaceRole == 70}"><a th:href="@{/{domainKey}/manage/pmDashboard(domainKey=${domainKey})}">🎏관리페이지</a></li>
-    </ul>
+<nav th:fragment="homeSidebar(activeMenu)" id="sidemenu" class="sidemenu tw-sidebar" aria-label="HOME 메뉴">
+    <div class="tw-nav-groups">
+        <details class="tw-nav-group" open>
+            <summary th:replace="~{layout/sidebarUi :: heading('🏠', '홈')}"></summary>
+            <ul class="tw-nav-items">
+                <li>
+                    <a th:href="@{/{domainKey}/home/dashboard(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'dashboard' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📚', '대시보드')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/home/calendar(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'calendar' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('🗓️', '캘린더')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/home/gantt(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'gantt' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📉', '간트차트')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/home/growthTree(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'growthTree' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('🌳', '팀 성장나무')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/home/meetings(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'meetings' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📝', '회의록')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/home/projects(domainKey=${domainKey})}"
+                       th:attr="aria-current=${activeMenu == 'projects' ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📃', '참여 프로젝트')}"></th:block>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/{domainKey}/home/notice(domainKey=${domainKey})}"
+                       th:attr="aria-current=${#strings.startsWith(activeMenu, 'notice') ? 'page' : null}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('📢', '공지사항')}"></th:block>
+                    </a>
+                </li>
+                <li th:if="${manageWorkspaceRole == 50 or manageWorkspaceRole == 70}">
+                    <a th:href="@{/{domainKey}/manage/pmDashboard(domainKey=${domainKey})}">
+                        <th:block th:replace="~{layout/sidebarUi :: label('🎏', '관리페이지')}"></th:block>
+                    </a>
+                </li>
+            </ul>
+        </details>
+    </div>
 </nav>
 </body>
 </html>

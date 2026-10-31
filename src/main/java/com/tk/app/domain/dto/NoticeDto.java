@@ -1,5 +1,7 @@
 package com.tk.app.domain.dto;
 
+import com.tk.app.common.MyUtil;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,4 +21,7 @@ public class NoticeDto {
 	private String createdAt; // 등록일
 	private Long viewCount; // 조회수
 	
+    public void setContent(String content) {
+        this.content = MyUtil.sanitize(content);
+    }
 }

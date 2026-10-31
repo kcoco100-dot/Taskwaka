@@ -1,6 +1,11 @@
 
 package com.tk.app.oauth;
 
+import com.tk.app.controller.InviteAcceptanceController;
+import com.tk.app.security.LoginSessionPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
+
 import java.security.SecureRandom;
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -40,6 +45,8 @@ import lombok.RequiredArgsConstructor;
 public class KakaoController {
 
     private final KakaoAuthService kakaoAuthService;
+    private final LoginSessionPolicy sessionPolicy;
+    private final SessionRegistry sessions;
     private final MemberService memberService;
     private final UserDetailsService userDetailsService;
     private final LoginHistoryService loginHistoryService;
@@ -216,7 +223,11 @@ public class KakaoController {
             
             loginHistoryService.insertLoginHistory(member_id);
             
+            var concurrency = new ConcurrentSessionControlAuthenticationStrategy(sessions);
+            concurrency.setMaximumSessions(sessionPolicy::maximum);
+            concurrency.onAuthentication(authentication, request, response);
             request.changeSessionId();
+            sessions.registerNewSession(request.getSession().getId(), authentication.getPrincipal());
 
             SecurityContext context =
                     SecurityContextHolder.createEmptyContext();
@@ -229,7 +240,7 @@ public class KakaoController {
 
             return ResponseEntity.status(302)
                     .header(HttpHeaders.LOCATION,
-                            request.getContextPath() + "/main")
+                            request.getContextPath() + InviteAcceptanceController.afterLogin(request, response, "/main"))
                     .build();
 
 

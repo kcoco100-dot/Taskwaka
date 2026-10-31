@@ -7,13 +7,9 @@
 		<link rel="stylesheet" th:href="@{/dist/css/project/task_notice.css}">
 		<link rel="stylesheet" th:href="@{/dist/css/paginate.css}">
 		<!-- Quill Rich Text Editor -->
-		<link
-			href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
-			rel="stylesheet">
+		<link th:href="@{/dist/vendor/quill/css/quill.snow.css}" rel="stylesheet">
 		<!-- Quill Editor Image Resize CSS -->
-		<link
-			href="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.css"
-			rel="stylesheet">
+		<link th:if="${isTeamLeader}" th:href="@{/dist/vendor/quill/css/resize.css}" rel="stylesheet">
 		
 		<div class="notice-split-wrapper" id="noticeSplitWrapper">
 
@@ -254,14 +250,11 @@
 				th:src="@{/dist/js/project/task_notice.js}"></script>
 
 
-			<!-- Quill Rich Text Editor -->
-			<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-			<!-- Quill Editor Image Resize JS -->
-			<script
-				src="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.js"></script>
-			<!-- Quill Editor 적용 JS -->
-
-			<script th:src="@{/dist/posts/qeditor.js}"></script>
+			<th:block th:if="${isTeamLeader}">
+				<script th:src="@{/dist/vendor/quill/js/quill.js}"></script>
+				<script th:src="@{/dist/vendor/quill/js/resize.js}"></script>
+				<script th:src="@{/dist/posts/qeditor.js}"></script>
+			</th:block>
 
 			<script type="text/javascript">
 			const currentDomainKey = '[[${domainKey}]]' ;

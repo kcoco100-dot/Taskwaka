@@ -1,5 +1,10 @@
 package com.tk.app.controller;
 
+import com.tk.app.service.TreeShopService;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -25,6 +30,20 @@ import lombok.extern.slf4j.Slf4j;
 public class HomeGrowthTreeController {
 	
 	private final GrowthTreeService growthTreeService;
+    private final TreeShopService shop;
+
+    @GetMapping("/growthTree/shop")
+    @ResponseBody
+    public TreeShopService.State shopState(@RequestAttribute("workspace") WorkspaceDto workspace) {
+        return shop.state(workspace.getWorkspaceId());
+    }
+
+    @PutMapping("/growthTree/shop/{itemId}")
+    @ResponseBody
+    public TreeShopService.State equip(@RequestAttribute("workspace") WorkspaceDto workspace,
+            @PathVariable("itemId") long itemId, @RequestParam("equipped") boolean equipped) {
+        return shop.setEquipped(workspace.getWorkspaceId(), workspace.getMemberId(), itemId, equipped);
+    }
 	
 	@ModelAttribute("domainKey")
 	public String setDomainKey(@PathVariable("domainKey") String domainKey) {

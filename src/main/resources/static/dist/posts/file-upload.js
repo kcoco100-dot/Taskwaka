@@ -139,6 +139,13 @@ window.addEventListener('DOMContentLoaded', () => {
 	const fileAddEL = document.querySelector('form .file-upload-panel .drag-area');
 	const inputEL = document.querySelector('form .file-upload-panel input[type=file]');
 	const sizeEL = document.querySelector('form .file-upload-panel .file-size');
+
+	inputEL.form.addEventListener('reset', () => {
+		sel_files.length = 0;
+		fileSize = 0;
+		fileListEL.replaceChildren();
+		if (sizeEL) sizeEL.textContent = '0.00';
+	});
 	
 	const fileTransfer = () => {
 		let dt = new DataTransfer();

@@ -41,8 +41,10 @@
                     
                     <div class="site-inquiry-field">
 					    <label for="files">첨부파일</label>
-					    <input type="file" id="files" name="files" multiple onchange="showSelectedFiles()">
-						<div id="selectedFileList" class="site-inquiry-file-list"></div>
+					    <input type="file" id="files" name="files" multiple>
+						<div id="selectedFileList" data-file-input="files"
+                            data-row-class="site-inquiry-file-item" data-name-class="site-inquiry-file-name"
+                            data-remove-class="site-inquiry-file-remove" class="site-inquiry-file-list"></div>
 					    <p class="site-inquiry-help">문의와 관련된 파일을 첨부할 수 있습니다.</p>
 					</div>
 
@@ -63,36 +65,7 @@
 </th:block>
 
 <th:block layout:fragment="script">
-    <script type="text/javascript">
-	    function showSelectedFiles() {
-	        const files = document.getElementById("files").files;
-	        const fileList = document.getElementById("selectedFileList");
-	
-	        fileList.innerHTML = "";
-	
-	        for(let i = 0; i < files.length; i++) {
-	            fileList.innerHTML +=
-	                "<div class='site-inquiry-file-item'>"
-	                + "<span class='site-inquiry-file-name'>" + files[i].name + "</span>"
-	                + "<button type='button' class='site-inquiry-file-remove' onclick='removeSelectedFile(" + i + ")'>삭제</button>"
-	                + "</div>";
-	        }
-	    }
-
-        function removeSelectedFile(index) {
-            const input = document.getElementById("files");
-            const dt = new DataTransfer();
-
-            for(let i = 0; i < input.files.length; i++) {
-                if(i !== index) {
-                    dt.items.add(input.files[i]);
-                }
-            }
-
-            input.files = dt.files;
-            showSelectedFiles();
-        }
-    </script>
+    <script th:src="@{/dist/js/selected-files.js}"></script>
 </th:block>
 
 </body>

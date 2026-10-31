@@ -1,5 +1,6 @@
 package com.tk.app.domain.dto;
 
+import com.tk.app.common.MyUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,4 +25,8 @@ public class MeetingMinutesDto {
 	private Long projectId; // 등록할 프로젝트 번호
 	private Long subTaskId; // 하위업무 번호
 	private Long memberId; // 로그인 회원 번호
+
+	public void setContent(String content) {
+		this.content = MyUtil.sanitize(content);
+	}
 }

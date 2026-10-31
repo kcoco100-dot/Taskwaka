@@ -1,12 +1,13 @@
 package com.tk.app.controller;
 
+import java.nio.charset.StandardCharsets;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.tk.app.domain.dto.MemberDto;
 import com.tk.app.mail.MailSender;
 import com.tk.app.security.CustomUserDetails;
-import com.tk.app.service.ManageWorkspaceInviteService;
 import com.tk.app.service.MemberService;
 
 import jakarta.servlet.http.HttpSession;
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberController {
 	private final MemberService memberService;
 	private final MailSender mailSender;
-	private final ManageWorkspaceInviteService InviteService;
+
 	
 	@GetMapping
 	public String index() {
@@ -69,20 +69,8 @@ public class MemberController {
 	        @RequestParam(value = "inviteKey", required = false) String inviteKey,
 	        @AuthenticationPrincipal CustomUserDetails user,
 	        Model model) {
-		if (inviteKey != null && user != null) {
-	        try {
-	            Map<String, Object> map = new HashMap<>();
-	            map.put("inviteKey", inviteKey);
-	            map.put("memberId", user.getMember().getMember_id());
-	            
-	            InviteService.acceptInvite(map);
-	            log.info("워크스페이스 팀원 등록 완료!");
-	        } catch (Exception e) {
-	            log.info("등록 실패: " + e.getMessage());
-	        }
-	    }
-		
-		return "main/mainHome";
+		if (inviteKey != null) return "redirect:" + InviteAcceptanceController.previewPath(inviteKey);
+        return "main/mainHome";
 	}
 
 	/**
@@ -287,7 +275,7 @@ public class MemberController {
 	
 	    try {
 	        byte[] hashBytes = MessageDigest.getInstance("SHA-256")
-	                .digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+	                .digest(token.getBytes(StandardCharsets.UTF_8));
 	
 	        String tokenHash = HexFormat.of().formatHex(hashBytes);
 	
@@ -332,7 +320,7 @@ public class MemberController {
 	
 	    try {
 	        byte[] hashBytes = MessageDigest.getInstance("SHA-256")
-	                .digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+	                .digest(token.getBytes(StandardCharsets.UTF_8));
 	
 	        String tokenHash = HexFormat.of().formatHex(hashBytes);
 	
@@ -410,7 +398,7 @@ public class MemberController {
     	
     	try {
 			byte[] hashBytes = MessageDigest.getInstance("SHA-256")
-					.digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+					.digest(token.getBytes(StandardCharsets.UTF_8));
 			
 			tokenHash = HexFormat.of().formatHex(hashBytes);
 		} catch (NoSuchAlgorithmException e) {

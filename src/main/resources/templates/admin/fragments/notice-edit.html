@@ -46,7 +46,9 @@
 				    <div class="notice-upload-box">
 				        <div class="notice-upload-description">📄 추가할 파일을 선택해 주세요.</div>
 				        <input type="file" id="noticeNewFiles" name="files" multiple>
-				        <div id="noticeNewFileList" class="notice-upload-list"></div>
+				        <div id="noticeNewFileList" data-file-input="noticeNewFiles"
+                            data-row-class="notice-upload-item" data-name-class="notice-upload-name"
+                            data-remove-class="notice-new-delete" class="notice-upload-list"></div>
 				    </div>
 				</div>
 
@@ -100,41 +102,8 @@
 	        });
 	    });
 	    
-	    const noticeNewFiles = document.getElementById('noticeNewFiles');
-	    const noticeNewFileList = document.getElementById('noticeNewFileList');
-	
-	    noticeNewFiles.addEventListener('change', function() {
-	        noticeNewFileList.innerHTML = '';
-	
-	        const selectedFiles = Array.from(this.files);
-	        
-	        selectedFiles.forEach(function(file, index) {
-	        	noticeNewFileList.innerHTML += '<div>' + file.name + ' <button type="button" class="notice-new-delete" data-index="' + index + '">삭제</button></div>';
-	        });
-	        
-	        document.querySelectorAll('.notice-new-delete').forEach(function(button) {
-	            button.addEventListener('click', function() {
-	                const index = Number(this.getAttribute('data-index'));
-	                
-	                selectedFiles.splice(index, 1);
-	
-	                document.querySelectorAll('.notice-new-delete').forEach(function(button, i) {
-	                    button.setAttribute('data-index', i);
-	                });
-	
-	                const dataTransfer = new DataTransfer();
-	                
-	                this.parentElement.remove();
-	
-	                selectedFiles.forEach(function(file) {
-	                    dataTransfer.items.add(file);
-	                });
-	
-	                noticeNewFiles.files = dataTransfer.files;
-	            });
-	        });
-	    });
-	</script>
+    </script>
+    <script th:src="@{/dist/js/selected-files.js}"></script>
 </th:block>	
 	
 </body>

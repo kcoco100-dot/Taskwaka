@@ -1,16 +1,25 @@
 package com.tk.app.service;
 
+import com.tk.app.domain.dto.CalendarEventDto;
+import com.tk.app.domain.dto.DashboardSummaryDto;
+import com.tk.app.domain.dto.NoticeDto;
+import java.math.RoundingMode;
+
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.tk.app.common.StorageService;
+import com.tk.app.common.ManageFileStorage;
+import com.tk.app.common.MyUtil;
+import com.tk.app.security.LoginMemberUtil;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import java.math.BigDecimal;
+import java.util.stream.Collectors;
 import com.tk.app.domain.dto.DailyReportDto;
-import com.tk.app.domain.dto.MomDto;
 import com.tk.app.domain.dto.ProjectDto;
 import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
@@ -30,7 +39,7 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskMapper taskMapper;
     private final ProjectMapper projectMapper;
-    private final StorageService storageService;
+    private final ManageFileStorage fileStorage;
     
     @Value("${file.upload-root}/task")
 	private String uploadPath;
@@ -38,7 +47,12 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(readOnly = true)
     public List<TaskDto> getTaskList(Long projectId) {
-        return taskMapper.selectTasksByProjectId(projectId);
+        List<TaskDto> tasks = taskMapper.selectTasksByProjectId(projectId);
+        if (!tasks.isEmpty()) {
+            var children = taskMapper.selectSubTasksByProjectId(projectId).stream().collect(Collectors.groupingBy(SubTaskDto::getTaskId));
+            tasks.forEach(task -> task.setSubTasks(children.getOrDefault(task.getTaskId(), List.of())));
+        }
+        return tasks;
     }
 
     @Override
@@ -46,6 +60,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDto getTaskDetail(Long taskId) {
         TaskDto task = taskMapper.selectTaskById(taskId);
         if (task != null) {
+            task.setSubTasks(taskMapper.selectSubTasksByTaskId(taskId));
             task.setParticipants(getSelectableMembersForTask(task.getProjectId(), taskId));
         }
         return task;
@@ -56,6 +71,7 @@ public class TaskServiceImpl implements TaskService {
     public SubTaskDto getSubTaskDetail(Long subTaskId) {
         SubTaskDto sub = taskMapper.selectSubTaskById(subTaskId);
         if (sub != null) {
+            sub.setFiles(taskMapper.subTaskFiles(subTaskId));
             sub.setParticipants(getSelectableMembersForSubTask(sub.getProjectId(), sub.getTaskId(), subTaskId));
         }
         return sub;
@@ -63,7 +79,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void updateTaskDetail(TaskDto dto) {
-        taskMapper.updateTaskDetail(dto);
+        requireChanged(taskMapper.updateTaskDetail(dto));
     }
 
     @Override
@@ -91,22 +107,18 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void updateSubTaskDetail(SubTaskDto dto) {
-    	try {
-    		if(! dto.getSelectFile().isEmpty()) {
-    			
-                for (MultipartFile mf : dto.getSelectFile()) {
-                    if (!mf.isEmpty()) {
-                        String saveFilename = storageService.uploadFileToServer(mf, uploadPath);
-        				dto.setSaveFilename(saveFilename);
-        				//dto.setOriginalFilename(dto.getSelectFile().getOriginalFilename());
-                    }
-                }
-			}
-    		taskMapper.updateSubTaskDetail(dto);
-			
-		} catch (Exception e) {
-			
-		}
+        requireChanged(taskMapper.updateSubTaskDetail(dto));
+        try {
+            for (var file : fileStorage.save(dto.getSelectFile(), uploadPath)) {
+                requireChanged(taskMapper.insertSubTaskFile(dto.getSubTaskId(), file));
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("하위 업무 첨부를 저장하지 못했습니다.", e);
+        }
+    }
+
+    private static void requireChanged(int count) {
+        if (count != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "대상이 없거나 이미 변경됐습니다.");
     }
 
     @Override
@@ -124,7 +136,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteSubTask(Long subTaskId) {
-        taskMapper.softDeleteSubTask(subTaskId);
+        requireChanged(taskMapper.softDeleteSubTask(subTaskId));
     }
 
     @Override
@@ -149,39 +161,56 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DailyReportDto> getDailyReports(Long subTaskId) {
-        return taskMapper.selectDailyReportsBySubTaskId(subTaskId);
+    public List<DailyReportDto> getDailyReports(Long subTaskId, long authorId, boolean leader) {
+        return taskMapper.selectDailyReportsBySubTaskId(subTaskId, authorId, leader);
     }
 
     @Override
     @Transactional
     public DailyReportDto createDailyReport(DailyReportDto dto) {
-        taskMapper.insertDailyReport(dto);
-        // 일일보고서 진행률을 하위업무 진행률에도 동기화 반영
-        SubTaskDto subTaskDto = taskMapper.selectSubTaskById(dto.getSubTaskId());
-        Long projectMemberId = subTaskDto.getProjectMemberId();
-        dto.setProjectMemberId(projectMemberId);
-        Double subTaskProgress = subTaskDto.getProgress();
-        Double sumProgress = dto.getProgress() + subTaskProgress;
-        if (sumProgress > 100) return null;
-        taskMapper.updateSubTaskField(dto.getSubTaskId(), "progress", sumProgress);
+        double delta = validDelta(dto.getProgress());
+        double progress = nextProgress(dto.getSubTaskId(), delta);
+        requireChanged(taskMapper.insertDailyReport(dto));
+        requireChanged(taskMapper.updateSubTaskField(dto.getSubTaskId(), "progress", progress));
         return taskMapper.selectDailyReportById(dto.getDailyReportId());
+    }
+
+    private static double validDelta(Double delta) {
+        if (delta == null || !Double.isFinite(delta) || delta < 0 || delta > 100 ||
+                BigDecimal.valueOf(delta).stripTrailingZeros().scale() > 2)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "증가분은 0~100 사이 소수 둘째 자리까지 입력하세요.");
+        return delta;
+    }
+
+    private double nextProgress(long subTaskId, double change) {
+        Double current = taskMapper.lockSubTaskProgress(subTaskId);
+        if (current == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        double next = BigDecimal.valueOf(current).add(BigDecimal.valueOf(change)).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        if (next < 0 || next > 100) throw new ResponseStatusException(HttpStatus.CONFLICT, "합산 진행률은 0~100 사이여야 합니다.");
+        return next;
     }
 
     @Override
     public boolean updateDailyReport(DailyReportDto dto) {
-        int updated = taskMapper.updateDailyReport(dto);
-        if (updated > 0 && dto.getProgress() != null && dto.getSubTaskId() != null) {
-            taskMapper.updateSubTaskField(dto.getSubTaskId(), "progress", dto.getProgress());
-        }
-        return updated > 0;
+        DailyReportDto old = taskMapper.lockDailyReport(dto.getDailyReportId(), LoginMemberUtil.getSessionInfo().getMember_id());
+        if (old == null) return false;
+        dto.setSubTaskId(old.getSubTaskId());
+        double progress = nextProgress(old.getSubTaskId(), validDelta(dto.getProgress()) - old.getProgress());
+        if (taskMapper.updateDailyReport(dto) != 1) return false;
+        requireChanged(taskMapper.updateSubTaskField(old.getSubTaskId(), "progress", progress));
+        return true;
     }
 
     @Override
     public boolean deleteDailyReport(Long dailyReportId) {
-        return taskMapper.softDeleteDailyReport(dailyReportId) > 0;
+        DailyReportDto old = taskMapper.lockDailyReport(dailyReportId, LoginMemberUtil.getSessionInfo().getMember_id());
+        if (old == null) return false;
+        double progress = nextProgress(old.getSubTaskId(), -old.getProgress());
+        if (taskMapper.softDeleteDailyReport(dailyReportId) != 1) return false;
+        requireChanged(taskMapper.updateSubTaskField(old.getSubTaskId(), "progress", progress));
+        return true;
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public ProjectDto getProjectById (Long projectId) {
@@ -190,7 +219,7 @@ public class TaskServiceImpl implements TaskService {
     
     @Override
     @Transactional(readOnly = true)
-    public com.tk.app.domain.dto.DashboardSummaryDto getDashboardSummary(Long projectId) {
+    public DashboardSummaryDto getDashboardSummary(Long projectId) {
         return taskMapper.selectProjectDashboardSummary(projectId);
     }
 
@@ -202,36 +231,26 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<com.tk.app.domain.dto.NoticeDto> getRecentProjectNotices(Long projectId) {
+    public List<NoticeDto> getRecentProjectNotices(Long projectId) {
         return taskMapper.selectRecentProjectNotices(projectId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<com.tk.app.domain.dto.CalendarEventDto> getCalendarEvents(Long projectId) {
-        return taskMapper.selectCalendarEventsByProject(projectId);
+    public List<CalendarEventDto> getCalendarEvents(Long projectId, long workspaceMemberId) {
+        return taskMapper.selectCalendarEventsByProject(projectId, workspaceMemberId);
     }
 
     @Override
-    public com.tk.app.domain.dto.CalendarEventDto createPersonalEvent(com.tk.app.domain.dto.CalendarEventDto dto) {
+    public CalendarEventDto createPersonalEvent(CalendarEventDto dto) {
         dto.setScheduleType("PERSONAL");
         taskMapper.insertCalendarEvent(dto);
         return dto;
     }
 
     @Override
-    public boolean deletePersonalEvent(Long scheduleId) {
-        return taskMapper.deleteCalendarEvent(scheduleId) > 0;
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public boolean isTeamLeaderOrAbove(Map<String, Object> isTeamLeaderMap) {
-        if (! isTeamLeaderMap.containsKey("currentProjectMemberId")) return false;
-        Map<String, Object> info = taskMapper.selectProjectMemberRoleInfo(isTeamLeaderMap);
-
-        int role = Integer.parseInt(String.valueOf(info.get("role")));
-        return role >= 30; // 30=TL(팀 리더), 50=DT, 70=PM
+    public boolean deletePersonalEvent(Long scheduleId, long projectId, long workspaceMemberId) {
+        return taskMapper.deleteCalendarEvent(scheduleId, projectId, workspaceMemberId) > 0;
     }
 
 	@Override
@@ -250,33 +269,28 @@ public class TaskServiceImpl implements TaskService {
         if (incrementView) {
             taskMapper.incrementNoticeViewCount(noticeId);
         }
-        return taskMapper.selectTaskNoticeDetail(noticeId);
+        var detail = taskMapper.selectTaskNoticeDetail(noticeId);
+        if (detail != null && detail.get("content") instanceof String content) {
+            detail.put("content", MyUtil.sanitize(content));
+        }
+        return detail;
     }
 
     @Override
     public Map<String, Object> createTaskNotice(Map<String, Object> param) {
         taskMapper.insertTaskNotice(param);
         Long noticeId = Long.valueOf(String.valueOf(param.get("noticeId")));
-        return taskMapper.selectTaskNoticeDetail(noticeId);
+        return getTaskNoticeDetail(noticeId, false);
     }
 
     @Override
     public void updateTaskNotice(Map<String, Object> param) {
-        taskMapper.updateTaskNotice(param);
+        requireChanged(taskMapper.updateTaskNotice(param));
     }
 
     @Override
-    public void deleteTaskNotice(Long noticeId) {
-        taskMapper.softDeleteTaskNotice(noticeId);
-    }
-    
-    @Transactional
-    public List<Map<String, Object>> getDocumentList(Long projectId) {
-    	List<Map<String, Object>> list; 
-    	taskMapper.selectReportList(projectId);
-    	taskMapper.selectMomList(projectId);
-    	
-    	return null;
+    public void deleteTaskNotice(long projectId, Long noticeId) {
+        requireChanged(taskMapper.softDeleteTaskNotice(projectId, noticeId));
     }
     
     @Override
@@ -290,27 +304,5 @@ public class TaskServiceImpl implements TaskService {
     	Double addProgress = dto.getProgress();
     	taskMapper.insertTeamReport(dto);
     	//taskMapper.updateTaskField(taskId, "progress", currentProgress + addProgress);
-    }
-    
-    public void updateTeamReport(TeamReportDto dto) { 
-    	taskMapper.updateTeamReport(dto);
-    	
-    }
-    
-    public void deleteTeamReport(Long TeamReportId) {
-    	taskMapper.softDeleteTeamReport(TeamReportId);
-    }
-    
-    public void createMOM(MomDto dto) {
-    	taskMapper.insertMOM(dto);
-    }
-    
-    public void updateMOM(MomDto dto) { 
-    	taskMapper.updateMOM(dto);
-    	
-    }
-    
-    public void deleteMOM(Long momId) {
-    	taskMapper.softDeleteMOM(momId);
     }
 }

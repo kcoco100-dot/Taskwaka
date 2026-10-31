@@ -110,67 +110,11 @@ public class MyUtil {
 		return result;
     }
 
-	/**
-	 * XSS 방지을 위한 <script>, onerror, onclick, javascript: URL 등의 태그를 제거하고,
-	 *   <a href>는 안전한 스킴만 허용하는 새니타이즈 메소드
-	 * @param html	정화할 HTML 
-	 * @return
-	 */
-	public String sanitize(String html) {
-		if (html == null) return null;
+    /** 공지 편집기의 서식과 허용된 링크·이미지만 남긴다. */
+    public static String sanitize(String html) {
+        return NoticeHtml.clean(html);
+    }
 
-        // script 태그 제거
-        html = html.replaceAll("(?i)<script.*?>.*?</script>", "");
-
-        // iframe, object, embed 제거
-        html = html.replaceAll("(?i)<(iframe|object|embed).*?>.*?</\\1>", "");
-
-        // on* 이벤트 제거(onclick, onerror 등)
-        html = html.replaceAll("(?i)\\s+on[a-z]+\\s*=\\s*(['\"]).*?\\1", "");
-        
-        // javascript:, data:, vbscript: 제거
-        html = html.replaceAll("(?i)javascript\\s*:", "");
-        html = html.replaceAll("(?i)data\\s*:", "");
-        html = html.replaceAll("(?i)vbscript\\s*:", "");
-        
-        /* <a href> 개별 검사 */
-        html = sanitizeAnchorHref(html);
-        
-        return html;
-	}
-	
-	/* <a href> 화이트 리스트 처리 */
-	protected String sanitizeAnchorHref(String html) {
-    	final Pattern A_TAG_PATTERN = Pattern.compile("(?i)<a\\s+[^>]*href\\s*=\\s*(['\"])(.*?)\\1[^>]*>");
-    	
-    	Matcher matcher = A_TAG_PATTERN.matcher(html);
-    	StringBuffer sb = new StringBuffer();
-
-        while (matcher.find()) {
-            // String quote = matcher.group(1);
-            String href = matcher.group(2).trim().toLowerCase();
-
-            if (isSafeHref(href)) {
-                matcher.appendReplacement(sb, matcher.group());
-            } else {
-                // 위험한 href 제거
-                String safeATag = matcher.group().replaceAll("(?i)href\\s*=\\s*(['\"]).*?\\1", "");
-                matcher.appendReplacement(sb, safeATag);
-            }
-        }
-        matcher.appendTail(sb);
-        
-        return sb.toString();
-	}
-
-	/* 허용 href 정책 */
-	protected boolean isSafeHref(String href) {
-		return href.startsWith("http://")
-			|| href.startsWith("https://")
-			|| href.startsWith("/")
-			|| href.startsWith("#");
-	}
-	
 	/**
 	* 특수 문자를 HTML 문자로 변경 및 엔터를 <br>로 변경 하는 메소드
 	* 

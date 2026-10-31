@@ -50,8 +50,10 @@
 					
 					<div class="site-inquiry-field">
 					    <label for="files">새 첨부파일</label>
-					    <input type="file" id="files" name="files" multiple onchange="showSelectedFiles()">
-						<div id="selectedFileList" class="site-inquiry-edit-file-list"></div>
+					    <input type="file" id="files" name="files" multiple>
+						<div id="selectedFileList" data-file-input="files"
+                            data-row-class="site-inquiry-edit-file-item" data-name-class="site-inquiry-edit-file-name"
+                            data-remove-class="site-inquiry-edit-file-remove" class="site-inquiry-edit-file-list"></div>
 					</div>
 
                     <div class="site-inquiry-notice">
@@ -122,37 +124,7 @@
 		}
 	</script>
 	
-	<script type="text/javascript">
-		function showSelectedFiles() {
-		    const files = document.getElementById("files").files;
-		    const fileList = document.getElementById("selectedFileList");
-		
-		    fileList.innerHTML = "";
-		
-		    for(let i = 0; i < files.length; i++) {
-		    	fileList.innerHTML += "<div class='site-inquiry-edit-file-item'>"
-		    	    + "<span class='site-inquiry-edit-file-name'>" + files[i].name + "</span>"
-		    	    + "<button type='button' class='site-inquiry-edit-file-remove' onclick='removeSelectedFile(" + i + ")'>삭제</button>"
-		    	    + "</div>";
-		    }
-		}
-	</script>
-	
-	<script type="text/javascript">
-		function removeSelectedFile(index) {
-		    const input = document.getElementById("files");
-		    const dt = new DataTransfer();
-		
-		    for(let i = 0; i < input.files.length; i++) {
-		        if(i !== index) {
-		            dt.items.add(input.files[i]);
-		        }
-		    }
-		
-		    input.files = dt.files;
-		    showSelectedFiles();
-		}
-	</script>
+    <script th:src="@{/dist/js/selected-files.js}"></script>
 	
 </th:block>
 

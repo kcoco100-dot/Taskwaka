@@ -433,7 +433,7 @@
                 ) &gt;= 100 THEN 2
                 WHEN p.status = 2 THEN 1
                 ELSE p.status
-            END,
+            END
         WHERE p.project_id = #{projectId}
           AND p.workspace_id = #{workspaceId}
           AND p.deleted IS NULL

@@ -5,8 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spring</title>
-<!-- Favicons -->
-<link th:href="@{/dist/images/h.png}" rel="icon">
   
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +23,7 @@
 <link rel="stylesheet" th:href="@{/dist/css/main-dash.css}" type="text/css">
 <!-- Form CSS Files -->
 <link rel="stylesheet" th:href="@{/dist/css/forms.css}" type="text/css">
+<th:block th:replace="~{layout/header :: headerFooterAssets}"></th:block>
 <!-- 각 페이지의 css가 작성될 위치 -->
 <th:block layout:fragment="css"></th:block>
 	
@@ -33,7 +32,7 @@
 </head>
 <body>
 
-<header>
+<header class="fixed-top">
 	<th:block th:replace="~{admin/layout/header::header}"></th:block>
 </header>
 
@@ -46,6 +45,9 @@
 
 <!-- 부가적인 콘텐츠를 작성할 위치 -->
 <th:block layout:fragment="aside-container"></th:block>	
+<footer>
+	<th:block th:replace="~{layout/footer :: footer}"></th:block>
+</footer>
 
 <!-- Preloader -->
 <div id="preloader"></div>

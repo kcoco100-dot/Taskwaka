@@ -122,10 +122,11 @@ public class ManageInviteController {
             inviteMap.put("workspaceId", workspaceId);
             inviteMap.put("inviterId", info.getMember_id());
             inviteMap.put("targetMemberIds", targetMemberIds);
+            inviteMap.put("retryIds", requestData.get("retryIds"));
+            inviteMap.put("resend", requestData.get("resend"));
 
-            myInviteService.sendInvitesAndMail(inviteMap);
-
-            return ResponseEntity.ok("초대 메일을 발송했습니다.");
+            List<Long> failed = myInviteService.sendInvitesAndMail(inviteMap);
+            return ResponseEntity.ok(Map.of("failedMemberIds", failed));
 
         } catch (ResponseStatusException e) {
         	
@@ -156,30 +157,6 @@ public class ManageInviteController {
             @RequestParam("inviteKey") String inviteKey,
             Model model) throws Exception {
         
-        try {
-            SessionInfo info = LoginMemberUtil.getSessionInfo();
-            
-            if (info == null) {
-                log.info("초대 수락을 위한 로그인 정보가 존재하지 않습니다.");
-                throw new IllegalStateException("로그인 정보가 없습니다."); 
-            }
-
-            Map<String, Object> acceptMap = new HashMap<>();
-            acceptMap.put("inviteKey", inviteKey);
-            acceptMap.put("memberId", info.getMember_id());
-            acceptMap.put("domainKey", domainKey);
-
-            myInviteService.acceptInvite(acceptMap);
-
-        } catch (IllegalArgumentException e) {
-            log.info("acceptInvitation 유효성 에러 : ", e);
-            throw e; 
-            
-        } catch (Exception e) {
-            log.error("acceptInvitation 시스템 에러 : ", e);
-            throw e;
-        }
-        
-        return "redirect:/" + domainKey + "/home/dashboard";
+        return "redirect:" + InviteAcceptanceController.previewPath(inviteKey);
     }
 }

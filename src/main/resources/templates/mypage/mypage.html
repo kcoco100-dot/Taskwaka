@@ -4,24 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>마이페이지 | TASKWAKA</title>
-    <link rel="stylesheet" th:href="@{/dist/css/header.css}">
+    <th:block th:replace="~{layout/header :: headerFooterAssets}"></th:block>
     <link rel="stylesheet" th:href="@{/dist/css/mypage.css(v=12)}">
+    <link rel="stylesheet" th:href="@{/dist/css/sidebar.css}">
 </head>
 
 <body class="mypage-body">
 
 <header class="site-header">
-    <div class="team-header">
-        <div class="team-header-left">
-            <a th:href="@{/myHome}" class="team-logo">
-                <img th:src="@{/dist/images/taskwaka-bear-icon.png}" class="team-logo-image" alt="">
-                <span>TASKWAKA</span>
-            </a>
-        </div>
-        <div class="team-header-right">
-            <a th:href="@{/myHome}" class="mypage-back">홈으로</a>
-        </div>
-    </div>
+    <th:block th:replace="~{layout/header :: bar('account', @{/myHome}, ~{})}"></th:block>
 </header>
 
 <main class="mypage-container">
@@ -33,44 +24,55 @@
     </div>
 
     <div class="mypage-layout">
-        <nav class="mypage-sidebar" aria-label="마이페이지 메뉴">
-            <strong class="mypage-sidebar-title">계정 관리</strong>
-            <a th:href="@{/member/mypage}"
-               th:classappend="${page == 'overview'} ? 'is-active' : ''">
-                내 정보
-            </a>
-
-            <a th:href="@{/member/mypage/profile}"
-               th:classappend="${page == 'profile'} ? 'is-active' : ''">
-                프로필 사진 수정
-            </a>
-
-            <a th:if="${isLocalAccount}"
-               th:href="@{/member/mypage/contact}"
-               th:classappend="${page == 'contact'} ? 'is-active' : ''">
-                연락처 및 주소 수정
-            </a>
-
-            <a th:if="${isLocalAccount}"
-               th:href="@{/member/mypage/security}"
-               th:classappend="${page == 'security'} ? 'is-active' : ''">
-                비밀번호 변경
-            </a>
-
-            <div class="mypage-sidebar-divider"></div>
-
-            <strong class="mypage-sidebar-title">탈퇴 관리</strong>
-
-            <a th:href="@{/member/mypage/works}"
-               th:classappend="${page == 'works'} ? 'is-active' : ''">
-                워크 탈퇴
-            </a>
-
-            <a th:href="@{/member/mypage/withdraw}"
-               class="mypage-sidebar-danger"
-               th:classappend="${page == 'withdraw'} ? 'is-active' : ''">
-                사이트 탈퇴
-            </a>
+        <nav class="mypage-sidebar tw-sidebar" aria-label="마이페이지 메뉴">
+            <div class="tw-nav-groups">
+                <details class="tw-nav-group" open>
+                    <summary th:replace="~{layout/sidebarUi :: heading('👤', '계정 관리')}"></summary>
+                    <ul class="tw-nav-items">
+                        <li>
+                            <a th:href="@{/member/mypage}"
+                               th:attr="aria-current=${page == 'overview' ? 'page' : null}">
+                                <th:block th:replace="~{layout/sidebarUi :: label('👤', '내 정보')}"></th:block>
+                            </a>
+                        </li>
+                        <li>
+                            <a th:href="@{/member/mypage/profile}"
+                               th:attr="aria-current=${page == 'profile' ? 'page' : null}">
+                                <th:block th:replace="~{layout/sidebarUi :: label('🖼️', '프로필 사진 수정')}"></th:block>
+                            </a>
+                        </li>
+                        <li th:if="${isLocalAccount}">
+                            <a th:href="@{/member/mypage/contact}"
+                               th:attr="aria-current=${page == 'contact' ? 'page' : null}">
+                                <th:block th:replace="~{layout/sidebarUi :: label('📇', '연락처 및 주소 수정')}"></th:block>
+                            </a>
+                        </li>
+                        <li th:if="${isLocalAccount}">
+                            <a th:href="@{/member/mypage/security}"
+                               th:attr="aria-current=${page == 'security' ? 'page' : null}">
+                                <th:block th:replace="~{layout/sidebarUi :: label('🔑', '비밀번호 변경')}"></th:block>
+                            </a>
+                        </li>
+                    </ul>
+                </details>
+                <details class="tw-nav-group" open>
+                    <summary th:replace="~{layout/sidebarUi :: heading('🚪', '탈퇴 관리')}"></summary>
+                    <ul class="tw-nav-items">
+                        <li>
+                            <a th:href="@{/member/mypage/works}"
+                               th:attr="aria-current=${page == 'works' ? 'page' : null}">
+                                <th:block th:replace="~{layout/sidebarUi :: label('🚪', '워크 탈퇴')}"></th:block>
+                            </a>
+                        </li>
+                        <li class="tw-nav-danger">
+                            <a th:href="@{/member/mypage/withdraw}"
+                               th:attr="aria-current=${page == 'withdraw' ? 'page' : null}">
+                                <th:block th:replace="~{layout/sidebarUi :: label('⛔', '사이트 탈퇴')}"></th:block>
+                            </a>
+                        </li>
+                    </ul>
+                </details>
+            </div>
         </nav>
 
         <div class="mypage-content">
@@ -476,6 +478,9 @@
         </div>
     </div>
 </main>
+<footer>
+    <th:block th:replace="~{layout/footer :: footer}"></th:block>
+</footer>
 
 <script src="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
 

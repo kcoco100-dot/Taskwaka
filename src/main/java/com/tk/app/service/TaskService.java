@@ -12,7 +12,6 @@ import com.tk.app.domain.dto.SubTaskDto;
 import com.tk.app.domain.dto.TaskDto;
 import com.tk.app.domain.dto.TaskMemberDto;
 import com.tk.app.domain.dto.TeamReportDto;
-import com.tk.app.mapper.ProjectMapper;
 
 public interface TaskService {
     List<TaskDto> getTaskList(Long projectId);
@@ -30,7 +29,7 @@ public interface TaskService {
     List<TaskMemberDto> getSelectableMembersForTask(Long projectId, Long taskId);
     List<TaskMemberDto> getSelectableMembersForSubTask(Long projectId, Long taskId, Long subTaskId);
 
-    List<DailyReportDto> getDailyReports(Long subTaskId);
+    List<DailyReportDto> getDailyReports(Long subTaskId, long authorId, boolean leader);
     DailyReportDto createDailyReport(DailyReportDto dto);
     boolean updateDailyReport(DailyReportDto dto);
     boolean deleteDailyReport(Long dailyReportId);
@@ -43,18 +42,17 @@ public interface TaskService {
     List<NoticeDto> getRecentProjectNotices(Long projectId);
 
     // 캘린더용
-    List<CalendarEventDto> getCalendarEvents(Long projectId);
-    CalendarEventDto createPersonalEvent(com.tk.app.domain.dto.CalendarEventDto dto);
-    boolean deletePersonalEvent(Long scheduleId);
+    List<CalendarEventDto> getCalendarEvents(Long projectId, long workspaceMemberId);
+    CalendarEventDto createPersonalEvent(CalendarEventDto dto);
+    boolean deletePersonalEvent(Long scheduleId, long projectId, long workspaceMemberId);
     
     // 업무공지 탭 전용
-    boolean isTeamLeaderOrAbove(Map<String, Object> isTeamLeaderMap);
 	List<Map<String, Object>> getTaskNoticeList(Map<String, Object> map);
     public int getTaskNoticeCount(Map<String, Object> map);
     Map<String, Object> getTaskNoticeDetail(Long noticeId, boolean incrementView);
-    Map<String, Object> createTaskNotice(java.util.Map<String, Object> param);
-    void updateTaskNotice(java.util.Map<String, Object> param);
-    void deleteTaskNotice(Long noticeId);
+    Map<String, Object> createTaskNotice(Map<String, Object> param);
+    void updateTaskNotice(Map<String, Object> param);
+    void deleteTaskNotice(long projectId, Long noticeId);
     
     public void createTeamReport(TeamReportDto dto);
 }

@@ -1,5 +1,11 @@
 package com.tk.app.controller;
 
+import com.tk.app.domain.dto.ProjectActor;
+import com.tk.app.mapper.TaskMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.tk.app.domain.dto.ProjectDto;
 import com.tk.app.domain.dto.SessionInfo;
 import com.tk.app.domain.dto.SubTaskDto;
@@ -24,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 public class ProjectController {
 
     private final TaskService taskService;
+    private final ProjectAccessAdvice access;
+    private final TaskMapper taskMapper;
 
     @GetMapping("")
     public String projectDetail(
@@ -33,6 +41,7 @@ public class ProjectController {
             @RequestParam(name="page", defaultValue = "1") int page,
             @RequestParam(name="kwd", defaultValue = "") String kwd,
             @RequestParam(name="schType", defaultValue = "all") String schType,
+            @RequestAttribute("projectActor") ProjectActor actor,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         
@@ -43,16 +52,13 @@ public class ProjectController {
     	
     	log.info("currentProjectMemberId: " + currentProjectMemberId);
     	
-        if (!tab.matches("dashboard|task|gantt|calendar|document|notice")) {
+        if (!tab.matches("dashboard|task|gantt|calendar|notice")) {
             tab = "dashboard";
         }
         
-        Map<String, Object> isTeamLeaderMap = new HashMap<>();
-        isTeamLeaderMap.put("currentProjectMemberId", currentProjectMemberId);
-        isTeamLeaderMap.put("projectId", projectId);
-        
-        boolean isTeamLeader = taskService.isTeamLeaderOrAbove(isTeamLeaderMap); // 매퍼고쳐야댐
+        boolean isTeamLeader = actor.isLeader();
         ProjectDto pDto = taskService.getProjectById(projectId);
+        if (pDto == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         
         model.addAttribute("isTeamLeader", isTeamLeader);
         model.addAttribute("domainKey", domainKey);
@@ -61,7 +67,9 @@ public class ProjectController {
         model.addAttribute("projectName", pDto.getSubject());
         model.addAttribute("currentProjectMemberId", currentProjectMemberId);
         model.addAttribute("currentProjectMemberName", currentProjectMemberName);
-        model.addAttribute("tasks", taskService.getTaskList(projectId));
+        if (tab.equals("task") || tab.equals("gantt")) {
+            model.addAttribute("tasks", taskService.getTaskList(projectId));
+        }
         
         switch(tab) {
 	        case "dashboard" -> {
@@ -78,10 +86,8 @@ public class ProjectController {
 	        case "calendar" -> {
 	        	
 	        }
-	        case "document" -> {
-	        	//model.addAttribute();
-	        }
 	        case "notice" -> {
+                model.addAttribute("tasks", taskMapper.selectTasksByProjectId(projectId));
 	        	int pageSize = 10;
 	        	int currentPage = (page < 1) ? 1 : page;
 	        	int offset = (currentPage - 1) * pageSize;
@@ -114,6 +120,7 @@ public class ProjectController {
     /**
      * 하위 업무 생성 후 Thymeleaf 프래그먼트 HTML 조각 반환
      */
+    @Transactional
     @PostMapping("/tasks/{taskId}/fragment/create-sub")
     public String createSubTaskFragment(
             @PathVariable("domainKey") String domainKey,
@@ -125,13 +132,17 @@ public class ProjectController {
             @RequestParam(value = "status", defaultValue = "0") Integer status,
             @RequestParam(value = "startAt", required = false) String startAt,
             @RequestParam(value = "endAt", required = false) String endAt,
+            @RequestAttribute("projectActor") ProjectActor actor,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
+        access.lockMutation();
 
     	SessionInfo currentProjectMember = userDetails.getMember();
     	
     	Long currentProjectMemberId = currentProjectMember.getMember_id();
     	
+        if (!actor.isLeader() || taskMapper.activeAssignee(projectId, projectMemberId) != 1)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         SubTaskDto dto = new SubTaskDto();
         dto.setProjectId(projectId);
         dto.setTaskId(taskId);
@@ -145,6 +156,7 @@ public class ProjectController {
         SubTaskDto created = taskService.createSubTask(dto);
         model.addAttribute("projectMemberId", projectMemberId);
         model.addAttribute("subTask", created);
+        model.addAttribute("isTeamLeader", actor.isLeader());
         model.addAttribute("currentProjectMemberId", currentProjectMemberId);
 
         return "project/fragments/task_items :: subTaskItem";

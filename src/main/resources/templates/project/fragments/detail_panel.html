@@ -5,7 +5,7 @@
 	     [공통 프래그먼트] 우측 오버레이 상세 패널 (업무 탭 / 간트차트 탭 / 캘린더 탭 공용)
 	     사용법: <aside th:replace="~{project/fragments/detail_panel :: detailPanel}"></aside>
 	     ========================================================================== -->
-	<aside th:fragment="detailPanel" class="common-detail-panel" id="taskDetailSidePanel" th:attr="data-current-project-member-id=${currentProjectMemberId}">
+	<aside th:fragment="detailPanel" class="common-detail-panel" id="taskDetailSidePanel" th:attr="data-current-project-member-id=${currentProjectMemberId},data-leader=${isTeamLeader}">
 		<link rel="stylesheet" th:href="@{/dist/css/project/detail_panel.css}">
 
 		<div class="pane-resizer-bar" id="paneResizerBar" title="좌우로 드래그하여 패널 너비 조절"></div>
@@ -89,8 +89,7 @@
 					<span class="prop-label">진척도</span>
 					<div class="detail-progress-control">
 						<!-- 수정 모드에서만 슬라이더 바 노출 -->
-						<input type="range" id="detailProgressRange" min="0" max="100" step="5" value="0" disabled
-						       oninput="document.getElementById('detailProgressLabel').textContent = this.value + '%'">
+						<input type="range" id="detailProgressRange" min="0" max="100" step="0.01" value="0" disabled>
 						<span class="progress-val-text" id="detailProgressLabel">0%</span>
 					</div>
 				</div>
@@ -146,14 +145,7 @@
 		</div>
 
 		<script th:src="@{/dist/js/project/detail_panel.js}"></script>
-		
-		<!-- Quill Rich Text Editor -->
-		<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-		<!-- Quill Editor Image Resize JS -->
-		<script src="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.js"></script>
-		
 		<script th:src="@{/dist/posts/file-upload.js}"></script>
-		<script th:src="@{/dist/posts/qeditor.js}"></script>
 	</aside>
 </body>
 </html>
