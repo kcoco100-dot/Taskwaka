@@ -23,9 +23,9 @@ public class TaskDto {
     private String created;
     private String updated;
     
-//  private String saveFilename;
-//	private String originalFilename;
-//	private MultipartFile selectFile; // <input type='file' name='selectFile' ..
+    private String saveFilename;
+	private String originalFilename;
+	private List<MultipartFile> selectFile; // <input type='file' name='selectFile' ..
 	
     private List<SubTaskDto> subTasks;
     private List<TaskMemberDto> participants;

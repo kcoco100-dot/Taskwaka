@@ -1,8 +1,6 @@
 /**
  * [Taskwaka] 공통 우측 오버레이 상세 드로어 패널 스크립트 (detail_panel.js)
- * - 인라인 실시간 수정 제거 완료
  * - 기본 조회 모드(일반 텍스트 형태) + [수정] 버튼 클릭 시에만 수정 모드(.is-editing) 전환
- * - 평소에는 업로드된 첨부파일 목록(#attachedFileList) 표시, 수정 모드 시에만 #fileDropzone 노출 및 file-upload.js 연동
  * - 하위업무 담당자 전용 일일 보고서(Daily Report) CRUD 지원
  * - 업무 목록 탭(.task-tr / .subtask-tr) 및 간트차트 탭(.gantt-tree-row) 양방향 동기화 지원
  */
@@ -78,7 +76,6 @@ async function openDetailPanel(taskId, rowElem) {
 	// 수정 모드 강제 종료 및 조회 전용 세팅
 	exitDetailEditModeUI();
 	setPanelReadonlyMode(true);
-	clearPendingUploadFiles();
 
 	const typeBadge = document.getElementById('detailEntityTypeBadge');
 	if (typeBadge) {
@@ -105,17 +102,16 @@ async function openDetailPanel(taskId, rowElem) {
 		const data = await detailRes.json();
 		const task = data.task || data;
 		const subTasks = data.subTasks || task.subTasks || [];
-		const files = data.files || task.files || data.attachments || task.attachments || [];
+		//const taskMembers = membersRes.ok ? await membersRes.json() : [];
 
+		/*populateAssigneeOptions(taskMembers, task.projectMemberId, task.assigneeName);*/
 		bindDetailCommonFields(task);
-		renderAttachedFilesList(files);
 		renderDetailSubTasksList(subTasks, task);
 	} catch (err) {
 		console.error('openDetailPanel 에러:', err);
 		if (currentDetailRowElem) {
 			fallbackBindFromRow(currentDetailRowElem, 'TASK');
 		}
-		renderAttachedFilesList([]);
 	}
 }
 
@@ -140,7 +136,6 @@ async function openSubTaskDetailPanel(subTaskId, rowElem) {
 	canEditCurrentSubTask = false;
 	exitDetailEditModeUI();
 	setPanelReadonlyMode(true);
-	clearPendingUploadFiles();
 
 	const typeBadge = document.getElementById('detailEntityTypeBadge');
 	if (typeBadge) {
@@ -163,11 +158,16 @@ async function openSubTaskDetailPanel(subTaskId, rowElem) {
 
 		const data = await res.json();
 		const subTask = data.subTask || data;
-		const files = data.files || subTask.files || data.attachments || subTask.attachments || [];
 		currentOpenTaskId = subTask.taskId || currentOpenTaskId;
 
+		let candidateMembers = data.taskMembers || [];
+		if (candidateMembers.length === 0 && currentOpenTaskId) {
+			const memRes = await fetch(`${baseUrl}/${currentOpenTaskId}/members`);
+			if (memRes.ok) candidateMembers = await memRes.json();
+		}
+
+		/*populateAssigneeOptions(candidateMembers, subTask.projectMemberId, subTask.assigneeName);*/
 		bindDetailCommonFields(subTask);
-		renderAttachedFilesList(files);
 
 		// [핵심] 로그인한 사용자가 해당 하위업무 담당자일 때만 수정 버튼 및 일일보고서 작성 폼 노출
 		const loginPmId = getCurrentProjectMemberId();
@@ -188,7 +188,6 @@ async function openSubTaskDetailPanel(subTaskId, rowElem) {
 		if (currentDetailRowElem) {
 			fallbackBindFromRow(currentDetailRowElem, 'SUB_TASK');
 		}
-		renderAttachedFilesList([]);
 	}
 }
 
@@ -226,7 +225,7 @@ function toggleFieldLock(lock) {
 	const assigneeEl = document.getElementById('detailAssigneeSelect');
 	const startEl = document.getElementById('detailStartDate');
 	const endEl = document.getElementById('detailEndDate');
-	const progressEl = document.getElementById('detailProgressRange');
+	//const progressEl = document.getElementById('detailProgressRange');
 	const contentEl = document.getElementById('detailContentText');
 
 	if (titleEl) titleEl.readOnly = lock;
@@ -238,7 +237,7 @@ function toggleFieldLock(lock) {
 }
 
 /**
- * [수정] 버튼 클릭 시 수정 모드 진입 (#fileDropzone 노출)
+ * [수정] 버튼 클릭 시 수정 모드 진입
  */
 function enterDetailEditMode() {
 	// 담당자 권한(canEditCurrentSubTask)이 없으면 수정 모드 진입 차단
@@ -262,7 +261,6 @@ function enterDetailEditMode() {
 		statusSelect.value = String(currentDetailStatus);
 	}
 
-	// .is-editing 클래스가 붙으면 CSS에 의해 #fileDropzone이 자동으로 드러남
 	panel.classList.add('is-editing');
 	toggleFieldLock(false);
 
@@ -302,7 +300,7 @@ function exitDetailEditModeUI() {
 }
 
 /**
- * [취소] 버튼 클릭 시 원래 값 복원 및 대기 중인 업로드 파일 초기화 후 조회 모드 복귀
+ * [취소] 버튼 클릭 시 원래 값 복원 후 조회 모드 복귀
  */
 function cancelDetailEditMode() {
 	if (originalDetailSnapshot) {
@@ -325,12 +323,11 @@ function cancelDetailEditMode() {
 		currentDetailStatus = parseInt(originalDetailSnapshot.status, 10) || 0;
 		updateDetailStatusBadgeUI(currentDetailStatus);
 	}
-	clearPendingUploadFiles();
 	exitDetailEditModeUI();
 }
 
 /**
- * [저장] 버튼 클릭 시 변경된 항목들을 서버에 PATCH + 선택된 첨부파일 서버 업로드 후 조회 모드 복귀
+ * [저장] 버튼 클릭 시 변경된 항목들을 서버에 PATCH 후 조회 모드 복귀
  */
 async function saveDetailEditMode() {
 	if (currentEntityType !== 'SUB_TASK' || !currentOpenSubTaskId) return;
@@ -351,44 +348,58 @@ async function saveDetailEditMode() {
 		return;
 	}
 
-	const fieldsToCheck = ['title', 'status', 'startAt', 'endAt', 'progress', 'content'];
-	const baseUrl = getTaskApiBaseUrl();
+	// 1. FormData 생성 및 텍스트 데이터 추가 (DTO 필드명과 일치시킴)
+	const formData = new FormData();
+	formData.append('subTaskId', currentOpenSubTaskId);
+	formData.append('title', newValues.title);
+	formData.append('status', newValues.status);
+	formData.append('startAt', newValues.startAt);
+	formData.append('endAt', newValues.endAt);
+	formData.append('progress', newValues.progress);
+	formData.append('content', newValues.content);
+	if (newValues.projectMemberId) {
+		formData.append('projectMemberId', newValues.projectMemberId);
+	}
+
+	// 2. file-upload.js가 관리하는 input[type=file]에서 파일 꺼내서 같은 FormData에 추가!
+	const fileInput = document.getElementById('detailFileInput');
+	if (fileInput && fileInput.files && fileInput.files.length > 0) {
+		for (const file of fileInput.files) {
+			formData.append('selectFile', file); // List<MultipartFile> selectFile
+		}
+	}
+		const baseUrl = getTaskApiBaseUrl();
 	try {
-		for (const field of fieldsToCheck) {
-			if (!originalDetailSnapshot || String(originalDetailSnapshot[field]) !== String(newValues[field])) {
-				const res = await fetch(`${baseUrl}/subtasks/${currentOpenSubTaskId}/field`, {
-					method: 'PATCH',
-					headers: getCsrfHeaders(),
-					body: JSON.stringify({
-						field: field,
-						fieldName: field,
-						value: String(newValues[field]),
-						fieldValue: String(newValues[field])
-					})
-				});
-				if (!res.ok) {
-					throw new Error(`${field} 업데이트 실패`);
-				}
-			}
+		// 3. 단 한 번의 요청으로 텍스트 + 파일 동시 전송 (POST 또는 PUT)
+		const res = await fetch(`${baseUrl}/subtasks/${currentOpenSubTaskId}`, {
+			method: 'PUT', // 스프링 멀티파트 호환성을 위해 POST(또는 PUT) 권장
+			headers: getCsrfOnlyHeaders(), // ⚠️ Content-Type: application/json 절대 넣지 말 것!
+			body: formData
+		});
+
+		if (!res.ok) {
+			throw new Error('하위업무 수정 및 파일 업로드 실패');
 		}
 
-		// file-upload.js를 통해 #detailFileInput에 담긴 새 첨부파일이 있으면 서버로 업로드
-		await uploadPendingFilesToServer('SUB_TASK', currentOpenSubTaskId);
+		const result = await res.json().catch(() => ({}));
+
+		// 서버에서 최신 파일 목록을 내려주면 렌더링, 아니면 화면에 즉시 추가
+		if (result.files || result.attachments) {
+			renderAttachedFilesList(result.files || result.attachments);
+		} else if (fileInput && fileInput.files.length > 0) {
+			appendNewlyUploadedFilesToUI(fileInput.files);
+		}
+
+		// 업로드 대기열 초기화
+		clearPendingUploadFiles();
 
 		currentDetailStatus = parseInt(newValues.status, 10) || 0;
 		updateDetailStatusBadgeUI(currentDetailStatus);
 
-		// 담당자 변경 시 상단 아바타/작성자명 갱신
 		const assigneeSelect = document.getElementById('detailAssigneeSelect');
 		const selectedAssigneeName = assigneeSelect?.options 
 			? (assigneeSelect.options[assigneeSelect.selectedIndex]?.text || '-')
 			: (assigneeSelect?.textContent?.trim() || '-');
-		if (selectedAssigneeName && selectedAssigneeName !== '-') {
-			const authorNameEl = document.getElementById('detailAuthorName');
-			const avatarEl = document.getElementById('detailAuthorAvatar');
-			if (authorNameEl) authorNameEl.textContent = selectedAssigneeName;
-			if (avatarEl) avatarEl.textContent = selectedAssigneeName.substring(0, 2);
-		}
 
 		syncUpdatedSubTaskToRow(newValues, selectedAssigneeName);
 		exitDetailEditModeUI();
@@ -400,186 +411,7 @@ async function saveDetailEditMode() {
 
 
 /* ==========================================================================
-   4. 첨부파일 목록 렌더링(상시 조회) & file-upload.js 기반 서버 업로드 연동
-   ========================================================================== */
-
-/**
- * 서버에 업로드된 첨부파일 목록을 #attachedFileList에 렌더링 (평소 조회 모드에서도 항상 보임)
- */
-function renderAttachedFilesList(files) {
-	const listBox = document.getElementById('attachedFileList');
-	const countSpan = document.getElementById('attachedFileCount');
-	if (!listBox) return;
-
-	const validFiles = Array.isArray(files) ? files : [];
-	if (countSpan) countSpan.textContent = `(${validFiles.length})`;
-
-	if (validFiles.length === 0) {
-		listBox.innerHTML = `<div class="empty-attached-msg">등록된 첨부파일이 없습니다.</div>`;
-		return;
-	}
-
-	const baseUrl = getTaskApiBaseUrl();
-	listBox.innerHTML = '';
-
-	validFiles.forEach(f => {
-		const fileId = f.fileId || f.taskFileId || f.subTaskFileId || f.id || '';
-		const fileName = f.originalFilename || f.originName || f.fileName || f.name || '첨부파일';
-		const fileSize = f.fileSize || f.size || 0;
-		const sizeText = fileSize ? `(${(Number(fileSize) / 1024).toFixed(1)} KB)` : '';
-		const downloadUrl = f.downloadUrl || f.fileUrl || (fileId ? `${baseUrl}/files/${fileId}/download` : '#');
-
-		const item = document.createElement('div');
-		item.className = 'attached-file-item';
-		item.dataset.fileId = fileId;
-
-		item.innerHTML = `
-			<a href="${downloadUrl}" class="attached-file-link" target="_blank" download="${escapeHtml(fileName)}">
-				<span>📄 ${escapeHtml(fileName)}</span>
-				<small style="color:#9E9284; font-weight:400;">${sizeText}</small>
-			</a>
-			${fileId ? `<button type="button" class="btn-del-existing-file" onclick="deleteExistingAttachedFile('${fileId}', this)">삭제</button>` : ''}
-		`;
-		listBox.appendChild(item);
-	});
-}
-
-/**
- * file-upload.js가 관리하는 input[type=file]의 파일들을 서버에 FormData로 전송
- * (detail_panel 수정 저장 시 & 새 업무/하위업무 생성 시 공용 호출 가능)
- */
-async function uploadPendingFilesToServer(entityType, targetId, customInputSelector) {
-	const fileInput = customInputSelector
-		? document.querySelector(customInputSelector)
-		: document.getElementById('detailFileInput');
-
-	if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-		return [];
-	}
-
-	const formData = new FormData();
-	for (const file of fileInput.files) {
-		formData.append('files', file);
-		formData.append('selectFile', file);
-	}
-
-	const baseUrl = getTaskApiBaseUrl();
-	const uploadUrl = entityType === 'SUB_TASK'
-		? `${baseUrl}/subtasks/${targetId}/files`
-		: `${baseUrl}/${targetId}/files`;
-
-	try {
-		const res = await fetch(uploadUrl, {
-			method: 'POST',
-			headers: getCsrfOnlyHeaders(),
-			body: formData
-		});
-
-		if (res.ok) {
-			const result = await res.json().catch(() => null);
-			const uploadedList = result?.files || result?.attachments || (Array.isArray(result) ? result : null);
-
-			if (uploadedList) {
-				renderAttachedFilesList(uploadedList);
-			} else {
-				appendNewlyUploadedFilesToUI(fileInput.files);
-			}
-		} else {
-			// 백엔드 파일 전용 엔드포인트가 다를 경우에도 화면 목록에 우선 반영
-			appendNewlyUploadedFilesToUI(fileInput.files);
-		}
-	} catch (err) {
-		console.warn('첨부파일 업로드 요청 처리 중 경고:', err);
-		appendNewlyUploadedFilesToUI(fileInput.files);
-	} finally {
-		if (!customInputSelector) {
-			clearPendingUploadFiles();
-		}
-	}
-}
-
-/**
- * 업로드 완료된 파일들을 상시 조회 영역(#attachedFileList)에 즉시 추가
- */
-function appendNewlyUploadedFilesToUI(fileList) {
-	const listBox = document.getElementById('attachedFileList');
-	if (!listBox || !fileList || fileList.length === 0) return;
-
-	const emptyMsg = listBox.querySelector('.empty-attached-msg');
-	if (emptyMsg) emptyMsg.remove();
-
-	for (const file of fileList) {
-		const blobUrl = URL.createObjectURL(file);
-		const item = document.createElement('div');
-		item.className = 'attached-file-item';
-		item.innerHTML = `
-			<a href="${blobUrl}" class="attached-file-link" download="${escapeHtml(file.name)}">
-				<span>📄 ${escapeHtml(file.name)}</span>
-				<small style="color:#9E9284; font-weight:400;">(${(file.size / 1024).toFixed(1)} KB)</small>
-			</a>
-			<button type="button" class="btn-del-existing-file" onclick="this.closest('.attached-file-item').remove(); updateAttachedFileCount();">삭제</button>
-		`;
-		listBox.appendChild(item);
-	}
-	updateAttachedFileCount();
-}
-
-/**
- * 기존 업로드된 첨부파일 삭제
- */
-async function deleteExistingAttachedFile(fileId, btnElem) {
-	if (!confirm('첨부파일을 삭제하시겠습니까?')) return;
-
-	const baseUrl = getTaskApiBaseUrl();
-	try {
-		await fetch(`${baseUrl}/files/${fileId}`, {
-			method: 'DELETE',
-			headers: getCsrfHeaders()
-		});
-	} catch (err) {
-		console.warn('첨부파일 서버 삭제 실패:', err);
-	}
-
-	const item = btnElem?.closest('.attached-file-item');
-	if (item) item.remove();
-	updateAttachedFileCount();
-}
-
-/**
- * file-upload.js 내부의 대기 목록(.file-upload-list) 및 input[type=file] 초기화
- */
-function clearPendingUploadFiles() {
-	const dropzone = document.getElementById('fileDropzone');
-	if (!dropzone) return;
-
-	const fileInput = dropzone.querySelector('input[type="file"]');
-	const uploadList = dropzone.querySelector('.file-upload-list');
-	const sizeEl = dropzone.querySelector('.file-size');
-
-	if (fileInput) {
-		fileInput.value = '';
-		// 빈 change 이벤트를 발생시켜 file-upload.js의 fileTransfer 동기화 유도
-		fileInput.dispatchEvent(new Event('change'));
-	}
-	if (uploadList) uploadList.innerHTML = '';
-	if (sizeEl) sizeEl.textContent = '0.00';
-}
-
-function updateAttachedFileCount() {
-	const listBox = document.getElementById('attachedFileList');
-	const countSpan = document.getElementById('attachedFileCount');
-	if (!listBox || !countSpan) return;
-
-	const items = listBox.querySelectorAll('.attached-file-item');
-	countSpan.textContent = `(${items.length})`;
-
-	if (items.length === 0 && !listBox.querySelector('.empty-attached-msg')) {
-		listBox.innerHTML = `<div class="empty-attached-msg">등록된 첨부파일이 없습니다.</div>`;
-	}
-}
-
-/* ==========================================================================
-   5. 공통 데이터 바인딩 및 좌측 목록 행 / 간트차트 동기화
+   4. 공통 데이터 바인딩 및 좌측 목록 행 / 간트차트 동기화
    ========================================================================== */
 function bindDetailCommonFields(item) {
 	const assigneeName = document.getElementById('detailAssigneeSelect'); 
@@ -746,7 +578,7 @@ function renderDetailSubTasksList(subTasks, parentTask) {
 }
 
 /* ==========================================================================
-   6. 일일 업무 보고서 (Daily Report) CRUD
+   5. 일일 업무 보고서 (Daily Report) CRUD
    ========================================================================== */
 async function loadDailyReports(subTaskId) {
 	const listBox = document.getElementById('dailyReportListBox');
@@ -931,7 +763,7 @@ async function deleteDailyReport(dailyReportId) {
 }
 
 /* ==========================================================================
-   7. 패널 닫기 / 하위업무 모달 연동 / 유틸리티
+   6. 패널 닫기 / 하위업무 모달 연동 / 유틸리티
    ========================================================================== */
 function closeDetailPanel() {
 	const panel = document.getElementById('taskDetailSidePanel');
@@ -939,7 +771,6 @@ function closeDetailPanel() {
 		panel.classList.remove('open');
 		panel.classList.remove('is-editing');
 	}
-	clearPendingUploadFiles();
 	document.querySelectorAll('.task-tr.selected-row, .subtask-tr.selected-row').forEach(tr => {
 		tr.classList.remove('selected-row');
 	});
@@ -963,6 +794,33 @@ function requestDeleteCurrentSubTask() {
 	}
 }
 
+/*function handleFileUpload(inputElem) {
+	const file = inputElem.files && inputElem.files[0];
+	if (!file) return;
+
+	const listBox = document.getElementById('attachedFileList');
+	const countSpan = document.getElementById('attachedFileCount');
+	if (!listBox) return;
+
+	const item = document.createElement('div');
+	item.className = 'attached-file-item';
+	item.innerHTML = `
+		<span>📄 ${escapeHtml(file.name)} <small style="color:#9E9284;">(${(file.size / 1024).toFixed(1)} KB)</small></span>
+		<button type="button" style="border:none; background:none; color:#B84A39; cursor:pointer; font-size:12px;" onclick="this.parentElement.remove(); updateAttachedFileCount();">삭제</button>
+	`;
+	listBox.appendChild(item);
+	inputElem.value = '';
+	updateAttachedFileCount();
+}
+
+function updateAttachedFileCount() {
+	const listBox = document.getElementById('attachedFileList');
+	const countSpan = document.getElementById('attachedFileCount');
+	if (listBox && countSpan) {
+		countSpan.textContent = `(${listBox.children.length})`;
+	}
+}*/
+
 function highlightSelectedRow(rowElem) {
 	document.querySelectorAll('.task-tr.selected-row, .subtask-tr.selected-row').forEach(tr => {
 		tr.classList.remove('selected-row');
@@ -985,6 +843,7 @@ function highlightSelectedRow(rowElem) {
 }
 
 function fallbackBindFromRow(rowElem, type) {
+	// 간트차트 행(.gantt-tree-row)인 경우 dataset에서 우선 추출
 	if (rowElem.classList && rowElem.classList.contains('gantt-tree-row')) {
 		bindDetailCommonFields({
 			title: rowElem.dataset.title || rowElem.querySelector('.gantt-row-title')?.textContent?.trim() || '',
@@ -1036,7 +895,7 @@ function escapeBacktick(str) {
 }
 
 /* ==========================================================================
-   8. 패널 너비 드래그 리사이저 & ESC 닫기 이벤트 바인딩
+   7. 패널 너비 드래그 리사이저 & ESC 닫기 이벤트 바인딩
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
 	const panel = document.getElementById('taskDetailSidePanel');

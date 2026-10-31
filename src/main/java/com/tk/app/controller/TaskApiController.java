@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.DailyReportDto;
@@ -27,10 +28,7 @@ public class TaskApiController {
 
     private final TaskService taskService;
     private final GrowthTreeService growthTreeService;
-    private final StorageService storageService;
-    
-    @Value("${file.upload-root}/task")
-	private String uploadPath;
+
 
     // 1. 전체 업무 목록 조회
     @GetMapping
@@ -59,18 +57,18 @@ public class TaskApiController {
     }
 
     // 5. 메인 업무 실시간 필드 수정
-    @PatchMapping("/{taskId}/field")
-    public ResponseEntity<Map<String, Object>> updateTaskField(
-            @PathVariable("taskId") Long taskId,
-            @RequestBody Map<String, Object> req) {
-        String fieldName = (String) req.get("fieldName");
-        Object fieldValue = req.get("fieldValue");
-        taskService.updateTaskField(taskId, fieldName, fieldValue);
-
-        Map<String, Object> res = new HashMap<>();
-        res.put("success", true);
-        return ResponseEntity.ok(res);
-    }
+//    @PatchMapping("/{taskId}/field")
+//    public ResponseEntity<Map<String, Object>> updateTaskField(
+//            @PathVariable("taskId") Long taskId,
+//            @RequestBody Map<String, Object> req) {
+//        String fieldName = (String) req.get("fieldName");
+//        Object fieldValue = req.get("fieldValue");
+//        taskService.updateTaskField(taskId, fieldName, fieldValue);
+//
+//        Map<String, Object> res = new HashMap<>();
+//        res.put("success", true);
+//        return ResponseEntity.ok(res);
+//    }
 
     // 6. 메인 업무 상세 내용 저장
     @PutMapping("/{taskId}")
@@ -101,29 +99,44 @@ public class TaskApiController {
 //    	
 //    }
 
-    // 7. 하위 업무 실시간 필드 수정 (우측 패널에서 호출)
-    @PatchMapping("/subtasks/{subTaskId}/field")
-    public ResponseEntity<Map<String, Object>> updateSubTaskField(
-            @PathVariable("subTaskId") Long subTaskId,
-            @RequestBody Map<String, Object> req) {
-        String fieldName = (String) req.get("fieldName");
-        Object fieldValue = req.get("fieldValue");
-        taskService.updateSubTaskField(subTaskId, fieldName, fieldValue);
+//    // 7. 하위 업무 수정 (우측 패널에서 호출)
+//    @PostMapping("/subtasks/{subTaskId}")
+//    public ResponseEntity<Map<String, Object>> updateSubTaskWithFiles(
+//            @PathVariable("projectId") Long projectId,
+//            @PathVariable("subTaskId") Long subTaskId,
+//            @ModelAttribute SubTaskDto dto) { // @RequestBody가 아니라 @ModelAttribute 사용!
+//
+//        Map<String, Object> res = new HashMap<>();
+//        try {
+//            dto.setSubTaskId(subTaskId);
+//
+//            // 1. 하위업무 텍스트 정보 업데이트 + 첨부파일 저장 (Service에서 일괄 처리)
+//            taskService.updateTaskDetail(dto);
+//
+//            // 2. 저장 후 갱신된 첨부파일 목록 조회해서 내려주기 (선택)
+//            // res.put("files", taskService.getSubTaskFiles(subTaskId));
+//            res.put("success", true);
+//            return ResponseEntity.ok(res);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            res.put("success", false);
+//            res.put("message", "저장 중 오류가 발생했습니다.");
+//            return ResponseEntity.status(500).body(res);
+//        }
+//    }
 
-        Map<String, Object> res = new HashMap<>();
-        res.put("success", true);
-        return ResponseEntity.ok(res);
-    }
-
-    // 8. 하위 업무 상세 내용 저장
+ // 8. 하위 업무 상세 내용 및 첨부파일 저장
     @PutMapping("/subtasks/{subTaskId}")
     public ResponseEntity<Map<String, Object>> updateSubTaskDetail(
             @PathVariable("subTaskId") Long subTaskId,
-            @RequestBody SubTaskDto dto) {
+            @ModelAttribute SubTaskDto dto) { 
+
         dto.setSubTaskId(subTaskId);
-        taskService.updateSubTaskDetail(dto);
-        //storageService.uploadFileToServer(null, uploadPath);
         
+        taskService.updateSubTaskDetail(dto);
+        //res.put("files", taskService.getSubTaskFiles(subTaskId));
+
         Map<String, Object> res = new HashMap<>();
         res.put("success", true);
         return ResponseEntity.ok(res);

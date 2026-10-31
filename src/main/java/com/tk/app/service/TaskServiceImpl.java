@@ -3,9 +3,12 @@ package com.tk.app.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.tk.app.common.StorageService;
 import com.tk.app.domain.dto.DailyReportDto;
 import com.tk.app.domain.dto.MomDto;
 import com.tk.app.domain.dto.ProjectDto;
@@ -17,14 +20,20 @@ import com.tk.app.mapper.ProjectMapper;
 import com.tk.app.mapper.TaskMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class TaskServiceImpl implements TaskService {
 
     private final TaskMapper taskMapper;
     private final ProjectMapper projectMapper;
+    private final StorageService storageService;
+    
+    @Value("${file.upload-root}/task")
+	private String uploadPath;
 
     @Override
     @Transactional(readOnly = true)
@@ -82,7 +91,22 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void updateSubTaskDetail(SubTaskDto dto) {
-        taskMapper.updateSubTaskDetail(dto);
+    	try {
+    		if(! dto.getSelectFile().isEmpty()) {
+    			
+                for (MultipartFile mf : dto.getSelectFile()) {
+                    if (!mf.isEmpty()) {
+                        String saveFilename = storageService.uploadFileToServer(mf, uploadPath);
+        				dto.setSaveFilename(saveFilename);
+        				//dto.setOriginalFilename(dto.getSelectFile().getOriginalFilename());
+                    }
+                }
+			}
+    		taskMapper.updateSubTaskDetail(dto);
+			
+		} catch (Exception e) {
+			
+		}
     }
 
     @Override
