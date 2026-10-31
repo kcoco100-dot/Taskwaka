@@ -68,6 +68,16 @@ document.addEventListener('DOMContentLoaded', function () {
 	const purchasedFruits = new Set();
 	let selectedFruit = null;
 	
+	// 착용템 : 모자 표시 이미지 및 구매, 착용 상태
+	const hatProduct = shop.querySelector(
+		'#shop-accessory .tree-shop-product[data-hat]');
+	
+	const hatImage = document.getElementById('treeHatImage');
+	
+	// 모자 구매 기록 및 착용 상태
+	const purchasedHats = new Set();
+	let selectedHat = null;
+	
 	function readShopState() {
 	    if (!storageKey) {
 	        return null;
@@ -110,10 +120,27 @@ document.addEventListener('DOMContentLoaded', function () {
 			    return null;
 			}
 
+			// 기존의 배경, 열매 기록을 유지하면서 모자 저장 데이터 검증
+			const withoutHat = saved.purchasedHats === undefined &&
+				saved.selectedHat === undefined;
+			
+			const savedHats = withoutHat ? [] : saved.purchasedHats;
+			const savedHat = withoutHat ? null : saved.selectedHat;
+			const hat = hatProduct.dataset.hat;
+			
+			if(!Array.isArray(savedHats) ||
+				!savedHats.every(item => item === hat) ||
+				(savedHat !== null && (savedHat !== hat || !savedHats.includes(savedHat)))) {
+					return null;
+				}
+			
+			// 배경, 열매, 모자 정보를 하나의 객체로 묶어서 반환
 			return {
-			    ...saved,
-			    purchasedFruits: savedFruits,
-			    selectedFruit: savedFruit
+				...saved,
+				purchasedFruits: savedFruits,
+				selectedFruit: savedFruit,
+				purchasedHats: savedHats,
+				selectedHat: savedHat
 			};
 			
 	    } catch (error) {
@@ -176,6 +203,52 @@ document.addEventListener('DOMContentLoaded', function () {
 		        priceElement.textContent = originalPrice + ' EXP';
 		    }
 		}
+		
+		// 착용한 모자 표시
+		hatImage.hidden = selectedHat === null;
+		
+		if(selectedHat !== null) {
+			hatImage.src = selectedHat;
+		}
+		
+		// 모자 카드의 착용 상태와 가격 표시
+		const hat = hatProduct.dataset.hat;
+		// hatEquipped : 모자 카드가 현재 착용중인 모자인지 판단한 결과
+		const hatEquipped = hat === selectedHat;
+		const hatPriceElement = hatProduct.querySelector('.tree-shop-price');
+		const hatPrice = Number(hatProduct.dataset.price);
+		
+		hatProduct.classList.toggle('is-equipped', hatEquipped);
+		hatPriceElement.classList.toggle('is-default', hatEquipped);
+	
+		if(hatEquipped) {
+			hatPriceElement.textContent = '✓ 착용 중';
+		} else if (purchasedHats.has(hat)) {
+			hatPriceElement.textContent = '착용하기';
+		} else {
+			hatPriceElement.textContent = hatPrice + 'EXP';
+		}
+	}
+	// 배경, 열매 상태를 함께 저장하는 함수 준비
+	function saveShopState() {
+		if(!storageKey) {
+			return;
+		}
+		
+		try {
+			localStorage.setItem(storageKey, JSON.stringify({
+				spentExp,
+				purchasedBackgrounds: Array.from(purchasedBackgrounds),
+				selectedBackground,
+				purchasedFruits: Array.from(purchasedFruits),
+				selectedFruit,
+				purchasedHats: Array.from(purchasedHats),
+				selectedHat
+			}));
+		} catch(err) {
+			console.log(err);
+		}
+		
 	}
 	
 	// 페이지를 열 때 저장 상태를 복원
@@ -188,6 +261,21 @@ document.addEventListener('DOMContentLoaded', function () {
 	    for (const background of savedState.purchasedBackgrounds) {
 	        purchasedBackgrounds.add(background);
 	    }
+		
+		// 읽어온 열매 상태를 변수에 복원
+		selectedFruit = savedState.selectedFruit;
+		
+		// 저장된 열매를 나무 및 카드에 표시
+		for(const fruit of savedState.purchasedFruits) {
+			purchasedFruits.add(fruit);
+		}
+		
+		// 읽어온 모자 구매 기록 & 착용 상태 복원
+		selectedHat = savedState.selectedHat;
+		
+		for(const hat of savedState.purchasedHats) {
+			purchasedHats.add(hat);
+		}
 	}
 
 	renderShopState();
@@ -253,19 +341,106 @@ document.addEventListener('DOMContentLoaded', function () {
 			selectedBackground = background;
 			renderShopState();
 			
-			// 확인이 끝난 화면 상태만 브라우저에 저장
-			if(storageKey) {
-				
-				try {
-					localStorage.setItem(storageKey, JSON.stringify({
-						spentExp,
-						purchasedBackgrounds: Array.from(purchasedBackgrounds),
-						selectedBackground
-					}));
-				} catch(err) {
-					console.log('배경 상점 상태를 저장하지 못했습니다.');
-				}
-			}
+			// 배경 구매 처리도 새 저장 함수를 사용함
+			saveShopState();
 		});
 	}
+	
+	// 열매 클릭 시 구매, 착용, 저장
+	for(const product of fruitProducts) {
+		product.addEventListener('click', async function() {
+			if(!shopEnabled) {
+				alert('상점은 성장나무가 5단계에 도달한 후 이용할 수 있습니다.');
+				return;
+			}
+			// 이미 착용중인 상품이거나, 확인창의 응답을 기다리는 중이면 클릭 처리 종료
+			if(product.classList.contains('is-equipped') || purchasePending) {
+				return;
+			}
+			
+			const fruit = product.dataset.fruit;
+			const itemName = product.querySelector('.tree-shop-item-name')
+				.textContent.trim();
+				
+			const purchasePrice = purchasedFruits.has(fruit)
+				? 0 : Number(product.dataset.price);
+				
+			if(shopExp < purchasePrice) {
+				alert('경험치가 부족합니다.');
+				return;
+			}
+			
+			const message = purchasePrice === 0 
+				? itemName + '열매 5알을 무료로 착용하시겠습니까?'
+				: itemName + '열매 5알을' + purchasePrice + ' EXP 로 구매하고 착용하시겠습니까?';
+				
+			let confirmed;
+			purchasePending = true;
+			
+			try {
+				confirmed = await showConfirm(message);
+			} finally {
+				purchasePending = false;
+			}
+			
+			if(!confirmed) {
+				return;
+			}
+			
+			spentExp += purchasePrice;
+			purchasedFruits.add(fruit);
+			selectedFruit = fruit;
+			renderShopState();
+			saveShopState();
+		});
+	}
+	
+	// 모자 클릭 이벤트
+	hatProduct.addEventListener('click', async function() {
+		if(!shopEnabled) {
+			alert('상점은 성장나무 5단계 도달 후 이용하실 수 있습니다.');
+			return;
+		}
+		
+		// is-equipped 가 있으면 이미 착용중이므로 종료
+		// purchasePending 가 true 면 확인창 응답을 기다리는 중이므로 종료
+		if(hatProduct.classList.contains('is-equipped') || purchasePending) {
+			return;
+		}
+		
+		// 모자 카드의 착용 상태와 가격 표시
+		const hat = hatProduct.dataset.hat;
+		const itemName = hatProduct.querySelector('.tree-shop-item-name')
+			.textContent.trim();
+		const purchasePrice = purchasedHats.has(hat) 
+			? 0 : Number(hatProduct.dataset.price);
+			
+		if(shopExp < purchasePrice) {
+			alert('경험치가 부족합니다.');
+			return;
+		}
+		const message = purchasePrice === 0 
+			? itemName + '를 무료로 착용하시겠습니까?'
+			: itemName + '를' + purchasePrice + ' EXP 로 구매하고 착용하시겠습니까?';
+			
+		let confirmed;
+		purchasePending = true;
+
+		try {
+			confirmed = await showConfirm(message);
+		} finally {
+			purchasePending = false;
+		}
+
+		if(!confirmed) {
+			return;
+		}
+
+		spentExp += purchasePrice;
+		purchasedHats.add(hat);
+		selectedHat = hat;
+		renderShopState();
+		saveShopState();
+		
+	})
 });

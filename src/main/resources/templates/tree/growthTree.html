@@ -55,6 +55,9 @@
 						         th:src="@{/dist/tree/items/persimmon.png}"
 						         alt="">
 						</div>
+						
+						<!-- 착용템 중 모자 나무 위에 표시 -->
+						<img id="treeHatImage" class="tree-hat" alt="" th:src="@{/dist/tree/items/hat.png}" hidden aria-hidden="true">
                         </div>
 
                         <p class="tree-preview-description">
@@ -203,7 +206,7 @@
                         <section id="shop-accessory" class="tree-shop-panel" data-shop-items="accessory" aria-labelledby="shop-accessory-title" hidden>
                             <h3 id="shop-accessory-title">착용 아이템 <span>나무에 특별함을</span></h3>
                             <ul class="tree-shop-products">
-                                <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-accessory"><img th:src="@{/dist/tree/items/hat.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">모자</strong><span class="tree-shop-price">20 EXP</span></li>
+                                <li class="tree-shop-product" data-price="20" th:attr="data-hat=@{/dist/tree/items/hat.png}"><div class="tree-shop-icon tree-shop-icon-accessory"><img th:src="@{/dist/tree/items/hat.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">모자</strong><span class="tree-shop-price">20 EXP</span></li>
                                 <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-accessory"><img th:src="@{/dist/tree/items/tree-bauble.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">트리 장식</strong><span class="tree-shop-price">20 EXP</span></li>
                                 <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-gold"><img th:src="@{/dist/tree/items/gold-charm.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">금 장식</strong><span class="tree-shop-price">100 EXP</span></li>
                                 <li class="tree-shop-product"><div class="tree-shop-icon tree-shop-icon-silver"><img th:src="@{/dist/tree/items/silver-charm.png}" alt="" loading="lazy"></div><strong class="tree-shop-item-name">은 장식</strong><span class="tree-shop-price">50 EXP</span></li>
