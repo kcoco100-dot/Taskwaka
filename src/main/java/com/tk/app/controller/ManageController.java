@@ -91,12 +91,19 @@ public class ManageController {
 			map.put("workspace_id", workspaceId);
 			map.put("actorId", info.getMember_id());
 			map.put("workspaceId", workspaceId);
+			
 			Long ownWorkspaceMemberId = currentRole == 70 ? service.getOwnWorkspaceMemberId(map) : null;
+			
 			List<ManageDto> allProjects = service.listProjectManage(map);
 			java.util.Set<Long> accessibleIds = new java.util.HashSet<>();
+			Map<Long, Integer> projectStatusMap = new HashMap<>();
 			for (ManageDto project : allProjects) {
-				accessibleIds.add(project.getProject_id());
+				if (!Integer.valueOf(2).equals(project.getStatus())) {
+					accessibleIds.add(project.getProject_id());
+					projectStatusMap.put(project.getProject_id(), project.getStatus());
+				}
 			}
+			
 			kwd = kwd == null ? "" : kwd.trim();
             List<ProjectTeamView> rawMembers = projectMemberRepository.findWorkspaceMembersWithProject(workspaceId, kwd);
 
@@ -125,7 +132,7 @@ public class ManageController {
 					ProjectParticipation p = new ProjectParticipation();
 					p.setProjectMemberId(view.getProjectMemberId());
 					p.setProjectId(view.getProjectId());
-					p.setProjectName(view.getProjectName());
+					p.setProjectName(view.getProjectName() + (Integer.valueOf(3).equals(projectStatusMap.get(view.getProjectId())) ? " (보류)" : ""));
 					p.setRole(view.getRole());
 					groupDto.getProjects().add(p);
 				}
@@ -147,9 +154,12 @@ public class ManageController {
 			int end = Math.min(offset + size, dataCount);
 			List<WorkspaceMemberGroupDto> teamMembers = allMembers.subList(offset, end);
 			String listUrl = RequestUtils.getContextPath() + "/" + domainKey + "/manage/manage?schType=" + myUtil.encodeUrl(schType) + "&kwd=" + myUtil.encodeUrl(kwd);
+			
             model.addAttribute("schType", schType);
             model.addAttribute("kwd", kwd);
+            
 			String paging = paginateUtil.paging(current_page, totalPage, listUrl);
+			
 			model.addAttribute("paging", paging);
 			model.addAttribute("pageBaseUrl", listUrl + "&page=");
 			model.addAttribute("page", current_page);
@@ -224,34 +234,49 @@ public class ManageController {
 	@PostMapping("/excludeProject")
 	@ResponseBody
 	public Map<String, Object> excludeProject(
-			@PathVariable("domainKey") String domainKey,
-			@RequestParam("projectMemberId") Long projectMemberId) {
-
-		Map<String, Object> resultMap = new HashMap<>();
-
-		try {
-			SessionInfo info = LoginMemberUtil.getSessionInfo();
-
-			if (info == null) {
-				throw new SecurityException("로그인 정보가 없습니다.");
-			}
-
-			Map<String, Object> map = new HashMap<>();
-			map.put("domainKey", domainKey);
-			map.put("actorId", info.getMember_id());
-			map.put("projectMemberId", projectMemberId);
-
-			service.excludeProjectMember(map);
-
-			resultMap.put("status", "success");
-
-		} catch (Exception e) {
-			log.error("excludeProject 오류: ", e);
-			resultMap.put("status", "fail");
-		}
-
-		return resultMap;
-	}
+            @PathVariable("domainKey") String domainKey,
+            @RequestParam("projectMemberId") Long projectMemberId) {
+		
+        Map<String, Object> resultMap = new HashMap<>();
+        
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            
+            if (info == null) {
+                throw new SecurityException("로그인 정보가 없습니다.");
+            }
+            
+            Map<String, Object> map = new HashMap<>();
+            
+            map.put("domainKey", domainKey);
+            map.put("actorId", info.getMember_id());
+            map.put("projectMemberId", projectMemberId);
+            
+            service.excludeProjectMember(map);
+            
+            resultMap.put("status", "success");
+            
+        } catch (IllegalArgumentException e) {
+            resultMap.put("status", "fail");
+            resultMap.put("message", e.getMessage());
+            
+        } catch (IllegalStateException e) {
+            resultMap.put("status", "fail");
+            resultMap.put("message", e.getMessage());
+            
+        } catch (SecurityException e) {
+            resultMap.put("status", "fail");
+            resultMap.put("message", "로그인 정보 또는 제외 권한을 확인해주세요.");
+            
+        } catch (Exception e) {
+        	
+            log.error("excludeProject 오류: ", e);
+            resultMap.put("status", "fail");
+            resultMap.put("message", "프로젝트 제외 처리 중 오류가 발생했습니다.");
+        }
+        
+        return resultMap;
+    }
 
 	// 워크 팀원 제외
 	@PostMapping("/excludeWorkspace")
@@ -261,31 +286,44 @@ public class ManageController {
 			@RequestParam("workspaceMemberId") Long workspaceMemberId) {
 
 		Map<String, Object> resultMap = new HashMap<>();
-
-		try {
-			SessionInfo info = LoginMemberUtil.getSessionInfo();
-
-			if (info == null) {
-				throw new SecurityException("로그인 정보가 없습니다.");
-			}
-
-			Map<String, Object> map = new HashMap<>();
-			map.put("domainKey", domainKey);
-			map.put("actorId", info.getMember_id());
-			map.put("workspaceMemberId", workspaceMemberId);
-
-			service.excludeWorkspaceMember(map);
-
-			resultMap.put("status", "success");
-
-		} catch (Exception e) {
-			log.error("excludeWorkspace 오류: ", e);
-			
-			resultMap.put("status", "fail");
-		}
-
-		return resultMap;
-	}
+		
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            
+            if (info == null) {
+                throw new SecurityException("로그인 정보가 없습니다.");
+            }
+            
+            Map<String, Object> map = new HashMap<>();
+            
+            map.put("domainKey", domainKey);
+            map.put("actorId", info.getMember_id());
+            map.put("workspaceMemberId", workspaceMemberId);
+            
+            service.excludeWorkspaceMember(map);
+            
+            resultMap.put("status", "success");
+        } catch (IllegalArgumentException e) {
+            resultMap.put("status", "fail");
+            resultMap.put("message", e.getMessage());
+            
+        } catch (IllegalStateException e) {
+            resultMap.put("status", "fail");
+            resultMap.put("message", e.getMessage());
+            
+        } catch (SecurityException e) {
+            resultMap.put("status", "fail");
+            resultMap.put("message", "로그인 정보 또는 제외 권한을 확인해주세요.");
+            
+        } catch (Exception e) {
+            log.error("excludeWorkspace 오류: ", e);
+            
+            resultMap.put("status", "fail");
+            resultMap.put("message", "워크 제외 처리 중 오류가 발생했습니다.");
+        }
+        
+        return resultMap;
+    }
 
 	// 팀원 초대 화면
 	@GetMapping("/invitation")
@@ -375,10 +413,12 @@ public class ManageController {
 			map.put("memberId", info.getMember_id());
 			
 			List<ManageDto> projectList = service.listProjectManage(map);
+			
 			int totalProjectCount = projectList.size();
 			int plannedProjectCount = 0;
 			int inProgressProjectCount = 0;
 			int completedProjectCount = 0;
+			
 			for (ManageDto p : projectList) {
 				if (p.getStatus() == 0) {
 					plannedProjectCount++;

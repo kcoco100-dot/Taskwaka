@@ -217,6 +217,7 @@ public interface ProjectMemberRepository extends JpaRepository<ManageProjectMemb
         FROM projects p
         WHERE p.workspace_id = :workspaceId
           AND p.deleted IS NULL
+          AND p.status IN (0, 1)
           AND EXISTS (
               SELECT 1
               FROM workspace_members actor

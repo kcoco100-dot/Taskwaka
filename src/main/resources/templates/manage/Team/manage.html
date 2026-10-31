@@ -28,14 +28,14 @@
 		        <a class="manage-member-search-button" th:href="@{/{domainKey}/manage/manage(domainKey=${domainKey})}">초기화</a>
 		    </form>
 		    <div class="member-table-wrap">
-                <table class="project-list-table">
+                  <table class="project-list-table manage-member-table">
                     <thead>
                         <tr>
                             <th style="text-align: center;">이름</th>
                             <th style="text-align: center;">참여 프로젝트</th>
                             <th style="text-align: center;">프로젝트 직위</th>
                             <th style="text-align: center;">상태</th>
-                            <th style="text-align: center;">관리 (직위 변경 / 신규 배정)</th>
+                            <th style="text-align: center;">프로젝트 관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,9 +53,7 @@
                                 
                                 <div th:unless="${#lists.isEmpty(member.projects)}" class="member-project-list">
                                      
-                                    <div th:each="p : ${member.projects}" 
-                                         class="member-project-item"
-                                         th:text="${p.projectName}">프로젝트명</div>
+                                    <div th:each="p : ${member.projects}" class="member-project-item" th:text="${p.projectName}">프로젝트명</div>
                                 </div>
                             </td>
                             
@@ -66,16 +64,12 @@
                                 
                                 <div th:unless="${#lists.isEmpty(member.projects)}" class="member-project-list">
                                      
-                                    <div th:each="p : ${member.projects}" 
-                                         class="member-project-item member-role-item">
+                                    <div th:each="p : ${member.projects}" class="member-project-item member-role-item">
                                          
                                         <span th:if="${p.role == 70}" class="project-status project-status-progress">PM</span>
                                         <span th:if="${p.role == 50}" class="project-status project-status-planned">DT</span>
                                         <span th:if="${p.role == 30}" class="project-status project-status-completed">TL</span>
                                         <span th:if="${p.role == 10}" class="project-status project-status-paused">AA</span>
-                                        
-                                        <button th:if="${currentRole == 70 or (currentRole == 50 and (p.role == 30 or p.role == 10))}" type="button" class="btn-exclude-project" th:data-id="${p.projectMemberId}"
-                                                style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px;">제외</button>
                                     </div>
                                 </div>
                             </td>
@@ -87,35 +81,34 @@
                             </td>
                             
                             <td th:if="${currentRole >= 50}">
-                                <div style="display: flex; gap: 5px; align-items: center;">
-                                    
-                                    <select class="project-select" th:id="'projectSelect_' + ${member.workspaceMemberId}" 
-                                            style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; min-width: 140px; cursor: pointer; position: relative; z-index: 10;">
+                                <div hidden>
+                                    <span th:each="p : ${member.projects}" class="member-project-ref" th:data-project-id="${p.projectId}" th:data-project-member-id="${p.projectMemberId}"></span>
+                                </div>
+                                
+                                <div class="manage-member-actions">
+                                    <select class="project-select" th:id="'projectSelect_' + ${member.workspaceMemberId}" aria-label="관리할 프로젝트">
                                         <option value="" disabled selected>-- 프로젝트 --</option>
-                                        <option th:each="proj : ${projectList}" 
-                                                th:value="${proj.project_id}" 
-                                                th:text="${proj.status == 0 ? '[예정] ' + proj.subject : '[진행중] ' + proj.subject}"></option>
+                                        <option th:each="proj : ${projectList}" th:value="${proj.project_id}" th:text="${proj.subject}">프로젝트명</option>
                                     </select>
                                     
-                                    <select class="role-select" th:id="'roleSelect_' + ${member.workspaceMemberId}" 
-                                            style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; position: relative; z-index: 10;">
+                                    <select class="role-select" th:id="'roleSelect_' + ${member.workspaceMemberId}" aria-label="배정할 직위">
                                         <option value="" disabled selected>-- 직위 --</option>
-                                        <option th:if="${currentRole == 70 and ownWorkspaceMemberId != null and member.workspaceMemberId == ownWorkspaceMemberId}" value="70">PM</option>
-                                        <option th:if="${currentRole == 70}" value="50">DT</option>
+                                        <option th:if="${currentRole >= 70 and ownWorkspaceMemberId != null and member.workspaceMemberId == ownWorkspaceMemberId}"
+                                                value="70">PM</option>
+                                        <option th:if="${currentRole >= 70}" value="50">DT</option>
                                         <option value="30">TL</option>
                                         <option value="10">AA</option>
                                     </select>
                                     
-                                    <button type="button" 
-                                            class="project-button project-assign" 
+                                    <button type="button"
+                                            class="project-button project-assign"
                                             th:data-workspace-member-id="${member.workspaceMemberId}"
                                             style="background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; position: relative; z-index: 10;">배정</button>
 
-                                    <button th:if="${currentRole == 70}" type="button" class="btn-exclude-workspace" th:data-id="${member.workspaceMemberId}"
-                                            style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px;">워크 제외</button>
+                                    <button type="button" class="btn-exclude-project" th:data-workspace-member-id="${member.workspaceMemberId}" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; white-space: nowrap;">제외</button>
                                 </div>
                             </td>
-                            <td th:unless="${currentRole >= 50}">조회 전용</td>
+                            <td th:unless="${currentRole >= 50}"></td>
                         </tr>
 
                         <tr th:if="${#lists.isEmpty(teamMembers)}">
@@ -192,14 +185,37 @@
 
             document.querySelectorAll('.btn-exclude-project').forEach(button => {
                 button.addEventListener('click', function() {
-                    if(!confirm("해당 팀원을 이 프로젝트에서 제외하시겠습니까?")) {
+                	const workspaceMemberId = this.getAttribute('data-workspace-member-id');
+                    const row = this.closest('tr');
+                    const projectSelect = document.getElementById('projectSelect_' + workspaceMemberId);
+                    const participations = Array.from(row.querySelectorAll('.member-project-ref'));
+
+                    if(participations.length === 0) {
+                        alert("참여한 프로젝트가 아닙니다.");
                         return;
                     }
-                    
-                    const projectMemberId = this.getAttribute('data-id');
-                    const formData = new URLSearchParams();
-                    formData.append('projectMemberId', projectMemberId);
 
+                    const projectId = projectSelect.value;
+                    if(!projectId) {
+                        alert("제외할 프로젝트를 선택해주세요.");
+                        return;
+                    }
+
+                    const participation = participations.find(item => item.dataset.projectId === projectId);
+                    if(!participation) {
+                        alert("참여한 프로젝트가 아닙니다.");
+                        return;
+                    }
+
+                    const projectName = projectSelect.options[projectSelect.selectedIndex].text;
+                    if(!confirm(`해당 팀원을 "${projectName}" 프로젝트에서 제외하시겠습니까?`)) {
+                        return;
+                    }
+
+                    const formData = new URLSearchParams();
+                    formData.append('projectMemberId', participation.dataset.projectMemberId);
+                    this.disabled = true;
+                    
                     fetch(`${contextPath}${domainKey}/manage/excludeProject`, {
                         method: 'POST',
                         headers: requestHeaders,
@@ -207,44 +223,23 @@
                     })
                     .then(res => res.json())
                     .then(data => {
-                        if(data.status === 'success') {
+                    	if(data.status === 'success') {
                             alert('프로젝트에서 제외되었습니다.');
                             location.reload();
                         } else {
-                            alert('처리 중 오류가 발생했습니다.');
+                            alert(data.message || '프로젝트 제외에 실패했습니다.');
                         }
-                    });
-                });
-            });
-
-            document.querySelectorAll('.btn-exclude-workspace').forEach(button => {
-                button.addEventListener('click', function() {
-                    if(!confirm("정말 이 팀원을 워크스페이스에서 제외하시겠습니까?")) {
-                        return;
-                    }
-                    
-                    const workspaceMemberId = this.getAttribute('data-id');
-                    const formData = new URLSearchParams();
-                    formData.append('workspaceMemberId', workspaceMemberId);
-
-                    fetch(`${contextPath}${domainKey}/manage/excludeWorkspace`, {
-                        method: 'POST',
-                        headers: requestHeaders,
-                        body: formData
                     })
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data.status === 'success') {
-                            alert('워크스페이스에서 제외되었습니다.');
-                            location.reload();
-                        } else {
-                            alert('처리 중 오류가 발생했습니다.');
-                        }
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("서버와 통신 중 오류가 발생했습니다.");
+                    })
+                    .finally(() => {
+                        this.disabled = false;
                     });
                 });
             });
         });
     </script>
 </th:block>
-
 </html>

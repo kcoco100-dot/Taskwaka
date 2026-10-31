@@ -461,8 +461,9 @@ public class ManageServiceImpl implements ManageService{
         try {
             Long workspaceId = mapper.findByDomainKey((String) map.get("domainKey"));
             Long projectMemberId = requiredLong(map, "projectMemberId");
+            
             if (projectMemberRepository.countActiveProjectMember(workspaceId, projectMemberId) != 1) {
-                throw new IllegalArgumentException("프로젝트 참여자를 확인하세요.");
+                throw new IllegalArgumentException("참여한 프로젝트가 아닙니다.");
             }
             
             projectMemberRepository.deleteSubTaskMembersForExclusion(projectMemberId);

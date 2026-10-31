@@ -34,6 +34,7 @@
                                 <th>이메일</th>
                                 <th>현재 워크 직위</th>
                                 <th>직위 부여·변경</th>
+                                <th>워크 제외</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,20 +60,26 @@
                                             <option value="10" th:selected="${member.role == 10}">사원</option>
                                         </select>
                                         <button type="submit" class="workspace-role-button primary" onclick="return confirm('선택한 직위로 변경하시겠습니까?');">변경</button>
-                                    </form>
                                     
 									<button type="button"
-									        class="workspace-role-button pm-change-open"
-									        th:if="${manageWorkspaceRole == 70 and member.role == 50}"
-									        th:attr="data-member-id=${member.memberId},data-member-name=${member.name}"
-									        th:disabled="${pmChangePending == true}"
-									        th:text="${pmChangePending == true ? '사장 교체 신청 중' : '사장 교체 신청'}">
-									    사장 교체 신청
-									</button>
+                                            class="workspace-role-button pm-change-open"
+                                            th:classappend="${manageWorkspaceRole == 70 and member.role == 50 ? '' : 'pm-change-placeholder'}"
+                                            th:attr="data-member-id=${member.memberId},data-member-name=${member.name}"
+                                            th:disabled="${pmChangePending == true or manageWorkspaceRole != 70 or member.role != 50}"
+                                            th:text="${manageWorkspaceRole == 70 and member.role == 50 ? (pmChangePending == true ? '사장 교체 신청 중' : '사장 교체 신청') : '사장 교체 불가'}">
+                                        사장 교체 신청
+                                    </button>
+                                    </form>
+								</td>
+								<td>
+									<button th:if="${manageWorkspaceRole >= 70 and member.role < 70}" type="button" class="workspace-role-button btn-exclude-workspace"
+                                            th:data-id="${member.workspaceMemberId}" th:data-name="${member.name}"
+                                            style="background-color: #dc3545; color: white; border-color: #dc3545; white-space: nowrap;">제외</button>
+                                    <span th:unless="${manageWorkspaceRole >= 70 and member.role < 70}">-</span>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(memberList)}">
-                                <td colspan="4" class="project-empty">조회된 워크스페이스 팀원이 없습니다.</td>
+                                <td colspan="5" class="project-empty">조회된 워크스페이스 팀원이 없습니다.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -181,18 +188,11 @@
 				
 				        <div class="pm-history-dates">
 				            <span>
-				                신청일:
-				                <span th:text="${request.requested != null
-				                    ? #dates.format(request.requested, 'yyyy-MM-dd HH:mm')
-				                    : '-'}">
-				                </span>
+				                신청일:<span th:text="${request.requested != null ? #dates.format(request.requested, 'yyyy-MM-dd HH:mm') : '-'}"></span>
 				            </span>
 				
 				            <span th:if="${request.processed != null}">
-				                처리일:
-				                <span th:text="${#dates.format(
-				                    request.processed, 'yyyy-MM-dd HH:mm')}">
-				                </span>
+				                처리일:<span th:text="${#dates.format(request.processed, 'yyyy-MM-dd HH:mm')}"></span>
 				            </span>
 				        </div>
 				    </article>
@@ -263,6 +263,59 @@
             }
         });
     })();
+</script>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const excludeWorkspaceUrl = /*[[@{/{domainKey}/manage/excludeWorkspace(domainKey=${domainKey})}]]*/ "";
+        const csrfHeader = /*[[${_csrf != null ? _csrf.headerName : null}]]*/ null;
+        const csrfToken = /*[[${_csrf != null ? _csrf.token : null}]]*/ null;
+        const requestHeaders = { 'Content-Type': 'application/x-www-form-urlencoded' };
+        if(csrfHeader && csrfToken) {
+            requestHeaders[csrfHeader] = csrfToken;
+        }
+
+        document.querySelectorAll('.btn-exclude-workspace').forEach(button => {
+            button.addEventListener('click', function() {
+                const workspaceMemberId = this.getAttribute('data-id');
+                const memberName = this.getAttribute('data-name');
+
+                if(!confirm(`${memberName}님을 워크스페이스와 참여 프로젝트에서 제외하시겠습니까?`)) {
+                    return;
+                }
+
+                const formData = new URLSearchParams();
+                formData.append('workspaceMemberId', workspaceMemberId);
+                this.disabled = true;
+
+                fetch(excludeWorkspaceUrl, {
+                    method: 'POST',
+                    headers: requestHeaders,
+                    body: formData
+                })
+                .then(response => {
+                    if(!response.ok) {
+                        throw new Error('워크 제외 요청에 실패했습니다.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.status === 'success') {
+                        alert('워크스페이스에서 제외되었습니다.');
+                        location.reload();
+                    } else {
+                        alert(data.message || '워크 제외에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('서버와 통신 중 오류가 발생했습니다.');
+                })
+                .finally(() => {
+                    this.disabled = false;
+                });
+            });
+        });
+    });
 </script>
 </th:block>
 

@@ -181,7 +181,7 @@ public class ManageProjectServiceImpl implements ManageProjectService {
 				throw new IllegalArgumentException("프로젝트명을 확인하세요.");
 			}
 
-			if (status == null || status < 0 || status > 2) {
+			if (status == null || status < 0 || status > 3) {
 				throw new IllegalArgumentException("프로젝트 진행상태가 올바르지 않습니다.");
 			}
 

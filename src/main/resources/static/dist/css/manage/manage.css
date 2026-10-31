@@ -1,17 +1,14 @@
 @charset "UTF-8";
 
-/* 왼쪽 메뉴 전체 스크롤 */
+/* 왼쪽 메뉴 */
 .manage-layout .sidemenu {
     overflow-y: auto;
     overscroll-behavior-y: contain;
 }
-
 .manage-layout .sidemenu .manage-menu {
     gap: 12px;
     flex-shrink: 0;
 }
-
-/* 대분류별 박스 */
 .manage-layout .menu-group {
     flex-shrink: 0;
     overflow: hidden;
@@ -38,46 +35,55 @@
     cursor: pointer;
     transition: background-color 0.2s;
 }
-
 .manage-layout .menu-toggle:hover {
     background: #E3EDD8;
 }
-
 .manage-layout .menu-toggle:focus-visible {
     outline: 2px solid #71865B;
     outline-offset: -3px;
 }
 
-/* 세부 메뉴 목록 */
+/* 세부 메뉴 */
 .manage-layout .sidemenu .submenu {
     gap: 4px;
     padding: 8px;
 }
-
-.manage-layout .sidemenu .submenu a {
+.manage-layout .sidemenu .submenu a,
+.manage-layout .sidemenu .submenu .manage-menu-button {
     display: block;
+    box-sizing: border-box;
     padding: 10px 12px;
     border-radius: 8px;
     color: #786B5E;
     font-size: 13px;
     font-weight: 400;
     line-height: 1.6;
+    text-align: left;
+    cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
 }
-
-.manage-layout .sidemenu .submenu a:hover {
+.manage-layout .sidemenu .submenu .manage-menu-button {
+    width: 100%;
+    margin: 0;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    font-family: inherit;
+}
+.manage-layout .sidemenu .submenu a:hover,
+.manage-layout .sidemenu .submenu .manage-menu-button:hover {
     background: #F0E9DF;
     color: #594331;
 }
-
-/* 현재 선택한 세부 메뉴 */
-.manage-layout .sidemenu .submenu a.active {
+.manage-layout .sidemenu .submenu a.active,
+.manage-layout .sidemenu .submenu .manage-menu-button.active {
     background: #EEF4E6;
     color: #4F6242;
     font-weight: 700;
 }
-
-.manage-layout .sidemenu .submenu a:focus-visible {
+.manage-layout .sidemenu .submenu a:focus-visible,
+.manage-layout .sidemenu .submenu .manage-menu-button:focus-visible {
     outline: 2px solid #71865B;
     outline-offset: -2px;
 }
@@ -89,12 +95,9 @@
     min-height: 0;
     padding: 24px;
 }
-
 .manage-content .page-heading {
     flex-shrink: 0;
 }
-
-/* 제목 아래 남은 공간을 채우는 박스 */
 .manage-content .member-content {
     flex: 0 0 auto;
     min-height: 200px;
@@ -105,44 +108,8 @@
     border-radius: 14px;
     background: #FFFFFF;
 }
-/* 팀원 정보 조회 버튼 */
-.manage-layout .sidemenu .submenu .manage-menu-button {
-    display: block;
-    width: 100%;
-    margin: 0;
-    padding: 10px 12px;
-    box-sizing: border-box;
-    appearance: none;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    box-shadow: none;
-    color: #786B5E;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.6;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-}
 
-.manage-layout .sidemenu .submenu .manage-menu-button:hover {
-    background: #F0E9DF;
-    color: #594331;
-}
-
-.manage-layout .sidemenu .submenu .manage-menu-button.active {
-    background: #EEF4E6;
-    color: #4F6242;
-    font-weight: 700;
-}
-
-.manage-layout .sidemenu .submenu .manage-menu-button:focus-visible {
-    outline: 2px solid #71865B;
-    outline-offset: -2px;
-}
-/* 팀원 명단은 프로젝트 수에 따라 늘어나며, 본문 영역에서만 세로 스크롤 */
+/* 팀원 관리 본문·표 스크롤 */
 .manage-member-page > .manage-content {
     overflow-y: auto;
     min-height: 0;
@@ -152,10 +119,60 @@
     overflow-x: auto;
 }
 .manage-member-page .member-table-wrap .project-list-table {
-    min-width: 1100px;
     width: 100%;
+    min-width: 1100px;
     margin-bottom: 0;
 }
+
+/* 팀원 정보 조회 표 */
+.manage-member-page .member-table-wrap .manage-member-table {
+    min-width: 1200px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+.manage-member-page .manage-member-table th,
+.manage-member-page .manage-member-table td {
+    box-sizing: border-box;
+    padding-right: 12px;
+    padding-left: 12px;
+    text-align: center;
+    vertical-align: middle;
+}
+.manage-member-page .manage-member-table th {
+    height: 48px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    white-space: nowrap;
+}
+.manage-member-page .manage-member-table td {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.manage-member-page .manage-member-table th:nth-child(1) {
+    width: 14%;
+}
+.manage-member-page .manage-member-table th:nth-child(2) {
+    width: 26%;
+}
+.manage-member-page .manage-member-table th:nth-child(3) {
+    width: 12%;
+}
+.manage-member-page .manage-member-table th:nth-child(4) {
+    width: 10%;
+}
+.manage-member-page .manage-member-table th:nth-child(5) {
+    width: 38%;
+}
+
+/* 이름 */
+.manage-member-page .manage-member-table .project-name {
+    margin: 0;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.6;
+}
+
+/* 참여 프로젝트·직위 목록 */
 .manage-member-page .member-project-list {
     display: flex;
     flex-direction: column;
@@ -163,32 +180,108 @@
 }
 .manage-member-page .member-project-item {
     display: flex;
-    min-height: 34px;
     align-items: center;
+    min-height: 34px;
     white-space: normal;
 }
 .manage-member-page .member-role-item {
     gap: 10px;
     white-space: nowrap;
 }
-.manage-member-page .manage-member-footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-    padding-bottom: 4px;
+.manage-member-page .manage-member-table .member-project-list {
+    align-items: stretch;
+    width: 100%;
+    margin: 0;
 }
-.manage-member-page .manage-member-footer .project-pagination {
-    display: flex;
+.manage-member-page .manage-member-table .member-project-item {
+    box-sizing: border-box;
+    height: 34px;
+    margin: 0;
+}
+.manage-member-page .manage-member-table .member-project-item:not(.member-role-item) {
+    display: block;
+    overflow: hidden;
+    line-height: 34px;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.manage-member-page .manage-member-table .member-role-item {
+    justify-content: center;
+}
+.manage-member-page .manage-member-table .project-status {
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    vertical-align: middle;
 }
 
-/* 팀원 정보 조회: 검색 영역 */
+/* 프로젝트 선택·직위 선택·배정·제외 */
+.manage-member-page .manage-member-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+}
+.manage-member-page .manage-member-actions select {
+    box-sizing: border-box;
+    height: 34px;
+    margin: 0;
+    padding: 6px;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+    background: #FFFFFF;
+    color: #594331;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+.manage-member-page .manage-member-actions .project-select {
+    flex: 0 1 200px;
+    width: 200px;
+    min-width: 140px;
+    max-width: 220px;
+}
+.manage-member-page .manage-member-actions .role-select {
+    flex: 0 0 90px;
+    width: 90px;
+}
+.manage-member-page .manage-member-actions button,
+.manage-member-page .manage-exclude-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 34px;
+    margin: 0;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 4px;
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.manage-member-page .manage-member-actions button {
+    flex: 0 0 auto;
+}
+.manage-member-page .manage-member-actions .project-assign {
+    background: #007BFF;
+}
+.manage-member-page .manage-member-actions .btn-exclude-project,
+.manage-member-page .manage-exclude-button {
+    background: #DC3545;
+}
+.manage-member-page .manage-member-actions button:disabled,
+.manage-member-page .manage-exclude-button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* 팀원 검색 */
 .manage-member-page .manage-member-search {
     display: flex;
     flex-wrap: wrap;
@@ -196,14 +289,12 @@
     gap: 10px;
     margin: 0 0 22px;
 }
-
 .manage-member-search label {
     margin: 0;
     color: #665747;
     font-size: 13px;
     font-weight: 600;
 }
-
 .manage-member-search input[type="search"] {
     box-sizing: border-box;
     flex: 1 1 220px;
@@ -219,16 +310,13 @@
     font: inherit;
     font-size: 13px;
 }
-
 .manage-member-search input::placeholder {
     color: #9B9186;
 }
-
 .manage-member-search input:focus {
     outline: 2px solid #71865B;
     outline-offset: 2px;
 }
-
 .manage-member-search .manage-member-search-button {
     box-sizing: border-box;
     display: inline-flex;
@@ -247,23 +335,68 @@
     white-space: nowrap;
     cursor: pointer;
 }
-
 .manage-member-search-button:hover {
     background: #F7F3EE;
 }
-
 .manage-member-search .manage-member-search-button.primary {
     border-color: #71865B;
     background: #71865B;
     color: #FFFFFF;
 }
-
 .manage-member-search .manage-member-search-button.primary:hover {
     border-color: #5E724A;
     background: #5E724A;
 }
-
 .manage-member-search-button:focus-visible {
     outline: 2px solid #71865B;
     outline-offset: 2px;
+}
+
+/* 팀원 정보 조회·워크 직위 관리 하단 공통 */
+.manage-member-page .manage-member-footer,
+.manage-member-page .workspace-role-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 38px;
+    margin-top: 20px;
+    padding-bottom: 4px;
+}
+
+/* 총 인원수: 왼쪽 */
+.manage-member-page .manage-member-footer > p,
+.manage-member-page .workspace-role-footer > p {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    position: static;
+    margin: 0;
+    color: #9B9186;
+    font-size: 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* 페이지 번호: 가운데 */
+.manage-member-page .manage-member-footer .project-pagination,
+.manage-member-page .workspace-role-footer .project-pagination {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+}
+.manage-member-page .manage-member-footer .project-pagination > div,
+.manage-member-page .workspace-role-footer .project-pagination > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
 }

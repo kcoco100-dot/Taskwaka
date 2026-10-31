@@ -1,189 +1,6 @@
 @charset "UTF-8";
-.workspace-role-page .page-heading {
-    margin-bottom: 24px;
-}
-.workspace-role-page .workspace-role-description {
-    margin: 8px 0 0;
-    color: #786B5E;
-    font-size: 13px;
-}
-.workspace-role-page .member-content {
-    padding: 24px;
-}
-.workspace-role-search {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 22px;
-}
-.workspace-role-search label {
-    color: #665747;
-    font-size: 13px;
-    font-weight: 600;
-}
-.workspace-role-search input {
-    flex: 1 1 260px;
-    max-width: 420px;
-    min-width: 180px;
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #DDD5CA;
-    border-radius: 8px;
-    font: inherit;
-}
-.workspace-role-button {
-    display: inline-flex;
-    min-height: 38px;
-    align-items: center;
-    justify-content: center;
-    padding: 0 15px;
-    border: 1px solid #DDD5CA;
-    border-radius: 8px;
-    background: white;
-    color: #665747;
-    font: inherit;
-    font-size: 13px;
-    text-decoration: none;
-    cursor: pointer;
-}
-.workspace-role-button.primary {
-    border-color: #71865B;
-    background: #71865B;
-    color: white;
-}
-.workspace-role-button.primary:hover {
-    background: #5E724A;
-}
-.workspace-role-button.disabled {
-    opacity: .45;
-    cursor: default;
-}
-.workspace-role-page .workspace-role-table {
-    min-width: 760px;
-}
-.workspace-role-table th:last-child,
-.workspace-role-table td:last-child {
-    width: 280px;
-}
-.workspace-role-edit {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-.workspace-role-edit select {
-    height: 38px;
-    min-width: 130px;
-    padding: 0 10px;
-    border: 1px solid #DDD5CA;
-    border-radius: 8px;
-    background: white;
-    color: #594331;
-    font: inherit;
-    font-size: 13px;
-}
-.workspace-role-badge {
-    display: inline-flex;
-    min-width: 65px;
-    justify-content: center;
-    padding: 6px 10px;
-    border-radius: 18px;
-    font-size: 12px;
-    font-weight: 700;
-}
-/* 워크스페이스 최고 관리자(boss) 역할 배지 스타일 */
-.workspace-role-badge.boss {
-    background: #EBF1E5;
-    color: #4F6242;
-}
 
-/* 워크스페이스 중간 관리자(manager) 역할 배지 스타일 */
-.workspace-role-badge.manager {
-    background: #F5EEDA;
-    color: #886B30;
-}
-
-/* 워크스페이스 부관리자/어시스턴트(assistant) 역할 배지 스타일 */
-.workspace-role-badge.assistant {
-    background: #E9EEF6;
-    color: #52668B;
-}
-
-/* 워크스페이스 일반 사원/팀원(staff) 역할 배지 스타일 */
-.workspace-role-badge.staff {
-    background: #FCEDE8;
-    color: #A66351;
-}
-
-.workspace-role-locked {
-    color: #9B9186;
-    font-size: 12px;
-}
-.workspace-role-alert {
-    margin-bottom: 14px;
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-}
-/* 워크스페이스 권한/역할 설정 성공 알림 스타일 */
-.workspace-role-alert.success {
-    background: #EEF4E6;
-    color: #4F6242;
-}
-
-/* 워크스페이스 권한/역할 설정 오류 알림 스타일 */
-.workspace-role-alert.error {
-    background: #FCEDE8;
-    color: #AD6551;
-}
-
-.workspace-role-page .workspace-role-footer {
-    margin-top: 20px;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.workspace-role-page .workspace-role-footer .project-pagination {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.workspace-role-page .workspace-role-note {
-    margin: 20px 0 0;
-    color: #8B7D6E;
-    font-size: 12px;
-}
-
-.workspace-role-footer {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 12px;
-}
-
-.workspace-role-footer > p {
-    grid-column: 1;
-    margin: 0;
-}
-
-.workspace-role-footer .project-pagination {
-    grid-column: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 0;
-}
-
-.workspace-role-footer .project-pagination > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-
+/* 화면 제목 */
 .workspace-role-page .page-heading {
     height: auto;
     min-height: 0;
@@ -193,7 +10,6 @@
     background: transparent;
     text-align: left;
 }
-
 .workspace-role-page .page-title {
     height: auto;
     min-height: 0;
@@ -205,45 +21,231 @@
     line-height: 1.4;
     text-align: left;
 }
-
-.workspace-role-page .workspace-role-table {
-    min-width: 860px;
+.workspace-role-page .workspace-role-description {
+    margin: 8px 0 0;
+    color: #786B5E;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.workspace-role-page .member-content {
+    padding: 24px;
 }
 
-.workspace-role-page .workspace-role-table th:last-child,
-.workspace-role-page .workspace-role-table td:last-child {
-    width: 340px;
+/* 검색 */
+.workspace-role-search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+}
+.workspace-role-search label {
+    margin: 0;
+    color: #665747;
+    font-size: 13px;
+    font-weight: 600;
+}
+.workspace-role-search input {
+    box-sizing: border-box;
+    flex: 1 1 260px;
+    max-width: 420px;
+    min-width: 180px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #DDD5CA;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+    font-size: 13px;
+}
+
+/* 공통 버튼 */
+.workspace-role-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 38px;
+    padding: 0 15px;
+    border: 1px solid #DDD5CA;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #665747;
+    font: inherit;
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.workspace-role-button.primary {
+    border-color: #71865B;
+    background: #71865B;
+    color: #FFFFFF;
+}
+.workspace-role-button.primary:hover {
+    background: #5E724A;
+}
+.workspace-role-button.disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+.workspace-role-page .workspace-role-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 워크 직위 관리 표 */
+.workspace-role-page .member-table-wrap .workspace-role-table {
+    width: 100%;
+    min-width: 1100px;
+    margin: 0;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+.workspace-role-page .workspace-role-table th,
+.workspace-role-page .workspace-role-table td {
+    box-sizing: border-box;
+    padding-right: 12px;
+    padding-left: 12px;
+    text-align: center;
+    vertical-align: middle;
+}
+.workspace-role-page .workspace-role-table th {
+    height: 48px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    white-space: nowrap;
+}
+.workspace-role-page .workspace-role-table td {
+    height: 76px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.workspace-role-page .workspace-role-table th:nth-child(1) {
+    width: 14%;
+}
+.workspace-role-page .workspace-role-table th:nth-child(2) {
+    width: 25%;
+}
+.workspace-role-page .workspace-role-table th:nth-child(3) {
+    width: 14%;
+}
+.workspace-role-page .workspace-role-table th:nth-child(4) {
+    width: 33%;
+}
+.workspace-role-page .workspace-role-table th:nth-child(5) {
+    width: 14%;
+}
+.workspace-role-page .workspace-role-table td:nth-child(4),
+.workspace-role-page .workspace-role-table td:nth-child(5) {
     white-space: nowrap;
 }
 
-.workspace-role-page .workspace-role-table td {
-    vertical-align: middle;
-}
-
-.workspace-role-table td:last-child .workspace-role-edit {
+/* 직위 선택과 변경 버튼 */
+.workspace-role-page .workspace-role-table .workspace-role-edit {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     margin: 0;
     vertical-align: middle;
 }
-
-.workspace-role-table .workspace-role-edit select {
+.workspace-role-page .workspace-role-table .workspace-role-edit select {
+    box-sizing: border-box;
     width: 110px;
     min-width: 110px;
+    height: 38px;
+    margin: 0;
+    padding: 0 10px;
+    border: 1px solid #DDD5CA;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #594331;
+    font: inherit;
+    font-size: 13px;
+}
+.workspace-role-page .workspace-role-table .workspace-role-button {
+    height: 38px;
+    vertical-align: middle;
 }
 
+/* 현재 직위 배지 */
+.workspace-role-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 65px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+.workspace-role-badge.boss {
+    background: #EBF1E5;
+    color: #4F6242;
+}
+.workspace-role-badge.manager {
+    background: #F5EEDA;
+    color: #886B30;
+}
+.workspace-role-badge.assistant {
+    background: #E9EEF6;
+    color: #52668B;
+}
+.workspace-role-badge.staff {
+    background: #FCEDE8;
+    color: #A66351;
+}
+
+/* 직위 변경 불가 안내 */
+.workspace-role-locked {
+    display: inline-block;
+    color: #9B9186;
+    font-size: 12px;
+    line-height: 38px;
+    vertical-align: middle;
+}
+
+/* 처리 안내 */
+.workspace-role-alert {
+    margin-bottom: 14px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+.workspace-role-alert.success {
+    background: #EEF4E6;
+    color: #4F6242;
+}
+.workspace-role-alert.error {
+    background: #FCEDE8;
+    color: #AD6551;
+}
+.workspace-role-page .workspace-role-note {
+    margin: 20px 0 0;
+    color: #8B7D6E;
+    font-size: 12px;
+}
+
+/* 사장 교체 신청 버튼 */
 .workspace-role-button.pm-change-open {
     margin-left: 8px;
     border-color: #D7DFC9;
     background: #F2F5EC;
     color: #536844;
-    white-space: nowrap;
     vertical-align: middle;
 }
-
 .workspace-role-button.pm-change-open:hover {
     background: #E7EEDC;
 }
 
+/* 사장 교체 신청 팝업 */
 .pm-change-dialog {
     box-sizing: border-box;
     width: min(460px, calc(100vw - 32px));
@@ -256,18 +258,15 @@
     background: #FFFFFF;
     color: #594331;
     font: inherit;
-    box-shadow: 0 20px 60px rgba(49, 39, 29, .2);
+    box-shadow: 0 20px 60px rgba(49, 39, 29, 0.2);
 }
-
 .pm-change-dialog::backdrop {
-    background: rgba(37, 33, 28, .38);
+    background: rgba(37, 33, 28, 0.38);
 }
-
 .pm-change-dialog form {
     margin: 0;
     padding: 24px;
 }
-
 .pm-change-heading {
     display: flex;
     align-items: flex-start;
@@ -275,21 +274,18 @@
     gap: 16px;
     margin-bottom: 22px;
 }
-
 .pm-change-heading h2 {
     margin: 0;
     font-size: 20px;
     font-weight: 700;
     line-height: 1.4;
 }
-
 .pm-change-heading p {
     margin: 8px 0 0;
     color: #8B7D6E;
     font-size: 12px;
     line-height: 1.6;
 }
-
 .pm-change-close {
     flex: 0 0 32px;
     width: 32px;
@@ -303,7 +299,6 @@
     line-height: 1;
     cursor: pointer;
 }
-
 .pm-change-target {
     display: flex;
     flex-wrap: wrap;
@@ -316,25 +311,21 @@
     background: #F5F7F1;
     font-size: 13px;
 }
-
 .pm-change-target > span:first-child {
     color: #8B7D6E;
     font-size: 12px;
 }
-
 .pm-change-role {
     margin-left: auto;
     color: #71865B;
     font-size: 12px;
 }
-
 .pm-change-label {
     display: block;
     margin-bottom: 8px;
     font-size: 13px;
     font-weight: 600;
 }
-
 .pm-change-dialog textarea {
     box-sizing: border-box;
     display: block;
@@ -350,23 +341,19 @@
     font-size: 13px;
     line-height: 1.7;
 }
-
 .pm-change-dialog textarea:focus {
     outline: 0;
     border-color: #71865B;
-    box-shadow: 0 0 0 3px rgba(113, 134, 91, .12);
+    box-shadow: 0 0 0 3px rgba(113, 134, 91, 0.12);
 }
-
 .pm-change-dialog textarea::placeholder {
     color: #A39A90;
 }
-
 .pm-change-note {
     margin: 8px 0 0;
     color: #948779;
     font-size: 12px;
 }
-
 .pm-change-footer {
     display: flex;
     justify-content: flex-end;
@@ -374,17 +361,12 @@
     margin-top: 24px;
 }
 
-.workspace-role-page .workspace-role-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
+/* 사장 교체 신청 내역 */
 .workspace-role-page .pm-request-history {
     margin-top: 28px;
     padding-top: 24px;
-    border-top: 1px solid #e7e1d8;
+    border-top: 1px solid #E7E1D8;
 }
-
 .workspace-role-page .pm-history-heading {
     display: flex;
     align-items: center;
@@ -392,26 +374,22 @@
     gap: 12px;
     margin-bottom: 16px;
 }
-
 .workspace-role-page .pm-history-heading h2 {
     margin: 0;
-    color: #4c3d30;
+    color: #4C3D30;
     font-size: 18px;
 }
-
 .workspace-role-page .pm-history-heading > span {
-    color: #877b70;
+    color: #877B70;
     font-size: 12px;
 }
-
 .workspace-role-page .pm-history-card {
     margin-top: 12px;
     padding: 20px;
-    border: 1px solid #e7e1d8;
+    border: 1px solid #E7E1D8;
     border-radius: 12px;
-    background: #fff;
+    background: #FFFFFF;
 }
-
 .workspace-role-page .pm-history-top,
 .workspace-role-page .pm-history-people {
     display: flex;
@@ -419,56 +397,46 @@
     flex-wrap: wrap;
     gap: 10px;
 }
-
 .workspace-role-page .pm-history-top {
     justify-content: space-between;
 }
-
 .workspace-role-page .pm-history-people {
-    color: #877b70;
+    color: #877B70;
     font-size: 13px;
 }
-
 .workspace-role-page .pm-history-people strong {
-    color: #493e32;
+    color: #493E32;
     font-size: 14px;
 }
-
 .workspace-role-page .pm-history-status {
     display: inline-block;
     padding: 5px 11px;
     border-radius: 20px;
-    background: #f1ede8;
-    color: #6b5b4c;
+    background: #F1EDE8;
+    color: #6B5B4C;
     font-size: 12px;
     font-weight: 700;
 }
-
 .workspace-role-page .pm-history-status.pending {
-    background: #fff2df;
-    color: #956b32;
+    background: #FFF2DF;
+    color: #956B32;
 }
-
 .workspace-role-page .pm-history-status.approved {
-    background: #edf3e6;
-    color: #4a6942;
+    background: #EDF3E6;
+    color: #4A6942;
 }
-
 .workspace-role-page .pm-history-status.rejected {
-    background: #fae9e5;
-    color: #a45142;
+    background: #FAE9E5;
+    color: #A45142;
 }
-
 .workspace-role-page .pm-history-reason,
 .workspace-role-page .pm-history-rejection {
     margin-top: 16px;
     font-size: 13px;
 }
-
 .workspace-role-page .pm-history-reason strong {
-    color: #6e5f51;
+    color: #6E5F51;
 }
-
 .workspace-role-page .pm-history-reason p,
 .workspace-role-page .pm-history-rejection p {
     margin: 7px 0 0;
@@ -476,15 +444,13 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
-
 .workspace-role-page .pm-history-rejection {
     padding: 14px 16px;
-    border: 1px solid #efd1c9;
+    border: 1px solid #EFD1C9;
     border-radius: 9px;
-    background: #fff6f3;
-    color: #984d40;
+    background: #FFF6F3;
+    color: #984D40;
 }
-
 .workspace-role-page .pm-history-dates {
     display: flex;
     flex-wrap: wrap;
@@ -493,13 +459,28 @@
     color: #948578;
     font-size: 12px;
 }
-
 .workspace-role-page .pm-history-empty {
     margin: 0;
     padding: 24px;
     border-radius: 10px;
-    background: #f9f7f3;
-    color: #877b70;
+    background: #F9F7F3;
+    color: #877B70;
     text-align: center;
     font-size: 13px;
+}
+
+.workspace-role-button.pm-change-open {
+    box-sizing: border-box;
+    width: 150px;
+    height: 38px;
+    margin-left: 8px;
+    padding: 0 10px;
+    border-color: #D7DFC9;
+    background: #F2F5EC;
+    color: #536844;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.workspace-role-button.pm-change-open.pm-change-placeholder {
+    visibility: hidden;
 }

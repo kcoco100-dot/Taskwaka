@@ -147,21 +147,15 @@
                 <div class="project-list-footer"
                      style="display:flex;justify-content:center;align-items:center;position:relative;">
                     <p style="position:absolute;left:0;margin:0;">
-                        <span id="project-range" th:text="|${#lists.isEmpty(list) ? 0 : (page - 1) * size + 1}–${#lists.isEmpty(list) ? 0 : (page - 1) * size + list.size()}|"></span>
-                        / <span id="project-total" th:text="${dataCount}"></span>건
+                    	총 <span id="project-total" th:text="${dataCount}"></span>건
                     </p>
 
-                    <nav class="project-pagination" aria-label="목록 페이지"
-                         th:if="${totalPage > 0}">
-                        <a class="manage-page-arrow" th:if="${page > 1}"
-                           th:href="${pageBaseUrl + (page - 1)}">이전</a>
-                        <span class="manage-page-arrow disabled"
-                              th:unless="${page > 1}">이전</span>
+                    <nav class="project-pagination" aria-label="목록 페이지" th:if="${totalPage > 0}">
+                        <a class="manage-page-arrow" th:if="${page > 1}" th:href="${pageBaseUrl + (page - 1)}">이전</a>
+                        <span class="manage-page-arrow disabled" th:unless="${page > 1}">이전</span>
                         <div th:utext="${paging}"></div>
-                        <a class="manage-page-arrow" th:if="${page < totalPage}"
-                           th:href="${pageBaseUrl + (page + 1)}">다음</a>
-                        <span class="manage-page-arrow disabled"
-                              th:unless="${page < totalPage}">다음</span>
+                        <a class="manage-page-arrow" th:if="${page < totalPage}" th:href="${pageBaseUrl + (page + 1)}">다음</a>
+                        <span class="manage-page-arrow disabled" th:unless="${page < totalPage}">다음</span>
                     </nav>
                 </div>
             </div>

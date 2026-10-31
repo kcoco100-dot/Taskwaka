@@ -417,21 +417,27 @@
 
 	<!-- 업무 비중에 따른 프로젝트 진행률 계산 -->
 	<update id="updateProjectProgress" parameterType="map">
-		UPDATE projects p
-		SET progress = (
-			SELECT ROUND(NVL(SUM(t.progress * NVL(t.progress_weight,
-								0) / 100),
-						0),
-					2)
-			FROM tasks t
-			WHERE t.project_id = p.project_id
-				AND t.deleted IS NULL
-		),
-			updated = SYSDATE
-		WHERE p.project_id = #{projectId}
-			AND p.workspace_id = #{workspaceId}
-			AND p.deleted IS NULL
-	</update>
+	 	UPDATE projects p
+        SET progress = (
+            SELECT ROUND(NVL(SUM(t.progress * NVL(t.progress_weight, 0) / 100), 0), 2)
+            FROM tasks t
+            WHERE t.project_id = p.project_id AND t.deleted IS NULL
+        ),
+            status = CASE
+            	WHEN p.status = 3 THEN 3
+                WHEN (
+                    SELECT ROUND(NVL(SUM(t.progress * NVL(t.progress_weight, 0) / 100), 0), 2)
+                    FROM tasks t
+                    WHERE t.project_id = p.project_id
+                      AND t.deleted IS NULL
+                ) &gt;= 100 THEN 2
+                WHEN p.status = 2 THEN 1
+                ELSE p.status
+            END,
+        WHERE p.project_id = #{projectId}
+          AND p.workspace_id = #{workspaceId}
+          AND p.deleted IS NULL
+    </update>
 
 	<!-- 보고서 상태별 건수 조회 -->
 	<select id="countReportStatuses" parameterType="map" resultType="map">
@@ -473,15 +479,17 @@
 
 	<!-- 보고서 등록용 프로젝트 조회 -->
 	<select id="listWritableProjects" parameterType="map" resultType="map">
-		SELECT p.project_id AS "projectId", p.subject AS "projectName", 
+		SELECT p.project_id AS "projectId",
+			p.subject || CASE p.status
+				WHEN 2 THEN ' (완료)'
+				WHEN 3 THEN ' (보류)'
+				ELSE ''
+			END AS "projectName",
 			pm.project_member_id AS "projectMemberId", NVL(p.progress, 0) AS "progress"
 		FROM projects p
-		JOIN project_members pm
-			ON pm.project_id = p.project_id
-		JOIN workspace_members wm
-			ON wm.workspace_member_id = pm.workspace_member_id
-		JOIN workspace_domains wd
-			ON wd.workspace_id = p.workspace_id
+		JOIN project_members pm ON pm.project_id = p.project_id
+		JOIN workspace_members wm ON wm.workspace_member_id = pm.workspace_member_id
+		JOIN workspace_domains wd ON wd.workspace_id = p.workspace_id
 		WHERE wd.domain_key = #{domainKey}
 			AND wd.active = 'Y'
 			AND wm.member_id = #{memberId}
