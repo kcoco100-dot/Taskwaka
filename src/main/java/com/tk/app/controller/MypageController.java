@@ -322,7 +322,7 @@ public class MypageController {
 	
 	
 	@GetMapping("/works/{workId}/leaveInfo")
-	public ResponseEntity<?> workLeaveInfo(@PathVariable Long workId) {
+	public ResponseEntity<?> workLeaveInfo(@PathVariable("workId") Long workId) {
 	    SessionInfo member = getLoginMember();
 	
 	    try {
@@ -363,7 +363,7 @@ public class MypageController {
 	
 
 	@PostMapping("/works/{workId}/leave")
-	public ResponseEntity<?> leaveWork(@PathVariable Long workId) {
+	public ResponseEntity<?> leaveWork(@PathVariable("workId") Long workId) {
 	
 	    SessionInfo member = getLoginMember();
 	
@@ -403,7 +403,7 @@ public class MypageController {
 
 
     @GetMapping("/works/{workId}/deleteInfo")
-    public ResponseEntity<?> workDeleteInfo(@PathVariable Long workId) {
+    public ResponseEntity<?> workDeleteInfo(@PathVariable("workId") Long workId) {
         SessionInfo member = getLoginMember();
 
         try {
@@ -428,7 +428,7 @@ public class MypageController {
     }
 
     @PostMapping("/works/{workId}/delete")
-    public ResponseEntity<?> deleteOwnedWork(@PathVariable Long workId) {
+    public ResponseEntity<?> deleteOwnedWork(@PathVariable("workId") Long workId) {
         SessionInfo member = getLoginMember();
 
         try {

@@ -44,7 +44,7 @@ public class SiteNoticeController {
 
 	@GetMapping("/notice")
 	public String noticeList(Model model,
-			@RequestParam (defaultValue = "") String keyword,
+			@RequestParam(name = "keyword", defaultValue = "") String keyword,
 			@RequestParam(name = "page", defaultValue = "1") int current_page) {
 		try {
 			int size = 5;
@@ -127,7 +127,7 @@ public class SiteNoticeController {
 	}
 	
 	@GetMapping("/notice/{notice_id}")
-	public String noticeDetail(@PathVariable long notice_id,
+	public String noticeDetail(@PathVariable("notice_id") long notice_id,
 			Model model){
 		
 		try {
@@ -201,7 +201,7 @@ public class SiteNoticeController {
 	}
 	
 	@PostMapping("/notice/delete")
-	public String deleteNotice(@RequestParam long notice_id) {
+	public String deleteNotice(@RequestParam("notice_id") long notice_id) {
 		try {
 			List<SiteNoticeFileDto> fileList = siteNoticeService.selectNoticeFiles(notice_id);
 			
@@ -312,7 +312,7 @@ public class SiteNoticeController {
 	}
 	
 	@PostMapping("/notice/deleteFile")
-	public ResponseEntity<?> deleteNoticeFile(@RequestParam long notice_file_id) {
+	public ResponseEntity<?> deleteNoticeFile(@RequestParam("notice_file_id") long notice_file_id) {
 		try {
 			SiteNoticeFileDto fileDto = siteNoticeService.selectNoticeFile(notice_file_id);
 			

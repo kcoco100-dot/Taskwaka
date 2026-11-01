@@ -126,7 +126,7 @@ public class AdminController {
     }
     
     @GetMapping("/user/{member_id}")
-    public String userDetail(@PathVariable long member_id,
+    public String userDetail(@PathVariable("member_id") long member_id,
     		Model model) {
     	  System.out.println("회원 상세 컨트롤러 실행: " + member_id);
     	
