@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const workNameError = document.getElementById("workSubjectError");
     const domainError = document.getElementById("domainError");
     const workContentError = document.getElementById("workContentError");
-    const statusError = document.getElementById("statusError");
 	
 	let domainCheckTimer;
 	let domainCheckVersion = 0;
@@ -126,19 +125,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	    const validDomain = checkDomainKey();
 	    const validContent = checkWorkContent();
 
-	    const selectedStatus = form.querySelector(
-	        'input[name="status"]:checked'
-	    );
-
-	    if (! selectedStatus) {
-	        statusError.textContent =
-	            "워크 공개 여부를 선택해주세요.";
-	    } else {
-	        statusError.textContent = "";
-	    }
-
-		
-	    if (! validSubject || ! validDomain || ! validContent || ! selectedStatus) {
+	    if (! validSubject || ! validDomain || ! validContent) {
 
 	        if (! validSubject) {
 	            workSubject.focus();
@@ -146,10 +133,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	            domainKey.focus();
 	        } else if (! validContent) {
 	            workContent.focus();
-	        } else {
-	            form.querySelector(
-	                'input[name="status"]'
-	            ).focus();
 	        }
 
 	        return;
@@ -176,10 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const fields = {
             workSubject: workSubject,
             domainKey: domainKey,
-            workContent: workContent,
-            status: form.querySelector(
-                'input[name="status"]:checked'
-            )
+            workContent: workContent
         };
 
         const input = fields[serverErrorField.value];
