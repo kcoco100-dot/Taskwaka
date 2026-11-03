@@ -481,6 +481,89 @@
     white-space: nowrap;
     vertical-align: middle;
 }
+
 .workspace-role-button.pm-change-open.pm-change-placeholder {
     visibility: hidden;
+}
+
+/* 워크 직위 관리 페이징 */
+.workspace-role-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-top: 20px;
+    min-height: 42px;
+}
+.workspace-role-footer > p {
+    position: absolute;
+    left: 0;
+    margin: 0;
+}
+.workspace-role-footer .project-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+}
+.workspace-role-footer .project-pagination > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.workspace-role-footer .project-pagination > div a,
+.workspace-role-footer .project-pagination > div span,
+.workspace-role-footer .project-pagination > div strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 34px;
+    padding: 0 9px;
+    border: 1px solid #E8E2D9;
+    border-radius: 6px;
+    background: #FFF;
+    color: #665747;
+    font-size: 13px;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.workspace-role-footer .project-pagination > div a:hover {
+    background: #F7F3EE;
+}
+
+.workspace-role-footer .project-pagination > div .active,
+.workspace-role-footer .project-pagination > div .current,
+.workspace-role-footer .project-pagination > div [aria-current="page"],
+.workspace-role-footer .project-pagination > div strong {
+    background: #EEF4E6;
+    border-color: #D7DFC9;
+    color: #536844;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .workspace-role-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .workspace-role-footer > p {
+        position: static;
+        align-self: flex-start;
+    }
+    .workspace-role-footer .project-pagination {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+}
+
+/* 워크 직위 관리 페이지 번호 간격 */
+.workspace-role-footer .project-pagination > div a,
+.workspace-role-footer .project-pagination > div span,
+.workspace-role-footer .project-pagination > div strong {
+    margin: 0 3px;
 }
