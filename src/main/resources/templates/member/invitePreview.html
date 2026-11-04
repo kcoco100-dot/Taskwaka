@@ -2,6 +2,106 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="utf-8"><title>워크 초대</title>
 <link th:replace="~{layout/header :: favicon}">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f7f3;
+        color: #554434;
+        font-family: "Pretendard", "Noto Sans KR", sans-serif;
+    }
+
+    main {
+        width: 100%;
+        max-width: 440px;
+        padding: 43px 42px 36px;
+        background: #fff;
+        border: 1px solid #e9e3da;
+        border-radius: 14px;
+        box-shadow: 0 6px 24px rgba(77, 62, 45, 0.035);
+    }
+
+    h1 {
+        margin: 0 0 12px;
+        color: #403b34;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    p {
+        margin: 0 0 28px;
+        color: #90877d;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    button,
+    form a {
+        width: 100%;
+        min-height: 47px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    button {
+        border: 1px solid #65472f;
+        background: #65472f;
+        color: #fff;
+    }
+
+    button:hover {
+        background: #503824;
+    }
+
+    form a {
+        border: 1px solid #e0d9cf;
+        background: #fff;
+        color: #66594c;
+    }
+
+    form a:hover {
+        background: #f8f7f3;
+    }
+
+    button:focus-visible,
+    form a:focus-visible {
+        outline: 3px solid #c99c71;
+        outline-offset: 3px;
+    }
+
+    @media (max-width: 480px) {
+        main {
+            padding: 32px 24px;
+        }
+    }
+</style>
+
+
 </head>
 <body><main><h1>워크 초대</h1><p>현재 로그인한 계정으로 이 워크에 참여하시겠습니까?</p>
 <form method="post" th:action="@{/member/invite}">

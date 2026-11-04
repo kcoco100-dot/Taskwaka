@@ -34,7 +34,7 @@
 		    total_exp, updated_at)
 		VALUES(SEQ_WORKSPACE_GROWTH.NEXTVAL, #{workspaceId},
 				 TO_CHAR(SYSDATE, 'YYYY-MM'),
-		    (SELECT growth_level_id
+		    (SELECT NVL(growth_level_id, 0)
 		     FROM growth_levels
 		     WHERE min_exp &lt;=0
 		        AND (max_exp IS NULL OR max_exp &gt;=0)

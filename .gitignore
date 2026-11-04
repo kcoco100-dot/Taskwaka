@@ -18,6 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 config/
+*.cld
 
 **/templates/apiService/**
 **/templates/layout/layout3.html
