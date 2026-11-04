@@ -5,7 +5,7 @@
       layout:decorate="~{layout/layout3}">
 
 <th:block layout:fragment="css">
-    <link rel="stylesheet" th:href="@{/dist/css/work-create.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/work-create.css(v=3)}">
 </th:block>
 
 <th:block layout:fragment="content">
@@ -70,27 +70,8 @@
                     <p class="field-error" id="workContentError" 
                     	th:text="${errorField == 'workContent' ? errorMessage : ''}"></p>
 
-                    <label>워크 공개 설정</label>
-
-                    <label class="radio-option">
-                        <input type="radio" 
-                        	name="status"
-                            value="0"
-                            th:checked="${workCreateDto == null or workCreateDto.status == 0}"
-                            required>
-                        공개
-                    </label>
-
-                    <label class="radio-option">
-                        <input type="radio" 
-                        	name="status"
-                            value="1"
-                            th:checked="${workCreateDto != null and workCreateDto.status == 1}">
-                        비공개
-                    </label>
-
-					<p class="field-error" id="statusError"
-						th:text="${errorField == 'status' ? errorMessage : ''}"></p>
+                    <!-- 워크 공개 설정 화면은 제외하고 기존 등록값(공개: 0)은 유지 -->
+                    <input type="hidden" name="status" value="0">
                 </div>
 
                 <div class="work-create-actions">
@@ -115,7 +96,7 @@
 
 <th:block layout:fragment="script">
 
-    <script th:src="@{/dist/js/workCreate.js}"></script>
+    <script th:src="@{/dist/js/workCreate.js(v=3)}"></script>
 
 </th:block>
 
