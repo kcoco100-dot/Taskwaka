@@ -239,7 +239,8 @@
 }
 
 .site-inquiry-file-list {
-    margin-top: 12px;
+    margin-top: 0;
+    min-height: 0;
 }
 
 .site-inquiry-file-item {
@@ -402,3 +403,10 @@
     line-height: 1;
     vertical-align: middle;
 }
+
+.site-inquiry-field input[type="file"] {
+    display: block;
+    width: 100%;
+    margin-bottom: 20px;
+}
+

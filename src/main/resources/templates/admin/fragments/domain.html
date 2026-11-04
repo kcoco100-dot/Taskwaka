@@ -134,9 +134,7 @@
 				<div style="margin-top: 20px;">
 
 					<div v-if="selectedWorkspace.active === 'Y'">
-						<textarea class="warm-textarea" v-model="stopReason"
-							placeholder="워크 정지 사유를 입력하세요."
-							style="width: 100%; min-height: 80px;"></textarea>
+						<textarea class="workspace-stop-reason" v-model="stopReason" placeholder="워크 정지 사유를 입력하세요."></textarea>
 
 						<button type="button" class="btn-danger"
 							@click="changeWorkspaceStatus('N')">워크 정지</button>
