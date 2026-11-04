@@ -74,8 +74,12 @@
 }
 
 .work-create-form textarea {
-    min-height: 120px;
-    resize: vertical;
+    height: 170px;
+    min-height: 170px;
+    max-height: 170px;
+    overflow-y: auto;
+    resize: none;
+    box-sizing: border-box;
 }
 
 .work-create-form input::placeholder,

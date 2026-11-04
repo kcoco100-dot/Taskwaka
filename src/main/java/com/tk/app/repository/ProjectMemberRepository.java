@@ -11,27 +11,37 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProjectMemberRepository extends JpaRepository<ManageProjectMember, Long> {
 
-	@Query(value = 
-        "SELECT " +
-        "   wm.workspace_member_id AS workspaceMemberId, " +
-        "   md.name AS name, " +
-        "   wm.role AS workspaceRole, " +
-        "   wm.status AS status, " +
-        "   pm.project_member_id AS projectMemberId, " +
-        "   p.project_id AS projectId, " +
-        "   p.subject AS projectName, " +
-        "   pm.role AS role " +
-        "FROM workspace_members wm " +
-        "JOIN member_details md ON wm.member_id = md.member_id " +
-        "LEFT JOIN project_members pm ON wm.workspace_member_id = pm.workspace_member_id AND pm.status = 0 " +
-        "AND EXISTS (SELECT 1 FROM projects active_p WHERE active_p.project_id = pm.project_id " +
-        "AND active_p.workspace_id = wm.workspace_id AND active_p.deleted IS NULL) " +
-        "LEFT JOIN projects p ON pm.project_id = p.project_id AND p.workspace_id = wm.workspace_id AND p.deleted IS NULL " +
-        "WHERE wm.workspace_id = :workspaceId AND wm.status = 0 " +
-        "AND (:kwd IS NULL OR INSTR(LOWER(md.name), LOWER(:kwd)) > 0) " +
-        "ORDER BY md.name ASC, wm.workspace_member_id, p.project_id DESC", 
-        nativeQuery = true)
-	    List<ProjectTeamView> findWorkspaceMembersWithProject(@Param("workspaceId") Long workspaceId, @Param("kwd") String kwd);
+
+	@Query(value =
+			"SELECT " +
+			"   wm.workspace_member_id AS workspaceMemberId, " +
+			"   md.name AS name, " +
+			"   wm.status AS status, " +
+			"   wm.role AS workspaceRole, " +
+			"   pm.project_member_id AS projectMemberId, " +
+			"   p.project_id AS projectId, " +
+			"   p.subject AS projectName, " +
+			"   pm.role AS role " +
+			"FROM workspace_members wm " +
+			"JOIN member_details md ON wm.member_id = md.member_id " +
+			"LEFT JOIN project_members pm ON wm.workspace_member_id = pm.workspace_member_id " +
+			"   AND pm.status = 0 " +
+			"   AND EXISTS ( " +
+			"       SELECT 1 FROM projects active_p " +
+			"       WHERE active_p.project_id = pm.project_id " +
+			"       AND active_p.workspace_id = wm.workspace_id " +
+			"       AND active_p.deleted IS NULL) " +
+			"LEFT JOIN projects p ON pm.project_id = p.project_id " +
+			"   AND p.workspace_id = wm.workspace_id " +
+			"   AND p.deleted IS NULL " +
+			"WHERE wm.workspace_id = :workspaceId " +
+			"   AND wm.status = 0 " +
+			"   AND (:kwd IS NULL OR INSTR(LOWER(md.name), LOWER(:kwd)) > 0) " +
+			"ORDER BY md.name ASC, wm.workspace_member_id, p.project_id DESC",
+			nativeQuery = true)
+	List<ProjectTeamView> findWorkspaceMembersWithProject(
+			@Param("workspaceId") Long workspaceId,
+			@Param("kwd") String kwd);
 
     // 프로젝트 팀원 등록 및 직위 변경
     @Modifying

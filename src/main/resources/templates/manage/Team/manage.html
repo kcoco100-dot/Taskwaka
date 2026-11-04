@@ -43,7 +43,7 @@
                             
                             <td>
                                 <strong class="project-name">
-								    <span th:text="${workspaceRoleNames[member.workspaceMemberId]}">과장</span>
+								    <span th:if="${workspaceRoleNames[member.workspaceMemberId] != null and !#strings.isEmpty(workspaceRoleNames[member.workspaceMemberId])}" th:text="${workspaceRoleNames[member.workspaceMemberId] + ' '}">과장 </span>
 								    <span th:text="${member.name}">이팀장</span>
 								</strong>
                             </td>

@@ -67,12 +67,15 @@ public class ManageController {
 		return domainKey;
 	}
 
-	// 팀원 목록 조회
+
+	// 팀원 정보 조회
 	@GetMapping("manage")
-	public String manage(@PathVariable("domainKey") String domainKey,
+	public String manage(
+			@PathVariable("domainKey") String domainKey,
 			@RequestParam(value = "page", defaultValue = "1") int current_page,
-            @RequestParam(name = "schType", defaultValue = "all") String schType,
-            @RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) {
+			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "kwd", defaultValue = "") String kwd,
+			Model model) {
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
 			if (info == null) {
@@ -82,51 +85,62 @@ public class ManageController {
 			if (workspaceId == null) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다.");
 			}
-			Integer currentRole = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(workspaceId, info.getMember_id());
-            if (currentRole == null) {
-                currentRole = 0;
-            }
+			Integer currentRole = projectMemberRepository.findRoleByWorkspaceIdAndMemberId(
+					workspaceId, info.getMember_id());
+			if (currentRole == null) {
+				currentRole = 0;
+			}
 
 			Map<String, Object> map = new HashMap<>();
 			map.put("workspace_id", workspaceId);
 			map.put("actorId", info.getMember_id());
 			map.put("workspaceId", workspaceId);
-			
-			Long ownWorkspaceMemberId = currentRole == 70 ? service.getOwnWorkspaceMemberId(map) : null;
-			
+
+			Long ownWorkspaceMemberId = currentRole == 70
+					? service.getOwnWorkspaceMemberId(map) : null;
+
 			List<ManageDto> allProjects = service.listProjectManage(map);
 			java.util.Set<Long> accessibleIds = new java.util.HashSet<>();
 			Map<Long, Integer> projectStatusMap = new HashMap<>();
+
 			for (ManageDto project : allProjects) {
 				if (!Integer.valueOf(2).equals(project.getStatus())) {
 					accessibleIds.add(project.getProject_id());
 					projectStatusMap.put(project.getProject_id(), project.getStatus());
 				}
 			}
-			
+
 			kwd = kwd == null ? "" : kwd.trim();
-            List<ProjectTeamView> rawMembers = projectMemberRepository.findWorkspaceMembersWithProject(workspaceId, kwd);
+			List<ProjectTeamView> rawMembers = projectMemberRepository.findWorkspaceMembersWithProject(
+					workspaceId, kwd);
 
 			Map<Long, WorkspaceMemberGroupDto> groupedMembers = new LinkedHashMap<>();
 			Map<Long, String> workspaceRoleNames = new HashMap<>();
-			
-			for (ProjectTeamView view : rawMembers) {
-			    Integer workspaceRole = view.getWorkspaceRole();
-			    String roleName = workspaceRole == null ? ""
-			            : workspaceRole == 70 ? "사장"
-			            : workspaceRole == 50 ? "과장"
-			            : workspaceRole == 30 ? "대리"
-			            : workspaceRole == 10 ? "사원" : "";
+			Map<Long, Integer> workspaceRoleOrder = new HashMap<>();
 
-			    workspaceRoleNames.put(view.getWorkspaceMemberId(), roleName);
-			
-				WorkspaceMemberGroupDto groupDto = groupedMembers.computeIfAbsent(view.getWorkspaceMemberId(), k -> {
-					WorkspaceMemberGroupDto newDto = new WorkspaceMemberGroupDto();
-					newDto.setWorkspaceMemberId(view.getWorkspaceMemberId());
-					newDto.setName(view.getName());
-					newDto.setStatus(view.getStatus());
-					return newDto;
-				});
+			for (ProjectTeamView view : rawMembers) {
+				Long workspaceMemberId = view.getWorkspaceMemberId();
+				Integer workspaceRole = view.getWorkspaceRole();
+
+				workspaceRoleOrder.put(
+						workspaceMemberId, workspaceRole == null ? 0 : workspaceRole);
+
+				String roleName = workspaceRole == null ? ""
+						: workspaceRole == 70 ? "사장"
+						: workspaceRole == 50 ? "과장"
+						: workspaceRole == 30 ? "대리"
+						: workspaceRole == 10 ? "사원" : "";
+
+				workspaceRoleNames.put(workspaceMemberId, roleName);
+
+				WorkspaceMemberGroupDto groupDto = groupedMembers.computeIfAbsent(
+						workspaceMemberId, k -> {
+							WorkspaceMemberGroupDto newDto = new WorkspaceMemberGroupDto();
+							newDto.setWorkspaceMemberId(view.getWorkspaceMemberId());
+							newDto.setName(view.getName());
+							newDto.setStatus(view.getStatus());
+							return newDto;
+						});
 
 				if (view.getProjectId() != null && accessibleIds.contains(view.getProjectId())) {
 					ProjectParticipation p = new ProjectParticipation();
@@ -139,58 +153,111 @@ public class ManageController {
 			}
 
 			List<WorkspaceMemberGroupDto> allMembers = new ArrayList<>(groupedMembers.values());
+
+			for (WorkspaceMemberGroupDto member : allMembers) {
+				member.getProjects().sort((a, b) -> {
+					int roleA = a.getRole() == null ? 0 : a.getRole();
+					int roleB = b.getRole() == null ? 0 : b.getRole();
+
+					int result = Integer.compare(roleB, roleA);
+					if (result != 0) {
+						return result;
+					}
+
+					String nameA = a.getProjectName() == null ? "" : a.getProjectName();
+					String nameB = b.getProjectName() == null ? "" : b.getProjectName();
+					return nameA.compareToIgnoreCase(nameB);
+				});
+			}
+
+			allMembers.sort((a, b) -> {
+				int workA = workspaceRoleOrder.getOrDefault(a.getWorkspaceMemberId(), 0);
+				int workB = workspaceRoleOrder.getOrDefault(b.getWorkspaceMemberId(), 0);
+
+				int result = Integer.compare(workB, workA);
+				if (result != 0) {
+					return result;
+				}
+
+				int projectA = a.getProjects().stream()
+						.mapToInt(p -> p.getRole() == null ? 0 : p.getRole())
+						.max().orElse(0);
+
+				int projectB = b.getProjects().stream()
+						.mapToInt(p -> p.getRole() == null ? 0 : p.getRole())
+						.max().orElse(0);
+
+				result = Integer.compare(projectB, projectA);
+				if (result != 0) {
+					return result;
+				}
+
+				String nameA = a.getName() == null ? "" : a.getName();
+				String nameB = b.getName() == null ? "" : b.getName();
+
+				result = nameA.compareToIgnoreCase(nameB);
+				if (result != 0) {
+					return result;
+				}
+
+				return Long.compare(a.getWorkspaceMemberId(), b.getWorkspaceMemberId());
+			});
+
 			int size = 10;
-			int dataCount = 0;
+			int dataCount = allMembers.size();
 			int totalPage = 0;
-			dataCount = allMembers.size();
+
 			if (dataCount != 0) {
 				totalPage = paginateUtil.pageCount(dataCount, size);
 			}
+
 			current_page = Math.min(current_page, totalPage);
 			if (current_page < 1) {
 				current_page = 1;
 			}
+
 			int offset = (current_page - 1) * size;
 			int end = Math.min(offset + size, dataCount);
 			List<WorkspaceMemberGroupDto> teamMembers = allMembers.subList(offset, end);
-			String listUrl = RequestUtils.getContextPath() + "/" + domainKey + "/manage/manage?schType=" + myUtil.encodeUrl(schType) + "&kwd=" + myUtil.encodeUrl(kwd);
-			
-            model.addAttribute("schType", schType);
-            model.addAttribute("kwd", kwd);
-            
+
+			String listUrl = RequestUtils.getContextPath()
+					+ "/" + domainKey + "/manage/manage?schType="
+					+ myUtil.encodeUrl(schType)
+					+ "&kwd=" + myUtil.encodeUrl(kwd);
+
 			String paging = paginateUtil.paging(current_page, totalPage, listUrl);
-			
+
+			List<ManageDto> activeProjects = new ArrayList<>();
+			for (ManageDto p : allProjects) {
+				if (Integer.valueOf(0).equals(p.getStatus())
+						|| Integer.valueOf(1).equals(p.getStatus())) {
+					activeProjects.add(p);
+				}
+			}
+
+			model.addAttribute("schType", schType);
+			model.addAttribute("kwd", kwd);
 			model.addAttribute("paging", paging);
 			model.addAttribute("pageBaseUrl", listUrl + "&page=");
 			model.addAttribute("page", current_page);
 			model.addAttribute("size", size);
 			model.addAttribute("dataCount", dataCount);
 			model.addAttribute("totalPage", totalPage);
-
-			List<ManageDto> activeProjects = new ArrayList<>();
-			for (ManageDto p : allProjects) {
-				if (p.getStatus() == 0 || p.getStatus() == 1) {
-					activeProjects.add(p);
-				}
-			}
-
 			model.addAttribute("teamMembers", teamMembers);
-			model.addAttribute("workspaceRoleNames", workspaceRoleNames);
 			model.addAttribute("projectList", activeProjects);
 			model.addAttribute("currentRole", currentRole);
 			model.addAttribute("ownWorkspaceMemberId", ownWorkspaceMemberId);
-
+			model.addAttribute("workspaceRoleNames", workspaceRoleNames);
 		} catch (ResponseStatusException e) {
-			
 			throw e;
-			
 		} catch (Exception e) {
 			log.info("manage : ", e);
-            throw new IllegalStateException(e);
+			throw new IllegalStateException(e);
 		}
 
 		return "manage/Team/manage";
 	}
+
 
 	// 프로젝트 배정 및 직위 변경
 	@PostMapping("/assignProject")
